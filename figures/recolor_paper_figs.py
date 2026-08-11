@@ -38,6 +38,13 @@ BASE = '#8B7194'
 PARTIAL = '#A87D76'
 MARK = '#A8443E'      # annotation markers, kept salient on purpose
 
+# Pre-norm / post-norm post. Pre-LN is blue, Post-LN is plum, and Post-LN
+# rescued by warm-up is sage, held constant across both reproduced figures.
+PRE = '#5F7396'
+PRE2 = '#6B8FA8'
+POST = '#8B7194'
+POSTW = '#6E8C66'
+
 
 def rgb(h):
     return np.array([int(h[i:i + 2], 16) for i in (1, 3, 5)], dtype=float)
@@ -142,5 +149,24 @@ for name, panel in panels.items():
     canvas.paste(p, (0, 0))
     canvas.resize((p.width * 3, height * 3), Image.LANCZOS).save(
         os.path.join(OUT, name))
+
+# -- Xiong et al. (2020), Figure 3(b): gradient magnitude by layer ----------
+print('xiong2020-fig3b-grad-by-layer.png')
+im = flatten(os.path.join(SRC, 'xiong2020-fig3b-grad-by-layer.png'))
+im = recolour(im, [('#3274a1', PRE),      # Pre-LN (init)
+                   ('#e1812c', POST),     # Post-LN (init)
+                   ('#3a913a', POSTW)])   # Post-LN (after warm-up)
+im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
+    os.path.join(OUT, 'preln-grad-by-layer.png'))
+
+# -- Xiong et al. (2020), Figure 4(b): BLEU with and without warm-up --------
+print('xiong2020-fig4b-bleu-warmup.png')
+im = flatten(os.path.join(SRC, 'xiong2020-fig4b-bleu-warmup.png'))
+im = recolour(im, [('#1f77b4', POST),     # Post-LN, RAdam, no warm-up
+                   ('#ff7f0e', PRE2),     # Pre-LN,  RAdam, no warm-up
+                   ('#2ca02c', POSTW),    # Post-LN, Adam,  with warm-up
+                   ('#d62728', PRE)])     # Pre-LN,  Adam,  no warm-up
+im.resize((im.width * 3, im.height * 3), Image.LANCZOS).save(
+    os.path.join(OUT, 'preln-bleu-warmup.png'))
 
 print('done ->', OUT)

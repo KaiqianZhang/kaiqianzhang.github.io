@@ -37,8 +37,8 @@ is of the slot itself.
             <div class='annot'>
                 <span class='who'>(a) Post-norm, the 2017 arrangement.</span>
                 The green boxes sit on the main path, <i>after</i> each
-                residual addition. This is the original Transformer, and it is
-                what BERT, GPT-2, and GPT-3 use.
+                residual addition. This is the original Transformer, and
+                BERT.
             </div>
         </div>
         <div class='panel'>
@@ -47,9 +47,9 @@ is of the slot itself.
             <div class='annot'>
                 <span class='who'>(b) Pre-norm, the modern arrangement.</span>
                 The green boxes moved <i>inside</i> the residual branch, before
-                each sub-layer, leaving the main path clear. This is what
-                LLaMA, Mistral, Qwen, and Gemma use — with RMSNorm in those
-                boxes.
+                each sub-layer, leaving the main path clear. GPT-2 and
+                GPT-3 already did this with LayerNorm; LLaMA, Mistral, Qwen,
+                and Gemma do it with RMSNorm in those boxes.
             </div>
         </div>
     </div>
