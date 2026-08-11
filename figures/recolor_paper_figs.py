@@ -36,6 +36,7 @@ LN = '#5F7396'
 RMS = '#6E8C66'
 BASE = '#8B7194'
 PARTIAL = '#A87D76'
+MARK = '#A8443E'      # annotation markers, kept salient on purpose
 
 
 def rgb(h):
@@ -100,13 +101,18 @@ def trim(img, pad=12):
 
 os.makedirs(OUT, exist_ok=True)
 
-# -- Ba, Kiros & Hinton (2016), Figure 1(a) ---------------------------------
-print('ba2016-fig1a-recall1.png')
-im = flatten(os.path.join(SRC, 'ba2016-fig1a-recall1.png'))
-im = recolour(im, [('#0000ff', LN),        # Order-Embedding + LN
-                   ('#008000', BASE)])     # Order-Embedding (no norm)
-im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
-    os.path.join(OUT, 'layernorm-2016-recall1.png'))
+# -- Zhang & Sennrich (2019), Figure 1(a) and 1(b) --------------------------
+# The paper's motivating figure: the same runs measured in steps and in
+# seconds. This is the argument RMSNorm exists to answer.
+for src, dst in (('zhang2019-fig1a-loss-vs-steps.png', 'rmsnorm-loss-vs-steps.png'),
+                 ('zhang2019-fig1b-loss-vs-time.png', 'rmsnorm-loss-vs-time.png')):
+    print(src)
+    im = flatten(os.path.join(SRC, src))
+    im = recolour(im, [('#1f77b4', BASE),   # Baseline, no normalization
+                       ('#ff7f0e', LN),     # LayerNorm
+                       ('#ff0000', MARK)])  # the annotated loss markers
+    im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
+        os.path.join(OUT, dst))
 
 # -- Zhang & Sennrich (2019), Figure 2(a) -----------------------------------
 print('zhang2019-fig2a-recall1.png')

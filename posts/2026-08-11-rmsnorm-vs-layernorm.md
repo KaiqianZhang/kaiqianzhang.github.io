@@ -108,11 +108,9 @@ both. Biao Zhang and Rico Sennrich asked whether the first one was doing any
 work.
 
 Their motivation was cost. Normalization is not free, and its cost is paid
-once per normalization layer, on every token, on every step, forever. Their
-Figure 1 makes the point sharply: on a GRU-based translation model, when the
-un-normalized baseline reaches a training loss of 7.0, LayerNorm has reached
-5.4 after the same number of *steps* — but only 5.9 after the same amount of
-*time*. Part of what LayerNorm wins per step, it gives back per second.
+once per normalization layer, on every token, on every step, forever. Part of
+what LayerNorm wins per step, it hands back per second — section 3 is the
+figure they opened with, and it is worth looking at before reading on.
 
 So they proposed removing the mean subtraction and keeping only the division,
 now by the root mean square. They stated the hypothesis plainly:
@@ -285,59 +283,72 @@ property. The claim of the paper — supported by experiments then, and by the
 entire field since — is that this particular property was not the one carrying
 the load.
 
-## 3. Two Papers, Three Years, One Benchmark
+## 3. The Figure That Started It
 
-The clearest way to see the argument is to put the two papers side by side.
-They happen to run the same experiment: mean Recall@1 on the order-embedding
-image retrieval task, plotted against training steps in units of 300. Three
-years apart, on the same benchmark, with the same axes.
+Every paper has one figure carrying its argument. For RMSNorm it is Figure 1,
+and it contains no RMSNorm at all. It shows the same two training runs — a GRU
+translation model with and without LayerNorm — plotted twice, against two
+different x-axes.
 
 <div class='figure-pair'>
     <div class='panels'>
         <div class='panel'>
-            <img src='/images/layernorm-2016-recall1.png'
-                 alt='Mean Recall@1 versus iteration for order-embeddings with and without layer normalization. The LN curve rises faster and peaks higher.'>
+            <img src='/images/rmsnorm-loss-vs-steps.png'
+                 alt='Training loss against training step for a baseline model and a LayerNorm model. The LayerNorm curve is far below the baseline; markers show 7.0 and 5.4 at the same step.'>
             <div class='annot'>
-                <span class='who'>2016 — the case for LayerNorm.</span>
-                <b>Order-Embedding + LN</b> (blue) climbs faster and settles
-                about a point higher than the un-normalized
-                <b>Order-Embedding</b> (plum). This is the gain that made
-                LayerNorm standard.
-            </div>
-            <div class='source'>
-                Figure 1(a), Ba, Kiros &amp; Hinton (2016), recoloured.
+                <span class='who'>(a) Measured in steps.</span>
+                Where the un-normalized <b>Baseline</b> (plum) is at a loss of
+                7.0, <b>LayerNorm</b> (blue) is already at 5.4. Normalization
+                is winning, and winning big.
             </div>
         </div>
         <div class='panel'>
-            <img src='/images/rmsnorm-2019-recall1.png'
-                 alt='Mean Recall@1 versus training steps for baseline, LayerNorm, RMSNorm and pRMSNorm. The LayerNorm, RMSNorm and pRMSNorm curves lie on top of one another, all above the baseline.'>
+            <img src='/images/rmsnorm-loss-vs-time.png'
+                 alt='The same two runs plotted against wall-clock training time. The gap is visibly smaller; markers show 7.0 and 5.9.'>
             <div class='annot'>
-                <span class='who'>2019 — the case for RMSNorm.</span>
-                <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (rose) sit on top of
-                <b>LayerNorm</b> (blue), all clearly above <b>Baseline</b>
-                (plum). Deleting the mean subtraction cost nothing.
-            </div>
-            <div class='source'>
-                Figure 2(a), Zhang &amp; Sennrich (2019), recoloured.
+                <span class='who'>(b) Measured in seconds.</span>
+                The same two runs. Now LayerNorm is only at 5.9, because each
+                of its steps took longer. A third of the advantage was spent
+                paying for the normalizer.
             </div>
         </div>
     </div>
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
-        The same benchmark, three years apart. The left panel is the argument
-        that normalizing helps: the gap between blue and green is what
-        LayerNorm bought. The right panel is the argument that <i>re-centering
-        is not what helped</i>: the gap that matters is again the one above the
-        baseline, and RMSNorm captures all of it while computing one statistic
-        instead of two. The curves to compare are not the fastest and the
-        slowest — they are the ones lying on top of each other.
+        The whole case for RMSNorm, in one pair of axes. 5.4 against 5.9 is
+        the entire opening: normalization earns its keep per step, then hands
+        a large share of it back per second. Everything that follows —
+        deleting the mean, keeping the RMS — is an attempt to collect the
+        difference. Note what is <i>not</i> being argued: nobody is proposing
+        to drop normalization. The target is its price.
+        <br>
+        Figure 1, Zhang &amp; Sennrich (2019), recoloured.
     </div>
 </div>
 
-Read the right panel carefully. The finding is not that RMSNorm wins. The
-finding is that RMSNorm *ties*, and a tie is the entire point: if two methods
-reach the same quality and one of them does less work, the one that does less
-work should be preferred.
+Having posed the problem that way, the paper has to show that its answer costs
+nothing in quality. It reports that across machine translation, image
+classification, image-caption retrieval, and question answering, RMSNorm
+matches LayerNorm — mostly in tables. This is the one they plotted:
+
+<div class='figure'>
+    <img src='/images/rmsnorm-2019-recall1.png'
+         alt='Mean Recall@1 against training steps for Baseline, LayerNorm, RMSNorm and pRMSNorm. The three normalized curves lie on top of one another, all above the baseline.'>
+    <div class='caption'>
+        <span class='caption-label'>Figure 3.</span>
+        <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (rose) sit on top of
+        <b>LayerNorm</b> (blue), all well above <b>Baseline</b> (plum). The
+        curves to compare are not the highest and the lowest — they are the
+        three that are indistinguishable. A tie is the result being claimed,
+        and a tie is what makes the speed argument in Figure 2 decisive.
+        <br>
+        Figure 2(a), Zhang &amp; Sennrich (2019), recoloured.
+    </div>
+</div>
+
+Read those two figures together and the paper is done. Normalization is worth
+its quality gain but not its full price; removing the mean recovers part of
+the price and costs none of the gain.
 
 ## 4. The Ledger: What Is Kept, What Is Lost
 
@@ -404,7 +415,7 @@ by a factor of $1/\sqrt{1+c^2}$.[^shift]
     <img src='/images/rmsnorm-vs-layernorm.png'
          alt='Two panels. Left: log-log plot of disagreement between LayerNorm and RMSNorm against width d, following a 1/2d line. Right: cosine similarity to the unshifted output against shift c, with LayerNorm flat at 1 and RMSNorm decaying.'>
     <div class='caption'>
-        <span class='caption-label'>Figure 3.</span>
+        <span class='caption-label'>Figure 4.</span>
         Gaussian inputs, 4,000 draws per point. <b>(a)</b> The two normalizers
         disagree less and less as the model gets wider, and the simulated mean
         lands on the predicted $1/2d$ line. At GPT-2's width the disagreement
