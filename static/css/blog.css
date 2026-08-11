@@ -191,6 +191,11 @@ table td {
   width: 100%;
   display: block;
 }
+/* For diagrams that are much taller than they are wide. */
+.article .figure-pair.tall .panel img {
+  max-width: 235px;
+  margin: 0 auto;
+}
 .article .figure-pair .panel .annot {
   font-size: 12px;
   line-height: 1.45em;

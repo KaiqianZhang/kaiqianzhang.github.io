@@ -1,6 +1,6 @@
 ---
 title: RMSNorm vs. LayerNorm
-subtitle: LayerNorm subtracts a mean. In a network as wide as a modern transformer, that mean is almost always negligible — and I can show you exactly how negligible. Deleting it is most of what RMSNorm is, and nearly every large language model since 2023 has agreed.
+subtitle: Nearly every modern language model deleted one step from LayerNorm — here is exactly how little that step was doing.
 date: 2026-08-11
 tags: llm
 icon: 🍵
@@ -20,7 +20,53 @@ subtract the mean.
 This post is about why that one deletion was worth making, and what it tells
 us about how progress in this field actually happens.
 
-## 1. A short history
+## Where the Normalizer Lives
+
+Before the history, it is worth seeing where in the network any of this
+happens. RMSNorm is a drop-in replacement for LayerNorm, not a rearrangement
+of the architecture — both occupy exactly the same slot. So the useful picture
+is of the slot itself.
+
+<div class='figure-pair tall'>
+    <div class='panels'>
+        <div class='panel'>
+            <img src='/images/transformer-postln-block.png'
+                 alt='Block diagram of a Post-LN transformer layer. Input flows through multi-head attention, then addition, then Layer Norm, then FFN, then addition, then Layer Norm.'>
+            <div class='annot'>
+                <span class='who'>(a) Post-norm, the 2017 arrangement.</span>
+                The green boxes sit on the main path, <i>after</i> each
+                residual addition. This is the original Transformer, and it is
+                what BERT, GPT-2, and GPT-3 use.
+            </div>
+        </div>
+        <div class='panel'>
+            <img src='/images/transformer-preln-block.png'
+                 alt='Block diagram of a Pre-LN transformer layer. Input branches to Layer Norm, then multi-head attention, then addition; then branches to Layer Norm, then FFN, then addition.'>
+            <div class='annot'>
+                <span class='who'>(b) Pre-norm, the modern arrangement.</span>
+                The green boxes moved <i>inside</i> the residual branch, before
+                each sub-layer, leaving the main path clear. This is what
+                LLaMA, Mistral, Qwen, and Gemma use — with RMSNorm in those
+                boxes.
+            </div>
+        </div>
+    </div>
+    <div class='caption'>
+        <span class='caption-label'>Figure 1.</span>
+        Two normalization sites per layer, marked in green — one before
+        attention, one before the feed-forward network. Everything in this post
+        happens inside a green box. The boxes are labelled "Layer Norm" because
+        the diagram predates the switch; in a current model they contain
+        RMSNorm instead, in the same positions. Note that moving from (a) to
+        (b) is a <i>separate</i> change from the one this post is about, made
+        for reasons to do with gradients rather than cost. Today's models made
+        both.
+        <br>
+        Figure 1, Xiong et al. (2020), split into its two panels.
+    </div>
+</div>
+
+## 1. The Mean That Everyone Kept Subtracting
 
 To see why RMSNorm exists, it helps to know what problem normalization was
 invented to solve, and what each attempt cost.
@@ -85,7 +131,7 @@ The interesting part of this history is not that a faster method won. It is
 that a widely repeated explanation for *why* LayerNorm worked turned out to be
 half wrong, and nobody checked for three years.
 
-## 2. The math
+## 2. The Arithmetic of an Absence
 
 Both methods take a single token's hidden vector $x \in \mathbb{R}^d$ and
 return a vector of the same shape. The only difference is which statistics
@@ -121,7 +167,7 @@ $$
 That is the whole difference. No $\mu$, no subtraction, and in the original
 formulation no bias either.
 
-### Why RMS is the right replacement for $\sigma$
+### Why RMS Stands In for $\sigma$
 
 These two statistics are more closely related than they look. Expand the sum
 of squares by adding and subtracting $\mu$:
@@ -150,7 +196,7 @@ inputs is zero, RMSNorm is exactly equal to LayerNorm."
 So the real question is not whether the two formulas look different. It is how
 big $\mu$ is compared to $\sigma$ in practice.
 
-### Exactly how far apart are they?
+### Exactly How Far Apart Are They?
 
 We can answer that question with an identity rather than a guess.
 
@@ -183,7 +229,7 @@ about the distribution of $x$. If the mean is small relative to the overall
 scale, the two normalizers point in nearly the same direction, and the "nearly"
 is quantified precisely.
 
-### The consequence in high dimensions
+### What Width Does to the Difference
 
 Now add the one assumption that matters for real networks: $d$ is large.
 
@@ -205,9 +251,9 @@ $1/1536 \approx 0.00065$. Llama 2 7B has $d = 4096$, giving about $0.00012$.
 The mean that LayerNorm works to remove is, in a model of realistic width,
 almost not there.
 
-Section 5 checks this prediction against simulation.
+Section 5 puts this prediction to the test.
 
-### Invariance, and what gets given up
+### The Property That Was Traded Away
 
 The papers frame the comparison in terms of *invariance*: which changes to the
 input leave the output untouched.
@@ -231,7 +277,7 @@ property. The claim of the paper — supported by experiments then, and by the
 entire field since — is that this particular property was not the one carrying
 the load.
 
-## 3. What the two papers reported
+## 3. Two Papers, Three Years, One Benchmark
 
 The clearest way to see the argument is to put the two papers side by side.
 They happen to run the same experiment: mean Recall@1 on the order-embedding
@@ -269,7 +315,7 @@ years apart, on the same benchmark, with the same axes.
         </div>
     </div>
     <div class='caption'>
-        <span class='caption-label'>Figure 1.</span>
+        <span class='caption-label'>Figure 2.</span>
         The same benchmark, three years apart. The left panel is the argument
         that normalizing helps: the gap between blue and green is what
         LayerNorm bought. The right panel is the argument that <i>re-centering
@@ -285,7 +331,7 @@ finding is that RMSNorm *ties*, and a tie is the entire point: if two methods
 reach the same quality and one of them does less work, the one that does less
 work should be preferred.
 
-## 4. Compare and contrast
+## 4. The Ledger: What Is Kept, What Is Lost
 
 |  | LayerNorm | RMSNorm |
 |---|---|---|
@@ -327,7 +373,7 @@ and showing that nothing breaks is a real contribution, and it is rarer than
 it should be — partly because a paper reporting a tie is harder to publish
 than one reporting a win.
 
-## 5. A simulation
+## 5. Watching the Gap Close
 
 The derivation in section 2 makes two falsifiable predictions. Simulating them
 takes very little code, because both normalizers are two lines:
@@ -350,7 +396,7 @@ by a factor of $1/\sqrt{1+c^2}$.[^shift]
     <img src='/images/rmsnorm-vs-layernorm.png'
          alt='Two panels. Left: log-log plot of disagreement between LayerNorm and RMSNorm against width d, following a 1/2d line. Right: cosine similarity to the unshifted output against shift c, with LayerNorm flat at 1 and RMSNorm decaying.'>
     <div class='caption'>
-        <span class='caption-label'>Figure 2.</span>
+        <span class='caption-label'>Figure 3.</span>
         Gaussian inputs, 4,000 draws per point. <b>(a)</b> The two normalizers
         disagree less and less as the model gets wider, and the simulated mean
         lands on the predicted $1/2d$ line. At GPT-2's width the disagreement
@@ -374,7 +420,7 @@ across the feature dimension, the two would diverge exactly as panel (b) shows.
 The empirical claim underneath every modern LLM is that this does not happen
 enough to matter.
 
-## 6. Recap
+## 6. The Short Version
 
 - LayerNorm normalizes each token across its own features, using the mean and
   the standard deviation. RMSNorm drops the mean and divides by the root mean
@@ -395,7 +441,7 @@ enough to matter.
   works. A result that removes something and changes nothing is worth as much
   as one that adds something.
 
-## 7. References
+## 7. The Paper Trail
 
 1. Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization.
    [arXiv:1607.06450](https://arxiv.org/abs/1607.06450).
