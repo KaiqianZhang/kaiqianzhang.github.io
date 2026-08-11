@@ -428,7 +428,7 @@ across the feature dimension, the two would diverge exactly as panel (b) shows.
 The empirical claim underneath every modern LLM is that this does not happen
 enough to matter.
 
-## 6. The Short Version
+## 6. Recap
 
 - LayerNorm normalizes each token across its own features, using the mean and
   the standard deviation. RMSNorm drops the mean and divides by the root mean
