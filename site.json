@@ -9,9 +9,9 @@
   "base": "",
   "credit": "Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.",
   "quote": {
-    "text": "What I cannot create, I do not understand.",
-    "author": "Richard Feynman",
-    "link": "https://en.wikiquote.org/wiki/Richard_Feynman"
+    "text": "The best time to plant a tree was ten years ago. The second-best time is now.",
+    "author": "Chinese proverb",
+    "link": ""
   },
   "links": [
     { "name": "Blog", "url": "/blog/" },

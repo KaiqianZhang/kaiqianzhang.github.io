@@ -563,8 +563,12 @@ def build():
     quote = config.get('quote') or {}
     quote_author = ''
     if quote.get('author'):
-        quote_author = ("<a href='%s' target='_blank'>%s</a>"
-                        % (quote.get('link', '#'), html.escape(quote['author'])))
+        name = html.escape(quote['author'])
+        link = (quote.get('link') or '').strip()
+        # An attribution without a source stays plain text rather than
+        # becoming a link to nowhere.
+        quote_author = ("<a href='%s' target='_blank'>%s</a>" % (link, name)
+                        if link else '<p>%s</p>' % name)
     index_body = render(template('index.html'),
                         quote_text=html.escape(quote.get('text', '')),
                         quote_author=quote_author,
