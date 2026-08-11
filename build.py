@@ -467,14 +467,9 @@ def absolute(config, url):
 
 
 def tag_nav_html(config, posts, active=None):
-    counts = {}
-    for post in posts:
-        for slug in post.tags:
-            counts[slug] = counts.get(slug, 0) + 1
+    """Every configured tag is listed, whether or not it has posts yet."""
     items = []
     for tag in config['tags']:
-        if not counts.get(tag['slug']):
-            continue
         cls = " class='active'" if tag['slug'] == active else ''
         items.append("        <li><a href='%s/blog/tags/%s/'%s>%s</a></li>"
                      % (config['base'], tag['slug'], cls, tag['name']))
@@ -598,13 +593,13 @@ def build():
     # Tag pages.
     for tag in config['tags']:
         tagged = [p for p in posts if tag['slug'] in p.tags]
-        if not tagged:
-            continue
         body = render(template('tag.html'),
                       tag_name=html.escape(tag['name']),
                       count=len(tagged),
                       tag_nav=tag_nav_html(config, posts, active=tag['slug']),
-                      posts=post_rows(tagged),
+                      posts=(post_rows(tagged) if tagged else
+                             "            <p class='post-subtitle'>"
+                             'No posts yet.</p>'),
                       base=config['base'])
         write(os.path.join(OUT_DIR, 'blog', 'tags', tag['slug'], 'index.html'),
               page(config, body, '%s | %s' % (tag['name'], config['title']),
