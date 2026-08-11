@@ -350,6 +350,40 @@ def highlight_code(code, lang):
     return "<div class='highlight'><pre>%s</pre></div>" % html.escape(code)
 
 
+# Muted Morandi tones, cycled across the table of contents.
+TOC_COLOURS = ['#A3B1A1', '#A9B5C4', '#C7B8A8', '#C9AFA6',
+               '#B3AEC1', '#BFC0A8', '#C4A88F', '#9FB0AB']
+
+WORDS_PER_MINUTE = 220
+
+
+def reading_time(body):
+    """Whole minutes, from prose only. Code, math and raw HTML are skipped."""
+    text = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
+    text = re.sub(r'\$\$.*?\$\$', '', text, flags=re.DOTALL)
+    text = re.sub(r'<[^>]+>', '', text)
+    return max(1, round(len(text.split()) / WORDS_PER_MINUTE))
+
+
+def insert_toc(content):
+    """Replace a [TOC] marker with a contents list built from the h2s."""
+    marker = '<p>[TOC]</p>'
+    if marker not in content:
+        return content
+    items = []
+    for n, m in enumerate(re.finditer(r"<h2 id='([^']*)'>(.*?)</h2>", content)):
+        label = re.sub(r'<[^>]+>', '', m.group(2)).strip()
+        items.append(
+            "        <li style='border-left-color: %s'>"
+            "<a href='#%s'>%s</a></li>"
+            % (TOC_COLOURS[n % len(TOC_COLOURS)], m.group(1), label))
+    if not items:
+        return content.replace(marker, '')
+    toc = ("<nav class='toc'>\n    <p class='toc-head'>Contents</p>\n"
+           "    <ul>\n%s\n    </ul>\n</nav>" % '\n'.join(items))
+    return content.replace(marker, toc)
+
+
 def slugify(text):
     # Drop protected spans (code, math) so their stash index cannot leak into
     # the anchor as a stray number.
@@ -385,9 +419,12 @@ class Post:
         self.tags = [t.strip() for t in meta.get('tags', '').split(',')
                      if t.strip()]
 
+        self.read_minutes = reading_time(body)
+
         md = Markdown()
         self.content = md.convert(body)
         self.footnotes = md.footnotes_html()
+        self.content = insert_toc(self.content)
 
         self.url = '%s/blog/%s/%s/' % (config['base'],
                                        self.date.strftime('%Y/%m/%d'),
@@ -597,6 +634,7 @@ def build():
                       title=html.escape(post.title),
                       subtitle=html.escape(post.subtitle),
                       date=post.date_display,
+                      read_time='%d min read' % post.read_minutes,
                       tags=tags,
                       content=post.content,
                       footnotes=post.footnotes,

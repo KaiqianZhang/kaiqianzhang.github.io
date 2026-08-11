@@ -172,6 +172,47 @@ table td {
 .article .figure .caption-label {
   font-weight: bold;
 }
+.article .toc {
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 18px 0 22px 0;
+  margin: 40px 0;
+}
+.article .toc .toc-head {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(0, 0, 0, 0.5);
+  margin: 0 0 14px 0;
+}
+.article .toc ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  columns: 2;
+  column-gap: 26px;
+}
+.article .toc ul li {
+  border-left: 4px solid;
+  padding: 3px 0 3px 11px;
+  margin: 0 0 9px 0;
+  font-size: 13.5px;
+  line-height: 1.35em;
+  break-inside: avoid;
+}
+.article .toc ul li a {
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.78);
+}
+.article .toc ul li a:hover {
+  text-decoration: underline;
+  color: rgba(0, 0, 0, 0.5);
+}
+@media screen and (max-width: 700px) {
+  .article .toc ul {
+    columns: 1;
+  }
+}
 .article .figure-pair {
   border-top: 1px solid hsla(0, 0%, 0%, 0.2);
   border-bottom: 1px solid hsla(0, 0%, 0%, 0.2);

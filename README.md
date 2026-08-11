@@ -106,6 +106,32 @@ Everything user-facing is in `site.json`:
 - `tags` — the master list. Order here is the order shown; only tags with at
   least one published post are displayed.
 
+## Table of contents and read time
+
+Put `[TOC]` on its own line anywhere in a post and it is replaced by a
+contents list built from that post's `##` headings, each with a cycling
+Morandi accent colour. Anchors come from the heading text, so renaming a
+heading changes its link.
+
+Read time is computed automatically from prose word count at 220 words per
+minute — code blocks, display math, and raw HTML are excluded — and shown as a
+byline next to the date. Aim for 5–15 minutes; check a draft's length with:
+
+```sh
+python3 -c "import build; p=build.Post('posts/<file>.md', build.load_config()); print(p.read_minutes)"
+```
+
+## Figures
+
+`figures/norm_comparison.py` generates plots into `static/images/`.
+
+`figures/recolor_paper_figs.py` recolours reproduced paper figures into the
+site palette, reading from `figures/originals/` so it stays reproducible. It
+solves for each pixel's opacity against white and re-emits it in the
+replacement hue, which leaves text, axes, and gridlines untouched. If you
+reproduce a figure from a paper, say so in the caption and note the
+recolouring.
+
 ## Post icons
 
 Every row in a post listing is prefixed with an icon, Notion-style. The

@@ -20,6 +20,8 @@ subtract the mean.
 This post is about why that one deletion was worth making, and what it tells
 us about how progress in this field actually happens.
 
+[TOC]
+
 ## Where the Normalizer Lives
 
 Before the history, it is worth seeing where in the network any of this
@@ -62,7 +64,13 @@ is of the slot itself.
         for reasons to do with gradients rather than cost. Today's models made
         both.
         <br>
-        Figure 1, Xiong et al. (2020), split into its two panels.
+        Reproduced figures throughout this post are recoloured to the
+        palette used here, so that LayerNorm is always blue, RMSNorm always
+        green, and an un-normalized baseline always taupe. Only hue is
+        changed; no data is altered.
+        <br>
+        Figure 1, Xiong et al. (2020), split into its two panels and
+        recoloured.
     </div>
 </div>
 
@@ -293,11 +301,11 @@ years apart, on the same benchmark, with the same axes.
                 <span class='who'>2016 — the case for LayerNorm.</span>
                 <b>Order-Embedding + LN</b> (blue) climbs faster and settles
                 about a point higher than the un-normalized
-                <b>Order-Embedding</b> (green). This is the gain that made
+                <b>Order-Embedding</b> (taupe). This is the gain that made
                 LayerNorm standard.
             </div>
             <div class='source'>
-                Figure 1(a), Ba, Kiros &amp; Hinton (2016).
+                Figure 1(a), Ba, Kiros &amp; Hinton (2016), recoloured.
             </div>
         </div>
         <div class='panel'>
@@ -305,12 +313,12 @@ years apart, on the same benchmark, with the same axes.
                  alt='Mean Recall@1 versus training steps for baseline, LayerNorm, RMSNorm and pRMSNorm. The LayerNorm, RMSNorm and pRMSNorm curves lie on top of one another, all above the baseline.'>
             <div class='annot'>
                 <span class='who'>2019 — the case for RMSNorm.</span>
-                <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (red) sit on top of
-                <b>LayerNorm</b> (orange), all clearly above <b>Baseline</b>
-                (blue). Deleting the mean subtraction cost nothing.
+                <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (rose) sit on top of
+                <b>LayerNorm</b> (blue), all clearly above <b>Baseline</b>
+                (taupe). Deleting the mean subtraction cost nothing.
             </div>
             <div class='source'>
-                Figure 2(a), Zhang &amp; Sennrich (2019).
+                Figure 2(a), Zhang &amp; Sennrich (2019), recoloured.
             </div>
         </div>
     </div>
