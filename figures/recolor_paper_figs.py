@@ -4,12 +4,18 @@ The originals live in figures/originals/ so this is reproducible from the repo.
 Only hue is changed: every pixel keeps its opacity against white, so line
 weights, antialiasing, text and axes are untouched. No data is altered.
 
-Each line-plot pixel is a blend of one pure series colour C with the white
-background:  p = 255 - a*(255 - C).  For each pixel we solve for `a` against
-every known source colour by least squares, keep the best fit if its residual
-is small, and re-emit the pixel with the replacement colour C':
-    p' = 255 - a*(255 - C')
-Pixels that fit nothing well (black text, grey gridlines) are left alone.
+Two blend models are fitted per pixel, against every known source colour C:
+
+    toward white   p = 255 - a*(255 - C)     antialiased line and box edges
+    toward black   p = b*C                   antialiased text sitting on a fill
+
+The better fit wins, and the pixel is re-emitted with the replacement colour C'
+under the same model. The second model matters whenever a figure has black
+text on a coloured box: those edge pixels are blends of C with black, and
+without it they keep the old hue and fringe the text.
+
+Pixels that fit nothing well, and all near-grey pixels (black text, grey
+gridlines, axes), are left alone.
 
 Run:  python3 figures/recolor_paper_figs.py
 """
@@ -25,11 +31,11 @@ OUT = os.path.join(os.path.dirname(HERE), 'static', 'images')
 
 # The site palette. Semantics are kept consistent across every figure:
 # LayerNorm is dusty blue, RMSNorm is sage green, an un-normalized baseline is
-# taupe. These match figures/norm_comparison.py.
-LN = '#8896AB'
-RMS = '#7E9B76'
-BASE = '#B0A79B'
-PARTIAL = '#BC9A93'
+# plum. These match figures/norm_comparison.py.
+LN = '#5F7396'
+RMS = '#6E8C66'
+BASE = '#8B7194'
+PARTIAL = '#A87D76'
 
 
 def rgb(h):
@@ -47,29 +53,35 @@ def recolour(img, mapping, tol=45.0):
     chromatic = (flat.max(1) - flat.min(1)) > 22
 
     best_res = np.full(len(ink), np.inf)
-    best_alpha = np.zeros(len(ink))
+    best_coef = np.zeros(len(ink))
     best_idx = np.full(len(ink), -1)
+    best_model = np.zeros(len(ink), dtype=np.int8)   # 0 = white, 1 = black
 
     for k, (src, _dst) in enumerate(mapping):
-        d = 255.0 - rgb(src)                     # direction for this series
-        denom = float(d @ d)
-        alpha = (ink @ d) / denom
-        resid = np.linalg.norm(ink - alpha[:, None] * d[None, :], axis=1)
-        take = (resid < best_res) & (alpha > 0.04) & (alpha < 1.15) & chromatic
-        best_res[take] = resid[take]
-        best_alpha[take] = alpha[take]
-        best_idx[take] = k
+        c = rgb(src)
+        for model, basis, obs in ((0, 255.0 - c, ink), (1, c, flat)):
+            coef = (obs @ basis) / float(basis @ basis)
+            resid = np.linalg.norm(obs - coef[:, None] * basis[None, :], axis=1)
+            take = ((resid < best_res) & (coef > 0.04) & (coef < 1.15)
+                    & chromatic)
+            best_res[take] = resid[take]
+            best_coef[take] = coef[take]
+            best_idx[take] = k
+            best_model[take] = model
 
-    out = ink.copy()
+    out = flat.copy()
     for k, (_src, dst) in enumerate(mapping):
-        sel = (best_idx == k) & (best_res < tol)
-        if not sel.any():
-            continue
-        out[sel] = best_alpha[sel][:, None] * (255.0 - rgb(dst))[None, :]
-        print('      %s -> %s  (%d px)' % (_src, dst, sel.sum()))
+        c2 = rgb(dst)
+        hit = (best_idx == k) & (best_res < tol)
+        white = hit & (best_model == 0)
+        black = hit & (best_model == 1)
+        out[white] = 255.0 - best_coef[white][:, None] * (255.0 - c2)[None, :]
+        out[black] = best_coef[black][:, None] * c2[None, :]
+        print('      %s -> %s  (%d px: %d edge, %d text)'
+              % (_src, dst, hit.sum(), white.sum(), black.sum()))
 
     return Image.fromarray(
-        np.clip(255.0 - out, 0, 255).reshape(h, w, 3).astype(np.uint8))
+        np.clip(out, 0, 255).reshape(h, w, 3).astype(np.uint8))
 
 
 def flatten(path):
@@ -109,10 +121,11 @@ im.resize((im.width * 3, im.height * 3), Image.LANCZOS).save(
 # -- Xiong et al. (2020), Figure 1, split into its two panels ---------------
 print('xiong2020-fig1-preln-postln.png')
 im = flatten(os.path.join(SRC, 'xiong2020-fig1-preln-postln.png'))
-im = recolour(im, [('#a9d18e', '#A3BC97'),   # Layer Norm boxes -> sage
-                   ('#8faadc', '#A9B7CB'),   # FFN box -> dusty blue
-                   ('#ffd966', '#DFCCA3'),   # Attention box -> sand
-                   ('#2f528f', '#6E7C93')],  # box outlines
+# Box fills sit behind black text, so they stay lighter than the line colours.
+im = recolour(im, [('#a9d18e', '#8FB183'),   # Layer Norm boxes -> sage
+                   ('#8faadc', '#8DA3C6'),   # FFN box -> dusty blue
+                   ('#ffd966', '#C7B0D2'),   # Attention box -> lilac
+                   ('#2f528f', '#4F5F7D')],  # box outlines
              tol=60)
 panels = {'transformer-postln-block.png': im.crop((0, 0, 303, im.height)),
           'transformer-preln-block.png': im.crop((303, 0, im.width, im.height))}

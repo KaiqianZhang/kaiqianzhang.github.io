@@ -350,9 +350,10 @@ def highlight_code(code, lang):
     return "<div class='highlight'><pre>%s</pre></div>" % html.escape(code)
 
 
-# Muted Morandi tones, cycled across the table of contents.
-TOC_COLOURS = ['#A3B1A1', '#A9B5C4', '#C7B8A8', '#C9AFA6',
-               '#B3AEC1', '#BFC0A8', '#C4A88F', '#9FB0AB']
+# Muted Morandi tones, cycled across the table of contents. Deeper than a
+# pastel so the accent bars read at small sizes, weighted toward blue/purple.
+TOC_COLOURS = ['#5F7396', '#7E6B91', '#6E8C66', '#A87D76',
+               '#6B8FA8', '#8C6A9E', '#5F8A8B', '#9C7B62']
 
 WORDS_PER_MINUTE = 220
 

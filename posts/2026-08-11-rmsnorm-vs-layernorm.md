@@ -66,7 +66,7 @@ is of the slot itself.
         <br>
         Reproduced figures throughout this post are recoloured to the
         palette used here, so that LayerNorm is always blue, RMSNorm always
-        green, and an un-normalized baseline always taupe. Only hue is
+        green, and an un-normalized baseline always plum. Only hue is
         changed; no data is altered.
         <br>
         Figure 1, Xiong et al. (2020), split into its two panels and
@@ -301,7 +301,7 @@ years apart, on the same benchmark, with the same axes.
                 <span class='who'>2016 — the case for LayerNorm.</span>
                 <b>Order-Embedding + LN</b> (blue) climbs faster and settles
                 about a point higher than the un-normalized
-                <b>Order-Embedding</b> (taupe). This is the gain that made
+                <b>Order-Embedding</b> (plum). This is the gain that made
                 LayerNorm standard.
             </div>
             <div class='source'>
@@ -315,7 +315,7 @@ years apart, on the same benchmark, with the same axes.
                 <span class='who'>2019 — the case for RMSNorm.</span>
                 <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (rose) sit on top of
                 <b>LayerNorm</b> (blue), all clearly above <b>Baseline</b>
-                (taupe). Deleting the mean subtraction cost nothing.
+                (plum). Deleting the mean subtraction cost nothing.
             </div>
             <div class='source'>
                 Figure 2(a), Zhang &amp; Sennrich (2019), recoloured.

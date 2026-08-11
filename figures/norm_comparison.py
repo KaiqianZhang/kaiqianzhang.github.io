@@ -19,12 +19,12 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 
 # Muted Morandi-ish palette, warm greys with a sage green that matches the
 # site's post icon.
-LN = '#8896AB'        # dusty blue
-RMS = '#7E9B76'       # sage green
-REF = '#B3A394'       # taupe, used for analytic reference curves
-GRID = '#E4E1DC'
-TEXT = '#4A4A4A'
-MUTED = '#8C8C8C'
+LN = '#5F7396'        # dusty blue
+RMS = '#6E8C66'       # sage green
+REF = '#8C7BA6'       # lavender, used for analytic reference curves
+GRID = '#DEDAD4'
+TEXT = '#3F3F3F'
+MUTED = '#6E6E6E'
 
 plt.rcParams.update({
     'font.family': 'sans-serif',
