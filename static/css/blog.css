@@ -236,8 +236,9 @@ table td {
 #blog .post-icon,
 .tag-page .post-icon {
   display: inline-block;
-  width: 1.1em;
-  margin-right: 7px;
+  /* The slot is wider than the glyph so a wide emoji cannot eat the gap. */
+  width: 1.35em;
+  margin-right: 11px;
   font-size: 15px;
   line-height: 1;
   text-align: center;
