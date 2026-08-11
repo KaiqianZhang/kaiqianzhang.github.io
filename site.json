@@ -1,7 +1,7 @@
 {
   "title": "Kaiqian Zhang",
   "author": "Kaiqian Zhang",
-  "email": "[firstname][surname]2025@gmail.com",
+  "email": "[surname][firstname]2025@gmail.com",
   "description": "Notes on natural language processing, transformers, and machine learning.",
   "keywords": "natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization",
   "lang": "en",
