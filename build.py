@@ -97,9 +97,11 @@ class Markdown:
     def convert(self, text):
         text = text.replace('\r\n', '\n').replace('\r', '\n')
         text = self._extract_code_blocks(text)
-        text = self._extract_footnote_defs(text)
+        # Math and inline code are protected before footnotes are pulled out,
+        # so that a footnote body gets the same treatment as body text.
         text = self._extract_math(text)
         text = self._extract_inline_code(text)
+        text = self._extract_footnote_defs(text)
         body = self._blocks(text)
         return self._unstash(body)
 
@@ -349,6 +351,9 @@ def highlight_code(code, lang):
 
 
 def slugify(text):
+    # Drop protected spans (code, math) so their stash index cannot leak into
+    # the anchor as a stray number.
+    text = PLACEHOLDER_RE.sub('', text)
     text = re.sub(r'<[^>]+>', '', text).strip().lower()
     text = re.sub(r'[^\w\s-]', '', text, flags=re.UNICODE)
     return re.sub(r'[\s_]+', '-', text).strip('-') or 'section'
