@@ -40,6 +40,19 @@ h1 {
 #landing .section ul {
 	padding-left: 15px;
 }
+#landing .credit {
+	margin-top: 40px;
+	font-size: 12px;
+	line-height: 1.5em;
+	color: rgba(0, 0, 0, 0.4);
+}
+#landing .credit a {
+	color: rgba(0, 0, 0, 0.4);
+}
+#landing .credit a:hover {
+	color: rgba(0, 0, 0, 0.7);
+	text-decoration: none;
+}
 .nav {
 	max-width: 700px;
 	margin: 15px auto;

@@ -443,6 +443,16 @@ def tag_name(config, slug):
     return slug.replace('-', ' ').capitalize()
 
 
+def credit_html(config, wrapped=True):
+    """The template acknowledgement. Empty string removes it everywhere."""
+    text = config.get('credit', '').strip()
+    if not text:
+        return ''
+    if not wrapped:
+        return "\t\t<div class='credit'>%s</div>" % text
+    return "    <div class='credit'>\n        <div class='wrap'>%s</div>\n    </div>" % text
+
+
 def nav_html(config):
     return '\n'.join(
         "        <li><a href='%s'>%s</a></li>"
@@ -494,7 +504,8 @@ def page(config, body, page_title, description, head_extra=''):
                   base=config['base'],
                   nav=nav_html(config),
                   head_extra=head_extra,
-                  body=body)
+                  body=body,
+                  credit=credit_html(config))
 
 
 def write(path, text):
@@ -545,7 +556,8 @@ def build():
                  author=html.escape(config['author']),
                  email=html.escape(config['email']),
                  base=config['base'],
-                 links=links))
+                 links=links,
+                 credit=credit_html(config, wrapped=False)))
 
     # Blog index.
     quote = config.get('quote') or {}

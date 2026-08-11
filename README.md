@@ -1,8 +1,12 @@
 # Blog
 
-A minimal, text-first static blog, modelled on the layout of
-[gregorygundersen.com/blog](https://gregorygundersen.com/blog/). Markdown in,
-plain HTML out. The only hard dependency is Python 3.
+A minimal, text-first static blog. Markdown in, plain HTML out. The only hard
+dependency is Python 3.
+
+The website template is adopted from
+[Gregory Gundersen](https://gregorygundersen.com/blog/) — the layout and
+stylesheet follow his blog. The acknowledgement is rendered in the footer of
+every page and is configurable via `credit` in `site.json`.
 
 ## Commands
 
@@ -95,6 +99,8 @@ Everything user-facing is in `site.json`:
 - `nav` — the small links across the top of every blog page.
 - `links` — the list on the landing page.
 - `quote` — the italic epigraph above the post list.
+- `credit` — the acknowledgement footer, shown on every page. Accepts raw
+  HTML; set it to `""` to remove the footer entirely.
 - `tags` — the master list. Order here is the order shown; only tags with at
   least one published post are displayed.
 
