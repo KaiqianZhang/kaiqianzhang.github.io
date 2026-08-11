@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <title>{{ page_title }}</title>
+    <meta charset='UTF-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+
+    <meta name='description' content='{{ description }}'>
+    <meta name='keywords' content='{{ keywords }}'>
+    <meta name='author' content='{{ author }}'>
+
+    <link rel='alternate' type='application/rss+xml' title='{{ site_title }}' href='{{ base }}/feed.xml'>
+    <link href='{{ base }}/css/blog.css' rel='stylesheet'/>
+    <link href='{{ base }}/css/pygments.css' rel='stylesheet'/>
+
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+    </script>
+    <script id='MathJax-script' async
+            src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+    </script>
+{{ head_extra }}
+</head>
+<body>
+    <div class='nav'>
+    <ul class='wrap'>
+{{ nav }}
+    </ul>
+</div>
+{{ body }}
+</body>
+</html>

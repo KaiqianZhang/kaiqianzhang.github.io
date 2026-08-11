@@ -1,0 +1,33 @@
+{
+  "title": "Kaiqian Zhang",
+  "author": "Kaiqian Zhang",
+  "email": "zhangkaiqian2025@gmail.com",
+  "description": "Notes on natural language processing, transformers, and machine learning.",
+  "keywords": "natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization",
+  "lang": "en",
+  "url": "https://example.github.io",
+  "base": "",
+  "quote": {
+    "text": "What I cannot create, I do not understand.",
+    "author": "Richard Feynman",
+    "link": "https://en.wikiquote.org/wiki/Richard_Feynman"
+  },
+  "links": [
+    { "name": "Blog", "url": "/blog/" },
+    { "name": "Code", "url": "https://github.com/" }
+  ],
+  "nav": [
+    { "name": "Home", "url": "/" },
+    { "name": "Blog", "url": "/blog/" },
+    { "name": "RSS", "url": "/feed.xml" }
+  ],
+  "tags": [
+    { "slug": "attention", "name": "Attention" },
+    { "slug": "transformer", "name": "Transformers" },
+    { "slug": "tokenization", "name": "Tokenization" },
+    { "slug": "position", "name": "Position encoding" },
+    { "slug": "training", "name": "Training" },
+    { "slug": "decoding", "name": "Decoding and sampling" },
+    { "slug": "uncat", "name": "Uncategorized" }
+  ]
+}

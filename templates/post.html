@@ -1,0 +1,24 @@
+    <div class='wrap content'>
+        <div class='front-matter'>
+            <h1>{{ title }}</h1>
+            <h4>{{ subtitle }}</h4>
+            <div class='bylines'>
+                <div class='byline'>
+                    <h3>Published</h3>
+                    <p>{{ date }}</p>
+                </div>
+                <div class='byline'>
+                    <h3>Tags</h3>
+                    <p>{{ tags }}</p>
+                </div>
+            </div>
+            <div class='clear'></div>
+        </div>
+        <div class='article'>
+{{ content }}
+{{ footnotes }}
+        </div>
+        <div id='more'>
+            <a href='{{ base }}/blog/'>&larr; All posts</a>
+        </div>
+    </div>

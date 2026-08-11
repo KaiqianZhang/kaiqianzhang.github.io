@@ -1,0 +1,6 @@
+# Generated output. Rebuilt from posts/ on every run.
+site/
+
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+	<title>{{ site_title }}</title>
+	<meta charset='UTF-8'>
+	<meta content='width=device-width, initial-scale=1' name='viewport'/>
+	<meta name='description' content='{{ description }}'>
+	<meta name='author' content='{{ author }}'>
+	<link rel='alternate' type='application/rss+xml' title='{{ site_title }}' href='{{ base }}/feed.xml'>
+	<link href='{{ base }}/css/main.css' rel='stylesheet'/>
+</head>
+<body>
+	<div id='landing'>
+		<h1>{{ author }}</h1>
+		<ul id='links'>
+{{ links }}
+			<li id='contact'>{{ email }}</li>
+		</ul>
+	</div>
+</body>
+</html>
