@@ -274,6 +274,74 @@ table td {
     margin-top: 25px;
   }
 }
+/* Animated SVG diagrams. No JavaScript: the rotation is a CSS keyframe, and
+   it stops for readers who ask for reduced motion. */
+.article .rope-anim svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.article .rope-anim .dial {
+  fill: none;
+  stroke: #D8D4CE;
+  stroke-width: 1.5;
+}
+.article .rope-anim .tick {
+  stroke: #D8D4CE;
+  stroke-width: 1.5;
+}
+.article .rope-anim .tick0 {
+  stroke: #A9A49C;
+  stroke-width: 2.5;
+}
+.article .rope-anim .hub {
+  fill: #A9A49C;
+}
+.article .rope-anim .q {
+  fill: #5F7396;
+  stroke: #5F7396;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.article .rope-anim .k {
+  fill: #8B7194;
+  stroke: #8B7194;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+}
+.article .rope-anim .wedge {
+  fill: #8C7BA6;
+  fill-opacity: 0.2;
+  stroke: none;
+}
+.article .rope-anim .lbl {
+  font: 500 13px -apple-system, Helvetica, arial, sans-serif;
+  fill: #4A4A4A;
+}
+.article .rope-anim .lbl-q {
+  fill: #5F7396;
+}
+.article .rope-anim .lbl-k {
+  fill: #8B7194;
+}
+.article .rope-anim .spin {
+  transform-box: view-box;
+  transform-origin: 110px 110px;
+  animation: rope-turn 11s linear infinite;
+}
+@keyframes rope-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .article .rope-anim .spin {
+    animation: none;
+  }
+}
 .article .footnote {
   line-height: 0;
 }

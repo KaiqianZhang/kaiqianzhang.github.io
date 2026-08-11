@@ -169,4 +169,11 @@ im = recolour(im, [('#1f77b4', POST),     # Post-LN, RAdam, no warm-up
 im.resize((im.width * 3, im.height * 3), Image.LANCZOS).save(
     os.path.join(OUT, 'preln-bleu-warmup.png'))
 
+# -- Su et al. (2021), Figure 2: the long-term decay bound ------------------
+print('su2021-fig2-long-term-decay.png')
+im = flatten(os.path.join(SRC, 'su2021-fig2-long-term-decay.png'))
+im = recolour(im, [('#5e81b5', PRE)])     # the single plotted curve
+im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
+    os.path.join(OUT, 'rope-long-term-decay.png'))
+
 print('done ->', OUT)
