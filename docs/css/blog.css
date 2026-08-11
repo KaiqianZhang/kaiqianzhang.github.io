@@ -163,6 +163,12 @@ table td {
 .article .figure img {
   max-width: 100%;
 }
+/* For a supporting figure that does not need the full column width. */
+.article .figure.narrow img {
+  max-width: 430px;
+  margin: 0 auto;
+  display: block;
+}
 .article .figure .caption {
   padding-top: 15px;
   display: inline-block;
