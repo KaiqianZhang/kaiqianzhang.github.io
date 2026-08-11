@@ -460,7 +460,7 @@ enough to matter.
   works. A result that removes something and changes nothing is worth as much
   as one that adds something.
 
-## 7. Where This Came From
+## 7. References
 
 1. Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization.
    [arXiv:1607.06450](https://arxiv.org/abs/1607.06450).

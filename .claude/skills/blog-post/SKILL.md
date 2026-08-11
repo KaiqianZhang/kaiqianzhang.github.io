@@ -141,7 +141,8 @@ rather than a magazine.
   Kept, What Is Lost", "The Paper Trail"
 
 Keep the register consistent across the post, and check that no two headings
-say the same thing. The recap section is plainly titled "Recap".
+say the same thing. The last two sections are exceptions and stay plain:
+"Recap" and "References".
 
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
