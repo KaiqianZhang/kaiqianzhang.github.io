@@ -128,8 +128,20 @@ plain declarative sentences, bold on first use of a defined term, historical
 narrative with explicit temporal transitions, minimal hedging. Prefer
 paragraphs over bullet lists for argument; use lists for enumerable things.
 
-**Headings.** Evocative rather than functional — "The Arithmetic of an
-Absence", not "The Math". The recap section is plainly titled "Recap".
+**Headings.** Quiet and allusive, not clever. They should sound like someone
+thinking, not like a headline. Understate rather than announce; suggest the
+section's subject without naming it outright; avoid puns, wordplay, colons,
+and anything that sounds pleased with itself. Aim for the register of an essay
+rather than a magazine.
+
+- Good: "The Long Life of an Assumption", "Two Ways of Counting", "What Was
+  Given Up", "The Vanishing Difference", "The Arithmetic of Absence"
+- Too plain: "History", "The Math", "Comparison"
+- Too pleased with itself: "The Figure That Started It", "The Ledger: What Is
+  Kept, What Is Lost", "The Paper Trail"
+
+Keep the register consistent across the post, and check that no two headings
+say the same thing. The recap section is plainly titled "Recap".
 
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.

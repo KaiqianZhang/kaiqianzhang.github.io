@@ -22,7 +22,7 @@ us about how progress in this field actually happens.
 
 [TOC]
 
-## Where the Normalizer Lives
+## Two Places in Every Layer
 
 Before the history, it is worth seeing where in the network any of this
 happens. RMSNorm is a drop-in replacement for LayerNorm, not a rearrangement
@@ -74,7 +74,7 @@ is of the slot itself.
     </div>
 </div>
 
-## 1. The Mean That Everyone Kept Subtracting
+## 1. The Long Life of an Assumption
 
 To see why RMSNorm exists, it helps to know what problem normalization was
 invented to solve, and what each attempt cost.
@@ -137,7 +137,7 @@ The interesting part of this history is not that a faster method won. It is
 that a widely repeated explanation for *why* LayerNorm worked turned out to be
 half wrong, and nobody checked for three years.
 
-## 2. The Arithmetic of an Absence
+## 2. The Arithmetic of Absence
 
 Both methods take a single token's hidden vector $x \in \mathbb{R}^d$ and
 return a vector of the same shape. The only difference is which statistics
@@ -259,7 +259,7 @@ almost not there.
 
 Section 5 puts this prediction to the test.
 
-### The Property That Was Traded Away
+### The Invariance Left Behind
 
 The papers frame the comparison in terms of *invariance*: which changes to the
 input leave the output untouched.
@@ -283,7 +283,7 @@ property. The claim of the paper — supported by experiments then, and by the
 entire field since — is that this particular property was not the one carrying
 the load.
 
-## 3. The Figure That Started It
+## 3. Two Ways of Counting
 
 Every paper has one figure carrying its argument. For RMSNorm it is Figure 1,
 and it contains no RMSNorm at all. It shows the same two training runs — a GRU
@@ -350,7 +350,7 @@ Read those two figures together and the paper is done. Normalization is worth
 its quality gain but not its full price; removing the mean recovers part of
 the price and costs none of the gain.
 
-## 4. The Ledger: What Is Kept, What Is Lost
+## 4. What Was Given Up
 
 |  | LayerNorm | RMSNorm |
 |---|---|---|
@@ -392,7 +392,7 @@ and showing that nothing breaks is a real contribution, and it is rarer than
 it should be — partly because a paper reporting a tie is harder to publish
 than one reporting a win.
 
-## 5. Watching the Gap Close
+## 5. The Vanishing Difference
 
 The derivation in section 2 makes two falsifiable predictions. Simulating them
 takes very little code, because both normalizers are two lines:
@@ -460,7 +460,7 @@ enough to matter.
   works. A result that removes something and changes nothing is worth as much
   as one that adds something.
 
-## 7. The Paper Trail
+## 7. Where This Came From
 
 1. Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization.
    [arXiv:1607.06450](https://arxiv.org/abs/1607.06450).
