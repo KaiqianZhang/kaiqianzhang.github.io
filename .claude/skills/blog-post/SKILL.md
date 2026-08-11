@@ -128,21 +128,25 @@ plain declarative sentences, bold on first use of a defined term, historical
 narrative with explicit temporal transitions, minimal hedging. Prefer
 paragraphs over bullet lists for argument; use lists for enumerable things.
 
-**Headings.** Quiet and allusive, not clever. They should sound like someone
-thinking, not like a headline. Understate rather than announce; suggest the
-section's subject without naming it outright; avoid puns, wordplay, colons,
-and anything that sounds pleased with itself. Aim for the register of an essay
-rather than a magazine.
+**Headings.** Literary. Carry an image, and let the sentence have some
+rhythm — a heading may be long if the length earns it. The image should be
+*true*: it has to encode what the section actually shows, so that it reads as
+apt once the section is read, not merely decorative.
 
-- Good: "The Long Life of an Assumption", "Two Ways of Counting", "What Was
-  Given Up", "The Vanishing Difference", "The Arithmetic of Absence"
-- Too plain: "History", "The Math", "Comparison"
-- Too pleased with itself: "The Figure That Started It", "The Ledger: What Is
-  Kept, What Is Lost", "The Paper Trail"
+- Good: "Seven Years of Subtracting a Ghost" (the mean is ~0 in a wide model),
+  "What the Clock Knew and the Counter Did Not" (wall-clock time versus
+  training steps), "Watching a Difference Vanish into Width" (the gap shrinks
+  as 1/2d), "The Arithmetic of an Absence", "A Ledger of What Was Kept and
+  What Was Sold", "Two Small Rooms in Every Layer"
+- Too plain: "History", "The Math", "Comparison", "Results"
+- Too flat and understated: "What Was Given Up", "Two Ways of Counting", "The
+  Long Life of an Assumption" — correct but drab, no image
+- Wrong kind of clever: puns, and anything that announces its own importance
+  ("The Figure That Started It")
 
 Keep the register consistent across the post, and check that no two headings
-say the same thing. The last two sections are exceptions and stay plain:
-"Recap" and "References".
+say the same thing. Two sections always stay plain, whatever the register:
+**"Recap"** and, always last, **"References"**.
 
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.

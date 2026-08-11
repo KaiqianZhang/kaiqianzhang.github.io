@@ -65,17 +65,17 @@
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
-        <li style='border-left-color: #5F7396'><a href='#two-places-in-every-layer'>Two Places in Every Layer</a></li>
-        <li style='border-left-color: #7E6B91'><a href='#1-the-long-life-of-an-assumption'>1. The Long Life of an Assumption</a></li>
-        <li style='border-left-color: #6E8C66'><a href='#2-the-arithmetic-of-absence'>2. The Arithmetic of Absence</a></li>
-        <li style='border-left-color: #A87D76'><a href='#3-two-ways-of-counting'>3. Two Ways of Counting</a></li>
-        <li style='border-left-color: #6B8FA8'><a href='#4-what-was-given-up'>4. What Was Given Up</a></li>
-        <li style='border-left-color: #8C6A9E'><a href='#5-the-vanishing-difference'>5. The Vanishing Difference</a></li>
+        <li style='border-left-color: #5F7396'><a href='#two-small-rooms-in-every-layer'>Two Small Rooms in Every Layer</a></li>
+        <li style='border-left-color: #7E6B91'><a href='#1-seven-years-of-subtracting-a-ghost'>1. Seven Years of Subtracting a Ghost</a></li>
+        <li style='border-left-color: #6E8C66'><a href='#2-the-arithmetic-of-an-absence'>2. The Arithmetic of an Absence</a></li>
+        <li style='border-left-color: #A87D76'><a href='#3-what-the-clock-knew-and-the-counter-did-not'>3. What the Clock Knew and the Counter Did Not</a></li>
+        <li style='border-left-color: #6B8FA8'><a href='#4-a-ledger-of-what-was-kept-and-what-was-sold'>4. A Ledger of What Was Kept and What Was Sold</a></li>
+        <li style='border-left-color: #8C6A9E'><a href='#5-watching-a-difference-vanish-into-width'>5. Watching a Difference Vanish into Width</a></li>
         <li style='border-left-color: #5F8A8B'><a href='#6-recap'>6. Recap</a></li>
         <li style='border-left-color: #9C7B62'><a href='#7-references'>7. References</a></li>
     </ul>
 </nav>
-<h2 id='two-places-in-every-layer'>Two Places in Every Layer</h2>
+<h2 id='two-small-rooms-in-every-layer'>Two Small Rooms in Every Layer</h2>
 <p>Before the history, it is worth seeing where in the network any of this happens. RMSNorm is a drop-in replacement for LayerNorm, not a rearrangement of the architecture — both occupy exactly the same slot. So the useful picture is of the slot itself.</p>
 <div class='figure-pair tall'>
     <div class='panels'>
@@ -121,7 +121,7 @@
         recoloured.
     </div>
 </div>
-<h2 id='1-the-long-life-of-an-assumption'>1. The Long Life of an Assumption</h2>
+<h2 id='1-seven-years-of-subtracting-a-ghost'>1. Seven Years of Subtracting a Ghost</h2>
 <p>To see why RMSNorm exists, it helps to know what problem normalization was invented to solve, and what each attempt cost.</p>
 <p><strong>2015: normalization arrives.</strong> Ioffe and Szegedy introduced <strong>batch normalization</strong>, which standardizes each feature using the mean and variance computed <em>across the examples in a mini-batch</em>. It worked remarkably well for convolutional networks, and it made much deeper networks trainable. But the statistics depend on the batch, and that dependence is a problem. Sequences have different lengths, so a recurrent network's batch statistics are different at every time step. Inference on a single example has no batch at all, so BatchNorm needs a separate set of running averages, which is one more thing to get wrong.</p>
 <p><strong>2016: LayerNorm removes the batch.</strong> Ba, Kiros, and Hinton made a small change with large consequences. Instead of normalizing each feature across the batch, normalize <em>each example across its own features</em>. The statistics for a token now depend on that token and nothing else. There is no batch dependence, no train/test discrepancy, and no difficulty with variable-length sequences. LayerNorm was designed with recurrent networks in mind, and the paper's experiments are on RNNs.</p>
@@ -136,7 +136,7 @@
 <p><strong>2019–2020: quiet adoption.</strong> T5 used a simplified LayerNorm with no mean subtraction and no bias — RMSNorm in all but name. The paper barely mentions it.</p>
 <p><strong>2023 onward: the new default.</strong> LLaMA used RMSNorm, and the architecture it popularized — pre-norm placement, RMSNorm, rotary position embeddings, SwiGLU — became the template. Mistral, Qwen, Gemma, DeepSeek, Phi, and OLMo all use RMSNorm. LayerNorm has not disappeared; it is still in the older models people run every day, and in plenty of vision architectures. But for new large language models, RMSNorm is now the default and LayerNorm is the exception.</p>
 <p>The interesting part of this history is not that a faster method won. It is that a widely repeated explanation for <em>why</em> LayerNorm worked turned out to be half wrong, and nobody checked for three years.</p>
-<h2 id='2-the-arithmetic-of-absence'>2. The Arithmetic of Absence</h2>
+<h2 id='2-the-arithmetic-of-an-absence'>2. The Arithmetic of an Absence</h2>
 <p>Both methods take a single token's hidden vector $x \in \mathbb{R}^d$ and return a vector of the same shape. The only difference is which statistics they use.</p>
 <p><strong>LayerNorm</strong> computes both the mean and the standard deviation across the $d$ entries,</p>
 $$
@@ -205,7 +205,7 @@ $$
 $$
 <p>Only LayerNorm is invariant to <strong>re-centering</strong>. Add a constant $c$ to every entry: the mean becomes $\mu + c$, each deviation $x_i - \mu$ is unchanged, and $\sigma$ is unchanged, so $\text{LayerNorm}(x + c\mathbf{1}) = \text{LayerNorm}(x)$ exactly. RMSNorm has no such property — it sees a genuinely different vector.</p>
 <p>This is the real trade, and it is worth stating without spin. RMSNorm is not a free lunch or a strictly better method. It gives up a genuine mathematical property. The claim of the paper — supported by experiments then, and by the entire field since — is that this particular property was not the one carrying the load.</p>
-<h2 id='3-two-ways-of-counting'>3. Two Ways of Counting</h2>
+<h2 id='3-what-the-clock-knew-and-the-counter-did-not'>3. What the Clock Knew and the Counter Did Not</h2>
 <p>Every paper has one figure carrying its argument. For RMSNorm it is Figure 1, and it contains no RMSNorm at all. It shows the same two training runs — a GRU translation model with and without LayerNorm — plotted twice, against two different x-axes.</p>
 <div class='figure-pair'>
     <div class='panels'>
@@ -258,7 +258,7 @@ $$
     </div>
 </div>
 <p>Read those two figures together and the paper is done. Normalization is worth its quality gain but not its full price; removing the mean recovers part of the price and costs none of the gain.</p>
-<h2 id='4-what-was-given-up'>4. What Was Given Up</h2>
+<h2 id='4-a-ledger-of-what-was-kept-and-what-was-sold'>4. A Ledger of What Was Kept and What Was Sold</h2>
 <table>
 <thead><tr><th></th><th>LayerNorm</th><th>RMSNorm</th></tr></thead>
 <tbody>
@@ -276,7 +276,7 @@ $$
 <p><strong>Small per-token costs multiply at scale.</strong> A 70B-parameter model has on the order of 80 layers with two normalization sites each, applied to every token of every sequence, across trillions of training tokens and then across the entire deployed lifetime of the model. Anything on that path is worth simplifying.</p>
 <p><strong>Simplicity compounds beyond speed.</strong> One statistic instead of two means one reduction pass over the activation, which matters because these layers are limited by memory bandwidth rather than arithmetic. Dropping the bias removes parameters. Fewer moving parts make the kernel easier to fuse and the numerics easier to reason about in low precision. None of these is dramatic alone.</p>
 <p><strong>The methodological lesson is the durable one.</strong> The field had a story about why LayerNorm worked, and the story named two mechanisms. Someone tested them separately and found that one was carrying the weight. Removing a component and showing that nothing breaks is a real contribution, and it is rarer than it should be — partly because a paper reporting a tie is harder to publish than one reporting a win.</p>
-<h2 id='5-the-vanishing-difference'>5. The Vanishing Difference</h2>
+<h2 id='5-watching-a-difference-vanish-into-width'>5. Watching a Difference Vanish into Width</h2>
 <p>The derivation in section 2 makes two falsifiable predictions. Simulating them takes very little code, because both normalizers are two lines:</p>
 <div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">layernorm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
