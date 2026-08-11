@@ -1,5 +1,6 @@
-# Generated output. Rebuilt from posts/ on every run.
-site/
+# docs/ is the generated site. It is deliberately NOT ignored: GitHub Pages
+# serves it from the main branch, so it has to be committed. Never edit it by
+# hand -- it is deleted and rebuilt by every `python3 build.py`.
 
 __pycache__/
 *.pyc

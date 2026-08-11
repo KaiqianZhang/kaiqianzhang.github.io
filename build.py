@@ -22,7 +22,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 POSTS_DIR = os.path.join(ROOT, 'posts')
 TEMPLATES_DIR = os.path.join(ROOT, 'templates')
 STATIC_DIR = os.path.join(ROOT, 'static')
-OUT_DIR = os.path.join(ROOT, 'site')
+# GitHub Pages serves this repo from the main branch's /docs folder, so the
+# generated site is committed rather than ignored.
+OUT_DIR = os.path.join(ROOT, 'docs')
 
 try:
     from pygments import highlight as _pyg_highlight

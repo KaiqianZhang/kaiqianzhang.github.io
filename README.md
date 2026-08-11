@@ -11,7 +11,7 @@ every page and is configurable via `credit` in `site.json`.
 ## Commands
 
 ```sh
-python3 build.py                 # build into ./site
+python3 build.py                 # build into ./docs
 python3 build.py serve           # build, then serve at http://127.0.0.1:8000
 python3 build.py serve 4000      # ...on another port
 python3 build.py new "My Title"  # scaffold posts/YYYY-MM-DD-my-title.md
@@ -27,10 +27,11 @@ site.json           Title, author, nav, links, quote, tag list.
 posts/              Your Markdown. Filenames must be YYYY-MM-DD-slug.md.
 templates/          The HTML. Placeholders are {{ name }} and nothing else.
 static/             Copied verbatim to the site root (css/, images/).
-site/               Generated output. Deleted and rebuilt every time.
+docs/               Generated output. Deleted and rebuilt every time.
+                    Committed on purpose -- GitHub Pages serves it.
 ```
 
-Never edit anything under `site/` — it is wiped on each build.
+Never edit anything under `docs/` — it is wiped on each build.
 
 ## Writing a post
 
@@ -103,8 +104,9 @@ Everything user-facing is in `site.json`:
   HTML; set it to `""` to remove the footer entirely.
 - `post_icon` — the icon before each title in the post listings. Set it to
   `""` to remove icons entirely. See below.
-- `tags` — the master list. Order here is the order shown; only tags with at
-  least one published post are displayed.
+- `tags` — the master list. Order here is the order shown. Every tag is listed
+  and gets a page even before anything is written under it; an empty one reads
+  "No posts yet."
 
 ## Table of contents and read time
 
@@ -158,17 +160,24 @@ on the blog index and tag pages, not on the post page itself.
 
 ## Deploying to GitHub Pages
 
-The output in `site/` is fully static, so anything that serves files will do.
-For GitHub Pages:
+This site is published at <https://kaiqianzhang.github.io> from the `docs/`
+folder on the `main` branch. To publish a change:
 
-1. Push this repository to GitHub.
-2. Settings → Pages → build from a branch.
-3. Either point Pages at the `docs/` folder and change `OUT_DIR` in
-   `build.py` to `docs`, or push the contents of `site/` to a `gh-pages`
-   branch.
+```sh
+python3 build.py          # regenerate docs/
+git add -A
+git commit -m "New post"
+git push
+```
 
-`site/.nojekyll` is written on every build so GitHub Pages serves the HTML
-as-is rather than running it through Jekyll.
+GitHub rebuilds within about a minute. There is no CI step — `docs/` is the
+site, which is why it is committed rather than ignored.
 
-If you deploy to `username.github.io/blog` rather than a user site, set
-`"base": "/blog"` in `site.json` first, or every internal link will 404.
+Two settings this depends on, both already configured:
+
+- Settings → Pages → Source: *Deploy from a branch*, `main` / `docs`.
+- `docs/.nojekyll` is written on every build so GitHub serves the HTML as-is
+  instead of running it through Jekyll.
+
+If you ever move the site to `username.github.io/something`, set
+`"base": "/something"` in `site.json` first, or every internal link will 404.
