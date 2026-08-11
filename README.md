@@ -8,6 +8,24 @@ The website template is adopted from
 stylesheet follow his blog. The acknowledgement is rendered in the footer of
 every page and is configurable via `credit` in `site.json`.
 
+## The /blog-post skill
+
+`.claude/skills/blog-post/SKILL.md` is the Claude Code skill that writes posts
+for this blog: research, figures pulled from the original papers, a verified
+simulation, build, and commit. It encodes the conventions below so they do not
+have to be restated each time.
+
+That file is the canonical copy. It is installed by symlinking it into the
+place Claude Code looks:
+
+```sh
+mkdir -p ~/.claude/skills/blog-post
+ln -s "$PWD/.claude/skills/blog-post/SKILL.md" ~/.claude/skills/blog-post/SKILL.md
+```
+
+Editing either path edits the same file, so the installed skill and the
+committed one cannot drift.
+
 ## Commands
 
 ```sh
