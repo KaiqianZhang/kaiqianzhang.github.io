@@ -1,7 +1,7 @@
 ---
 title: Pre-Norm vs. Post-Norm
 subtitle: Moving the normalizer off the main path is what made deep transformers trainable, and the argument over where to put it instead is still going.
-date: 2026-08-12
+date: 2026-08-11
 tags: llm
 icon: 🍵
 ---
