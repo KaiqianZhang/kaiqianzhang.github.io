@@ -233,6 +233,26 @@ table td {
   font-weight: bold;
   margin-bottom: 0;
 }
+#blog .post-icon,
+.tag-page .post-icon {
+  display: inline-block;
+  width: 1.1em;
+  margin-right: 7px;
+  font-size: 15px;
+  line-height: 1;
+  text-align: center;
+  color: #3f7d47;
+  /* Emoji ignore font-weight; this keeps a text or SVG icon from inheriting
+     the bold of .post-title. */
+  font-weight: normal;
+}
+#blog .post-icon svg,
+.tag-page .post-icon svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+  vertical-align: -2px;
+}
 #blog .post-title a,
 .tag-page .post-title a {
   font-size: 18px;

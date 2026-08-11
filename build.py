@@ -375,6 +375,7 @@ class Post:
 
         self.title = meta.get('title', self.slug.replace('-', ' ').title())
         self.subtitle = meta.get('subtitle', '')
+        self.icon = meta.get('icon', '')     # overrides site.json post_icon
         self.draft = str(meta.get('draft', '')).lower() in ('true', 'yes', '1')
         self.tags = [t.strip() for t in meta.get('tags', '').split(',')
                      if t.strip()]
@@ -476,11 +477,20 @@ def tag_nav_html(config, posts, active=None):
     return '\n'.join(items)
 
 
-def post_rows(posts):
+def post_icon_html(config, post):
+    """Emoji or raw SVG, shown before the title. Empty string omits it."""
+    icon = post.icon or config.get('post_icon', '')
+    if not icon.strip():
+        return ''
+    return "<span class='post-icon'>%s</span>" % icon
+
+
+def post_rows(config, posts):
     rows = []
     for n, post in enumerate(posts, start=1):
         rows.append(render(template('post_row.html'),
                            url=post.url,
+                           icon=post_icon_html(config, post),
                            title=html.escape(post.title),
                            date=post.date_display,
                            subtitle=html.escape(post.subtitle),
@@ -568,7 +578,7 @@ def build():
                         quote_text=html.escape(quote.get('text', '')),
                         quote_author=quote_author,
                         tag_nav=tag_nav_html(config, posts),
-                        posts=post_rows(posts))
+                        posts=post_rows(config, posts))
     write(os.path.join(OUT_DIR, 'blog', 'index.html'),
           page(config, index_body, config['title'], config['description']))
 
@@ -597,7 +607,7 @@ def build():
                       tag_name=html.escape(tag['name']),
                       count=len(tagged),
                       tag_nav=tag_nav_html(config, posts, active=tag['slug']),
-                      posts=(post_rows(tagged) if tagged else
+                      posts=(post_rows(config, tagged) if tagged else
                              "            <p class='post-subtitle'>"
                              'No posts yet.</p>'),
                       base=config['base'])

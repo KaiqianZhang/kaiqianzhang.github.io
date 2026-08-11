@@ -101,8 +101,34 @@ Everything user-facing is in `site.json`:
 - `quote` — the italic epigraph above the post list.
 - `credit` — the acknowledgement footer, shown on every page. Accepts raw
   HTML; set it to `""` to remove the footer entirely.
+- `post_icon` — the icon before each title in the post listings. Set it to
+  `""` to remove icons entirely. See below.
 - `tags` — the master list. Order here is the order shown; only tags with at
   least one published post are displayed.
+
+## Post icons
+
+Every row in a post listing is prefixed with an icon, Notion-style. The
+default is `"post_icon": "🍵"` in `site.json`.
+
+Any single post can override it from its front matter:
+
+```markdown
+---
+title: My Post
+icon: 🌱
+---
+```
+
+The field is passed through as raw HTML, so an inline SVG works too and picks
+up the green from CSS via `currentColor`:
+
+```json
+"post_icon": "<svg viewBox='0 0 16 16'><path d='M8 1.5C3.5 4.5 3 10.5 8 14.5c5-4 4.5-10 0-13z'/></svg>"
+```
+
+Size and colour are set by `.post-icon` in `static/css/blog.css`. Icons appear
+on the blog index and tag pages, not on the post page itself.
 
 ## Deploying to GitHub Pages
 
