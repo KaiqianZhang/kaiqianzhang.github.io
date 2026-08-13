@@ -152,6 +152,21 @@ replacement hue, which leaves text, axes, and gridlines untouched. If you
 reproduce a figure from a paper, say so in the caption and note the
 recolouring.
 
+## The thumbs-up
+
+Every post ends with a thumbs-up button, emitted by `templates/post.html`, so
+posts get it without doing anything. Clicking it pops the thumb, fires a small
+burst of dots, and stores the tap under `liked:<path>` in the reader's
+`localStorage`.
+
+It is deliberately client-side only. There is **no shared count** — the site is
+static files on GitHub Pages with no backend, and the button says so
+underneath itself. A real count would need a serverless endpoint or a
+third-party widget.
+
+Styling and the animation live under `.applause` in `static/css/blog.css`; both
+animations stop under `prefers-reduced-motion`.
+
 ## Post icons
 
 Every row in a post listing is prefixed with an icon, Notion-style. The

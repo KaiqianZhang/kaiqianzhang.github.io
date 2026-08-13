@@ -22,7 +22,56 @@
 {{ content }}
 {{ footnotes }}
         </div>
+        <div class='applause'>
+            <button class='applause-btn' type='button' aria-pressed='false'>
+                <span class='applause-icon'>
+                    <svg class='burst' viewBox='0 0 44 44' aria-hidden='true'>
+                        <g>
+                            <circle cx='22' cy='5' r='1.7'/>
+                            <circle cx='22' cy='5' r='1.7' transform='rotate(60 22 22)'/>
+                            <circle cx='22' cy='5' r='1.7' transform='rotate(120 22 22)'/>
+                            <circle cx='22' cy='5' r='1.7' transform='rotate(180 22 22)'/>
+                            <circle cx='22' cy='5' r='1.7' transform='rotate(240 22 22)'/>
+                            <circle cx='22' cy='5' r='1.7' transform='rotate(300 22 22)'/>
+                        </g>
+                    </svg>
+                    <svg class='thumb' viewBox='0 0 24 24' aria-hidden='true'>
+                        <path d='M2 21h4V9H2v12z'/>
+                        <path d='M23 10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z'/>
+                    </svg>
+                </span>
+                <span class='applause-label'>Liked this?</span>
+            </button>
+            <p class='applause-note'>Kept in your browser. Nothing is sent anywhere.</p>
+        </div>
         <div id='more'>
             <a href='{{ base }}/blog/'>&larr; All posts</a>
         </div>
     </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.applause-btn');
+      if (!btn) return;
+      var label = btn.querySelector('.applause-label');
+      var key = 'liked:' + location.pathname;
+      var said = 'Thank you';
+      function paint(on, animate) {
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? said : 'Liked this?';
+        if (on && animate) {
+          btn.classList.remove('is-popping');
+          void btn.offsetWidth;
+          btn.classList.add('is-popping');
+        }
+      }
+      var stored = false;
+      try { stored = localStorage.getItem(key) === '1'; } catch (e) {}
+      paint(stored, false);
+      btn.addEventListener('click', function () {
+        var on = !btn.classList.contains('is-on');
+        try { on ? localStorage.setItem(key, '1') : localStorage.removeItem(key); } catch (e) {}
+        paint(on, true);
+      });
+    })();
+    </script>

@@ -508,6 +508,114 @@ table td {
   color: rgba(0, 0, 0, 0.7);
   text-decoration: none;
 }
+/* Thumbs-up at the foot of every post. Client-side only: a reader's own tap
+   is remembered in their browser, and there is no shared count. */
+.applause {
+  margin-top: 70px;
+  padding-top: 26px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.applause-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px 9px 15px;
+  font: 500 13px -apple-system, Helvetica, arial, sans-serif;
+  color: rgba(0, 0, 0, 0.55);
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.18s, border-color 0.18s, transform 0.18s, background 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.applause-btn:hover {
+  color: #3f7d47;
+  border-color: rgba(63, 125, 71, 0.45);
+  transform: translateY(-1px);
+}
+.applause-btn:focus-visible {
+  outline: 2px solid rgba(63, 125, 71, 0.5);
+  outline-offset: 3px;
+}
+.applause-btn.is-on {
+  color: #3f7d47;
+  border-color: rgba(63, 125, 71, 0.5);
+  background: rgba(63, 125, 71, 0.08);
+}
+.applause-icon {
+  position: relative;
+  display: inline-flex;
+  width: 19px;
+  height: 19px;
+}
+.applause-btn .thumb {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  transition: fill 0.18s;
+}
+.applause-btn.is-on .thumb {
+  fill: currentColor;
+  stroke: currentColor;
+}
+.applause-btn.is-popping .thumb {
+  animation: applause-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes applause-pop {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.35) rotate(-14deg); }
+  55% { transform: scale(0.94) rotate(7deg); }
+  75% { transform: scale(1.08) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+/* The little burst of dots, hidden until the tap. */
+.applause-btn .burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  pointer-events: none;
+  opacity: 0;
+}
+.applause-btn .burst circle {
+  fill: #3f7d47;
+}
+.applause-btn .burst g {
+  transform-box: view-box;
+  transform-origin: 22px 22px;
+}
+.applause-btn.is-popping .burst g {
+  animation: applause-burst 0.55s ease-out;
+}
+.applause-btn.is-popping .burst {
+  opacity: 1;
+}
+@keyframes applause-burst {
+  0% { transform: scale(0.3); opacity: 0.9; }
+  70% { opacity: 0.55; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+.applause-note {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.38);
+  margin: 11px 0 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .applause-btn.is-popping .thumb,
+  .applause-btn.is-popping .burst g {
+    animation: none;
+  }
+  .applause-btn:hover {
+    transform: none;
+  }
+}
 .footnotes {
   margin-top: 100px;
   font-size: 12px;
