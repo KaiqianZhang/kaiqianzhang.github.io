@@ -342,6 +342,80 @@ table td {
     animation: none;
   }
 }
+/* Interactive figures: a slider the reader drags, redrawing an inline SVG.
+   Degrades to a static starting state if JavaScript is off. */
+.article .knob {
+  border-top: 1px solid hsla(0, 0%, 0%, 0.2);
+  border-bottom: 1px solid hsla(0, 0%, 0%, 0.2);
+  padding: 18px 0 16px 0;
+  margin: 40px 0;
+}
+.article .knob svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.article .knob .controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 4px 2px 14px 2px;
+  flex-wrap: wrap;
+}
+.article .knob label {
+  font: 500 12px -apple-system, Helvetica, arial, sans-serif;
+  color: rgba(0, 0, 0, 0.55);
+  white-space: nowrap;
+}
+.article .knob input[type='range'] {
+  flex: 1 1 180px;
+  min-width: 140px;
+  accent-color: #8C7BA6;
+  height: 3px;
+  cursor: pointer;
+}
+.article .knob .readout {
+  font: 500 12px -apple-system, Helvetica, arial, sans-serif;
+  color: #5F7396;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.article .knob .axis {
+  stroke: #D8D4CE;
+  stroke-width: 1.2;
+}
+.article .knob .grid {
+  stroke: #EDEAE6;
+  stroke-width: 1;
+}
+.article .knob .tick {
+  font: 400 9.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C8C8C;
+}
+.article .knob .axlabel {
+  font: 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #6E6E6E;
+}
+.article .knob .trace {
+  fill: none;
+  stroke: #5F7396;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+.article .knob .ref {
+  stroke: #C7C2BA;
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+}
+.article .knob .bar {
+  fill: #5F7396;
+}
+.article .knob .note {
+  font: 400 11px -apple-system, Helvetica, arial, sans-serif;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0;
+}
+
 /* Compact roadmap strip: the argument of a post in one line. */
 .article .roadmap {
   border-top: 1px solid rgba(0, 0, 0, 0.08);

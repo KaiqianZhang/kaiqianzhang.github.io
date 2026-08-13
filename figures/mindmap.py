@@ -9,8 +9,9 @@ Four plots, one per stage of the map:
                           an additive path of the kind a gate provides
   mindmap-perplexity.png  perplexity read as an effective branching factor
 
-The corpus for the first plot is this blog's own posts, so the number is
-reproducible from the repository and honest about being small.
+The corpus for the first plot is the blog's other posts. The post this figure
+appears in is excluded, so the measurement does not include itself and the
+numbers stay stable as it is edited.
 
 Run:  python3 figures/mindmap.py
 """
@@ -63,6 +64,8 @@ def corpus_tokens():
     words = []
     for path in sorted(glob.glob(os.path.join(os.path.dirname(HERE),
                                               'posts', '*.md'))):
+        if 'mindmap' in os.path.basename(path):
+            continue                      # do not measure the post on itself
         text = open(path, encoding='utf-8').read()
         text = text.split('---', 2)[2] if text.startswith('---') else text
         text = re.sub(r'```.*?```', ' ', text, flags=re.DOTALL)

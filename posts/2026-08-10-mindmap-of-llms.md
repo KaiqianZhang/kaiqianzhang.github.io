@@ -1,7 +1,7 @@
 ---
 title: "My Mindmap of LLMs: Past Lives and Present"
 subtitle: Every idea a transformer replaced was itself a fix for the thing before it, and the whole chain is one argument about how to represent a word.
-date: 2026-08-13
+date: 2026-08-10
 tags: llm
 icon: 🍵
 ---
@@ -195,8 +195,9 @@ The original paper draws the same pair as wiring diagrams:
     <div class='caption'>
         <span class='caption-label'>Figure 3.</span>
         Note what is <i>not</i> in either diagram: any recurrence, any
-        ordering inside the window, any depth. The context words are summed —
-        "cat sat on the" and "the on sat cat" produce the same projection.
+        ordering inside the window, any depth. The context words are
+        <i>averaged</i>, in the paper's own word, so "cat sat on the" and "the
+        on sat cat" produce the same projection.
         This is a bag of words with a lookup table attached, and it was enough
         to make word vectors that do arithmetic.
         <br>
@@ -206,8 +207,11 @@ The original paper draws the same pair as wiring diagrams:
 
 Which of the two you want depends on the corpus, and my map is blunt about
 it: **CBOW is quick**, suits large-scale text like news; **Skip-gram is
-precise**, suits low-frequency words like legal terminology. The reason is
-sample count. Skip-gram generates one training pair per context word, so a
+precise**, suits low-frequency words like legal terminology. That framing
+comes from word2vec's own documentation rather than from either paper — the
+2013 paper reports only that CBOW trained in about a day against Skip-gram's
+three — but the mechanism behind it is clear enough. The reason is sample
+count. Skip-gram generates one training pair per context word, so a
 rare word in the middle produces several gradient updates; CBOW averages its
 context into a single update and lets frequent patterns dominate.
 
@@ -285,26 +289,96 @@ multiplication by a matrix has only two long-run outcomes.
     <div class='caption'>
         <span class='caption-label'>Figure 5.</span>
         The gradient's fate is decided by the spectral radius $\rho(W)$. Below
-        1 it decays like $\rho^{\,T}$ — at $\rho = 0.8$, a gradient reaching
-        fifty steps back has been reduced to about $4\times10^{-6}$ of its
-        size. Above 1 it grows the same way. The dotted line is the same
-        $\rho = 1.2$ matrix seen through $\tanh$: saturation flattens the
+        1 it decays like $\rho^{\,T}$ and above 1 it grows the same way. At
+        $\rho = 0.8$ the law predicts $0.8^{50} = 1.4\times10^{-5}$ after fifty
+        steps; the simulation reaches $4\times10^{-6}$, a constant factor
+        below, because a random non-normal Jacobian carries a sub-unit
+        prefactor. The dotted line is the same spectral radius seen through
+        $\tanh$: saturation flattens the
         derivative and damps the explosion, which is why exploding gradients
         are usually cured by clipping while vanishing ones needed an
         architecture. The flat sage line is what an additive path gives you.
     </div>
 </div>
 
+The law is simple enough to feel by hand. Drag the spectral radius and watch
+the same curve swing between the two failures:
+
+<div class='knob' id='rho-knob'>
+    <div class='controls'>
+        <label for='rho-range'>spectral radius &#961;(W)</label>
+        <input id='rho-range' type='range' min='0.60' max='1.40' step='0.01' value='0.80'>
+        <span class='readout' id='rho-out'>&#961; = 0.80</span>
+    </div>
+    <svg viewBox='0 0 700 260' role='img' aria-label='Gradient norm against time steps, redrawn as the spectral radius slider moves.'>
+        <g id='rho-grid'></g>
+        <line class='axis' x1='70' y1='215' x2='680' y2='215'/>
+        <line class='axis' x1='70' y1='20' x2='70' y2='215'/>
+        <line class='ref' id='rho-unit' x1='70' y1='0' x2='680' y2='0'/>
+        <polyline class='trace' id='rho-trace' points=''/>
+        <text class='axlabel' x='375' y='245' text-anchor='middle'>time steps back through the sequence</text>
+        <text class='axlabel' x='16' y='118' text-anchor='middle' transform='rotate(-90 16 118)'>gradient norm</text>
+    </svg>
+    <p class='note' id='rho-note'></p>
+    <script>
+    (function () {
+      var T = 60, LO = -12, HI = 12, X0 = 70, X1 = 680, Y0 = 215, Y1 = 20;
+      var range = document.getElementById('rho-range');
+      var out = document.getElementById('rho-out');
+      var note = document.getElementById('rho-note');
+      var trace = document.getElementById('rho-trace');
+      var grid = document.getElementById('rho-grid');
+      var unit = document.getElementById('rho-unit');
+      function ypx(e) { return Y0 + (e - LO) / (HI - LO) * (Y1 - Y0); }
+      var g = '';
+      for (var e = LO; e <= HI; e += 4) {
+        g += "<line class='grid' x1='70' y1='" + ypx(e) + "' x2='680' y2='" + ypx(e) + "'/>";
+        g += "<text class='tick' x='62' y='" + (ypx(e) + 3) + "' text-anchor='end'>1e" + e + "</text>";
+      }
+      for (var t = 0; t <= T; t += 15) {
+        var x = X0 + t / T * (X1 - X0);
+        g += "<text class='tick' x='" + x + "' y='231' text-anchor='middle'>" + t + "</text>";
+      }
+      grid.innerHTML = g;
+      unit.setAttribute('y1', ypx(0));
+      unit.setAttribute('y2', ypx(0));
+      function draw() {
+        var rho = parseFloat(range.value), pts = [];
+        for (var t = 0; t <= T; t++) {
+          var e = t * Math.log(rho) / Math.LN10;
+          pts.push((X0 + t / T * (X1 - X0)).toFixed(1) + ',' +
+                   ypx(Math.max(LO, Math.min(HI, e))).toFixed(1));
+        }
+        trace.setAttribute('points', pts.join(' '));
+        out.innerHTML = '&#961; = ' + rho.toFixed(2);
+        var f = Math.pow(rho, 50);
+        var word = rho < 0.995 ? 'shrunk' : (rho > 1.005 ? 'grown' : 'unchanged');
+        note.textContent = 'After 50 steps a gradient has ' + word + ' by a factor of ' +
+          (f < 0.001 || f > 1000 ? f.toExponential(1) : f.toFixed(2)) + '.';
+      }
+      range.addEventListener('input', draw);
+      draw();
+    })();
+    </script>
+</div>
+
 This is why the map annotates RNN with *short-term dependency (T=50)*. Not a
 hard limit — a practical one.
 
 **LSTM** is the architecture that answer required. It carries two states
-rather than one: a hidden state $h_t$ and a **cell state** $c_t$. And it adds
-three gates that decide what happens to the cell:
+rather than one: a hidden state $h_t$ and a **cell state** $c_t$, and it adds
+gates that decide what happens to the cell:
 
-- the **forget gate** — what information to retain
 - the **input gate** — what information to write
 - the **output gate** — what information to expose
+- the **forget gate** — what information to retain
+
+My map lists three gates, which is the LSTM everyone actually uses, but the
+credit is split: Hochreiter and Schmidhuber's 1997 paper has only the input
+and output gates. The forget gate — arguably the most important of the three,
+since without it the cell can only accumulate — was added two years later by
+Gers, Schmidhuber and Cummins, in a paper titled, exactly to the point,
+*Learning to Forget*.
 
 The cell state is updated mostly by addition rather than by repeated matrix
 multiplication, which gives the gradient a path closer to the flat green line
@@ -324,10 +398,14 @@ have no way to represent word sense or sentence meaning, and ELMo's "bank"
 differs between the money sentence and the river one because the LSTM read
 the rest of the sentence first.
 
-ELMo was **feature-based**: you did not fine-tune it, you concatenated its
-output onto whatever task-specific embedding you already had, as
-$x_t = [\text{task embedding},\ \text{ELMo embedding}]$. Pretraining as a
-better input, not yet as the model itself.
+ELMo was **feature-based**: its output was concatenated onto whatever
+task-specific embedding you already had, as
+$x_t = [\text{task embedding},\ \text{ELMo embedding}]$, and its weights were
+frozen while the downstream model trained. Worth being precise, since this
+gets flattened into "ELMo was never fine-tuned": the paper does fine-tune the
+language model on domain text first, and reports that doing so helps. What
+stays frozen is the biLM during supervised training. Pretraining as a better
+input, not yet as the model itself.
 
 ## 5. When Everything Happened At Once
 
@@ -388,6 +466,54 @@ uniform over 1,000 words gives 1000.0000.
     </div>
 </div>
 
+The same idea is easier to feel than to read. Drag the distribution from
+peaked to flat and watch the number follow:
+
+<div class='knob' id='ppl-knob'>
+    <div class='controls'>
+        <label for='ppl-range'>how sharp the distribution is</label>
+        <input id='ppl-range' type='range' min='-90' max='90' step='1' value='0'>
+        <span class='readout' id='ppl-out'></span>
+    </div>
+    <svg viewBox='0 0 700 220' role='img' aria-label='Bar chart of the probability assigned to twenty-four candidate next words, redrawn as the sharpness slider moves.'>
+        <g id='ppl-bars'></g>
+        <line class='axis' x1='40' y1='185' x2='680' y2='185'/>
+        <text class='axlabel' x='360' y='210' text-anchor='middle'>twenty-four candidate next words, most likely first</text>
+    </svg>
+    <p class='note' id='ppl-note'></p>
+    <script>
+    (function () {
+      var K = 24, X0 = 44, X1 = 676, Y0 = 185, TOP = 24;
+      var logits = [];
+      for (var i = 0; i < K; i++) logits.push(-0.28 * i - 0.35 * Math.sin(i * 1.7));
+      var range = document.getElementById('ppl-range');
+      var out = document.getElementById('ppl-out');
+      var note = document.getElementById('ppl-note');
+      var bars = document.getElementById('ppl-bars');
+      function draw() {
+        var t = Math.pow(10, parseFloat(range.value) / 60);
+        var m = Math.max.apply(null, logits), p = [], s = 0, i;
+        for (i = 0; i < K; i++) { p.push(Math.exp((logits[i] - m) / t)); s += p[i]; }
+        var h = 0;
+        for (i = 0; i < K; i++) { p[i] /= s; if (p[i] > 0) h -= p[i] * Math.log(p[i]); }
+        var ppl = Math.exp(h), w = (X1 - X0) / K, svg = '';
+        for (i = 0; i < K; i++) {
+          var bh = p[i] / Math.max.apply(null, p) * (Y0 - TOP);
+          svg += "<rect class='bar' x='" + (X0 + i * w + 1.5).toFixed(1) + "' y='" +
+                 (Y0 - bh).toFixed(1) + "' width='" + (w - 3).toFixed(1) +
+                 "' height='" + bh.toFixed(1) + "' rx='1.5'/>";
+        }
+        bars.innerHTML = svg;
+        out.textContent = 'perplexity = ' + ppl.toFixed(2);
+        note.textContent = 'The model is behaving as if choosing uniformly among ' +
+          ppl.toFixed(1) + ' of the ' + K + ' words. Flat gives ' + K + '; certain gives 1.';
+      }
+      range.addEventListener('input', draw);
+      draw();
+    })();
+    </script>
+</div>
+
 ## 7. Recap
 
 - The chain is one question asked repeatedly: what is a word, numerically? A
@@ -412,7 +538,7 @@ uniform over 1,000 words gives 1000.0000.
 
 ## 8. References
 
-1. Bengio, Y., Ducharme, R., Vincent, P., & Janvin, C. (2003). A Neural
+1. Bengio, Y., Ducharme, R., Vincent, P., & Jauvin, C. (2003). A Neural
    Probabilistic Language Model. *JMLR* 3, 1137–1155.
 2. Mikolov, T., Chen, K., Corrado, G., & Dean, J. (2013). Efficient Estimation
    of Word Representations in Vector Space.
@@ -424,10 +550,12 @@ uniform over 1,000 words gives 1000.0000.
    Word Representation. *EMNLP 2014*.
 5. Hochreiter, S., & Schmidhuber, J. (1997). Long Short-Term Memory. *Neural
    Computation* 9(8), 1735–1780.
-6. Pascanu, R., Mikolov, T., & Bengio, Y. (2013). On the Difficulty of
+6. Gers, F. A., Schmidhuber, J., & Cummins, F. (2000). Learning to Forget:
+   Continual Prediction with LSTM. *Neural Computation* 12(10), 2451–2471.
+7. Pascanu, R., Mikolov, T., & Bengio, Y. (2013). On the Difficulty of
    Training Recurrent Neural Networks.
    [arXiv:1211.5063](https://arxiv.org/abs/1211.5063).
-7. Peters, M. E., et al. (2018). Deep Contextualized Word Representations
+8. Peters, M. E., et al. (2018). Deep Contextualized Word Representations
    (ELMo). [arXiv:1802.05365](https://arxiv.org/abs/1802.05365).
-8. Vaswani, A., et al. (2017). Attention Is All You Need.
+9. Vaswani, A., et al. (2017). Attention Is All You Need.
    [arXiv:1706.03762](https://arxiv.org/abs/1706.03762).

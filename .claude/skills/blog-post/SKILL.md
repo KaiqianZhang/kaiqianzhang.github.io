@@ -180,6 +180,24 @@ Worker in `worker/`, switched on by `likes_endpoint` in `site.json`; with it
 empty the button still works and simply shows no number. Verify it survived
 the build by grepping the generated page for `applause-btn`.
 
+**Motion and interaction.** The reader likes both, and asks for them. Prefer
+them wherever a static image would under-serve the idea:
+
+- *Animation* when the point is a relationship that holds while something
+  else changes — the RoPE wedge staying rigid while both hands turn, the
+  word2vec window sliding along a sentence. Inline SVG plus a CSS keyframe,
+  no JavaScript, and always an off switch under `prefers-reduced-motion`.
+- *A slider* when the point is how a quantity responds to a parameter — a
+  spectral radius swinging a gradient between vanishing and exploding, a
+  temperature swinging perplexity between 1 and V. Use the `.knob` pattern in
+  `blog.css`: a `range` input, an inline SVG the script redraws, and a
+  one-line readout underneath saying what the number means.
+
+Keep the maths in the widget trivial and closed-form so it cannot disagree
+with the post's own figures, and check it with `node -e` before shipping —
+the same numbers should come out of the widget and the Python. A static plot
+is still right when the point is *measured* data rather than a formula.
+
 **Colour.** Deeper Morandi tones weighted toward blue and purple, no greys.
 The palette is defined in `figures/norm_comparison.py` and
 `figures/recolor_paper_figs.py`; reuse those constants. Hold colour semantics
