@@ -816,33 +816,29 @@ enough to matter.
 
 ## 6. Chat This Over With Friends
 
-**The one-line version.** Every large language model of the last few years
-quietly deleted a step from the thing that normalizes it, and nothing broke.
-LayerNorm subtracts the mean before dividing; RMSNorm just doesn't subtract.
+The story worth telling is that every large language model of the last few
+years quietly deleted a step from the operation that normalizes it, and
+nothing broke. LayerNorm subtracts the mean of a token's features before
+dividing by their spread; RMSNorm simply does not subtract. What lifts this
+above a micro-optimization is that you can say exactly how much was given up.
+The cosine between the two outputs is $\sigma/\text{RMS}$ — not approximately,
+exactly — which in a model as wide as GPT-2 puts them about seven parts in ten
+thousand apart, and the gap closes as $1/2d$ as models get wider. The mean
+that LayerNorm had been carefully subtracting for seven years was, in a
+network that wide, very nearly not there at all.
 
-**The detail that lands.** That mean is almost not there. In a model as wide
-as GPT-2 the two normalizers point in directions that differ by about seven
-parts in ten thousand, and the disagreement shrinks as $1/2d$ — so the wider
-the model, the more exactly the deleted step was doing nothing. You can even
-say what the agreement *is*: the cosine between the two outputs equals
-$\sigma/\text{RMS}$, exactly, no approximation.
-
-**What most people get wrong.** The usual story is "RMSNorm is faster."
-Faster is true but it is not the finding. The finding is that it *ties* — and
-a tie is the whole argument, because if two methods reach the same quality
-and one does less work, the one doing less work should win. The famous
-7%–64% speed-up comes from 2019 RNN experiments, and in a modern transformer
-normalization is a small slice of the compute.
-
-**If someone pushes back.** They should. RMSNorm genuinely gives up a real
-mathematical property — invariance to adding a constant to every feature.
-LayerNorm has it, RMSNorm does not. The field's bet is that this property was
-never the one doing the work, and seven years of models suggest the bet was
-right, but it was a bet.
-
-**The part worth stealing.** Removing something and showing that nothing
-breaks is a real result. It is rarer than it should be, partly because a
-paper reporting a tie is harder to publish than one reporting a win.
+Where the usual telling goes wrong is the moral. "RMSNorm is faster" is true
+and is not the finding; the finding is that it *ties*, and the tie is the
+whole argument, because when two methods reach the same quality the one doing
+less work should win. The famous 7–64% speed-up comes from 2019 recurrent
+experiments, and in a modern transformer normalization is a thin slice of the
+compute. It is worth being honest that something real was sold: LayerNorm is
+invariant to adding a constant to every feature and RMSNorm is not, and the
+field's position amounts to a bet that this invariance was never the property
+doing the work. Seven years of models suggest the bet was right. The part I
+find genuinely worth raising with someone is that this is a *negative* result
+— somebody removed a step, showed that nothing broke, and it turned out to
+matter more than most additions do.
 
 ## 7. References
 

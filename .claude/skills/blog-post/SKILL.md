@@ -192,30 +192,30 @@ This register is settled and confirmed. Do not drift back toward plain
 functional labels or toward flat understatement in later posts.
 
 **Chat This Over With Friends.** This replaces what would otherwise be a
-recap, and it is not one. A recap lists what the post covered; this section
-hands the reader what they need to talk about the topic confidently to
-someone else — what to lead with, which detail makes a listener look up, and
-what they can now correct. Write it as things to *say*, in full sentences a
-person could speak, not as findings to enumerate.
+recap, and it does two jobs at once: it closes the post so the reader truly
+has it, and it leaves them able to raise the topic with someone else and be
+interesting about it.
 
-The shape that works, in bold lead-ins:
+**Write it as one or two flowing paragraphs of prose.** Not bullets, not bold
+lead-ins, not a list of beats — a list reads as notes, and nobody speaks in
+notes. Two paragraphs of about 120 to 150 words each is the target.
 
-- **The one-line version.** What you open with. One or two sentences, no
-  notation, understandable to someone who has not read the post.
-- **The detail that lands.** The number or fact that makes a listener sit up.
-  Concrete, quotable, and drawn from the post's own verified figures.
-- **What most people get wrong.** The received version of this topic, and why
-  it is off. This is what makes the reader interesting rather than merely
-  informed.
-- **If someone pushes back.** The strongest fair objection, conceded honestly.
-  Being able to say where your own claim is weak is what separates confidence
-  from bluster — and it usually comes straight from the skeptic agent's
-  report.
-- Optionally one more: the part worth stealing, the thing nobody expects, or
-  the one-line mechanism worth remembering.
+What the two paragraphs do:
 
-Do not repeat figure captions here, and do not restate every section. Three
-to five beats, each one sayable out loud.
+- **The first carries the essence and the detail that makes it land.** Open
+  with the whole idea in a sentence someone could say at a table, with no
+  notation. Then give the one concrete thing — a number, a ratio, an image —
+  that makes a listener look up. It must come from the post's own verified
+  figures, and it should be quotable from memory.
+- **The second is where the reader becomes interesting rather than merely
+  informed.** The received version of this topic and why it is off; then the
+  strongest fair objection to your own account, conceded plainly. Close on
+  what is genuinely open, or on the thing that is more interesting than the
+  myth it replaces.
+
+Echo the post as you go, so the paragraphs double as the recap the reader
+needs — but echo the *argument*, not the section list. Do not repeat figure
+captions. Every sentence should survive being said out loud.
 
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.

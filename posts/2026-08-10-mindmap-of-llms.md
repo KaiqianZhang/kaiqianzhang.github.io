@@ -676,34 +676,29 @@ further:
 
 ## 7. Chat This Over With Friends
 
-**The one-line version.** The whole history before transformers is a single
-question asked over and over: what is a word, numerically? A count, then a
-direction, then a direction that depends on its neighbours, then one that
-depends on all of them at once. Each answer exists because the previous one
-could not do something specific.
+The thing worth saying is that the whole history before transformers is a
+single question asked over and over: what is a word, numerically? A count,
+then a direction, then a direction that depends on its neighbours, then one
+that depends on all of them at once — and each answer exists because the
+previous one could not do something specific. Counting died of arithmetic, and
+the numbers are stark enough to quote from memory. With a vocabulary of just
+1,594 words there are $10^{16}$ possible five-word sequences; a corpus sees
+around $10^{-13}$ of them, and almost every one of those exactly once. No
+quantity of data repairs that, because the space grows faster than any corpus
+can be made to grow.
 
-**The detail that lands.** Counting dies of arithmetic. With a vocabulary of
-just 1,594 words there are $10^{16}$ possible five-word sequences, and a
-corpus sees around $10^{-13}$ of them — almost all exactly once. No amount of
-data fixes that, because the space grows faster than any corpus can.
-
-**What most people get wrong.** Two things. Word2Vec did not invent word
-embeddings — Bengio's neural language model learned them a decade earlier, and
-learning them is what that paper is *for*. Word2Vec's contribution was making
-them cheap: strip out the expensive hidden layer and you can train on billions
-of words. And the lineage everyone recites is not chronological. LSTM predates
-Word2Vec by sixteen years, and ELMo came out four months *after* the
-transformer.
-
-**If someone pushes back.** The fair objection is that smoothed n-grams were
-not the failure this framing implies — modified Kneser-Ney five-grams held the
-state of the art for roughly two decades. What they could never supply is any
-notion that two words are similar.
-
-**The one-line mechanism worth remembering.** An RNN sends its gradient back
-by multiplying by the same matrix over and over, so it dies or diverges
-exponentially. An LSTM replaces that with $\prod_t f_t$ — still a product, but
-of numbers the model gets to choose.
+Two things in the popular telling are wrong, and correcting them is the
+enjoyable part. Word2Vec did not invent word embeddings — Bengio's neural
+language model was learning them a decade earlier, and learning them is what
+that paper is *for*; Word2Vec's contribution was making them cheap enough for
+everyone. And the lineage people recite is not a chronology at all: LSTM
+predates Word2Vec by sixteen years, and ELMo appeared four months *after* the
+transformer. The arrows in a map like this one mean "here is what that could
+not do", never "here is what came next". The fair objection to the whole
+framing is that smoothed n-grams were not the failure it implies — modified
+Kneser-Ney five-grams held the state of the art for roughly two decades. What
+counting could never supply is any notion that two words are *similar*, and
+that, rather than accuracy, is what the rest of the story is about.
 
 ## 8. References
 

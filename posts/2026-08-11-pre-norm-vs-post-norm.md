@@ -765,29 +765,28 @@ silent on post-norm's difficulty, which is the half the opening rests on.
 
 ## 7. Chat This Over With Friends
 
-**The one-line version.** Moving the normalizer one step earlier — off the
-main path and into the branch — is most of why anyone can train a hundred-layer
-transformer at all.
+In one sentence: moving the normalizer one step earlier — off the main path
+and into the residual branch — is most of the reason anyone can train a
+hundred-layer transformer at all. The mechanism is simple enough to carry
+around. Under pre-norm nothing rescales the main path, so the vector
+travelling up it merely accumulates, growing like $\sqrt{L}$; a 64-layer
+model arrives at the top carrying something about eleven times larger than
+what it started with. The last thing the network does is normalize, which
+divides by that size, so every gradient in a deep pre-norm model is damped by
+roughly $1/\sqrt{L}$ before a single step of training has been taken. That is
+the whole of the 2020 theorem, and a stack of random matrices with no
+attention, no nonlinearity and no data in it reproduces both halves.
 
-**The detail that lands.** Nothing rescales pre-norm's main path, so the
-vector running up it accumulates like $\sqrt{L}$ — a 64-layer model carries
-something eleven times larger at the top than at the bottom. The last thing
-the network does is normalize, which divides by that, so every gradient in a
-deep pre-norm model is damped by $1/\sqrt{L}$ before training starts. That is
-the whole theorem, and a stack of random matrices reproduces it.
-
-**What most people get wrong.** "Pre-norm meant we could delete the
-learning-rate warm-up." Every large model named in this post still warms up.
-What actually changed is subtler and more useful: warm-up's length and peak
-stopped being choices that could sink a run.
-
-**If someone pushes back.** The good objection is that Adam is invariant to
-rescaling a gradient by a constant, so a constant factor should barely move
-the update size. That is the weakest joint in the standard argument.
-
-**The thing nobody expects.** It is being walked back. DeepNet made post-norm
-trainable at a thousand layers; OLMo 2 and Gemma normalize *after* the
-sub-layer again. Nobody put it back on the main path — what got recovered was
+The conclusion people draw from this is usually too strong. It is often said
+that pre-norm let us delete learning-rate warm-up, and every large model named
+in this post still warms up. What actually changed is subtler and more useful:
+warm-up's length and peak stopped being choices that could sink a run. The
+better thing to raise, because most people have not heard it, is that the
+field has been quietly walking the decision back since about 2022. DeepNet
+made post-norm trainable at a thousand layers by scaling the residual; OLMo 2
+and Gemma normalize *after* the sub-layer again, and OLMo 2 reports that this
+only works when paired with normalizing the attention queries and keys. Nobody
+has put the normalizer back on the main path. What got recovered was
 post-norm's restraint, not its position.
 
 ## 8. References
