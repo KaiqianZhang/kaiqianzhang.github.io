@@ -1038,3 +1038,91 @@ table td {
     animation: none; transform: translateY(180px) scale(0.92);
   }
 }
+
+/* A token travelling through a SwiGLU feed-forward layer. Two pulses climb
+   the gate and value branches together, meet at the product, and one leaves
+   through the down-projection.
+
+   Same rule as every other animation here: the animated element carries no
+   SVG transform attribute of its own, because a CSS transform replaces it
+   rather than composing with it. All coordinates below are absolute. */
+.article .ffn-anim {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 0 6px 0;
+  margin: 34px 0;
+}
+.article .ffn-anim svg { width: 100%; height: auto; display: block; }
+.article .ffn-anim .wire { stroke: #C9C3BC; stroke-width: 1.8; fill: none; }
+.article .ffn-anim .mat { stroke-width: 0; }
+.article .ffn-anim .mat.gate { fill: #8C77BC; fill-opacity: 0.92; }
+.article .ffn-anim .mat.val  { fill: #3E6491; fill-opacity: 0.92; }
+.article .ffn-anim .mat.down { fill: #22253E; fill-opacity: 0.90; }
+.article .ffn-anim .mat.act  { fill: #6E8C66; fill-opacity: 0.92; }
+.article .ffn-anim .mlbl {
+  font: 600 12px -apple-system, Helvetica, arial, sans-serif;
+  fill: #FFFFFF; text-anchor: middle;
+}
+.article .ffn-anim .mdim {
+  font: 400 9px -apple-system, Helvetica, arial, sans-serif;
+  fill: rgba(255, 255, 255, 0.82); text-anchor: middle;
+}
+.article .ffn-anim .lbl {
+  font: 600 15px Georgia, serif; fill: #3F3F3F; text-anchor: middle;
+}
+.article .ffn-anim .dim {
+  font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C8C8C; text-anchor: middle; letter-spacing: 0.04em;
+}
+.article .ffn-anim .note {
+  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C77BC; text-anchor: middle;
+}
+.article .ffn-anim .prod { fill: none; stroke: #A8443E; stroke-width: 1.8; }
+.article .ffn-anim .plbl {
+  font: 600 14px -apple-system, Helvetica, arial, sans-serif;
+  fill: #A8443E; text-anchor: middle;
+}
+.article .ffn-anim .tok {
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+  fill: #A8443E;
+}
+/* gate branch: x(34,122) -> W(150,72) -> Swish(345,72) -> product(452,128) */
+@keyframes ffn-gate {
+  0%             { transform: translate(34px, 122px); opacity: 0; }
+  6%             { transform: translate(34px, 122px); opacity: 1; }
+  26%            { transform: translate(150px, 72px); opacity: 1; }
+  40%            { transform: translate(306px, 72px); opacity: 1; }
+  52%            { transform: translate(452px, 72px); opacity: 1; }
+  60%, 100%      { transform: translate(452px, 128px); opacity: 0; }
+}
+/* value branch: x(34,122) -> V(150,184) -> product(452,128) */
+@keyframes ffn-val {
+  0%             { transform: translate(34px, 122px); opacity: 0; }
+  6%             { transform: translate(34px, 122px); opacity: 1; }
+  26%            { transform: translate(150px, 184px); opacity: 1; }
+  52%            { transform: translate(452px, 184px); opacity: 1; }
+  60%, 100%      { transform: translate(452px, 128px); opacity: 0; }
+}
+/* out: product(452,128) -> W2(524,128) -> y(690,128) */
+@keyframes ffn-out {
+  0%, 58%        { transform: translate(452px, 128px); opacity: 0; }
+  62%            { transform: translate(452px, 128px); opacity: 1; }
+  78%            { transform: translate(524px, 128px); opacity: 1; }
+  94%            { transform: translate(690px, 128px); opacity: 1; }
+  100%           { transform: translate(690px, 128px); opacity: 0; }
+}
+.article .ffn-anim .tok-g { animation: ffn-gate 6s linear infinite; }
+.article .ffn-anim .tok-v { animation: ffn-val  6s linear infinite; }
+.article .ffn-anim .tok-o { animation: ffn-out  6s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  /* Park one token on each branch so the three routes are still legible. */
+  .article .ffn-anim .tok-g { animation: none; transform: translate(306px, 72px); }
+  .article .ffn-anim .tok-v { animation: none; transform: translate(300px, 184px); }
+  .article .ffn-anim .tok-o { animation: none; transform: translate(524px, 128px); }
+}
+@media (prefers-color-scheme: dark) {
+  .article .ffn-anim .wire { stroke: #4A4640; }
+  .article .ffn-anim .lbl { fill: #D8D4CE; }
+}

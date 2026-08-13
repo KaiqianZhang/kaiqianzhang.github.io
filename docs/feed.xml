@@ -7,6 +7,14 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>FFN-SwiGLU</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/13/ffn-swiglu/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/ffn-swiglu/</guid>
+        <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
+        <description>The feed-forward layer holds most of a transformer&#x27;s parameters, and the field demoted its activation to a gate that nobody can explain.</description>
+    </item>
+
+    <item>
         <title>RoPE</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/11/rope/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/11/rope/</guid>

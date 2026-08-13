@@ -161,6 +161,28 @@ ROADMAPS = {
             ('§5', 'all at once', 'Transformer 2017'),
         ]),
 
+    'swiglu': dict(
+        label='Roadmap of the feed-forward layer: a gate arrives in 2016, the '
+              'Transformer ships a plain two-matrix FFN in 2017, Shazeer puts '
+              'the gate inside it in 2020, and LLaMA makes that the default.',
+        arrows=['built for convolutions, not attention',
+                'the activation changed; the shape never did',
+                'it wins, unexplained'],
+        stops=[
+            ('2016', 'a gate appears',
+             'Dauphin et al. multiply two linear projections, one squashed. '
+             'It predates the Transformer it ends up inside.'),
+            ('2017', 'the plain FFN',
+             'Two matrices, widened fourfold, with a pointwise nonlinearity '
+             'between them. BERT and GPT swap in GELU; the shape stands.'),
+            ('2020', 'Shazeer combines them',
+             'A GLU inside the FFN. Three matrices, so the hidden width '
+             'shrinks to two thirds to pay for it.'),
+            ('2023-', 'LLaMA makes it default',
+             'SwiGLU in LLaMA, Mistral, Qwen, DeepSeek. Gemma keeps the '
+             'GELU-gated variant instead.'),
+        ]),
+
     'rope': dict(
         label='Roadmap of position encoding: absolute tags in 2017, relative '
               'offsets in 2018, rotation in 2021, and no encoding at all from '
