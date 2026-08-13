@@ -72,7 +72,7 @@
         <li style='border-left-color: #6B8FA8'><a href='#4-the-version-in-the-paper-and-the-version-in-the-weights'>4. The Version in the Paper and the Version in the Weights</a></li>
         <li style='border-left-color: #8C6A9E'><a href='#5-stretching-a-context-it-was-never-given'>5. Stretching a Context It Was Never Given</a></li>
         <li style='border-left-color: #5F8A8B'><a href='#6-a-bound-that-falls-and-nothing-underneath-it'>6. A Bound That Falls, and Nothing Underneath It</a></li>
-        <li style='border-left-color: #9C7B62'><a href='#7-recap'>7. Recap</a></li>
+        <li style='border-left-color: #9C7B62'><a href='#7-chat-this-over-with-friends'>7. Chat This Over With Friends</a></li>
         <li style='border-left-color: #5F7396'><a href='#8-references'>8. References</a></li>
     </ul>
 </nav>
@@ -281,15 +281,12 @@ $$
 <p>It is worth getting the mechanism the right way round, because this is easy to tell backwards. The decay in Figure 4 comes from <em>dephasing</em>. At distance 250 the fastest band has turned 250 radians and its contributions cancel, while band 63 has turned 0.0 radians and adds coherently: summing only the sixteen fastest bands gives a magnitude of 2.0 out of a possible 16, while all 64 together give 22.2. <strong>The fast clocks are what makes the bound fall.</strong> So the frequencies Gemma leans on for position are exactly the ones responsible for whatever decay exists, and the slow ones, which contribute no decay at all, are the ones it appears to have repurposed.</p>
 <p>None of this is a refutation, and the same paper argues <em>for</em> RoPE elsewhere: it shows that an attention head with no positional encoding cannot construct certain diagonal patterns a RoPE head can. Their ablation removing the lowest frequencies moves Gemma 2B's perplexity from 4.4627 to 4.4414 — an improvement, but a slim one to rest a large claim on.</p>
 <p>What survives is narrower and more interesting than a debunking. The decay property is real as a bound and absent as a typical behaviour; whether a model uses it is the model's choice; and the frequencies it actually leans on are not the ones the original argument would predict. RoPE stopped being a fixed formula some time ago. It is a spectrum, and both the engineering of section 5 and the interpretability of this one are arguments about which parts of it to use.</p>
-<h2 id='7-recap'>7. Recap</h2>
-<ul>
-  <li>Attention is permutation equivariant, so order has to be arranged for — though in a decoder the causal mask already supplies some of it, which is why models with no positional encoding work at all.</li>
-  <li>RoPE writes position as a rotation of the query and key. Rotations transpose by negating the angle and compose by adding it, so $q_m^\top k_n$ depends on $m$ and $n$ only through $n - m$, exactly.</li>
-  <li>Rotation is not the only solution to that requirement — it is the unique norm-preserving one that treats queries and keys alike. xPos takes the other branch.</li>
-  <li>A head runs $d/2$ rotations at geometrically spaced speeds, from one wrap every 6 tokens to one every 54,410. That spread is why long contexts break, and every extension method is a decision about which clocks to slow down.</li>
-  <li>The long-term decay the paper advertises is a property of an upper bound. The realised logit magnitude for random $q, k$ is exactly flat in distance, and the decay the bound does show comes from the fast bands, not the slow ones.</li>
-  <li>RoPE probably won on mechanics rather than elegance: elementwise, nothing inside the attention matrix, and untouched by a key-value cache.</li>
-</ul>
+<h2 id='7-chat-this-over-with-friends'>7. Chat This Over With Friends</h2>
+<p><strong>The one-line version.</strong> RoPE encodes a token's position by <em>rotating</em> its query and key rather than adding anything to them, and the rotation is chosen so that when you take the dot product the absolute positions cancel — exactly, by the algebra of rotations, leaving only the distance between the two tokens.</p>
+<p><strong>The detail that lands.</strong> A single attention head is running 64 clocks at once, at geometrically spaced speeds. The fastest completes a full turn every 6.3 tokens; the slowest needs 54,410. Against a 4,096-token training window, <strong>18 of those 64 clocks never complete a single turn</strong> — and that is precisely why models break past their trained context, and why every context-extension method is really a decision about which clocks to slow down. Llama 3 changed one number, the base, from 10,000 to 500,000, which stretches the slowest clock out to 2.6 million tokens.</p>
+<p><strong>What most people get wrong.</strong> Nearly every explanation says RoPE works because attention decays with distance. The paper does claim it. But that decay is a property of an <em>upper bound</em>, and for random queries and keys the realised size of the attention logit is exactly flat in distance — provably, since the variance works out to $d$ regardless of how far apart the tokens are. A 2024 study of Gemma argues decay is "unlikely to be the core reason" RoPE helps.</p>
+<p><strong>If someone pushes back.</strong> Fairly. That is one paper on one model family, and the same paper argues <em>for</em> RoPE elsewhere. What survives is narrower: decay is real as a bound, absent as a typical behaviour, and whether a model uses it is the model's choice.</p>
+<p><strong>The bit that surprises people.</strong> RoPE has no learned parameters at all. The angles come from a formula fixed before training starts, and the model's only freedom is deciding which of them to lean on.</p>
 <h2 id='8-references'>8. References</h2>
 <ol>
   <li>Su, J., Lu, Y., Pan, S., Murtadha, A., Wen, B., & Liu, Y. (2021). RoFormer: Enhanced Transformer with Rotary Position Embedding. <a href='https://arxiv.org/abs/2104.09864'>arXiv:2104.09864</a>.</li>

@@ -361,8 +361,17 @@ WORDS_PER_MINUTE = 220
 
 
 def reading_time(body):
-    """Whole minutes, from prose only. Code, math and raw HTML are skipped."""
+    """Whole minutes, from prose only. Code, math and raw HTML are skipped.
+
+    Script and style bodies have to go before tags are stripped: their
+    contents sit *between* tags, not inside them, so tag-stripping alone
+    leaves the JavaScript source behind and counts it as prose. A post with
+    two interactive widgets was reading a minute and a half long on that
+    alone.
+    """
     text = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
+    text = re.sub(r'<(script|style)\b.*?</\1>', '', text,
+                  flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'\$\$.*?\$\$', '', text, flags=re.DOTALL)
     text = re.sub(r'<[^>]+>', '', text)
     return max(1, round(len(text.split()) / WORDS_PER_MINUTE))

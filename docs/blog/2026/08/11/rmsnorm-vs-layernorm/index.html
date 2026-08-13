@@ -49,7 +49,7 @@
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
-                    <p>13 min read</p>
+                    <p>14 min read</p>
                 </div>
                 <div class='byline'>
                     <h3>Tags</h3>
@@ -71,7 +71,7 @@
         <li style='border-left-color: #A87D76'><a href='#3-what-the-clock-knew-and-the-counter-did-not'>3. What the Clock Knew and the Counter Did Not</a></li>
         <li style='border-left-color: #6B8FA8'><a href='#4-a-ledger-of-what-was-kept-and-what-was-sold'>4. A Ledger of What Was Kept and What Was Sold</a></li>
         <li style='border-left-color: #8C6A9E'><a href='#5-watching-a-difference-vanish-into-width'>5. Watching a Difference Vanish into Width</a></li>
-        <li style='border-left-color: #5F8A8B'><a href='#6-recap'>6. Recap</a></li>
+        <li style='border-left-color: #5F8A8B'><a href='#6-chat-this-over-with-friends'>6. Chat This Over With Friends</a></li>
         <li style='border-left-color: #9C7B62'><a href='#7-references'>7. References</a></li>
     </ul>
 </nav>
@@ -302,15 +302,12 @@ $$
 </div>
 <p>Both predictions hold. In panel (a) the dashed theory line is not fitted to anything — it is $1/2d$, and the simulated mean sits on it across four orders of magnitude. At $d = 768$ the measured disagreement is $6.53\times10^{-4}$ against a predicted $6.51\times10^{-4}$.</p>
 <p>Panel (a) is the case for RMSNorm and panel (b) is the case against it, and both are worth holding at once. At realistic widths the two methods are doing nearly the same thing, which is why the swap is safe. But they are not identical, and if a model's activations ever developed a large shared offset across the feature dimension, the two would diverge exactly as panel (b) shows. The empirical claim underneath every modern LLM is that this does not happen enough to matter.</p>
-<h2 id='6-recap'>6. Recap</h2>
-<ul>
-  <li>LayerNorm normalizes each token across its own features, using the mean and the standard deviation. RMSNorm drops the mean and divides by the root mean square.</li>
-  <li>The two are related by $\text{RMS}^2 = \sigma^2 + \mu^2$, so they coincide exactly when the mean is zero.</li>
-  <li>Their agreement is not approximate hand-waving. It is exactly $\cos\theta = \sigma/\text{RMS}$, and for a $d$-dimensional vector with roughly independent entries the disagreement averages $1/2d$ — negligible at the widths real models use.</li>
-  <li>What RMSNorm gives up is invariance to a constant shift of every feature. This is a genuine loss, and the empirical finding of the last seven years is that it does not matter.</li>
-  <li>RMSNorm is cheaper, has half the learned parameters, and matches quality. That combination made it the default for essentially every large language model since 2023.</li>
-  <li>The transferable lesson: when a method works, find out <em>which part</em> of it works. A result that removes something and changes nothing is worth as much as one that adds something.</li>
-</ul>
+<h2 id='6-chat-this-over-with-friends'>6. Chat This Over With Friends</h2>
+<p><strong>The one-line version.</strong> Every large language model of the last few years quietly deleted a step from the thing that normalizes it, and nothing broke. LayerNorm subtracts the mean before dividing; RMSNorm just doesn't subtract.</p>
+<p><strong>The detail that lands.</strong> That mean is almost not there. In a model as wide as GPT-2 the two normalizers point in directions that differ by about seven parts in ten thousand, and the disagreement shrinks as $1/2d$ — so the wider the model, the more exactly the deleted step was doing nothing. You can even say what the agreement <em>is</em>: the cosine between the two outputs equals $\sigma/\text{RMS}$, exactly, no approximation.</p>
+<p><strong>What most people get wrong.</strong> The usual story is "RMSNorm is faster." Faster is true but it is not the finding. The finding is that it <em>ties</em> — and a tie is the whole argument, because if two methods reach the same quality and one does less work, the one doing less work should win. The famous 7%–64% speed-up comes from 2019 RNN experiments, and in a modern transformer normalization is a small slice of the compute.</p>
+<p><strong>If someone pushes back.</strong> They should. RMSNorm genuinely gives up a real mathematical property — invariance to adding a constant to every feature. LayerNorm has it, RMSNorm does not. The field's bet is that this property was never the one doing the work, and seven years of models suggest the bet was right, but it was a bet.</p>
+<p><strong>The part worth stealing.</strong> Removing something and showing that nothing breaks is a real result. It is rarer than it should be, partly because a paper reporting a tie is harder to publish than one reporting a win.</p>
 <h2 id='7-references'>7. References</h2>
 <ol>
   <li>Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization. <a href='https://arxiv.org/abs/1607.06450'>arXiv:1607.06450</a>.</li>

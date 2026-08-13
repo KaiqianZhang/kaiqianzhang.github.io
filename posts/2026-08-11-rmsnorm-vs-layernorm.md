@@ -439,26 +439,35 @@ across the feature dimension, the two would diverge exactly as panel (b) shows.
 The empirical claim underneath every modern LLM is that this does not happen
 enough to matter.
 
-## 6. Recap
+## 6. Chat This Over With Friends
 
-- LayerNorm normalizes each token across its own features, using the mean and
-  the standard deviation. RMSNorm drops the mean and divides by the root mean
-  square.
-- The two are related by $\text{RMS}^2 = \sigma^2 + \mu^2$, so they coincide
-  exactly when the mean is zero.
-- Their agreement is not approximate hand-waving. It is exactly
-  $\cos\theta = \sigma/\text{RMS}$, and for a $d$-dimensional vector with
-  roughly independent entries the disagreement averages $1/2d$ — negligible at
-  the widths real models use.
-- What RMSNorm gives up is invariance to a constant shift of every feature.
-  This is a genuine loss, and the empirical finding of the last seven years is
-  that it does not matter.
-- RMSNorm is cheaper, has half the learned parameters, and matches quality.
-  That combination made it the default for essentially every large language
-  model since 2023.
-- The transferable lesson: when a method works, find out *which part* of it
-  works. A result that removes something and changes nothing is worth as much
-  as one that adds something.
+**The one-line version.** Every large language model of the last few years
+quietly deleted a step from the thing that normalizes it, and nothing broke.
+LayerNorm subtracts the mean before dividing; RMSNorm just doesn't subtract.
+
+**The detail that lands.** That mean is almost not there. In a model as wide
+as GPT-2 the two normalizers point in directions that differ by about seven
+parts in ten thousand, and the disagreement shrinks as $1/2d$ — so the wider
+the model, the more exactly the deleted step was doing nothing. You can even
+say what the agreement *is*: the cosine between the two outputs equals
+$\sigma/\text{RMS}$, exactly, no approximation.
+
+**What most people get wrong.** The usual story is "RMSNorm is faster."
+Faster is true but it is not the finding. The finding is that it *ties* — and
+a tie is the whole argument, because if two methods reach the same quality
+and one does less work, the one doing less work should win. The famous
+7%–64% speed-up comes from 2019 RNN experiments, and in a modern transformer
+normalization is a small slice of the compute.
+
+**If someone pushes back.** They should. RMSNorm genuinely gives up a real
+mathematical property — invariance to adding a constant to every feature.
+LayerNorm has it, RMSNorm does not. The field's bet is that this property was
+never the one doing the work, and seven years of models suggest the bet was
+right, but it was a bet.
+
+**The part worth stealing.** Removing something and showing that nothing
+breaks is a real result. It is rarer than it should be, partly because a
+paper reporting a tie is harder to publish than one reporting a win.
 
 ## 7. References
 

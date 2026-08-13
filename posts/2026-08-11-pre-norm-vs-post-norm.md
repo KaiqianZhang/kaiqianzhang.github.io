@@ -53,15 +53,15 @@ that is no longer unanimous.
         The same three parts in a different order. Follow the grey column: in
         (a) it is interrupted twice per layer by a normalizer, in (b) it runs
         clean from bottom to top and every normalizer has stepped aside into a
-        branch. That uninterrupted column is most of the story — it is what
+        branch. That uninterrupted column is most of the story — what
         makes pre-norm easy to train, and, as section 5 gets to, the property
-        that later designs kept even while moving the normalizer around it.
+        later designs kept even while moving the normalizer around it.
         <br>
         Figure 1, Xiong et al. (2020), split into its two panels and
-        recoloured. This diagram also opens
+        recoloured. The same diagram opens
         <a href='/blog/2026/08/11/rmsnorm-vs-layernorm/'>the RMSNorm post</a>,
-        where the question was which normalizer goes in the green boxes rather
-        than where the boxes go.
+        where the question was which normalizer goes in the boxes rather than
+        where the boxes go.
     </div>
 </div>
 
@@ -113,10 +113,9 @@ And then, starting around 2022, people began moving it back. That is section
 ## 2. The Stream That Only Rises
 
 The difference between the two arrangements is one line of algebra, and the
-consequence follows from it directly. One caveat governs this whole section:
-everything below describes a network **at initialization**, before any
-training. That is where the theory lives, and it is not the same as a claim
-about a trained model.
+consequence follows directly. One caveat governs the whole section: everything
+below describes a network **at initialization**, before any training. That is
+where the theory lives, and it is not a claim about a trained model.
 
 Write $F_l$ for the $l$-th sub-layer and $N$ for the normalizer. **Post-norm**
 puts $N$ outside:
@@ -298,9 +297,9 @@ the one that actually motivated warm-up.
 Three things are worth taking from this.
 
 **The clean residual path is the mechanism, not a metaphor.** The main path
-in Figure 1(b) is a sum with no nonlinearity and no rescaling on it, so the
-gradient reaching layer $l$ contains a term that has passed through nothing
-at all. In post-norm, $L$ normalizers stand in the road.
+in Figure 1(b) is a sum with no nonlinearity and no rescaling, so the gradient
+reaching layer $l$ contains a term that passed through nothing at all. In
+post-norm, $L$ normalizers stand in the road.
 
 **Stability may have been bought with something.** A growing stream means
 later layers write into a vector that is already large, so each one's
@@ -318,10 +317,9 @@ setting out to combine "the good performance of Post-LN and the stable
 training of Pre-LN", which only makes sense as a goal if the first of those
 was still worth wanting.
 
-It would be easy to overstate this. The work in the next section is not, in
-the main, chasing a quality edge from post-norm; its stated motivations are
-about stability — gradient spikes, activation growth, variance control. The
-unfinished comparison is a loose end, not the engine.
+It would be easy to overstate this. The work in the next section is not
+chasing a quality edge from post-norm; its motivations are stability —
+gradient spikes, activation growth, variance control.
 
 ## 5. The Slow Walk Back
 
@@ -437,27 +435,34 @@ weights assume away. And nothing here is unstable: post-norm's gradient sits
 flat and well-behaved. The toy shows pre-norm's damping and is silent on
 post-norm's difficulty, which is the half the opening rests on.
 
-## 7. Recap
+## 7. Chat This Over With Friends
 
-- A transformer layer's three parts can be ordered a few ways. Post-norm puts
-  the normalizer on the main path after the addition; pre-norm moves it into
-  the residual branch, before the sub-layer.
-- Under pre-norm nothing rescales the main path, so at initialization the
-  residual stream grows as $\sqrt{L}$ — unless the branch is deliberately
-  initialized to cancel it, as GPT-2's was. Under post-norm it is reset.
-- The final normalization divides by that stream, so pre-norm damps every
-  gradient by $1/\sqrt{L}$ while post-norm's are independent of depth. This is
-  Theorem 1 of Xiong et al., and a stack of random matrices reproduces it.
-- That is most of what warm-up was for. Note what did *not* happen: warm-up
-  is still standard in every large model named here. What changed is that its
-  length and peak stopped being choices that could sink a run.
-- The trade may run both ways. Pre-norm buys trainability and depth; what a
-  growing stream costs the later layers is an open question.
-- The question is live again. DeepNet made post-norm trainable at 1,000
-  layers; Swin V2, OLMo 2 and Gemma 2 have moved normalization back to
-  *after* the sub-layer while keeping the main path clean. Nobody has put a
-  normalizer back on the main path — and nobody should say pre-norm simply
-  won.
+**The one-line version.** Moving the normalizer one step earlier — off the
+main path and into the branch — is most of why anyone can train a hundred-layer
+transformer at all.
+
+**The detail that lands.** Under pre-norm nothing rescales the main path, so
+the vector running up it just accumulates: it grows like $\sqrt{L}$, and a
+64-layer model carries something about eleven times larger at the top than at
+the bottom. The last thing the network does is normalize, which divides by
+that — so every gradient in a deep pre-norm model is damped by
+$1/\sqrt{L}$ before it starts. That is the whole theorem, and a stack of
+random matrices reproduces it.
+
+**What most people get wrong.** "Pre-norm meant we could delete the
+learning-rate warm-up." Every large model named in this post still warms up.
+What actually changed is subtler and more useful: warm-up's length and peak
+stopped being choices that could sink a run.
+
+**If someone pushes back.** The good objection is that Adam is invariant to
+rescaling a gradient by a constant, so a constant factor between the two
+arrangements should barely move the update size. That is the weakest joint in
+the standard argument, and the partial answer is that warm-up helps SGD too.
+
+**The thing nobody expects.** It is being walked back. DeepNet made post-norm
+trainable at a thousand layers; OLMo 2 and Gemma moved normalization to
+*after* the sub-layer again. Nobody put it back on the main path — what got
+recovered was post-norm's restraint, not its position.
 
 ## 8. References
 

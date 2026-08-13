@@ -85,41 +85,41 @@ possible $n$-grams, and $V^n$ grows faster than any corpus.
          alt='Log-scale plot of possible n-grams against n-grams ever observed, for n from 1 to 5. The possible count rises steeply; the observed count is nearly flat.'>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Measured on this blog's own three posts — 8,168 words, 1,640 of them
+        Measured on this blog's own three posts — 8,293 words, 1,659 of them
         distinct. At $n = 1$ every word in the space is observed by
-        definition. By $n = 5$ there are $1.2 \times 10^{16}$ possible
-        five-word sequences and exactly 8,052 ever occur, which is
-        $7\times10^{-13}$ of the space. Worse, <b>98.9%</b> of those 8,052
+        definition. By $n = 5$ there are $1.3 \times 10^{16}$ possible
+        five-word sequences and exactly 8,128 ever occur, which is
+        $6\times10^{-13}$ of the space. Worse, <b>98.2%</b> of those 8,128
         occur exactly once, so almost every count the model would rely on is
         the number 1. A bigger corpus moves these numbers and does not change
         their shape.
     </div>
 </div>
 
-One honest caveat about that figure: a corpus of $N$ tokens holds at most $N$
+One caveat about that figure: a corpus of $N$ tokens holds at most $N$
 five-gram positions, so the flat line is pinned by arithmetic as much as by
 language. What it really shows is $V^n$ outrunning any corpus at all.
 
 Everything unseen gets probability zero, which the chain rule propagates to
-the whole sentence. Smoothing and backoff repair that, and better than this
-framing usually admits — modified Kneser-Ney five-grams held the state of the
-art for roughly two decades and were still a serious baseline in 2013, the
-year word2vec appeared. What they cannot supply is any notion that two words
-are *similar*. To a counter, "cat" and "dog" are as unrelated as "cat" and
+the whole sentence. Smoothing and backoff repair that better than this framing
+usually admits — modified Kneser-Ney five-grams held the state of the art for
+roughly two decades and were still a serious baseline in 2013, the year
+word2vec appeared. What they cannot supply is any notion that two words are
+*similar*. To a counter, "cat" and "dog" are as unrelated as "cat" and
 "thermodynamics".
 
 **NNLM**, the neural language model, was the first *neural* attempt at that —
 latent semantic analysis and Brown clustering had been deriving similarity
 from counts since the early 1990s. Its input is **one-hot**, and my map's note
 is the whole complaint: *lose the word meaning, dimension is horribly large*.
-Two one-hot vectors are orthogonal, so at the input, similarity is not merely
-unmeasured; it is unrepresentable.
+Two one-hot vectors are orthogonal, so similarity is not merely unmeasured at
+the input; it is unrepresentable.
 
 That is a correction to my own map, because NNLM *already fixes it*. Between
 the one-hot input and the hidden layer sits a shared matrix $C$ whose rows are
-word vectors; learning a distributed representation is what Bengio's paper is
-*for*. The one-hot is an indexing convention, not a theory of meaning. So the
-next arrow is not "Word2Vec invented embeddings" but something narrower:
+word vectors — learning a distributed representation is what Bengio's paper is
+*for*, and the one-hot is an indexing convention, not a theory of meaning. So
+the next arrow is not "Word2Vec invented embeddings" but something narrower:
 NNLM's came attached to an expensive model, and Word2Vec got them cheap.
 
 ## 2. When a Word Became a Direction
@@ -132,7 +132,7 @@ embeddings, though the model learns two and which you keep is a convention.
 Mikolov et al. remove NNLM's nonlinear hidden layer, and the paper is explicit
 that this is a *compute* argument: without it they could train on 1.6 billion
 words. Collobert and Weston had already got embeddings as a by-product in
-2008. The 2013 contribution is that it became cheap enough for everyone.
+2008; the 2013 contribution is that it became cheap enough for everyone.
 
 There are two ways to arrange that task, and they are mirror images.
 
@@ -213,9 +213,9 @@ The original paper draws the same pair as wiring diagrams:
         ordering inside the window, any depth. The projection node is drawn
         <b>SUM</b>, though the paper's prose says the vectors are
         <i>averaged</i> — the same thing up to a constant, and either way "cat
-        sat on the" and "the on sat cat" give the same projection.
-        This is a bag of words with a lookup table attached, and it was enough
-        to make word vectors that do arithmetic.
+        sat on the" and "the on sat cat" give the same projection. A bag of
+        words with a lookup table attached, and enough to make word vectors
+        that do arithmetic.
         <br>
         Figure 1, Mikolov et al. (2013), tinted.
     </div>
@@ -223,12 +223,10 @@ The original paper draws the same pair as wiring diagrams:
 
 Which you want depends on the corpus, and my map is blunt: **CBOW is quick**,
 for large-scale text like news; **Skip-gram is precise**, for low-frequency
-words like legal terminology. That framing comes from word2vec's documentation
-rather than either paper — what the 2013 paper reports is a different axis,
-CBOW better on syntactic analogies, Skip-gram on semantic ones, and CBOW about
-three times faster.
-
-The mechanism usually offered concerns a word's role as *context*: Skip-gram
+words. That framing comes from word2vec's documentation rather than either
+paper — the 2013 paper reports a different axis, CBOW better on syntactic
+analogies, Skip-gram on semantic ones, and CBOW about three times faster. The
+mechanism usually offered concerns a word's role as *context*: Skip-gram
 factors each window into $2c$ pairs, so a rare context word gets its own
 gradient, while CBOW averages it in with $2c-1$ neighbours and dilutes it.
 
@@ -271,12 +269,12 @@ window at a time and never sees the corpus whole; GloVe first builds a
 co-occurrence matrix $X \in \mathbb{R}^{V \times V}$ and then fits
 $w_i^\top \tilde{w}_j + b_i + \tilde{b}_j = \log X_{ij}$.
 
-That form comes from an observation worth keeping: what carries meaning is
-not a co-occurrence count but a *ratio* of them. $P(k \mid \text{ice}) /
-P(k \mid \text{steam})$ is large for *solid*, small for *gas*, and about 1 for
-*water* — so the ratio isolates exactly the dimension along which the two
-words differ. The matrix is enormous and, as the map notes, sparse, which is
-the point: only its nonzero entries are ever touched.
+That form comes from one observation: what carries meaning is not a
+co-occurrence count but a *ratio* of them. $P(k \mid \text{ice}) /
+P(k \mid \text{steam})$ is large for *solid*, small for *gas*, about 1 for
+*water* — the ratio isolates exactly the dimension along which the two words
+differ. The matrix is enormous and, as the map notes, sparse, which is the
+point: only nonzero entries are ever touched.
 
 ## 3. A Matrix Multiplied by Itself
 
@@ -287,7 +285,7 @@ has thrown away order, so "dog bites man" and "man bites dog" are one input.
 My map says *DNN and MLP cannot deal with time-series data*, which needs
 narrowing — NNLM is feed-forward and works fine, and so is a transformer. The
 true statement is that a fixed-width network over a *bag* of context can
-represent neither variable-length history nor order within the window.
+represent neither variable-length history nor order.
 
 **RNN** answers with a loop. Process the sequence one token at a time, and
 carry a hidden state forward:
@@ -417,13 +415,12 @@ the cell multiplies by $f_t$ rather than by $W^\top J$, so the backward
 product is $\prod_t f_t$ — still a product, but of numbers the model
 *chooses* rather than of a fixed matrix's spectrum.
 
-A reprieve, not a cure — and the 1997 original is the cleaner case, since its
-constant error carousel has a self-weight of exactly 1.0, making the sage line
-in Figure 5 literal. The forget gate put a learnable $f_t \in (0,1)$ back in
-the path, which decays again, just with a base the model can push toward 1.
-Hence the standard advice to initialize its bias high. My map's *T = 200*
-against the RNN's *T = 50* are rough marks in my own notes, not
-measurements.
+A reprieve, not a cure. The 1997 original is the cleaner case: its constant
+error carousel has a self-weight of exactly 1.0, making the sage line in
+Figure 5 literal. The forget gate put a learnable $f_t \in (0,1)$ back in the
+path, which decays again — just with a base the model can push toward 1, hence
+the standard advice to initialize its bias high. My map's *T = 200* against
+*T = 50* are rough marks in my notes, not measurements.
 
 One more node from my map, and it matters shortly: **xLSTM** (2024) revisits
 all this with two variants — sLSTM, exponential gating on a scalar memory, and
@@ -439,9 +436,9 @@ embedding of a word in a sequence, not of a word.
 
 Two details my map compresses. The forward and backward LSTMs are
 **independent**, trained separately and concatenated rather than jointly —
-precisely the criticism BERT's authors later levelled. And the output is a
-*learned, task-specific weighted sum of all layers*, which is the paper's real
-headline: layers encode different things, syntax lower, semantics higher.
+precisely BERT's later criticism. And the output is a *learned, task-specific
+weighted sum of all layers*: layers encode different things, syntax lower,
+semantics higher.
 
 This is what my map means by fixing the polysemy problem: Word2Vec and GloVe
 have no way to represent word sense or sentence meaning, and ELMo's "bank"
@@ -449,13 +446,12 @@ differs between the money sentence and the river one because the LSTM read
 the rest of the sentence first.
 
 ELMo was **feature-based**: its output was concatenated onto whatever
-task-specific embedding you already had, as
-$x_t = [\text{task embedding},\ \text{ELMo embedding}]$, and its weights were
-frozen while the downstream model trained. Worth being precise, since this
-gets flattened into "ELMo was never fine-tuned": the paper does fine-tune the
-language model on domain text first, and reports that doing so helps. What
-stays frozen is the biLM during supervised training. Pretraining as a better
-input, not yet as the model itself.
+task-specific embedding you had, and its weights were frozen while the
+downstream model trained. Worth being precise, since this gets flattened into
+"ELMo was never fine-tuned" — the paper *does* fine-tune the language model on
+domain text first and reports that it helps. What stays frozen is the biLM
+during supervised training. Pretraining as a better input, not yet as the
+model itself.
 
 ## 5. When Everything Happened At Once
 
@@ -471,9 +467,9 @@ actually incompatible — it simply took a decade.
 One link my map omits belongs here: attention was not the transformer's
 invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014,
 so a decoder could look back at any source position without squeezing through
-a bottleneck state. The transformer's contribution was deleting the recurrence
-around it — every position against every other in one parallel operation, with
-reach no longer set by how far a gradient survives a matrix product.
+a bottleneck state. The transformer deleted the recurrence around it — every
+position against every other in one parallel operation, with reach no longer
+set by how far a gradient survives a matrix product.
 
 My map writes down the price, and it is worth repeating because the cheerful
 version of this story omits it: **attention costs $O(T^2)$**, and
@@ -513,10 +509,10 @@ the $N$ words it saw. Lower is better. The useful way to read it is as an
 uncertain as if it were choosing uniformly among 40 words at every step.
 
 A model spreading probability uniformly over exactly $k$ words has perplexity
-exactly $k$ — uniform over 1,000 gives 1000.0000. But "exact" belongs to that
-case only: in general perplexity is the size of the *uniform distribution with
-the same entropy*, so a model at 40 might be choosing between three words most
-of the time and five thousand occasionally.
+exactly $k$ — uniform over 1,000 gives 1000.0000. But that exactness belongs
+to the uniform case only: in general perplexity is the size of the *uniform
+distribution with the same entropy*, so a model at 40 might be choosing
+between three words most of the time and five thousand occasionally.
 
 A second distinction the formula hides, which caught me out: the equation
 above is **held-out** perplexity, measured against unseen text, and it is
@@ -574,26 +570,36 @@ further:
     </script>
 </div>
 
-## 7. Recap
+## 7. Chat This Over With Friends
 
-- The chain is one question asked repeatedly: what is a word, numerically? A
-  count, then a direction, then a direction that depends on its neighbours,
-  then one that depends on all of them at once.
-- $n$-grams fail on arithmetic: the space grows as $V^n$ and no corpus covers
-  it. Smoothing handles the gaps; what it cannot supply is similarity.
-- NNLM, not Word2Vec, first learned word vectors. Word2Vec's contribution was
-  making them cheap enough to train on billions of words.
-- The softmax over the vocabulary was the binding cost, and both escapes
-  bought three to four orders of magnitude.
-- RNNs put order back and pay in repeated Jacobian products. The clean
-  $\rho^{\,T}$ story is the linear one: through $\tanh$ both small and large
-  spectral radii vanish, which is the asymmetry Pascanu et al. proved.
-- LSTM replaces the matrix product with $\prod_t f_t$ — still a product, but
-  of numbers the model chooses.
-- ELMo made the vector depend on the sentence. The transformer removed
-  sequential dependence in training, though not in generation, and paid in
-  $O(T^2)$ compute and a growing cache.
-- The ordering is logical, not chronological; the roadmap's dates say so.
+**The one-line version.** The whole history before transformers is a single
+question asked over and over: what is a word, numerically? A count, then a
+direction, then a direction that depends on its neighbours, then one that
+depends on all of them at once. Each answer exists because the previous one
+could not do something specific.
+
+**The detail that lands.** Counting dies of arithmetic. With a vocabulary of
+just 1,659 words there are $10^{16}$ possible five-word sequences, and a
+corpus sees around $10^{-13}$ of them — almost all exactly once. No amount of
+data fixes that, because the space grows faster than any corpus can.
+
+**What most people get wrong.** Two things. Word2Vec did not invent word
+embeddings — Bengio's neural language model learned them a decade earlier, and
+learning them is what that paper is *for*. Word2Vec's contribution was making
+them cheap: strip out the expensive hidden layer and you can train on billions
+of words. And the lineage everyone recites is not chronological. LSTM predates
+Word2Vec by sixteen years, and ELMo came out four months *after* the
+transformer.
+
+**If someone pushes back.** The fair objection is that smoothed n-grams were
+not the failure this framing implies — modified Kneser-Ney five-grams held the
+state of the art for roughly two decades. What they could never supply is any
+notion that two words are similar.
+
+**The one-line mechanism worth remembering.** An RNN sends its gradient back
+by multiplying by the same matrix over and over, so it dies or diverges
+exponentially. An LSTM replaces that with $\prod_t f_t$ — still a product, but
+of numbers the model gets to choose.
 
 ## 8. References
 

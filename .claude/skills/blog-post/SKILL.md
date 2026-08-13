@@ -56,7 +56,7 @@ verdicts to the user — propose, do not decide alone.
 | Paper figures | A paper has a figure that *carries its argument* | The papers are table-only or their figures are all minor experiments. Say so and offer to drop it or substitute an original diagram |
 | Compare and contrast | The topic is genuinely X versus Y | A single-subject topic has nothing to contrast. Offer to drop it, or to replace it with something that fits — "When to use it", "How it fails", "What it costs" |
 | Simulation | Nearly always — usually the most valuable section | Nothing simulable; then propose a worked example by hand, or an ablation, instead |
-| Recap, References | Always | — |
+| Chat This Over With Friends, References | Always | — |
 
 Also **actively look for sections worth adding**, and propose them with a
 reason. Do not limit yourself to this list:
@@ -116,7 +116,7 @@ annotated separately.
 5. Compare and contrast — takeaways, and why it matters for LLMs at large.
 6. A simulation — a visualization, plus a code snippet only if it is genuinely
    short.
-7. Recap.
+7. Chat This Over With Friends.
 8. References.
 
 Sections are numbered in the post; the opener is unnumbered. Renumber after
@@ -151,11 +151,38 @@ Write the headings *after* the sections for this reason, not before.
 
 Keep the register consistent across the post — one drab heading in a literary
 set is more noticeable than a whole drab set — and check that no two headings
-say the same thing. Two sections always stay plain, whatever the register:
-**"Recap"** and, always last, **"References"**.
+say the same thing. Two headings are fixed names rather than literary ones,
+whatever the register: **"Chat This Over With Friends"** and, always last,
+**"References"**.
 
 This register is settled and confirmed. Do not drift back toward plain
 functional labels or toward flat understatement in later posts.
+
+**Chat This Over With Friends.** This replaces what would otherwise be a
+recap, and it is not one. A recap lists what the post covered; this section
+hands the reader what they need to talk about the topic confidently to
+someone else — what to lead with, which detail makes a listener look up, and
+what they can now correct. Write it as things to *say*, in full sentences a
+person could speak, not as findings to enumerate.
+
+The shape that works, in bold lead-ins:
+
+- **The one-line version.** What you open with. One or two sentences, no
+  notation, understandable to someone who has not read the post.
+- **The detail that lands.** The number or fact that makes a listener sit up.
+  Concrete, quotable, and drawn from the post's own verified figures.
+- **What most people get wrong.** The received version of this topic, and why
+  it is off. This is what makes the reader interesting rather than merely
+  informed.
+- **If someone pushes back.** The strongest fair objection, conceded honestly.
+  Being able to say where your own claim is weak is what separates confidence
+  from bluster — and it usually comes straight from the skeptic agent's
+  report.
+- Optionally one more: the part worth stealing, the thing nobody expects, or
+  the one-line mechanism worth remembering.
+
+Do not repeat figure captions here, and do not restate every section. Three
+to five beats, each one sayable out loud.
 
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
@@ -250,7 +277,8 @@ rather than edit:
    range, sequential figure numbering, working TOC anchors, and any claim made
    twice. Check the headings specifically: is every one literary and
    image-bearing, is each image actually true of its section, is the register
-   consistent, and are "Recap" and "References" the last two and plain?
+   consistent, and are "Chat This Over With Friends" and "References" the
+   last two, under their fixed names?
 6. **The skeptic.** One agent whose only job is to argue the post is wrong,
    overclaims, or misleads. Ask it specifically for the strongest objection a
    domain expert would raise.
