@@ -45,57 +45,94 @@ What we want is for the model to *decide*, for each word, which other words to
 draw on, and by how much. And we want it to learn how to make that decision
 from data, rather than being told. That is what attention does.
 
-<div class='loop-anim'>
-    <svg viewBox='0 0 720 230' role='img'
-         aria-label='Two ways to translate a sentence. Above, every source word is squeezed through a single small vector before the output is written from it. Below, each output word draws directly on all of the source words, with the strengths of those connections varying.'>
-        <text class='step' x='8' y='20'>before 2014</text>
-        <g class='bn-src'>
-            <rect class='tok old' x='90' y='30' width='58' height='22' rx='4'/><text class='tk' x='119' y='45'>L'accord</text>
-            <rect class='tok old' x='154' y='30' width='58' height='22' rx='4'/><text class='tk' x='183' y='45'>sur</text>
-            <rect class='tok old' x='218' y='30' width='58' height='22' rx='4'/><text class='tk' x='247' y='45'>la</text>
-            <rect class='tok old' x='282' y='30' width='58' height='22' rx='4'/><text class='tk' x='311' y='45'>zone</text>
-        </g>
-        <line class='bn-wire' x1='119' y1='52' x2='400' y2='68'/>
-        <line class='bn-wire' x1='183' y1='52' x2='400' y2='68'/>
-        <line class='bn-wire' x1='247' y1='52' x2='400' y2='68'/>
-        <line class='bn-wire' x1='311' y1='52' x2='400' y2='68'/>
-        <rect class='bn-box' x='378' y='58' width='44' height='20' rx='4'/>
-        <text class='bn-lbl' x='400' y='72'>one vector</text>
-        <line class='bn-wire' x1='422' y1='68' x2='470' y2='68'/>
-        <rect class='tok new' x='470' y='58' width='62' height='22' rx='4'/><text class='tk nw' x='501' y='73'>The</text>
-        <rect class='tok new' x='538' y='58' width='78' height='22' rx='4'/><text class='tk nw' x='577' y='73'>agreement</text>
-        <text class='note' x='640' y='73'>everything</text>
-        <text class='note' x='640' y='87'>through here</text>
-
-        <text class='step' x='8' y='140'>after 2014</text>
-        <g class='bn-src'>
-            <rect class='tok old' x='90' y='150' width='58' height='22' rx='4'/><text class='tk' x='119' y='165'>L'accord</text>
-            <rect class='tok old' x='154' y='150' width='58' height='22' rx='4'/><text class='tk' x='183' y='165'>sur</text>
-            <rect class='tok old' x='218' y='150' width='58' height='22' rx='4'/><text class='tk' x='247' y='165'>la</text>
-            <rect class='tok old' x='282' y='150' width='58' height='22' rx='4'/><text class='tk' x='311' y='165'>zone</text>
-        </g>
-        <line class='bn-att a1' x1='119' y1='150' x2='501' y2='128'/>
-        <line class='bn-att a2' x1='183' y1='150' x2='501' y2='128'/>
-        <line class='bn-att a3' x1='247' y1='150' x2='501' y2='128'/>
-        <line class='bn-att a4' x1='311' y1='150' x2='501' y2='128'/>
-        <rect class='tok new' x='470' y='106' width='62' height='22' rx='4'/><text class='tk nw' x='501' y='121'>The</text>
-        <line class='bn-att a3' x1='119' y1='172' x2='577' y2='196'/>
-        <line class='bn-att a1' x1='183' y1='172' x2='577' y2='196'/>
-        <line class='bn-att a4' x1='247' y1='172' x2='577' y2='196'/>
-        <line class='bn-att a2' x1='311' y1='172' x2='577' y2='196'/>
-        <rect class='tok new' x='538' y='196' width='78' height='22' rx='4'/><text class='tk nw' x='577' y='211'>agreement</text>
-        <text class='note' x='648' y='160'>each output word</text>
-        <text class='note' x='648' y='174'>picks its own blend</text>
+<div class='sketch'>
+    <svg viewBox='0 0 720 208' role='img' aria-label='Two ways to translate. On the left four source words funnel into a single vector and the output is written from that alone. On the right every output word is joined directly to every source word.'>
+      <text class='sk-lbl' x='12.0' y='22.0' text-anchor='start'>before 2014</text>
+      <path class='sk-s2' d='M21.5,38.7 Q52.9,37.8 84.2,38.7 Q92.2,38.7 92.2,46.7 Q92.9,51.8 92.2,56.8 Q92.2,64.8 84.2,64.8 Q52.9,64.5 21.5,64.8 Q13.5,64.8 13.5,56.8 Q12.6,51.8 13.5,46.7 Q13.5,38.7 21.5,38.7'/>
+      <path class='sk-s2' d='M21.2,38.9 Q53.0,38.8 84.9,38.9 Q92.9,38.9 92.9,46.9 Q92.9,51.5 92.9,56.1 Q92.9,64.1 84.9,64.1 Q53.0,64.3 21.2,64.1 Q13.2,64.1 13.2,56.1 Q13.8,51.5 13.2,46.9 Q13.2,38.9 21.2,38.9'/>
+      <text class='sk-t' x='53.0' y='56.0' text-anchor='middle'>L'accord</text>
+      <path class='sk-thin' d='M92.4,50.9 Q122.4,75.4 152.0,100.5'/>
+      <path class='sk-thin' d='M92.0,50.4 Q122.4,75.2 152.3,100.5'/>
+      <path class='sk-s2' d='M21.4,72.9 Q52.4,72.8 83.3,72.9 Q91.3,72.9 91.3,80.9 Q90.5,85.4 91.3,89.9 Q91.3,97.9 83.3,97.9 Q52.4,97.1 21.4,97.9 Q13.4,97.9 13.4,89.9 Q13.7,85.4 13.4,80.9 Q13.4,72.9 21.4,72.9'/>
+      <path class='sk-s2' d='M22.5,71.3 Q53.3,70.8 84.2,71.3 Q92.2,71.3 92.2,79.3 Q92.4,85.0 92.2,90.8 Q92.2,98.8 84.2,98.8 Q53.3,98.5 22.5,98.8 Q14.5,98.8 14.5,90.8 Q14.1,85.0 14.5,79.3 Q14.5,71.3 22.5,71.3'/>
+      <text class='sk-t' x='53.0' y='90.0' text-anchor='middle'>sur</text>
+      <path class='sk-thin' d='M92.0,85.3 Q121.7,93.3 151.7,99.5'/>
+      <path class='sk-thin' d='M92.2,84.8 Q122.6,91.7 152.7,100.0'/>
+      <path class='sk-s2' d='M21.6,106.8 Q52.9,106.1 84.2,106.8 Q92.2,106.8 92.2,114.8 Q92.0,119.4 92.2,124.0 Q92.2,132.0 84.2,132.0 Q52.9,131.3 21.6,132.0 Q13.6,132.0 13.6,124.0 Q12.6,119.4 13.6,114.8 Q13.6,106.8 21.6,106.8'/>
+      <path class='sk-s2' d='M22.3,106.5 Q52.9,107.0 83.4,106.5 Q91.4,106.5 91.4,114.5 Q92.1,119.3 91.4,124.1 Q91.4,132.1 83.4,132.1 Q52.9,131.8 22.3,132.1 Q14.3,132.1 14.3,124.1 Q14.2,119.3 14.3,114.5 Q14.3,106.5 22.3,106.5'/>
+      <text class='sk-t' x='53.0' y='124.0' text-anchor='middle'>la</text>
+      <path class='sk-thin' d='M92.2,119.5 Q122.3,110.4 152.0,100.0'/>
+      <path class='sk-thin' d='M92.6,118.8 Q122.4,108.7 152.5,99.6'/>
+      <path class='sk-s2' d='M22.8,140.4 Q53.1,140.0 83.5,140.4 Q91.5,140.4 91.5,148.4 Q92.1,152.8 91.5,157.2 Q91.5,165.2 83.5,165.2 Q53.1,165.7 22.8,165.2 Q14.8,165.2 14.8,157.2 Q14.2,152.8 14.8,148.4 Q14.8,140.4 22.8,140.4'/>
+      <path class='sk-s2' d='M22.0,140.5 Q52.9,140.2 83.9,140.5 Q91.9,140.5 91.9,148.5 Q91.3,153.1 91.9,157.7 Q91.9,165.7 83.9,165.7 Q52.9,166.4 22.0,165.7 Q14.0,165.7 14.0,157.7 Q13.4,153.1 14.0,148.5 Q14.0,140.5 22.0,140.5'/>
+      <text class='sk-t' x='53.0' y='158.0' text-anchor='middle'>zone</text>
+      <path class='sk-thin' d='M92.3,153.3 Q122.1,126.5 151.9,99.7'/>
+      <path class='sk-thin' d='M91.8,152.4 Q122.2,126.6 151.8,100.0'/>
+      <path class='sk-mark' d='M160.7,86.5 Q190.1,86.7 219.5,86.5 Q227.5,86.5 227.5,94.5 Q226.7,100.4 227.5,106.3 Q227.5,114.3 219.5,114.3 Q190.1,114.8 160.7,114.3 Q152.7,114.3 152.7,106.3 Q153.3,100.4 152.7,94.5 Q152.7,86.5 160.7,86.5'/>
+      <path class='sk-mark' d='M160.1,86.6 Q189.7,86.5 219.2,86.6 Q227.2,86.6 227.2,94.6 Q228.2,100.5 227.2,106.4 Q227.2,114.4 219.2,114.4 Q189.7,115.3 160.1,114.4 Q152.1,114.4 152.1,106.4 Q151.5,100.5 152.1,94.6 Q152.1,86.6 160.1,86.6'/>
+      <text class='sk-t' x='190.0' y='105.0' text-anchor='middle'>one vector</text>
+      <path class='sk-thin' d='M227.7,100.5 Q245.7,88.5 262.4,74.7'/>
+      <path class='sk-thin' d='M227.3,100.5 Q244.1,87.1 261.6,74.7'/>
+      <path class='sk-thin' d='M262.6,74.5 Q261.2,77.6 259.6,80.6'/>
+      <path class='sk-thin' d='M261.6,73.3 Q257.9,73.5 254.4,74.3'/>
+      <path class='sk-thin' d='M227.4,99.8 Q245.2,112.7 262.0,126.7'/>
+      <path class='sk-thin' d='M228.1,100.0 Q245.6,112.2 261.9,126.1'/>
+      <path class='sk-thin' d='M262.2,125.6 Q258.6,125.0 255.0,124.8'/>
+      <path class='sk-thin' d='M262.3,125.9 Q260.3,123.2 258.9,120.1'/>
+      <path class='sk-s3' d='M270.2,59.4 Q304.4,59.7 338.6,59.4 Q346.6,59.4 346.6,67.4 Q346.5,73.6 346.6,79.8 Q346.6,87.8 338.6,87.8 Q304.4,87.3 270.2,87.8 Q262.2,87.8 262.2,79.8 Q261.8,73.6 262.2,67.4 Q262.2,59.4 270.2,59.4'/>
+      <path class='sk-s3' d='M270.3,59.6 Q303.7,59.8 337.1,59.6 Q345.1,59.6 345.1,67.6 Q345.3,74.1 345.1,80.5 Q345.1,88.5 337.1,88.5 Q303.7,89.0 270.3,88.5 Q262.3,88.5 262.3,80.5 Q262.4,74.1 262.3,67.6 Q262.3,59.6 270.3,59.6'/>
+      <text class='sk-t' x='304.0' y='79.0' text-anchor='middle'>The</text>
+      <path class='sk-s3' d='M269.6,111.5 Q304.2,110.5 338.8,111.5 Q346.8,111.5 346.8,119.5 Q346.5,126.0 346.8,132.5 Q346.8,140.5 338.8,140.5 Q304.2,140.6 269.6,140.5 Q261.6,140.5 261.6,132.5 Q260.7,126.0 261.6,119.5 Q261.6,111.5 269.6,111.5'/>
+      <path class='sk-s3' d='M270.0,112.7 Q304.0,111.8 337.9,112.7 Q345.9,112.7 345.9,120.7 Q346.8,126.7 345.9,132.8 Q345.9,140.8 337.9,140.8 Q304.0,140.2 270.0,140.8 Q262.0,140.8 262.0,132.8 Q261.9,126.7 262.0,120.7 Q262.0,112.7 270.0,112.7'/>
+      <text class='sk-t' x='304.0' y='131.0' text-anchor='middle'>agreement</text>
+      <text class='sk-note' x='180.0' y='188.0' text-anchor='middle'>the whole sentence, through one gap</text>
+      <path class='sk-faint' d='M372.6,25.6 Q372.5,111.1 371.5,196.6'/>
+      <text class='sk-lbl' x='396.0' y='22.0' text-anchor='start'>after 2014</text>
+      <path class='sk-s2' d='M405.7,37.2 Q436.9,37.5 468.1,37.2 Q476.1,37.2 476.1,45.2 Q476.9,50.3 476.1,55.4 Q476.1,63.4 468.1,63.4 Q436.9,63.3 405.7,63.4 Q397.7,63.4 397.7,55.4 Q396.8,50.3 397.7,45.2 Q397.7,37.2 405.7,37.2'/>
+      <path class='sk-s2' d='M406.7,37.9 Q436.9,38.4 467.1,37.9 Q475.1,37.9 475.1,45.9 Q474.7,51.0 475.1,56.0 Q475.1,64.0 467.1,64.0 Q436.9,63.8 406.7,64.0 Q398.7,64.0 398.7,56.0 Q398.8,51.0 398.7,45.9 Q398.7,37.9 406.7,37.9'/>
+      <text class='sk-t' x='437.0' y='56.0' text-anchor='middle'>L'accord</text>
+      <path class='sk-s2' d='M406.7,72.9 Q437.4,71.9 468.2,72.9 Q476.2,72.9 476.2,80.9 Q475.6,85.1 476.2,89.3 Q476.2,97.3 468.2,97.3 Q437.4,98.2 406.7,97.3 Q398.7,97.3 398.7,89.3 Q398.8,85.1 398.7,80.9 Q398.7,72.9 406.7,72.9'/>
+      <path class='sk-s2' d='M406.6,72.3 Q437.5,72.7 468.4,72.3 Q476.4,72.3 476.4,80.3 Q475.9,84.9 476.4,89.4 Q476.4,97.4 468.4,97.4 Q437.5,96.5 406.6,97.4 Q398.6,97.4 398.6,89.4 Q399.4,84.9 398.6,80.3 Q398.6,72.3 406.6,72.3'/>
+      <text class='sk-t' x='437.0' y='90.0' text-anchor='middle'>sur</text>
+      <path class='sk-s2' d='M406.1,105.8 Q437.4,105.9 468.7,105.8 Q476.7,105.8 476.7,113.8 Q475.7,119.2 476.7,124.6 Q476.7,132.6 468.7,132.6 Q437.4,132.4 406.1,132.6 Q398.1,132.6 398.1,124.6 Q398.8,119.2 398.1,113.8 Q398.1,105.8 406.1,105.8'/>
+      <path class='sk-s2' d='M406.7,106.5 Q437.2,105.5 467.6,106.5 Q475.6,106.5 475.6,114.5 Q476.6,119.7 475.6,124.9 Q475.6,132.9 467.6,132.9 Q437.2,132.3 406.7,132.9 Q398.7,132.9 398.7,124.9 Q398.8,119.7 398.7,114.5 Q398.7,106.5 406.7,106.5'/>
+      <text class='sk-t' x='437.0' y='124.0' text-anchor='middle'>la</text>
+      <path class='sk-s2' d='M406.7,139.8 Q437.5,140.5 468.3,139.8 Q476.3,139.8 476.3,147.8 Q476.2,153.1 476.3,158.4 Q476.3,166.4 468.3,166.4 Q437.5,165.9 406.7,166.4 Q398.7,166.4 398.7,158.4 Q398.2,153.1 398.7,147.8 Q398.7,139.8 406.7,139.8'/>
+      <path class='sk-s2' d='M405.8,139.8 Q437.1,139.6 468.4,139.8 Q476.4,139.8 476.4,147.8 Q475.6,153.2 476.4,158.6 Q476.4,166.6 468.4,166.6 Q437.1,167.1 405.8,166.6 Q397.8,166.6 397.8,158.6 Q397.6,153.2 397.8,147.8 Q397.8,139.8 405.8,139.8'/>
+      <text class='sk-t' x='437.0' y='158.0' text-anchor='middle'>zone</text>
+      <path class='sk-att' d='M476.2,51.4 Q535.8,63.6 595.5,74.5'/>
+      <path class='sk-att' d='M476.0,50.9 Q535.9,61.7 595.8,73.4'/>
+      <path class='sk-att' d='M475.9,50.6 Q535.7,88.7 596.3,125.4'/>
+      <path class='sk-att' d='M476.7,51.3 Q535.5,89.5 595.3,126.2'/>
+      <path class='sk-att' d='M475.5,85.4 Q535.6,78.8 595.8,73.8'/>
+      <path class='sk-att' d='M476.4,84.8 Q535.9,79.1 595.3,73.9'/>
+      <path class='sk-att' d='M476.0,85.5 Q536.2,104.9 595.7,126.3'/>
+      <path class='sk-att' d='M476.1,85.0 Q536.3,104.7 596.1,125.6'/>
+      <path class='sk-att' d='M475.9,119.6 Q536.2,96.5 596.5,73.7'/>
+      <path class='sk-att' d='M475.6,118.6 Q536.2,97.4 596.3,74.5'/>
+      <path class='sk-att' d='M476.4,119.7 Q535.9,123.5 595.5,126.3'/>
+      <path class='sk-att' d='M475.8,118.6 Q536.1,121.8 596.3,126.6'/>
+      <path class='sk-att' d='M476.0,152.6 Q535.7,112.6 595.9,73.4'/>
+      <path class='sk-att' d='M475.7,153.6 Q535.9,114.2 595.3,73.7'/>
+      <path class='sk-att' d='M476.0,152.8 Q535.9,138.9 596.1,126.4'/>
+      <path class='sk-att' d='M476.2,153.3 Q535.9,138.5 596.0,125.3'/>
+      <path class='sk-s3' d='M604.8,60.4 Q650.1,60.0 695.3,60.4 Q703.3,60.4 703.3,68.4 Q704.0,74.1 703.3,79.9 Q703.3,87.9 695.3,87.9 Q650.1,88.5 604.8,87.9 Q596.8,87.9 596.8,79.9 Q595.8,74.1 596.8,68.4 Q596.8,60.4 604.8,60.4'/>
+      <path class='sk-s3' d='M603.6,59.6 Q650.2,59.2 696.8,59.6 Q704.8,59.6 704.8,67.6 Q704.5,73.6 704.8,79.6 Q704.8,87.6 696.8,87.6 Q650.2,86.7 603.6,87.6 Q595.6,87.6 595.6,79.6 Q595.8,73.6 595.6,67.6 Q595.6,59.6 603.6,59.6'/>
+      <text class='sk-t' x='650.0' y='79.0' text-anchor='middle'>The</text>
+      <path class='sk-s3' d='M604.2,111.9 Q650.5,111.3 696.9,111.9 Q704.9,111.9 704.9,119.9 Q704.7,125.9 704.9,131.8 Q704.9,139.8 696.9,139.8 Q650.5,138.9 604.2,139.8 Q596.2,139.8 596.2,131.8 Q597.0,125.9 596.2,119.9 Q596.2,111.9 604.2,111.9'/>
+      <path class='sk-s3' d='M604.7,112.0 Q650.2,112.9 695.7,112.0 Q703.7,112.0 703.7,120.0 Q704.4,125.7 703.7,131.4 Q703.7,139.4 695.7,139.4 Q650.2,138.9 604.7,139.4 Q596.7,139.4 596.7,131.4 Q596.6,125.7 596.7,120.0 Q596.7,112.0 604.7,112.0'/>
+      <text class='sk-t' x='650.0' y='131.0' text-anchor='middle'>agreement</text>
+      <text class='sk-note' x='556.0' y='188.0' text-anchor='middle'>each word picks its own blend</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        The change that started all of this. Above, a translator squeezes the
-        whole source sentence into one fixed vector and then writes the output
-        from it, which is why long sentences went badly. Below, each output
-        word reaches back to all of the source words directly and takes its
-        own weighted blend of them — the lines pulse because those weights are
-        recomputed for every word produced. I have drawn only four source
-        words; imagine forty.
+        The change that started all of this. On the left, a translator
+        squeezes the whole source sentence through one fixed vector and writes
+        its output from that alone, which is why long sentences went so badly.
+        On the right, each output word reaches back to every source word and
+        takes its own weighted blend of them. I have drawn only four source
+        words here; imagine forty, and you can feel the left-hand design
+        straining.
     </div>
 </div>
 
@@ -105,62 +142,78 @@ The idea arrived in 2014, and not as a grand theory. It was a fix for a
 specific, visible failure.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 180' role='img' aria-label='Roadmap of attention: a fix for a bottleneck in 2014, a simpler score in 2015, the recurrence dropped in 2017, and the transformer everywhere after.'>
-      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
-      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
-      <text class='why' x='189.5' y='27'>the scoring network was extra machinery</text>
-      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
-      <text class='why' x='380.0' y='27'>attention was fine; the recurrence was not</text>
-      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
-      <text class='why' x='570.5' y='27'>quadratic cost, and a cache to feed</text>
+    <svg viewBox='0 0 760 192' role='img' aria-label='Roadmap of attention: a fix for a bottleneck in 2014, a simpler score in 2015, the recurrence dropped in 2017, and the transformer everywhere after.'>
+      <path class='spine' d='M94.2,51.8 Q380.2,51.3 666.1,51.4'/>
+      <path class='head' d='M178.3,51.7 Q189.3,51.5 200.3,51.7'/>
+      <path class='head' d='M178.2,52.4 Q189.6,51.6 201.0,51.7'/>
+      <path class='head' d='M200.9,51.6 Q198.5,53.5 195.6,54.7'/>
+      <path class='head' d='M199.8,51.6 Q197.6,50.2 195.2,49.4'/>
+      <text class='why' x='189.5' y='27.0'>the scoring network was extra</text>
+      <text class='why' x='189.5' y='39.0'>machinery</text>
+      <path class='head' d='M368.5,52.4 Q379.4,52.6 390.4,52.0'/>
+      <path class='head' d='M369.3,52.2 Q379.9,51.7 390.5,51.4'/>
+      <path class='head' d='M391.7,51.9 Q389.1,53.8 386.4,55.7'/>
+      <path class='head' d='M391.1,51.5 Q388.4,49.9 385.8,48.3'/>
+      <text class='why' x='380.0' y='27.0'>attention was fine; the</text>
+      <text class='why' x='380.0' y='39.0'>recurrence was not</text>
+      <path class='head' d='M559.7,51.6 Q570.9,52.4 582.2,52.3'/>
+      <path class='head' d='M559.2,52.4 Q570.5,52.6 581.8,52.6'/>
+      <path class='head' d='M581.6,51.6 Q578.6,53.4 575.8,55.3'/>
+      <path class='head' d='M581.2,51.6 Q579.2,49.9 576.9,48.5'/>
+      <text class='why' x='570.5' y='27.0'>quadratic cost, and a cache to</text>
+      <text class='why' x='570.5' y='39.0'>feed</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='176.5' height='140.0'/>
-        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='176.5' height='116.0' rx='7'/>
-        <text class='yr' x='94.2' y='65.0'>2014</text>
-        <text class='stage' x='94.2' y='79.0'>a fix for a bottleneck</text>
-        <text class='body' x='94.2' y='97.0'>Bahdanau et al. let a</text>
-        <text class='body' x='94.2' y='111.5'>translator look back at</text>
-        <text class='body' x='94.2' y='126.0'>every source word instead</text>
-        <text class='body' x='94.2' y='140.5'>of squeezing the sentence</text>
-        <text class='body' x='94.2' y='155.0'>into one vector.</text>
+        <rect class='hit' x='6.0' y='42.0' width='176.5' height='140.0'/>
+        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M13.2,67.9 Q94.3,67.7 175.3,67.9 Q182.3,67.9 182.3,74.9 Q181.7,125.6 182.3,176.4 Q182.3,183.4 175.3,183.4 Q94.3,182.8 13.2,183.4 Q6.2,183.4 6.2,176.4 Q6.8,125.6 6.2,74.9 Q6.2,67.9 13.2,67.9'/>
+        <path class='box' d='M13.1,68.6 Q94.2,68.3 175.3,68.6 Q182.3,68.6 182.3,75.6 Q181.9,126.5 182.3,177.5 Q182.3,184.5 175.3,184.5 Q94.2,185.4 13.1,184.5 Q6.1,184.5 6.1,177.5 Q6.2,126.5 6.1,75.6 Q6.1,68.6 13.1,68.6'/>
+        <text class='yr' x='94.2' y='77.0'>2014</text>
+        <text class='stage' x='94.2' y='91.0'>a fix for a bottleneck</text>
+        <text class='body' x='94.2' y='109.0'>Bahdanau et al. let a</text>
+        <text class='body' x='94.2' y='123.5'>translator look back at</text>
+        <text class='body' x='94.2' y='138.0'>every source word instead</text>
+        <text class='body' x='94.2' y='152.5'>of squeezing the sentence</text>
+        <text class='body' x='94.2' y='167.0'>into one vector.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30' width='176.5' height='140.0'/>
-        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-        <rect class='box' x='196.5' y='56' width='176.5' height='116.0' rx='7'/>
-        <text class='yr' x='284.8' y='65.0'>2015</text>
-        <text class='stage' x='284.8' y='79.0'>the score gets simpler</text>
-        <text class='body' x='284.8' y='97.0'>Luong et al. replace the</text>
-        <text class='body' x='284.8' y='111.5'>small alignment network</text>
-        <text class='body' x='284.8' y='126.0'>with a plain dot product.</text>
-        <text class='body' x='284.8' y='140.5'>Cheaper, and the form still</text>
-        <text class='body' x='284.8' y='155.0'>used today.</text>
+        <rect class='hit' x='196.5' y='42.0' width='176.5' height='140.0'/>
+        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M202.8,68.6 Q284.5,68.0 366.2,68.6 Q373.2,68.6 373.2,75.6 Q374.1,126.0 373.2,176.4 Q373.2,183.4 366.2,183.4 Q284.5,182.9 202.8,183.4 Q195.8,183.4 195.8,176.4 Q194.9,126.0 195.8,75.6 Q195.8,68.6 202.8,68.6'/>
+        <path class='box' d='M203.9,68.8 Q284.7,69.2 365.5,68.8 Q372.5,68.8 372.5,75.8 Q373.0,126.6 372.5,177.4 Q372.5,184.4 365.5,184.4 Q284.7,184.4 203.9,184.4 Q196.9,184.4 196.9,177.4 Q196.1,126.6 196.9,75.8 Q196.9,68.8 203.9,68.8'/>
+        <text class='yr' x='284.8' y='77.0'>2015</text>
+        <text class='stage' x='284.8' y='91.0'>the score gets simpler</text>
+        <text class='body' x='284.8' y='109.0'>Luong et al. replace the</text>
+        <text class='body' x='284.8' y='123.5'>small alignment network</text>
+        <text class='body' x='284.8' y='138.0'>with a plain dot product.</text>
+        <text class='body' x='284.8' y='152.5'>Cheaper, and the form still</text>
+        <text class='body' x='284.8' y='167.0'>used today.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30' width='176.5' height='140.0'/>
-        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-        <rect class='box' x='387.0' y='56' width='176.5' height='116.0' rx='7'/>
-        <text class='yr' x='475.2' y='65.0'>2017</text>
-        <text class='stage' x='475.2' y='79.0'>drop the recurrence</text>
-        <text class='body' x='475.2' y='97.0'>Vaswani et al. keep only</text>
-        <text class='body' x='475.2' y='111.5'>attention, pointed at the</text>
-        <text class='body' x='475.2' y='126.0'>sequence itself. Multiple</text>
-        <text class='body' x='475.2' y='140.5'>heads, and the division by</text>
-        <text class='body' x='475.2' y='155.0'>the square root of the</text>
-        <text class='body' x='475.2' y='169.5'>width.</text>
+        <rect class='hit' x='387.0' y='42.0' width='176.5' height='140.0'/>
+        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M394.8,67.3 Q475.7,66.9 556.6,67.3 Q563.6,67.3 563.6,74.3 Q563.2,125.6 563.6,176.8 Q563.6,183.8 556.6,183.8 Q475.7,184.5 394.8,183.8 Q387.8,183.8 387.8,176.8 Q387.3,125.6 387.8,74.3 Q387.8,67.3 394.8,67.3'/>
+        <path class='box' d='M393.5,67.4 Q474.8,68.0 556.1,67.4 Q563.1,67.4 563.1,74.4 Q562.3,125.6 563.1,176.7 Q563.1,183.7 556.1,183.7 Q474.8,182.7 393.5,183.7 Q386.5,183.7 386.5,176.7 Q385.9,125.6 386.5,74.4 Q386.5,67.4 393.5,67.4'/>
+        <text class='yr' x='475.2' y='77.0'>2017</text>
+        <text class='stage' x='475.2' y='91.0'>drop the recurrence</text>
+        <text class='body' x='475.2' y='109.0'>Vaswani et al. keep only</text>
+        <text class='body' x='475.2' y='123.5'>attention, pointed at the</text>
+        <text class='body' x='475.2' y='138.0'>sequence itself. Multiple</text>
+        <text class='body' x='475.2' y='152.5'>heads, and the division by</text>
+        <text class='body' x='475.2' y='167.0'>the square root of the</text>
+        <text class='body' x='475.2' y='181.5'>width.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30' width='176.5' height='140.0'/>
-        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-        <rect class='box' x='577.5' y='56' width='176.5' height='116.0' rx='7'/>
-        <text class='yr' x='665.8' y='65.0'>2018-</text>
-        <text class='stage' x='665.8' y='79.0'>everything is a transformer</text>
-        <text class='body' x='665.8' y='97.0'>BERT and GPT build on it.</text>
-        <text class='body' x='665.8' y='111.5'>By the 2020s, hybrids swap</text>
-        <text class='body' x='665.8' y='126.0'>some attention layers out</text>
-        <text class='body' x='665.8' y='140.5'>again to shrink what it</text>
-        <text class='body' x='665.8' y='155.0'>must store.</text>
+        <rect class='hit' x='577.5' y='42.0' width='176.5' height='140.0'/>
+        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M583.8,68.4 Q665.8,67.4 747.7,68.4 Q754.7,68.4 754.7,75.4 Q754.4,126.3 754.7,177.3 Q754.7,184.3 747.7,184.3 Q665.8,184.9 583.8,184.3 Q576.8,184.3 576.8,177.3 Q576.3,126.3 576.8,75.4 Q576.8,68.4 583.8,68.4'/>
+        <path class='box' d='M585.3,67.8 Q666.2,68.1 747.1,67.8 Q754.1,67.8 754.1,74.8 Q753.6,125.5 754.1,176.2 Q754.1,183.2 747.1,183.2 Q666.2,183.8 585.3,183.2 Q578.3,183.2 578.3,176.2 Q578.9,125.5 578.3,74.8 Q578.3,67.8 585.3,67.8'/>
+        <text class='yr' x='665.8' y='77.0'>2018-</text>
+        <text class='stage' x='665.8' y='91.0'>everything is a transformer</text>
+        <text class='body' x='665.8' y='109.0'>BERT and GPT build on it.</text>
+        <text class='body' x='665.8' y='123.5'>By the 2020s, hybrids swap</text>
+        <text class='body' x='665.8' y='138.0'>some attention layers out</text>
+        <text class='body' x='665.8' y='152.5'>again to shrink what it</text>
+        <text class='body' x='665.8' y='167.0'>must store.</text>
       </g>
     </svg>
 </div>

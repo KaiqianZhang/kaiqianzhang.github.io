@@ -119,6 +119,44 @@ re-explained. If the maths section restates the mechanism in symbols and adds
 nothing, fold its one useful formula into this section and drop it — that is
 the section budget the teaching section pays for itself with.
 
+## Drawn figures are drawn by hand
+
+Explanatory diagrams on this blog are **sketched, not plotted**. Boxes have
+wobbly outlines drawn twice, arrows are slightly bowed, and the labels are in a
+handwriting face. The reference is the Excalidraw look, in this site's palette
+rather than Excalidraw's black.
+
+The reason is not decoration. A diagram that visibly came from somebody's hand
+reads as an explanation being given to you, which is the register the prose is
+already in, and it signals honestly that the boxes are *a story about the
+mechanism* rather than a measurement of one.
+
+So the rule splits by what the figure is:
+
+- **A schematic — something you drew to show how a thing works** — is
+  hand-drawn. Generate it with `figures/sketch.py`, which provides `rough_rect`,
+  `rough_line`, `rough_arrow`, `box` and `text` over a seeded `Pen`, so the
+  wobble is deterministic and regenerating a figure leaves an empty diff. Add
+  the figure as a function there and wrap the output in
+  `<div class='sketch'>`.
+- **The history roadmap** is hand-drawn too — `figures/roadmap.py` draws its
+  boxes and arrows with the same primitives.
+- **A measured figure stays crisp.** Anything plotting real numbers —
+  matplotlib output, an interactive that computes as you drag it, a reproduced
+  paper figure — keeps clean lines and the normal type. Sketching a
+  measurement would be a lie about its provenance.
+
+Two mechanical traps, both of which have bitten:
+
+1. **Never leave a blank line inside a raw HTML block.** The Markdown parser
+   treats it as a paragraph break, closes the block, and wraps the rest of your
+   SVG in a `<p>`, which destroys the figure. Symptom: a figure that renders as
+   a black or broken mess.
+2. **Do not set `text-anchor` in CSS.** CSS beats the per-element attribute, so
+   a class carrying `text-anchor: middle` silently re-centres every label
+   placed with `anchor='start'` and pushes it off the edge of the viewBox. Set
+   anchoring on the element.
+
 ## The figure rule
 
 This is the rule most easily got wrong, and the one that matters most.
@@ -430,6 +468,13 @@ place — each one has to show something a static image cannot.
   and it counts as one of the five.
 - Vanilla JS and inline SVG only, no libraries. Honour
   `prefers-reduced-motion`: self-running animation stops, interaction stays.
+- **Check every control can actually be grabbed.** Styling a `range` input's
+  *height* to make the track look thin makes the whole control that tall, and
+  a three-pixel slider cannot be dragged with a mouse. Style
+  `::-webkit-slider-runnable-track` and `::-moz-range-track` for the thin look
+  and leave the input itself around 22px. After building any widget, check in
+  the browser that `document.elementFromPoint` at each slider's centre returns
+  the slider.
 - Every number an interactive prints must be computed, not tabulated. The same
   rigour rule applies — an interactive that lies is worse than a static image
   that does not.

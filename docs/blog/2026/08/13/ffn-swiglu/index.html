@@ -123,59 +123,74 @@
 <h2 id='1-when-the-gate-arrived-before-the-door-it-would-open'>1. When the Gate Arrived Before the Door It Would Open</h2>
 <p>The pieces were lying around before anyone assembled them, and not in the order the story implies.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of the feed-forward layer: a gate arrives in 2016, the Transformer ships a plain two-matrix FFN in 2017, Shazeer puts the gate inside it in 2020, and LLaMA makes that the default.'>
-      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
-      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
-      <text class='why' x='189.5' y='27'>built for convolutions, not attention</text>
-      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
-      <text class='why' x='380.0' y='27'>the activation changed; the shape never did</text>
-      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
-      <text class='why' x='570.5' y='27'>it wins, unexplained</text>
+    <svg viewBox='0 0 760 178' role='img' aria-label='Roadmap of the feed-forward layer: a gate arrives in 2016, the Transformer ships a plain two-matrix FFN in 2017, Shazeer puts the gate inside it in 2020, and LLaMA makes that the default.'>
+      <path class='spine' d='M94.2,52.5 Q380.0,51.9 665.7,52.1'/>
+      <path class='head' d='M178.5,51.4 Q189.2,51.5 199.9,51.5'/>
+      <path class='head' d='M179.1,51.9 Q190.1,52.4 201.1,51.9'/>
+      <path class='head' d='M201.2,51.6 Q198.0,53.4 195.1,55.6'/>
+      <path class='head' d='M201.1,51.5 Q198.2,50.4 195.4,49.1'/>
+      <text class='why' x='189.5' y='27.0'>built for convolutions, not</text>
+      <text class='why' x='189.5' y='39.0'>attention</text>
+      <path class='head' d='M368.8,51.6 Q380.2,51.9 391.6,51.4'/>
+      <path class='head' d='M369.2,52.3 Q380.2,52.7 391.3,52.4'/>
+      <path class='head' d='M391.7,52.5 Q389.3,54.4 386.5,55.7'/>
+      <path class='head' d='M390.5,52.5 Q387.8,51.3 385.6,49.3'/>
+      <text class='why' x='380.0' y='27.0'>the activation changed; the</text>
+      <text class='why' x='380.0' y='39.0'>shape never did</text>
+      <path class='head' d='M559.7,52.3 Q570.9,52.3 582.1,51.8'/>
+      <path class='head' d='M559.9,51.7 Q570.9,51.8 581.8,51.9'/>
+      <path class='head' d='M581.6,52.5 Q578.6,53.6 575.8,55.2'/>
+      <path class='head' d='M581.6,51.4 Q579.1,50.1 576.9,48.6'/>
+      <text class='why' x='570.5' y='39.0'>it wins, unexplained</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='94.2' y='65.0'>2016</text>
-        <text class='stage' x='94.2' y='79.0'>a gate appears</text>
-        <text class='body' x='94.2' y='97.0'>Dauphin et al. multiply two</text>
-        <text class='body' x='94.2' y='111.5'>linear projections, one</text>
-        <text class='body' x='94.2' y='126.0'>squashed. It predates the</text>
-        <text class='body' x='94.2' y='140.5'>Transformer it ends up</text>
-        <text class='body' x='94.2' y='155.0'>inside.</text>
+        <rect class='hit' x='6.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M12.6,68.5 Q93.9,68.6 175.2,68.5 Q182.2,68.5 182.2,75.5 Q182.3,118.9 182.2,162.2 Q182.2,169.2 175.2,169.2 Q93.9,168.8 12.6,169.2 Q5.6,169.2 5.6,162.2 Q5.7,118.9 5.6,75.5 Q5.6,68.5 12.6,68.5'/>
+        <path class='box' d='M13.0,67.4 Q94.2,67.8 175.5,67.4 Q182.5,67.4 182.5,74.4 Q182.6,118.8 182.5,163.2 Q182.5,170.2 175.5,170.2 Q94.2,169.8 13.0,170.2 Q6.0,170.2 6.0,163.2 Q5.5,118.8 6.0,74.4 Q6.0,67.4 13.0,67.4'/>
+        <text class='yr' x='94.2' y='77.0'>2016</text>
+        <text class='stage' x='94.2' y='91.0'>a gate appears</text>
+        <text class='body' x='94.2' y='109.0'>Dauphin et al. multiply two</text>
+        <text class='body' x='94.2' y='123.5'>linear projections, one</text>
+        <text class='body' x='94.2' y='138.0'>squashed. It predates the</text>
+        <text class='body' x='94.2' y='152.5'>Transformer it ends up</text>
+        <text class='body' x='94.2' y='167.0'>inside.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-        <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='284.8' y='65.0'>2017</text>
-        <text class='stage' x='284.8' y='79.0'>the plain FFN</text>
-        <text class='body' x='284.8' y='97.0'>Two matrices, widened</text>
-        <text class='body' x='284.8' y='111.5'>fourfold, with a pointwise</text>
-        <text class='body' x='284.8' y='126.0'>nonlinearity between them.</text>
-        <text class='body' x='284.8' y='140.5'>BERT and GPT swap in GELU;</text>
-        <text class='body' x='284.8' y='155.0'>the shape stands.</text>
+        <rect class='hit' x='196.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M202.9,68.5 Q284.1,69.2 365.3,68.5 Q372.3,68.5 372.3,75.5 Q372.6,118.9 372.3,162.3 Q372.3,169.3 365.3,169.3 Q284.1,170.2 202.9,169.3 Q195.9,169.3 195.9,162.3 Q196.4,118.9 195.9,75.5 Q195.9,68.5 202.9,68.5'/>
+        <path class='box' d='M202.7,67.6 Q284.8,68.1 366.8,67.6 Q373.8,67.6 373.8,74.6 Q373.5,118.6 373.8,162.6 Q373.8,169.6 366.8,169.6 Q284.8,169.5 202.7,169.6 Q195.7,169.6 195.7,162.6 Q195.1,118.6 195.7,74.6 Q195.7,67.6 202.7,67.6'/>
+        <text class='yr' x='284.8' y='77.0'>2017</text>
+        <text class='stage' x='284.8' y='91.0'>the plain FFN</text>
+        <text class='body' x='284.8' y='109.0'>Two matrices, widened</text>
+        <text class='body' x='284.8' y='123.5'>fourfold, with a pointwise</text>
+        <text class='body' x='284.8' y='138.0'>nonlinearity between them.</text>
+        <text class='body' x='284.8' y='152.5'>BERT and GPT swap in GELU;</text>
+        <text class='body' x='284.8' y='167.0'>the shape stands.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-        <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='475.2' y='65.0'>2020</text>
-        <text class='stage' x='475.2' y='79.0'>Shazeer combines them</text>
-        <text class='body' x='475.2' y='97.0'>A GLU inside the FFN. Three</text>
-        <text class='body' x='475.2' y='111.5'>matrices, so the hidden</text>
-        <text class='body' x='475.2' y='126.0'>width shrinks to two thirds</text>
-        <text class='body' x='475.2' y='140.5'>to pay for it.</text>
+        <rect class='hit' x='387.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M394.6,67.4 Q475.5,67.3 556.5,67.4 Q563.5,67.4 563.5,74.4 Q563.1,118.1 563.5,161.7 Q563.5,168.7 556.5,168.7 Q475.5,169.6 394.6,168.7 Q387.6,168.7 387.6,161.7 Q386.7,118.1 387.6,74.4 Q387.6,67.4 394.6,67.4'/>
+        <path class='box' d='M393.5,68.5 Q475.3,68.0 557.1,68.5 Q564.1,68.5 564.1,75.5 Q563.5,118.6 564.1,161.7 Q564.1,168.7 557.1,168.7 Q475.3,168.4 393.5,168.7 Q386.5,168.7 386.5,161.7 Q385.7,118.6 386.5,75.5 Q386.5,68.5 393.5,68.5'/>
+        <text class='yr' x='475.2' y='77.0'>2020</text>
+        <text class='stage' x='475.2' y='91.0'>Shazeer combines them</text>
+        <text class='body' x='475.2' y='109.0'>A GLU inside the FFN. Three</text>
+        <text class='body' x='475.2' y='123.5'>matrices, so the hidden</text>
+        <text class='body' x='475.2' y='138.0'>width shrinks to two thirds</text>
+        <text class='body' x='475.2' y='152.5'>to pay for it.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-        <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='665.8' y='65.0'>2023-</text>
-        <text class='stage' x='665.8' y='79.0'>LLaMA makes it default</text>
-        <text class='body' x='665.8' y='97.0'>SwiGLU in LLaMA, Mistral,</text>
-        <text class='body' x='665.8' y='111.5'>Qwen, DeepSeek. Gemma keeps</text>
-        <text class='body' x='665.8' y='126.0'>the GELU-gated variant</text>
-        <text class='body' x='665.8' y='140.5'>instead.</text>
+        <rect class='hit' x='577.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M585.0,68.8 Q666.3,69.5 747.5,68.8 Q754.5,68.8 754.5,75.8 Q753.9,118.8 754.5,161.8 Q754.5,168.8 747.5,168.8 Q666.3,168.0 585.0,168.8 Q578.0,168.8 578.0,161.8 Q577.4,118.8 578.0,75.8 Q578.0,68.8 585.0,68.8'/>
+        <path class='box' d='M583.9,67.2 Q665.6,66.3 747.2,67.2 Q754.2,67.2 754.2,74.2 Q754.8,118.5 754.2,162.8 Q754.2,169.8 747.2,169.8 Q665.6,170.3 583.9,169.8 Q576.9,169.8 576.9,162.8 Q576.0,118.5 576.9,74.2 Q576.9,67.2 583.9,67.2'/>
+        <text class='yr' x='665.8' y='77.0'>2023-</text>
+        <text class='stage' x='665.8' y='91.0'>LLaMA makes it default</text>
+        <text class='body' x='665.8' y='109.0'>SwiGLU in LLaMA, Mistral,</text>
+        <text class='body' x='665.8' y='123.5'>Qwen, DeepSeek. Gemma keeps</text>
+        <text class='body' x='665.8' y='138.0'>the GELU-gated variant</text>
+        <text class='body' x='665.8' y='152.5'>instead.</text>
       </g>
     </svg>
 </div>

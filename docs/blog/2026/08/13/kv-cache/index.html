@@ -81,49 +81,96 @@
 <p>I should be more careful about the word "word". Language models do not work in words but in <strong>tokens</strong>, which are chunks of text somewhere between a character and a word. The word "cache" might be one token; an unusual word like "Kaiqian" might be broken into three or four. Nothing in this post depends on the details of how that chunking is done, so if you prefer to imagine words wherever I write "tokens", you will not go wrong.</p>
 <p>So if the model only ever predicts one token, how does it produce a whole paragraph?</p>
 <p>It calls the function again. Let me be concrete about what that means, since this is the mechanism everything else rests on. The model takes the token it just produced, glues it onto the end of the text it was given, and feeds the whole thing back in as if it were a fresh question. Then it does it again. And again. A model writing a hundred tokens of prose is a function that has been called a hundred times, each time on a sequence one token longer than the last.</p>
-<div class='loop-anim'>
-    <svg viewBox='0 0 720 220' role='img'
-         aria-label='Four rows showing a sequence growing by one token per call. The first row is the prompt, the cat sat. Each row below repeats every earlier token and adds one newly generated token at the end, so the fourth row reads the cat sat on the mat.'>
-        <g class='row r1'>
-            <text class='step' x='8' y='40'>call 1</text>
-            <rect class='tok old' x='68' y='24' width='52' height='24' rx='4'/><text class='tk' x='94' y='41'>the</text>
-            <rect class='tok old' x='126' y='24' width='52' height='24' rx='4'/><text class='tk' x='152' y='41'>cat</text>
-            <rect class='tok old' x='184' y='24' width='52' height='24' rx='4'/><text class='tk' x='210' y='41'>sat</text>
-            <text class='arrow' x='252' y='41'>&#8594;</text>
-            <rect class='tok new' x='274' y='24' width='52' height='24' rx='4'/><text class='tk nw' x='300' y='41'>on</text>
-        </g>
-        <g class='row r2'>
-            <text class='step' x='8' y='86'>call 2</text>
-            <rect class='tok old' x='68' y='70' width='52' height='24' rx='4'/><text class='tk' x='94' y='87'>the</text>
-            <rect class='tok old' x='126' y='70' width='52' height='24' rx='4'/><text class='tk' x='152' y='87'>cat</text>
-            <rect class='tok old' x='184' y='70' width='52' height='24' rx='4'/><text class='tk' x='210' y='87'>sat</text>
-            <rect class='tok old' x='242' y='70' width='52' height='24' rx='4'/><text class='tk' x='268' y='87'>on</text>
-            <text class='arrow' x='310' y='87'>&#8594;</text>
-            <rect class='tok new' x='332' y='70' width='52' height='24' rx='4'/><text class='tk nw' x='358' y='87'>the</text>
-        </g>
-        <g class='row r3'>
-            <text class='step' x='8' y='132'>call 3</text>
-            <rect class='tok old' x='68' y='116' width='52' height='24' rx='4'/><text class='tk' x='94' y='133'>the</text>
-            <rect class='tok old' x='126' y='116' width='52' height='24' rx='4'/><text class='tk' x='152' y='133'>cat</text>
-            <rect class='tok old' x='184' y='116' width='52' height='24' rx='4'/><text class='tk' x='210' y='133'>sat</text>
-            <rect class='tok old' x='242' y='116' width='52' height='24' rx='4'/><text class='tk' x='268' y='133'>on</text>
-            <rect class='tok old' x='300' y='116' width='52' height='24' rx='4'/><text class='tk' x='326' y='133'>the</text>
-            <text class='arrow' x='368' y='133'>&#8594;</text>
-            <rect class='tok new' x='390' y='116' width='52' height='24' rx='4'/><text class='tk nw' x='416' y='133'>mat</text>
-        </g>
-        <g class='row r4'>
-            <text class='step' x='8' y='178'>call 4</text>
-            <rect class='tok old' x='68' y='162' width='52' height='24' rx='4'/><text class='tk' x='94' y='179'>the</text>
-            <rect class='tok old' x='126' y='162' width='52' height='24' rx='4'/><text class='tk' x='152' y='179'>cat</text>
-            <rect class='tok old' x='184' y='162' width='52' height='24' rx='4'/><text class='tk' x='210' y='179'>sat</text>
-            <rect class='tok old' x='242' y='162' width='52' height='24' rx='4'/><text class='tk' x='268' y='179'>on</text>
-            <rect class='tok old' x='300' y='162' width='52' height='24' rx='4'/><text class='tk' x='326' y='179'>the</text>
-            <rect class='tok old' x='358' y='162' width='52' height='24' rx='4'/><text class='tk' x='384' y='179'>mat</text>
-            <text class='arrow' x='426' y='179'>&#8594;</text>
-            <rect class='tok new' x='448' y='162' width='52' height='24' rx='4'/><text class='tk nw' x='474' y='179'>.</text>
-        </g>
-        <text class='note' x='560' y='110'>every call sees</text>
-        <text class='note' x='560' y='126'>everything again</text>
+<div class='sketch'>
+    <svg viewBox='0 0 720 216' role='img' aria-label='Four calls to a model. Each row repeats every token of the row above it and adds one newly generated token at the end.'>
+      <text class='sk-lbl' x='10.0' y='45.0' text-anchor='start'>call 1</text>
+      <path class='sk-s2' d='M77.5,25.6 Q98.6,26.0 119.7,25.6 Q127.7,25.6 127.7,33.6 Q128.4,38.4 127.7,43.2 Q127.7,51.2 119.7,51.2 Q98.6,50.4 77.5,51.2 Q69.5,51.2 69.5,43.2 Q70.0,38.4 69.5,33.6 Q69.5,25.6 77.5,25.6'/>
+      <path class='sk-s2' d='M77.3,25.5 Q98.9,25.2 120.5,25.5 Q128.5,25.5 128.5,33.5 Q128.2,38.5 128.5,43.6 Q128.5,51.6 120.5,51.6 Q98.9,51.6 77.3,51.6 Q69.3,51.6 69.3,43.6 Q69.6,38.5 69.3,33.5 Q69.3,25.5 77.3,25.5'/>
+      <text class='sk-t' x='99.0' y='44.0' text-anchor='middle'>the</text>
+      <path class='sk-s2' d='M141.8,26.0 Q163.1,25.2 184.3,26.0 Q192.3,26.0 192.3,34.0 Q192.8,38.9 192.3,43.8 Q192.3,51.8 184.3,51.8 Q163.1,52.4 141.8,51.8 Q133.8,51.8 133.8,43.8 Q132.9,38.9 133.8,34.0 Q133.8,26.0 141.8,26.0'/>
+      <path class='sk-s2' d='M141.6,25.3 Q162.9,25.0 184.1,25.3 Q192.1,25.3 192.1,33.3 Q193.0,38.3 192.1,43.2 Q192.1,51.2 184.1,51.2 Q162.9,51.8 141.6,51.2 Q133.6,51.2 133.6,43.2 Q134.1,38.3 133.6,33.3 Q133.6,25.3 141.6,25.3'/>
+      <text class='sk-t' x='163.0' y='44.0' text-anchor='middle'>cat</text>
+      <path class='sk-s2' d='M206.8,25.2 Q227.3,24.2 247.8,25.2 Q255.8,25.2 255.8,33.2 Q255.2,38.8 255.8,44.5 Q255.8,52.5 247.8,52.5 Q227.3,53.2 206.8,52.5 Q198.8,52.5 198.8,44.5 Q198.2,38.8 198.8,33.2 Q198.8,25.2 206.8,25.2'/>
+      <path class='sk-s2' d='M205.6,26.7 Q227.0,27.1 248.5,26.7 Q256.5,26.7 256.5,34.7 Q255.8,39.7 256.5,44.8 Q256.5,52.8 248.5,52.8 Q227.0,52.7 205.6,52.8 Q197.6,52.8 197.6,44.8 Q197.8,39.7 197.6,34.7 Q197.6,26.7 205.6,26.7'/>
+      <text class='sk-t' x='227.0' y='44.0' text-anchor='middle'>sat</text>
+      <path class='sk-thin' d='M264.1,38.9 Q275.9,38.9 287.7,39.2'/>
+      <path class='sk-thin' d='M263.4,39.4 Q275.4,39.3 287.5,38.3'/>
+      <path class='sk-thin' d='M287.9,39.1 Q285.4,41.2 282.6,42.8'/>
+      <path class='sk-thin' d='M287.5,38.4 Q285.1,37.1 282.9,35.6'/>
+      <path class='sk-mark' d='M300.4,26.0 Q320.9,25.4 341.5,26.0 Q349.5,26.0 349.5,34.0 Q349.7,39.0 349.5,44.1 Q349.5,52.1 341.5,52.1 Q320.9,51.8 300.4,52.1 Q292.4,52.1 292.4,44.1 Q291.7,39.0 292.4,34.0 Q292.4,26.0 300.4,26.0'/>
+      <path class='sk-mark' d='M299.2,26.4 Q321.0,25.9 342.9,26.4 Q350.9,26.4 350.9,34.4 Q350.6,38.8 350.9,43.1 Q350.9,51.1 342.9,51.1 Q321.0,51.7 299.2,51.1 Q291.2,51.1 291.2,43.1 Q290.9,38.8 291.2,34.4 Q291.2,26.4 299.2,26.4'/>
+      <text class='sk-t' x='321.0' y='44.0' text-anchor='middle'>on</text>
+      <text class='sk-lbl' x='10.0' y='89.0' text-anchor='start'>call 2</text>
+      <path class='sk-s2' d='M77.7,70.9 Q98.9,71.5 120.1,70.9 Q128.1,70.9 128.1,78.9 Q127.2,83.6 128.1,88.4 Q128.1,96.4 120.1,96.4 Q98.9,96.7 77.7,96.4 Q69.7,96.4 69.7,88.4 Q69.4,83.6 69.7,78.9 Q69.7,70.9 77.7,70.9'/>
+      <path class='sk-s2' d='M77.4,69.8 Q99.1,70.7 120.7,69.8 Q128.7,69.8 128.7,77.8 Q128.9,82.9 128.7,88.0 Q128.7,96.0 120.7,96.0 Q99.1,96.8 77.4,96.0 Q69.4,96.0 69.4,88.0 Q68.9,82.9 69.4,77.8 Q69.4,69.8 77.4,69.8'/>
+      <text class='sk-t' x='99.0' y='88.0' text-anchor='middle'>the</text>
+      <path class='sk-s2' d='M142.2,69.9 Q162.7,69.6 183.3,69.9 Q191.3,69.9 191.3,77.9 Q190.8,83.1 191.3,88.3 Q191.3,96.3 183.3,96.3 Q162.7,96.4 142.2,96.3 Q134.2,96.3 134.2,88.3 Q134.5,83.1 134.2,77.9 Q134.2,69.9 142.2,69.9'/>
+      <path class='sk-s2' d='M142.0,70.2 Q163.3,70.3 184.7,70.2 Q192.7,70.2 192.7,78.2 Q191.9,83.2 192.7,88.2 Q192.7,96.2 184.7,96.2 Q163.3,96.8 142.0,96.2 Q134.0,96.2 134.0,88.2 Q134.4,83.2 134.0,78.2 Q134.0,70.2 142.0,70.2'/>
+      <text class='sk-t' x='163.0' y='88.0' text-anchor='middle'>cat</text>
+      <path class='sk-s2' d='M206.4,69.4 Q227.2,68.6 247.9,69.4 Q255.9,69.4 255.9,77.4 Q254.9,82.6 255.9,87.7 Q255.9,95.7 247.9,95.7 Q227.2,94.9 206.4,95.7 Q198.4,95.7 198.4,87.7 Q197.6,82.6 198.4,77.4 Q198.4,69.4 206.4,69.4'/>
+      <path class='sk-s2' d='M206.1,70.8 Q227.0,71.6 247.9,70.8 Q255.9,70.8 255.9,78.8 Q255.7,83.3 255.9,87.8 Q255.9,95.8 247.9,95.8 Q227.0,96.6 206.1,95.8 Q198.1,95.8 198.1,87.8 Q198.7,83.3 198.1,78.8 Q198.1,70.8 206.1,70.8'/>
+      <text class='sk-t' x='227.0' y='88.0' text-anchor='middle'>sat</text>
+      <path class='sk-s2' d='M269.8,69.4 Q291.0,69.1 312.3,69.4 Q320.3,69.4 320.3,77.4 Q319.6,82.7 320.3,88.0 Q320.3,96.0 312.3,96.0 Q291.0,95.6 269.8,96.0 Q261.8,96.0 261.8,88.0 Q261.9,82.7 261.8,77.4 Q261.8,69.4 269.8,69.4'/>
+      <path class='sk-s2' d='M270.0,69.8 Q291.1,69.4 312.2,69.8 Q320.2,69.8 320.2,77.8 Q320.2,83.0 320.2,88.2 Q320.2,96.2 312.2,96.2 Q291.1,96.2 270.0,96.2 Q262.0,96.2 262.0,88.2 Q262.3,83.0 262.0,77.8 Q262.0,69.8 270.0,69.8'/>
+      <text class='sk-t' x='291.0' y='88.0' text-anchor='middle'>on</text>
+      <path class='sk-thin' d='M328.2,83.3 Q340.3,82.7 352.4,83.4'/>
+      <path class='sk-thin' d='M327.4,83.3 Q339.8,82.7 352.2,83.1'/>
+      <path class='sk-thin' d='M352.3,82.4 Q349.7,83.8 347.3,85.6'/>
+      <path class='sk-thin' d='M352.6,83.4 Q349.6,81.7 346.3,80.6'/>
+      <path class='sk-mark' d='M363.5,69.8 Q384.6,69.1 405.6,69.8 Q413.6,69.8 413.6,77.8 Q413.6,83.4 413.6,88.9 Q413.6,96.9 405.6,96.9 Q384.6,96.2 363.5,96.9 Q355.5,96.9 355.5,88.9 Q355.8,83.4 355.5,77.8 Q355.5,69.8 363.5,69.8'/>
+      <path class='sk-mark' d='M364.7,70.2 Q385.0,69.3 405.3,70.2 Q413.3,70.2 413.3,78.2 Q412.3,83.3 413.3,88.5 Q413.3,96.5 405.3,96.5 Q385.0,97.5 364.7,96.5 Q356.7,96.5 356.7,88.5 Q356.8,83.3 356.7,78.2 Q356.7,70.2 364.7,70.2'/>
+      <text class='sk-t' x='385.0' y='88.0' text-anchor='middle'>the</text>
+      <text class='sk-lbl' x='10.0' y='133.0' text-anchor='start'>call 3</text>
+      <path class='sk-s2' d='M77.4,113.9 Q98.2,114.0 119.1,113.9 Q127.1,113.9 127.1,121.9 Q126.4,126.6 127.1,131.4 Q127.1,139.4 119.1,139.4 Q98.2,138.8 77.4,139.4 Q69.4,139.4 69.4,131.4 Q68.9,126.6 69.4,121.9 Q69.4,113.9 77.4,113.9'/>
+      <path class='sk-s2' d='M77.7,113.3 Q99.0,113.3 120.3,113.3 Q128.3,113.3 128.3,121.3 Q127.7,126.8 128.3,132.3 Q128.3,140.3 120.3,140.3 Q99.0,139.9 77.7,140.3 Q69.7,140.3 69.7,132.3 Q70.1,126.8 69.7,121.3 Q69.7,113.3 77.7,113.3'/>
+      <text class='sk-t' x='99.0' y='132.0' text-anchor='middle'>the</text>
+      <path class='sk-s2' d='M142.9,114.4 Q163.2,115.1 183.5,114.4 Q191.5,114.4 191.5,122.4 Q190.9,127.3 191.5,132.3 Q191.5,140.3 183.5,140.3 Q163.2,139.3 142.9,140.3 Q134.9,140.3 134.9,132.3 Q133.9,127.3 134.9,122.4 Q134.9,114.4 142.9,114.4'/>
+      <path class='sk-s2' d='M142.3,114.1 Q163.2,114.7 184.0,114.1 Q192.0,114.1 192.0,122.1 Q192.8,127.2 192.0,132.2 Q192.0,140.2 184.0,140.2 Q163.2,140.4 142.3,140.2 Q134.3,140.2 134.3,132.2 Q134.0,127.2 134.3,122.1 Q134.3,114.1 142.3,114.1'/>
+      <text class='sk-t' x='163.0' y='132.0' text-anchor='middle'>cat</text>
+      <path class='sk-s2' d='M206.3,114.5 Q227.3,114.5 248.4,114.5 Q256.4,114.5 256.4,122.5 Q257.3,126.9 256.4,131.3 Q256.4,139.3 248.4,139.3 Q227.3,138.4 206.3,139.3 Q198.3,139.3 198.3,131.3 Q197.8,126.9 198.3,122.5 Q198.3,114.5 206.3,114.5'/>
+      <path class='sk-s2' d='M206.3,114.7 Q227.5,113.8 248.7,114.7 Q256.7,114.7 256.7,122.7 Q257.0,127.2 256.7,131.7 Q256.7,139.7 248.7,139.7 Q227.5,140.7 206.3,139.7 Q198.3,139.7 198.3,131.7 Q199.2,127.2 198.3,122.7 Q198.3,114.7 206.3,114.7'/>
+      <text class='sk-t' x='227.0' y='132.0' text-anchor='middle'>sat</text>
+      <path class='sk-s2' d='M270.8,113.9 Q291.2,113.9 311.5,113.9 Q319.5,113.9 319.5,121.9 Q319.9,126.8 319.5,131.7 Q319.5,139.7 311.5,139.7 Q291.2,139.4 270.8,139.7 Q262.8,139.7 262.8,131.7 Q262.7,126.8 262.8,121.9 Q262.8,113.9 270.8,113.9'/>
+      <path class='sk-s2' d='M269.9,114.4 Q291.0,114.7 312.1,114.4 Q320.1,114.4 320.1,122.4 Q320.4,127.0 320.1,131.6 Q320.1,139.6 312.1,139.6 Q291.0,139.1 269.9,139.6 Q261.9,139.6 261.9,131.6 Q262.9,127.0 261.9,122.4 Q261.9,114.4 269.9,114.4'/>
+      <text class='sk-t' x='291.0' y='132.0' text-anchor='middle'>on</text>
+      <path class='sk-s2' d='M333.2,114.1 Q354.9,114.7 376.6,114.1 Q384.6,114.1 384.6,122.1 Q383.7,126.8 384.6,131.5 Q384.6,139.5 376.6,139.5 Q354.9,140.4 333.2,139.5 Q325.2,139.5 325.2,131.5 Q325.5,126.8 325.2,122.1 Q325.2,114.1 333.2,114.1'/>
+      <path class='sk-s2' d='M334.8,113.2 Q355.2,114.2 375.6,113.2 Q383.6,113.2 383.6,121.2 Q383.1,126.6 383.6,131.9 Q383.6,139.9 375.6,139.9 Q355.2,139.7 334.8,139.9 Q326.8,139.9 326.8,131.9 Q326.9,126.6 326.8,121.2 Q326.8,113.2 334.8,113.2'/>
+      <text class='sk-t' x='355.0' y='132.0' text-anchor='middle'>the</text>
+      <path class='sk-thin' d='M392.2,127.0 Q404.3,126.7 416.5,126.4'/>
+      <path class='sk-thin' d='M392.7,127.6 Q404.2,127.8 415.6,127.6'/>
+      <path class='sk-thin' d='M416.5,127.4 Q413.6,128.9 410.7,130.5'/>
+      <path class='sk-thin' d='M415.4,127.1 Q413.3,125.7 411.3,124.3'/>
+      <path class='sk-mark' d='M427.6,114.6 Q448.4,115.2 469.3,114.6 Q477.3,114.6 477.3,122.6 Q477.1,127.7 477.3,132.8 Q477.3,140.8 469.3,140.8 Q448.4,141.1 427.6,140.8 Q419.6,140.8 419.6,132.8 Q418.7,127.7 419.6,122.6 Q419.6,114.6 427.6,114.6'/>
+      <path class='sk-mark' d='M428.7,114.9 Q449.7,115.3 470.8,114.9 Q478.8,114.9 478.8,122.9 Q479.0,127.4 478.8,132.0 Q478.8,140.0 470.8,140.0 Q449.7,140.8 428.7,140.0 Q420.7,140.0 420.7,132.0 Q420.3,127.4 420.7,122.9 Q420.7,114.9 428.7,114.9'/>
+      <text class='sk-t' x='449.0' y='132.0' text-anchor='middle'>mat</text>
+      <text class='sk-lbl' x='10.0' y='177.0' text-anchor='start'>call 4</text>
+      <path class='sk-s2' d='M78.1,157.4 Q98.6,157.1 119.1,157.4 Q127.1,157.4 127.1,165.4 Q127.4,170.3 127.1,175.3 Q127.1,183.3 119.1,183.3 Q98.6,184.0 78.1,183.3 Q70.1,183.3 70.1,175.3 Q70.9,170.3 70.1,165.4 Q70.1,157.4 78.1,157.4'/>
+      <path class='sk-s2' d='M78.7,157.9 Q99.2,158.4 119.7,157.9 Q127.7,157.9 127.7,165.9 Q127.3,170.8 127.7,175.7 Q127.7,183.7 119.7,183.7 Q99.2,183.1 78.7,183.7 Q70.7,183.7 70.7,175.7 Q69.8,170.8 70.7,165.9 Q70.7,157.9 78.7,157.9'/>
+      <text class='sk-t' x='99.0' y='176.0' text-anchor='middle'>the</text>
+      <path class='sk-s2' d='M141.4,157.7 Q162.6,158.1 183.8,157.7 Q191.8,157.7 191.8,165.7 Q192.5,171.1 191.8,176.4 Q191.8,184.4 183.8,184.4 Q162.6,184.7 141.4,184.4 Q133.4,184.4 133.4,176.4 Q134.4,171.1 133.4,165.7 Q133.4,157.7 141.4,157.7'/>
+      <path class='sk-s2' d='M141.4,157.7 Q162.4,156.8 183.4,157.7 Q191.4,157.7 191.4,165.7 Q190.5,171.0 191.4,176.4 Q191.4,184.4 183.4,184.4 Q162.4,184.2 141.4,184.4 Q133.4,184.4 133.4,176.4 Q133.7,171.0 133.4,165.7 Q133.4,157.7 141.4,157.7'/>
+      <text class='sk-t' x='163.0' y='176.0' text-anchor='middle'>cat</text>
+      <path class='sk-s2' d='M205.3,158.9 Q226.6,159.6 248.0,158.9 Q256.0,158.9 256.0,166.9 Q256.3,171.4 256.0,175.8 Q256.0,183.8 248.0,183.8 Q226.6,184.4 205.3,183.8 Q197.3,183.8 197.3,175.8 Q196.3,171.4 197.3,166.9 Q197.3,158.9 205.3,158.9'/>
+      <path class='sk-s2' d='M206.4,158.7 Q227.1,158.6 247.8,158.7 Q255.8,158.7 255.8,166.7 Q255.3,171.3 255.8,176.0 Q255.8,184.0 247.8,184.0 Q227.1,183.5 206.4,184.0 Q198.4,184.0 198.4,176.0 Q198.4,171.3 198.4,166.7 Q198.4,158.7 206.4,158.7'/>
+      <text class='sk-t' x='227.0' y='176.0' text-anchor='middle'>sat</text>
+      <path class='sk-s2' d='M269.7,158.3 Q290.6,158.8 311.5,158.3 Q319.5,158.3 319.5,166.3 Q319.4,171.1 319.5,175.9 Q319.5,183.9 311.5,183.9 Q290.6,184.2 269.7,183.9 Q261.7,183.9 261.7,175.9 Q262.4,171.1 261.7,166.3 Q261.7,158.3 269.7,158.3'/>
+      <path class='sk-s2' d='M269.6,157.2 Q291.1,158.1 312.5,157.2 Q320.5,157.2 320.5,165.2 Q320.6,170.4 320.5,175.5 Q320.5,183.5 312.5,183.5 Q291.1,184.4 269.6,183.5 Q261.6,183.5 261.6,175.5 Q262.4,170.4 261.6,165.2 Q261.6,157.2 269.6,157.2'/>
+      <text class='sk-t' x='291.0' y='176.0' text-anchor='middle'>on</text>
+      <path class='sk-s2' d='M334.4,157.6 Q355.4,156.7 376.5,157.6 Q384.5,157.6 384.5,165.6 Q384.7,171.2 384.5,176.7 Q384.5,184.7 376.5,184.7 Q355.4,185.3 334.4,184.7 Q326.4,184.7 326.4,176.7 Q326.4,171.2 326.4,165.6 Q326.4,157.6 334.4,157.6'/>
+      <path class='sk-s2' d='M334.1,158.8 Q355.1,159.1 376.1,158.8 Q384.1,158.8 384.1,166.8 Q384.6,171.3 384.1,175.7 Q384.1,183.7 376.1,183.7 Q355.1,183.3 334.1,183.7 Q326.1,183.7 326.1,175.7 Q326.2,171.3 326.1,166.8 Q326.1,158.8 334.1,158.8'/>
+      <text class='sk-t' x='355.0' y='176.0' text-anchor='middle'>the</text>
+      <path class='sk-s2' d='M398.6,158.5 Q419.3,159.0 440.1,158.5 Q448.1,158.5 448.1,166.5 Q447.9,171.5 448.1,176.5 Q448.1,184.5 440.1,184.5 Q419.3,183.5 398.6,184.5 Q390.6,184.5 390.6,176.5 Q389.9,171.5 390.6,166.5 Q390.6,158.5 398.6,158.5'/>
+      <path class='sk-s2' d='M398.1,158.0 Q419.0,158.0 439.9,158.0 Q447.9,158.0 447.9,166.0 Q448.5,170.6 447.9,175.2 Q447.9,183.2 439.9,183.2 Q419.0,182.6 398.1,183.2 Q390.1,183.2 390.1,175.2 Q389.7,170.6 390.1,166.0 Q390.1,158.0 398.1,158.0'/>
+      <text class='sk-t' x='419.0' y='176.0' text-anchor='middle'>mat</text>
+      <path class='sk-thin' d='M456.2,171.2 Q468.4,171.1 480.6,171.6'/>
+      <path class='sk-thin' d='M455.8,171.4 Q467.8,172.4 479.8,171.6'/>
+      <path class='sk-thin' d='M480.6,171.1 Q477.4,172.1 474.7,173.9'/>
+      <path class='sk-thin' d='M479.8,170.8 Q477.1,169.3 474.9,167.2'/>
+      <path class='sk-mark' d='M491.7,157.2 Q513.0,156.9 534.4,157.2 Q542.4,157.2 542.4,165.2 Q541.8,170.1 542.4,175.1 Q542.4,183.1 534.4,183.1 Q513.0,183.8 491.7,183.1 Q483.7,183.1 483.7,175.1 Q483.0,170.1 483.7,165.2 Q483.7,157.2 491.7,157.2'/>
+      <path class='sk-mark' d='M491.8,158.9 Q512.8,158.7 533.8,158.9 Q541.8,158.9 541.8,166.9 Q542.1,171.1 541.8,175.4 Q541.8,183.4 533.8,183.4 Q512.8,183.4 491.8,183.4 Q483.8,183.4 483.8,175.4 Q483.6,171.1 483.8,166.9 Q483.8,158.9 491.8,158.9'/>
+      <text class='sk-t' x='513.0' y='176.0' text-anchor='middle'>.</text>
+      <text class='sk-note' x='600.0' y='108.0' text-anchor='middle'>every call is handed</text>
+      <text class='sk-note' x='600.0' y='124.0' text-anchor='middle'>all of it again</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
@@ -140,126 +187,153 @@
 <h2 id='1-a-trick-nobody-published-and-the-name-that-took-five-years'>1. A Trick Nobody Published, and the Name That Took Five Years</h2>
 <p>Before we go inside, here is the shape of the story, because it is a slightly unusual one for a technical idea.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of the KV cache: an unpublished trick in 2017, diagnosed as a bandwidth cost in 2019, named in 2022, and the thing serving systems are built around by 2023.'>
-      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
-      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
-      <text class='why' x='189.5' y='27'>it worked, so nobody asked what it cost</text>
-      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
-      <text class='why' x='380.0' y='27'>a bottleneck with no name is hard to discuss</text>
-      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
-      <text class='why' x='570.5' y='27'>and then everything was designed around it</text>
+    <svg viewBox='0 0 760 178' role='img' aria-label='Roadmap of the KV cache: an unpublished trick in 2017, diagnosed as a bandwidth cost in 2019, named in 2022, and the thing serving systems are built around by 2023.'>
+      <path class='spine' d='M94.2,52.4 Q380.1,53.0 666.1,52.3'/>
+      <path class='head' d='M178.3,51.5 Q189.0,51.5 199.8,51.9'/>
+      <path class='head' d='M178.5,52.3 Q189.5,52.4 200.5,52.0'/>
+      <path class='head' d='M200.2,52.3 Q198.2,54.1 196.0,55.8'/>
+      <path class='head' d='M199.9,51.6 Q197.4,50.4 194.8,49.6'/>
+      <text class='why' x='189.5' y='27.0'>it worked, so nobody asked what</text>
+      <text class='why' x='189.5' y='39.0'>it cost</text>
+      <path class='head' d='M368.6,51.9 Q379.7,52.2 390.7,51.9'/>
+      <path class='head' d='M368.4,51.5 Q379.7,52.2 391.0,52.4'/>
+      <path class='head' d='M391.3,51.5 Q388.2,52.9 385.3,54.8'/>
+      <path class='head' d='M390.7,51.9 Q388.1,51.0 385.8,49.5'/>
+      <text class='why' x='380.0' y='27.0'>a bottleneck with no name is</text>
+      <text class='why' x='380.0' y='39.0'>hard to discuss</text>
+      <path class='head' d='M559.7,52.1 Q570.9,52.2 582.0,52.0'/>
+      <path class='head' d='M559.3,52.1 Q570.4,51.8 581.6,51.9'/>
+      <path class='head' d='M581.0,52.2 Q578.2,53.3 575.9,55.2'/>
+      <path class='head' d='M581.7,51.6 Q579.5,50.1 576.9,49.2'/>
+      <text class='why' x='570.5' y='27.0'>and then everything was</text>
+      <text class='why' x='570.5' y='39.0'>designed around it</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='94.2' y='65.0'>2017-</text>
-        <text class='stage' x='94.2' y='79.0'>a trick, not a paper</text>
-        <text class='body' x='94.2' y='97.0'>Implementations keep past</text>
-        <text class='body' x='94.2' y='111.5'>keys and values instead of</text>
-        <text class='body' x='94.2' y='126.0'>redoing them. No paper</text>
-        <text class='body' x='94.2' y='140.5'>claims it as a</text>
-        <text class='body' x='94.2' y='155.0'>contribution.</text>
+        <rect class='hit' x='6.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M12.4,67.2 Q93.5,66.5 174.7,67.2 Q181.7,67.2 181.7,74.2 Q180.7,118.4 181.7,162.6 Q181.7,169.6 174.7,169.6 Q93.5,169.5 12.4,169.6 Q5.4,169.6 5.4,162.6 Q5.3,118.4 5.4,74.2 Q5.4,67.2 12.4,67.2'/>
+        <path class='box' d='M12.5,67.2 Q93.9,66.3 175.4,67.2 Q182.4,67.2 182.4,74.2 Q182.2,118.1 182.4,162.0 Q182.4,169.0 175.4,169.0 Q93.9,168.4 12.5,169.0 Q5.5,169.0 5.5,162.0 Q5.9,118.1 5.5,74.2 Q5.5,67.2 12.5,67.2'/>
+        <text class='yr' x='94.2' y='77.0'>2017-</text>
+        <text class='stage' x='94.2' y='91.0'>a trick, not a paper</text>
+        <text class='body' x='94.2' y='109.0'>Implementations keep past</text>
+        <text class='body' x='94.2' y='123.5'>keys and values instead of</text>
+        <text class='body' x='94.2' y='138.0'>redoing them. No paper</text>
+        <text class='body' x='94.2' y='152.5'>claims it as a</text>
+        <text class='body' x='94.2' y='167.0'>contribution.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-        <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='284.8' y='65.0'>2019</text>
-        <text class='stage' x='284.8' y='79.0'>Shazeer names the cost</text>
-        <text class='body' x='284.8' y='97.0'>Incremental decoding is</text>
-        <text class='body' x='284.8' y='111.5'>limited by reloading the</text>
-        <text class='body' x='284.8' y='126.0'>keys and values, he argues,</text>
-        <text class='body' x='284.8' y='140.5'>and not by the arithmetic</text>
-        <text class='body' x='284.8' y='155.0'>at all.</text>
+        <rect class='hit' x='196.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M203.3,68.7 Q284.8,68.1 366.3,68.7 Q373.3,68.7 373.3,75.7 Q372.6,119.0 373.3,162.3 Q373.3,169.3 366.3,169.3 Q284.8,168.4 203.3,169.3 Q196.3,169.3 196.3,162.3 Q196.8,119.0 196.3,75.7 Q196.3,68.7 203.3,68.7'/>
+        <path class='box' d='M203.6,67.3 Q285.2,67.2 366.7,67.3 Q373.7,67.3 373.7,74.3 Q374.0,118.8 373.7,163.2 Q373.7,170.2 366.7,170.2 Q285.2,170.5 203.6,170.2 Q196.6,170.2 196.6,163.2 Q195.9,118.8 196.6,74.3 Q196.6,67.3 203.6,67.3'/>
+        <text class='yr' x='284.8' y='77.0'>2019</text>
+        <text class='stage' x='284.8' y='91.0'>Shazeer names the cost</text>
+        <text class='body' x='284.8' y='109.0'>Incremental decoding is</text>
+        <text class='body' x='284.8' y='123.5'>limited by reloading the</text>
+        <text class='body' x='284.8' y='138.0'>keys and values, he argues,</text>
+        <text class='body' x='284.8' y='152.5'>and not by the arithmetic</text>
+        <text class='body' x='284.8' y='167.0'>at all.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-        <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='475.2' y='65.0'>2022</text>
-        <text class='stage' x='475.2' y='79.0'>it gets its name</text>
-        <text class='body' x='475.2' y='97.0'>Pope et al. write "the KV</text>
-        <text class='body' x='475.2' y='111.5'>cache" as a defined term</text>
-        <text class='body' x='475.2' y='126.0'>while working out how to</text>
-        <text class='body' x='475.2' y='140.5'>serve very large models.</text>
-        <text class='body' x='475.2' y='155.0'>The name sticks.</text>
+        <rect class='hit' x='387.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M393.7,68.3 Q474.8,68.5 555.8,68.3 Q562.8,68.3 562.8,75.3 Q563.5,118.8 562.8,162.3 Q562.8,169.3 555.8,169.3 Q474.8,169.5 393.7,169.3 Q386.7,169.3 386.7,162.3 Q385.9,118.8 386.7,75.3 Q386.7,68.3 393.7,68.3'/>
+        <path class='box' d='M393.2,67.7 Q474.6,68.6 555.9,67.7 Q562.9,67.7 562.9,74.7 Q563.5,119.0 562.9,163.2 Q562.9,170.2 555.9,170.2 Q474.6,169.7 393.2,170.2 Q386.2,170.2 386.2,163.2 Q385.5,119.0 386.2,74.7 Q386.2,67.7 393.2,67.7'/>
+        <text class='yr' x='475.2' y='77.0'>2022</text>
+        <text class='stage' x='475.2' y='91.0'>it gets its name</text>
+        <text class='body' x='475.2' y='109.0'>Pope et al. write "the KV</text>
+        <text class='body' x='475.2' y='123.5'>cache" as a defined term</text>
+        <text class='body' x='475.2' y='138.0'>while working out how to</text>
+        <text class='body' x='475.2' y='152.5'>serve very large models.</text>
+        <text class='body' x='475.2' y='167.0'>The name sticks.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-        <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='665.8' y='65.0'>2023-</text>
-        <text class='stage' x='665.8' y='79.0'>the centre of serving</text>
-        <text class='body' x='665.8' y='97.0'>vLLM organises an entire</text>
-        <text class='body' x='665.8' y='111.5'>serving system around</text>
-        <text class='body' x='665.8' y='126.0'>managing it, and the cache</text>
-        <text class='body' x='665.8' y='140.5'>stops being an</text>
-        <text class='body' x='665.8' y='155.0'>implementation detail.</text>
+        <rect class='hit' x='577.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M583.8,68.1 Q665.6,68.7 747.4,68.1 Q754.4,68.1 754.4,75.1 Q754.3,119.2 754.4,163.2 Q754.4,170.2 747.4,170.2 Q665.6,170.0 583.8,170.2 Q576.8,170.2 576.8,163.2 Q576.6,119.2 576.8,75.1 Q576.8,68.1 583.8,68.1'/>
+        <path class='box' d='M584.6,67.8 Q666.2,67.2 747.9,67.8 Q754.9,67.8 754.9,74.8 Q754.7,118.7 754.9,162.6 Q754.9,169.6 747.9,169.6 Q666.2,169.4 584.6,169.6 Q577.6,169.6 577.6,162.6 Q577.8,118.7 577.6,74.8 Q577.6,67.8 584.6,67.8'/>
+        <text class='yr' x='665.8' y='77.0'>2023-</text>
+        <text class='stage' x='665.8' y='91.0'>the centre of serving</text>
+        <text class='body' x='665.8' y='109.0'>vLLM organises an entire</text>
+        <text class='body' x='665.8' y='123.5'>serving system around</text>
+        <text class='body' x='665.8' y='138.0'>managing it, and the cache</text>
+        <text class='body' x='665.8' y='152.5'>stops being an</text>
+        <text class='body' x='665.8' y='167.0'>implementation detail.</text>
       </g>
     </svg>
 </div>
-<p>The first box is the odd one. There is no citation for it because nobody ever claimed it as a contribution. Shazeer's 2019 paper prints the algorithm, but as setup for something else; what it adds is the diagnosis, blaming "the memory-bandwidth cost of repeatedly loading the large &ldquo;keys&rdquo; and &ldquo;values&rdquo; tensors".</p>
+<p>The first box is the odd one, and I could not find a citation for it anywhere, because nobody ever claimed it as a contribution. Shazeer's 2019 paper prints the algorithm, but as setup for something else; what it adds is the diagnosis, blaming "the memory-bandwidth cost of repeatedly loading the large &ldquo;keys&rdquo; and &ldquo;values&rdquo; tensors".</p>
 <p>The third box is the one I like best. It took until 2022 for the thing to acquire a settled name, in a paper by Pope and colleagues about serving very large models — and a bottleneck that nobody has a name for is a bottleneck that is hard to argue about. Within a year of it having one, there was a serving system organised entirely around managing it.</p>
 <h2 id='2-three-vectors-and-which-two-of-them-last'>2. Three Vectors, and Which Two of Them Last</h2>
 <p>To see what is worth keeping, we need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>. I have written a whole post about it — <a href='/blog/2026/08/13/attention/'>Attention</a>, which builds it up from the problem it solves and takes the formula apart term by term — and if you have never met it, that is the one to read. But I am not going to send you away to follow this post, so here is what you need, which is less than you might think.</p>
-<p>The problem attention solves is that the meaning of a word depends on the words around it. In "the cat sat on the mat", the word "sat" means what it does because of "cat". So each token needs a way to look at the others and draw in whatever it needs. Attention does this by turning every token into three lists of numbers rather than one. The first says what that token is looking for. The second advertises what it has to offer. The third is the content it hands over if anything wants it. They are called the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong>.</p>
-<p>To use them, the current token's query is compared against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives one score per token so far, saying how well each one matches. Those scores are turned into proportions that add up to one by a function called the <strong>softmax</strong>, and the proportions are used to blend the value vectors together. Written down:</p>
+<p>The problem attention solves is that the meaning of a word depends on the words around it. In "the cat sat on the mat", the word "sat" means what it does because of "cat". So each token needs some way to look at the others and draw in whatever it needs from them, and that is all I am going to claim for it here. Attention does this by turning every token into three lists of numbers rather than one. The first says what that token is looking for. The second advertises what it has to offer. The third is the content it hands over if anything wants it. They are called the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong>.</p>
+<p>To use them, we compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives us one score per token so far, saying how well each one matches. We then turn those scores into proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
 $$
 \text{Attention}(q, K, V) = \text{softmax}\!\left(\frac{q K^{\top}}{\sqrt{d_h}}\right) V .
 $$
 <p>Two structural facts, because the arithmetic later depends on both. The model splits the width of its vectors into parallel pieces called <strong>heads</strong>, each doing all of the above independently with its own learned projections; modern models use fewer heads for keys and values than for queries, and I will write $n_{kv}$ for that smaller count. And the whole arrangement repeats at every <strong>layer</strong>, stacked dozens deep, with Llama 3 70B having 80 of them.</p>
 <p>A note on symbols, since I am about to use two that look alike. I write $d_h$ for the width of one head's vectors — how many numbers are in a single key — and plain $d$ for the full width of the model, all the heads laid end to end. In Llama 3 8B, $d_h$ is 128 and $d$ is 4,096. Section 5 is where $d$ turns up.</p>
-<p>Now here is the one thing to carry forward, and everything else in this post follows from it. A token's key and value are computed from that token and the ones before it, and nothing that arrives later can alter them. Its query is different in kind: it is the question this token is asking at this moment, it is used once, and it is never wanted again. Two of the three vectors last, and one does not.</p>
-<div class='kv-anim'>
-    <svg viewBox='0 0 720 250' role='img'
-         aria-label='One attention layer during decoding. The current token vector is projected by three matrices into a query, a key and a value; the key and value are appended as one new row each to the key cache and the value cache, and the query attends over every row of both caches before the output projection.'>
-        <text class='lbl' x='8' y='120'>x<tspan class='sub' dy='4'>t</tspan></text>
-        <text class='dim' x='6' y='140'>one token</text>
-        <line class='wire' x1='42' y1='114' x2='96' y2='48'/>
-        <line class='wire' x1='42' y1='114' x2='96' y2='114'/>
-        <line class='wire' x1='42' y1='114' x2='96' y2='180'/>
-        <rect class='mat q' x='96' y='32' width='58' height='32' rx='5'/>
-        <text class='mlbl' x='125' y='53'>W<tspan class='sub' dy='3'>Q</tspan></text>
-        <rect class='mat k' x='96' y='98' width='58' height='32' rx='5'/>
-        <text class='mlbl' x='125' y='119'>W<tspan class='sub' dy='3'>K</tspan></text>
-        <rect class='mat v' x='96' y='164' width='58' height='32' rx='5'/>
-        <text class='mlbl' x='125' y='185'>W<tspan class='sub' dy='3'>V</tspan></text>
-        <line class='wire' x1='154' y1='48' x2='412' y2='48'/>
-        <line class='wire' x1='412' y1='48' x2='433' y2='70'/>
-        <line class='wire' x1='154' y1='114' x2='236' y2='114'/>
-        <line class='wire' x1='154' y1='180' x2='236' y2='180'/>
-        <rect class='cache' x='236' y='86' width='150' height='58' rx='5'/>
-        <text class='clbl' x='311' y='104'>key cache</text>
-        <text class='cdim' x='311' y='120'>[n_kv, t, d_h]</text>
-        <rect class='row new' x='242' y='126' width='138' height='11' rx='2'/>
-        <rect class='cache' x='236' y='152' width='150' height='58' rx='5'/>
-        <text class='clbl' x='311' y='170'>value cache</text>
-        <text class='cdim' x='311' y='186'>[n_kv, t, d_h]</text>
-        <rect class='row new' x='242' y='192' width='138' height='11' rx='2'/>
-        <line class='wire' x1='386' y1='114' x2='412' y2='114'/>
-        <line class='wire' x1='386' y1='180' x2='412' y2='180'/>
-        <line class='wire' x1='412' y1='180' x2='412' y2='114'/>
-        <line class='wire' x1='412' y1='114' x2='433' y2='92'/>
-        <circle class='op' cx='448' cy='81' r='19'/>
-        <text class='oplbl' x='448' y='86'>attn</text>
-        <line class='wire' x1='467' y1='81' x2='516' y2='81'/>
-        <rect class='mat o' x='516' y='65' width='58' height='32' rx='5'/>
-        <text class='mlbl' x='545' y='86'>W<tspan class='sub' dy='3'>O</tspan></text>
-        <line class='wire' x1='574' y1='81' x2='640' y2='81'/>
-        <text class='lbl' x='646' y='86'>y<tspan class='sub' dy='4'>t</tspan></text>
-        <text class='note' x='125' y='222'>read from the weights,</text>
-        <text class='note' x='125' y='237'>shared by every request</text>
-        <text class='note-hi' x='311' y='226'>written once per token, kept</text>
-        <text class='note-hi' x='311' y='241'>per request, read in full every step</text>
+<p>Now here is the one thing I would ask you to carry forward, because everything else in this post follows from it. A token's key and value are computed from that token and the ones before it, and nothing arriving later can alter them. Its query is different in kind: it is the question this token is asking at this moment, it is used once, and it is never wanted again. Two of the three vectors last, and one does not.</p>
+<div class='sketch'>
+    <svg viewBox='0 0 720 230' role='img' aria-label='One attention layer as a new token arrives. It is projected into a query, a key and a value. The key and value are appended to two growing stores; the query is used once and discarded.'>
+      <text class='sk-note' x='12.0' y='100.0' text-anchor='start'>one new</text>
+      <text class='sk-note' x='12.0' y='115.0' text-anchor='start'>token</text>
+      <path class='sk-thin' d='M61.6,103.8 Q79.3,79.2 96.1,54.0'/>
+      <path class='sk-thin' d='M62.4,103.7 Q80.2,79.2 96.3,53.6'/>
+      <path class='sk-s3' d='M103.5,40.0 Q132.4,39.5 161.2,40.0 Q169.2,40.0 169.2,48.0 Q168.7,54.2 169.2,60.5 Q169.2,68.5 161.2,68.5 Q132.4,68.0 103.5,68.5 Q95.5,68.5 95.5,60.5 Q95.8,54.2 95.5,48.0 Q95.5,40.0 103.5,40.0'/>
+      <path class='sk-s3' d='M103.6,39.2 Q132.7,39.8 161.9,39.2 Q169.9,39.2 169.9,47.2 Q170.6,53.6 169.9,60.0 Q169.9,68.0 161.9,68.0 Q132.7,68.4 103.6,68.0 Q95.6,68.0 95.6,60.0 Q95.4,53.6 95.6,47.2 Q95.6,39.2 103.6,39.2'/>
+      <text class='sk-t' x='133.0' y='59.0' text-anchor='middle'>query</text>
+      <path class='sk-thin' d='M62.4,103.7 Q78.7,107.6 95.4,109.8'/>
+      <path class='sk-thin' d='M62.1,104.0 Q78.8,107.6 95.8,109.5'/>
+      <path class='sk-s2' d='M103.7,95.2 Q133.0,94.4 162.3,95.2 Q170.3,95.2 170.3,103.2 Q170.3,110.0 170.3,116.8 Q170.3,124.8 162.3,124.8 Q133.0,124.7 103.7,124.8 Q95.7,124.8 95.7,116.8 Q95.9,110.0 95.7,103.2 Q95.7,95.2 103.7,95.2'/>
+      <path class='sk-s2' d='M104.9,95.4 Q133.2,94.6 161.5,95.4 Q169.5,95.4 169.5,103.4 Q169.8,109.7 169.5,116.0 Q169.5,124.0 161.5,124.0 Q133.2,124.1 104.9,124.0 Q96.9,124.0 96.9,116.0 Q97.7,109.7 96.9,103.4 Q96.9,95.4 104.9,95.4'/>
+      <text class='sk-t' x='133.0' y='115.0' text-anchor='middle'>key</text>
+      <path class='sk-thin' d='M61.4,103.9 Q78.3,134.8 95.7,165.4'/>
+      <path class='sk-thin' d='M62.0,103.4 Q78.4,134.6 95.8,165.4'/>
+      <path class='sk-s2' d='M103.3,151.2 Q133.1,152.1 162.8,151.2 Q170.8,151.2 170.8,159.2 Q169.9,165.5 170.8,171.8 Q170.8,179.8 162.8,179.8 Q133.1,178.9 103.3,179.8 Q95.3,179.8 95.3,171.8 Q95.5,165.5 95.3,159.2 Q95.3,151.2 103.3,151.2'/>
+      <path class='sk-s2' d='M103.6,152.4 Q132.7,152.5 161.9,152.4 Q169.9,152.4 169.9,160.4 Q170.7,166.3 169.9,172.2 Q169.9,180.2 161.9,180.2 Q132.7,180.5 103.6,180.2 Q95.6,180.2 95.6,172.2 Q96.6,166.3 95.6,160.4 Q95.6,152.4 103.6,152.4'/>
+      <text class='sk-t' x='133.0' y='171.0' text-anchor='middle'>value</text>
+      <text class='sk-note' x='133.0' y='190.0' text-anchor='middle'>used once,</text>
+      <text class='sk-note' x='133.0' y='205.0' text-anchor='middle'>then thrown away</text>
+      <path class='sk-thin' d='M169.4,110.6 Q202.6,109.7 235.9,109.7'/>
+      <path class='sk-thin' d='M170.5,110.7 Q203.1,110.6 235.7,110.2'/>
+      <path class='sk-thin' d='M235.5,109.5 Q233.5,111.9 230.9,113.7'/>
+      <path class='sk-thin' d='M236.6,110.1 Q234.1,108.4 231.3,106.9'/>
+      <path class='sk-thin' d='M169.4,166.6 Q202.4,165.3 235.5,166.2'/>
+      <path class='sk-thin' d='M170.0,166.3 Q203.1,166.3 236.2,165.9'/>
+      <path class='sk-thin' d='M235.5,165.6 Q233.1,167.0 230.7,168.5'/>
+      <path class='sk-thin' d='M236.5,166.6 Q233.9,164.7 231.0,163.1'/>
+      <path class='sk-s' d='M243.1,84.6 Q319.5,85.2 395.9,84.6 Q403.9,84.6 403.9,92.6 Q403.7,110.3 403.9,127.9 Q403.9,135.9 395.9,135.9 Q319.5,135.9 243.1,135.9 Q235.1,135.9 235.1,127.9 Q235.3,110.3 235.1,92.6 Q235.1,84.6 243.1,84.6'/>
+      <path class='sk-s' d='M243.2,84.6 Q319.9,85.3 396.5,84.6 Q404.5,84.6 404.5,92.6 Q404.6,110.7 404.5,128.8 Q404.5,136.8 396.5,136.8 Q319.9,137.1 243.2,136.8 Q235.2,136.8 235.2,128.8 Q236.1,110.7 235.2,92.6 Q235.2,84.6 243.2,84.6'/>
+      <text class='sk-t' x='320.0' y='108.0' text-anchor='middle'>key cache</text>
+      <text class='sk-sub' x='320.0' y='123.0' text-anchor='middle'>one row per token</text>
+      <path class='sk-s' d='M244.0,139.8 Q319.9,140.6 395.8,139.8 Q403.8,139.8 403.8,147.8 Q404.4,165.9 403.8,184.1 Q403.8,192.1 395.8,192.1 Q319.9,192.6 244.0,192.1 Q236.0,192.1 236.0,184.1 Q236.1,165.9 236.0,147.8 Q236.0,139.8 244.0,139.8'/>
+      <path class='sk-s' d='M243.2,139.8 Q319.6,139.8 396.0,139.8 Q404.0,139.8 404.0,147.8 Q403.6,165.8 404.0,183.7 Q404.0,191.7 396.0,191.7 Q319.6,190.8 243.2,191.7 Q235.2,191.7 235.2,183.7 Q235.5,165.8 235.2,147.8 Q235.2,139.8 243.2,139.8'/>
+      <text class='sk-t' x='320.0' y='164.0' text-anchor='middle'>value cache</text>
+      <text class='sk-sub' x='320.0' y='179.0' text-anchor='middle'>one row per token</text>
+      <path class='sk-thin' d='M403.4,109.7 Q437.0,88.3 470.3,66.4'/>
+      <path class='sk-thin' d='M403.6,110.6 Q436.5,87.0 470.5,65.4'/>
+      <path class='sk-thin' d='M404.2,165.4 Q436.6,115.6 469.8,66.3'/>
+      <path class='sk-thin' d='M404.7,165.5 Q437.7,116.3 469.8,66.5'/>
+      <path class='sk-thin' d='M169.4,54.1 Q320.0,56.4 470.5,59.6'/>
+      <path class='sk-thin' d='M169.3,54.3 Q319.8,57.8 470.4,60.0'/>
+      <path class='sk-mark' d='M477.4,41.2 Q517.6,42.2 557.9,41.2 Q565.9,41.2 565.9,49.2 Q566.7,62.0 565.9,74.8 Q565.9,82.8 557.9,82.8 Q517.6,83.4 477.4,82.8 Q469.4,82.8 469.4,74.8 Q470.1,62.0 469.4,49.2 Q469.4,41.2 477.4,41.2'/>
+      <path class='sk-mark' d='M477.4,42.3 Q517.3,42.3 557.2,42.3 Q565.2,42.3 565.2,50.3 Q565.8,62.4 565.2,74.5 Q565.2,82.5 557.2,82.5 Q517.3,82.1 477.4,82.5 Q469.4,82.5 469.4,74.5 Q469.9,62.4 469.4,50.3 Q469.4,42.3 477.4,42.3'/>
+      <text class='sk-t' x='518.0' y='67.0' text-anchor='middle'>attention</text>
+      <path class='sk-thin' d='M566.0,62.3 Q595.8,61.6 625.6,61.5'/>
+      <path class='sk-thin' d='M566.5,61.4 Q596.1,60.6 625.7,61.5'/>
+      <path class='sk-thin' d='M626.3,61.4 Q623.4,63.2 620.3,64.5'/>
+      <path class='sk-thin' d='M625.6,61.8 Q623.0,60.3 620.2,59.0'/>
+      <text class='sk-lbl' x='660.0' y='67.0' text-anchor='middle'>out</text>
+      <text class='sk-note' x='320.0' y='214.0' text-anchor='middle'>kept for the whole conversation, and read in full at every step</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
         This is where the cache actually lives. I have drawn one attention
-        layer at the moment a new token arrives. The token is projected three ways, but
-        only the <b>key and value get appended</b> to the two stores. The
-        query is used once, right here, to look over every row that has ever
-        been written, and is then discarded. Remember that there is one of
-        these pictures in every layer of the model.
+        layer at the moment a new token arrives. It is projected three ways,
+        but only the key and value are appended to the two stores. The query
+        is used once, right here, to look over every row that has ever been
+        written, and is then discarded. Remember that there is one of these
+        pictures in every layer of the model.
     </div>
 </div>
 <h2 id='3-the-rows-that-never-change-again'>3. The Rows That Never Change Again</h2>
@@ -405,13 +479,13 @@ $$
 <p>The counter underneath is the part I would ask you to watch. With a cache, reaching the fourth token costs four rows of work. Without one it costs nine, because the model would have redone the whole prefix at every step. Four against nine is not very impressive on its own, but that gap grows with the square of the length of the answer, and answers get long.</p>
 <h3 id='the-arithmetic-of-an-absence'>The Arithmetic of an Absence</h3>
 <p>You may have noticed that I said the model computes three vectors per token but the cache stores two. The queries are thrown away, and this is my favourite thing in the whole topic, because the reason is so clean.</p>
-<p>Think of attention as a question that the present asks of the past. When the model is working on token $t$, it takes <em>that</em> token's query and compares it against the keys of every token up to and including $t$. It never uses the query belonging to token 3 again after step 3 has finished. Token 3's key and value, by contrast, will be consulted at step 4, and step 5, and every step after that until the conversation ends.</p>
-<p>So the asymmetry in the cache is the asymmetry in the question. A token's question is asked once and is never asked again. A token's answer has to stay available forever, because everything that comes later is going to ask it something.</p>
+<p>I think of attention as a question that the present asks of the past. When the model is working on token $t$, it takes <em>that</em> token's query and compares it against the keys of every token up to and including $t$. It never uses the query belonging to token 3 again after step 3 has finished. Token 3's key and value, by contrast, will be consulted at step 4, and step 5, and every step after that until the conversation ends.</p>
+<p>So the asymmetry in the cache is really the asymmetry in the question, which is why I find it such a satisfying piece of design. A token's question is asked once and never again. Its answer has to stay available forever, because everything that comes later is going to ask it something.</p>
 <h3 id='the-promise-that-nothing-will-move'>The Promise That Nothing Will Move</h3>
 <p>I have been assuming something without saying so, and I want to make it explicit, because it is the assumption the whole technique stands on. Keeping old values only works if they are still correct. It would be no use caching the key for "cat" if appending the word "mat" quietly changed what that key should have been. So why doesn't it?</p>
-<p>In a model of this kind, the key and value for token $i$ are computed from token $i$ and the tokens before it, and from nothing else. This is a design choice called <strong>causal masking</strong>: when the model processes a position, it is forbidden from looking at anything to the right of it. The reason for that choice has nothing to do with caching — it is there so the model cannot cheat during training by peeking at the answer — but it has the happy consequence that appending a token can never reach backwards and change a row that has already been written.</p>
+<p>The answer is a design choice called <strong>causal masking</strong>. In a model of this kind, the key and value for token $i$ are computed from token $i$ and the tokens before it and from nothing else, because when the model processes a position it is forbidden from looking at anything to the right of it. The reason for that choice has nothing to do with caching — it is there so the model cannot cheat during training by peeking at the answer — but it has the happy consequence that appending a token can never reach backwards and change a row that has already been written.</p>
 <p>I want to use this to test a rule you will hear repeated often, which is that the KV cache only works in decoders. I think that is nearly right and the reason usually given for it is wrong, which makes it worth taking apart carefully.</p>
-<p>A <strong>bidirectional encoder</strong>, of the kind used in models like BERT, lets every token look at every other token in both directions. Add a word to the end and every representation in the sequence changes, because every one of them was allowed to depend on the whole sequence. There is nothing stable to keep. That much supports the rule.</p>
+<p>Take a <strong>bidirectional encoder</strong>, of the kind used in models like BERT, which lets every token look at every other token in both directions. Add a word to the end and every representation in the sequence changes, because every one of them was allowed to depend on the whole sequence. There is nothing stable to keep. That much supports the rule.</p>
 <p>But now I want you to consider a translation model, which has an encoder for the input sentence and a decoder that writes the output. When the decoder attends to the encoder's output — this is called <strong>cross-attention</strong> — those keys and values <em>are</em> cached, in every real implementation. And cross-attention is bidirectional. So the rule cannot really be about masking.</p>
 <p>What I think the rule is actually about is finality. A row is worth caching when nothing that arrives later can change it. Causal masking is the usual way to guarantee that, and it is not the only one: the encoder's output is final too, not because it is masked, but because the encoder has already finished running.</p>
 <div class='knob'>
@@ -494,8 +568,8 @@ $$
 </script>
 <h3 id='reading-is-not-writing'>Reading Is Not Writing</h3>
 <p>There is one more distinction I need to give you before we can talk about cost, and I think it explains most of what is strange about running these models.</p>
-<p>Answering a question happens in two phases that behave nothing alike. The first is <strong>prefill</strong>: the model reads your entire prompt. It can do this in one go, because all of the prompt is available at once, and computers are very good at doing the same operation to a thousand things simultaneously. Prefill fills the cache and it keeps the hardware busy.</p>
-<p>The second is <strong>decode</strong>: the model writes the answer, one token at a time, because it cannot start the second token until it has seen the first. Each step does a small amount of arithmetic, and reads the entire cache in order to attend over it. Prefill is the model reading; decode is the model writing, and writing is much harder to make fast.</p>
+<p>Answering a question happens in two phases that behave nothing alike, and I want to name them both because the difference between them is what makes serving these models strange. The first is <strong>prefill</strong>: the model reads your entire prompt. It can do this in one go, because all of the prompt is available at once and computers are very good at doing the same operation to a thousand things simultaneously. Prefill fills the cache, and it keeps the hardware busy.</p>
+<p>The second is <strong>decode</strong>: the model writes the answer one token at a time, because it cannot begin the second token until it has seen the first. Each step does a very small amount of arithmetic and yet still has to read the entire cache in order to attend over it. I would hold those two facts side by side for a moment, because the imbalance between them is what the companion post is about. Prefill is the model reading and decode is the model writing, and writing is far harder to make fast.</p>
 <h3 id='counting-the-rent'>Counting the Rent</h3>
 <p>We can now compute the size of the thing. Multiply out the shapes: for $L$ layers, at $p$ bytes for each number,</p>
 $$
@@ -601,13 +675,13 @@ $$
 <p>That number is why anybody worries about this at all.</p>
 <h2 id='4-the-bill-which-is-the-other-post'>4. The Bill, Which Is the Other Post</h2>
 <p>Everything so far has been about what the cache is and why it works. What it <em>costs</em> is a large enough subject that I have given it a post of its own — <a href='/blog/2026/08/13/kv-cache-costs/'>What the KV Cache Costs</a> — but the shape of the problem is worth stating here, because it follows directly from the number we just computed.</p>
-<p>The weights of a model are shared. Every conversation on a server runs through the same ones, so serving many at once spreads their cost across all of them, which is the entire economics of running these things. The cache is the opposite: it belongs to one conversation, nobody else can use it, and it grows for as long as that conversation continues. So the one move that makes everything else cheaper — serving more people at once — makes this particular cost worse, because every new person brings another cache to be stored and read on every step. That tension, and what the field has done about it, is what the other post is for.</p>
+<p>Here is the shape of it. The weights of a model are shared: every conversation on a server runs through the same ones, so serving many at once spreads their cost across all of them, which is the entire economics of running these things. The cache is the opposite: it belongs to one conversation, nobody else can use it, and it grows for as long as that conversation continues. So the one move that makes everything else cheaper — serving more people at once — makes this particular cost worse, because every new person brings another cache to be stored and read on every step. That tension, and what the field has done about it, is what the other post is for.</p>
 <h2 id='5-fifteen-decimal-places-and-a-floor-i-did-not-expect'>5. Fifteen Decimal Places, and a Floor I Did Not Expect</h2>
 <p>I did not want to take either of the two central claims on trust, so I wrote the experiment. It decodes 320 tokens through one real attention layer, twice: once keeping a cache, and once recomputing the whole prefix at every step, the way a model with no cache would have to. Both paths do genuine arithmetic on genuine vectors, and I timed each step of both.</p>
 <p>The first claim to check is that caching does not change the answer. It should not — we argued earlier that the rows are final — but arguing and checking are different activities. Over all 320 steps, the largest disagreement between the cached output and the recomputed one was $2.2 \times 10^{-15}$, which is the noise floor of the arithmetic itself. The cache is <em>algebraically</em> exact, which is the sense that matters: it changes no term in the definition of attention. (Two different implementations on a real GPU, working in 16-bit arithmetic, will still disagree in the last few bits. That is because floating-point addition is not associative, so adding the same numbers in a different order gives a very slightly different answer. It is a property of the arithmetic rather than of the cache.)</p>
 <p>The second claim is about how much work is saved, and here we can be exact, so let me count it out rather than assert it. I will count multiply-and-add operations, and I will use $d$ for the full width of the model, not the per-head $d_h$ from section 2.</p>
-<p>A cached step does two things. First it projects the one new token, which means multiplying its vector of length $d$ by each of four matrices — the query, key and value projections, and the output projection afterwards. Each matrix has $d^2$ entries and each entry costs a multiply and an add, so those four come to $8d^2$. Then it attends over the $t$ rows already sitting in the cache: one dot product of length $d$ against each of $t$ keys, and then a weighted sum of $t$ value vectors of length $d$. That is $4td$. So a cached step costs $8d^2 + 4td$.</p>
-<p>A step without a cache does the very same work, but for all $t$ tokens instead of one. Projecting them all costs $8td^2$, and attending over the full $t \times t$ grid of scores costs $4t^2d$. Now put the two next to each other. Every term in the second carries exactly one factor of $t$ that its counterpart in the first does not, so the second is $t$ times the first — exactly, not approximately. At the 320th token, a model without a cache is doing three hundred and twenty times the arithmetic to produce the very same row of numbers. (That is against this particular baseline, which recomputes the full square of scores; an implementation that exploited the mask would do about half as much, so call it between $t/2$ and $t$.)</p>
+<p>Let me take the cached step first. It does two things. It projects the one new token, which means multiplying its vector of length $d$ by each of four matrices — the query, key and value projections, and the output projection afterwards. Each matrix has $d^2$ entries and each entry costs a multiply and an add, so those four come to $8d^2$. Then it attends over the $t$ rows already sitting in the cache: one dot product of length $d$ against each of $t$ keys, and then a weighted sum of $t$ value vectors of length $d$. That is $4td$. So a cached step costs $8d^2 + 4td$.</p>
+<p>Now compare a step without a cache. It does the very same work, but for all $t$ tokens instead of one: projecting them all costs $8td^2$, and attending over the full $t \times t$ grid of scores costs $4t^2d$. Now put the two next to each other. Every term in the second carries exactly one factor of $t$ that its counterpart in the first does not, so the second is $t$ times the first — exactly, not approximately. At the 320th token, a model without a cache is doing three hundred and twenty times the arithmetic to produce the very same row of numbers. (That is against this particular baseline, which recomputes the full square of scores; an implementation that exploited the mask would do about half as much, so call it between $t/2$ and $t$.)</p>
 <div class='figure'>
     <img src='/images/kv-cache-cost.png'
          alt='Two panels. In (a), time for one decode step against tokens

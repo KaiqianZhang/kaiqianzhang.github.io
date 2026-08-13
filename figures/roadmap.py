@@ -15,6 +15,8 @@ Run:  python3 figures/roadmap.py [rmsnorm|prenorm|rope]
 
 import sys
 
+from sketch import Pen, rough_rect, rough_line, rough_arrow
+
 W = 760                 # viewBox width; the CSS scales it to the column
 PAD = 6                 # left and right margin
 GAP = 14                # space between boxes
@@ -56,43 +58,54 @@ def roadmap(stops, arrows, label):
     centres = [x + boxw / 2 for x in xs]
 
     wrapped = [wrap(body, boxw - 2 * BOX_PAD) for _, _, body in stops]
-    boxh = TITLE_DY + 8 + LINE_H * max(len(w) for w in wrapped)
-    height = BOX_TOP + boxh + 8
 
-    out = ["<svg viewBox='0 0 %d %d' role='img' aria-label='%s'>"
+    # The reason above each arrow has to fit the gap between two dots, or it
+    # collides with its neighbour. Wrap it onto two lines when it does not.
+    gap = centres[1] - centres[0] - 16 if n > 1 else W
+    why = [wrap(r, gap) for r in arrows]
+    why_lines = max([len(w) for w in why] or [1])
+
+    top_pad = 12 * (why_lines - 1)
+    spine_y = SPINE_Y + top_pad
+    box_top = BOX_TOP + top_pad
+    boxh = TITLE_DY + 8 + LINE_H * max(len(w) for w in wrapped)
+    height = box_top + boxh + 8
+
+    pen = Pen(len(stops) * 101 + len(label))
+    out = ["<svg viewBox=\'0 0 %d %d\' role=\'img\' aria-label=\'%s\'>"
            % (W, round(height), label)]
 
-    # The spine runs between the first and last dot only, so it does not
-    # trail off past the milestones at either end.
-    out.append("  <line class='spine' x1='%.1f' y1='%d' x2='%.1f' y2='%d'/>"
-               % (centres[0], SPINE_Y, centres[-1], SPINE_Y))
+    out += ['  ' + l for l in rough_line(centres[0], spine_y, centres[-1],
+                                         spine_y, pen, 'spine', bow=0.8,
+                                         passes=1)]
 
     for i, reason in enumerate(arrows):
         mid = (centres[i] + centres[i + 1]) / 2
-        tip = mid + 9
-        out.append("  <polygon class='head' points='%.1f,%d %.1f,%d %.1f,%d'/>"
-                   % (tip, SPINE_Y, tip - 9, SPINE_Y - 4, tip - 9, SPINE_Y + 4))
-        out.append("  <text class='why' x='%.1f' y='%d'>%s</text>"
-                   % (mid, SPINE_Y - 13, reason))
+        out += ['  ' + l for l in rough_arrow(mid - 11, spine_y, mid + 11,
+                                              spine_y, pen, 'head', bow=0.5,
+                                              head=6)]
+        for j, line in enumerate(why[i]):
+            out.append("  <text class=\'why\' x=\'%.1f\' y=\'%.1f\'>%s</text>"
+                       % (mid, spine_y - 13 - (len(why[i]) - 1 - j) * 12, line))
 
     # Each milestone is one <g class='stop'> so the CSS can lift the whole
-    # thing — dot, box and text together — when the mouse is over it.
+    # thing -- dot, box and text together -- when the mouse is over it.
     for i, (year, title, _body) in enumerate(stops):
         cx, x = centres[i], xs[i]
-        out.append("  <g class='stop'>")
-        out.append("    <rect class='hit' x='%.1f' y='%d' width='%.1f' "
-                   "height='%.1f'/>" % (x, SPINE_Y - 10, boxw, boxh + 24))
-        out.append("    <circle class='dot' cx='%.1f' cy='%d' r='4.5'/>"
-                   % (cx, SPINE_Y))
-        out.append("    <rect class='box' x='%.1f' y='%d' width='%.1f' "
-                   "height='%.1f' rx='7'/>" % (x, BOX_TOP, boxw, boxh))
-        out.append("    <text class='yr' x='%.1f' y='%.1f'>%s</text>"
-                   % (cx, BOX_TOP + TITLE_DY - 12, year))
-        out.append("    <text class='stage' x='%.1f' y='%.1f'>%s</text>"
-                   % (cx, BOX_TOP + TITLE_DY + 2, title))
+        out.append("  <g class=\'stop\'>")
+        out.append("    <rect class=\'hit\' x=\'%.1f\' y=\'%.1f\' width=\'%.1f\' "
+                   "height=\'%.1f\'/>" % (x, spine_y - 10, boxw, boxh + 24))
+        out.append("    <circle class=\'dot\' cx=\'%.1f\' cy=\'%.1f\' r=\'4.5\'/>"
+                   % (cx, spine_y))
+        out += ['    ' + l for l in rough_rect(x, box_top, boxw, boxh, pen,
+                                               'box', r=7)]
+        out.append("    <text class=\'yr\' x=\'%.1f\' y=\'%.1f\'>%s</text>"
+                   % (cx, box_top + TITLE_DY - 12, year))
+        out.append("    <text class=\'stage\' x=\'%.1f\' y=\'%.1f\'>%s</text>"
+                   % (cx, box_top + TITLE_DY + 2, title))
         for j, line in enumerate(wrapped[i]):
-            out.append("    <text class='body' x='%.1f' y='%.1f'>%s</text>"
-                       % (cx, BOX_TOP + TITLE_DY + 20 + j * LINE_H, line))
+            out.append("    <text class=\'body\' x=\'%.1f\' y=\'%.1f\'>%s</text>"
+                       % (cx, box_top + TITLE_DY + 20 + j * LINE_H, line))
         out.append("  </g>")
 
     out.append('</svg>')

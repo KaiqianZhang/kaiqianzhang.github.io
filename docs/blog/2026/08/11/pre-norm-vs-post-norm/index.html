@@ -109,59 +109,73 @@
 <h2 id='1-the-ritual-nobody-could-explain'>1. The Ritual Nobody Could Explain</h2>
 <p>For three years, training a transformer meant a ritual nobody could explain. The arrow labels are the history; the boxes its dates.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of normalizer placement: warm-up appears in 2017, the rearrangement spreads in 2018 to 2019, Xiong et al. explain it in 2020, pre-norm is the default after.'>
-      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
-      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
-      <text class='why' x='189.5' y='27'>nobody could say what it was for</text>
-      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
-      <text class='why' x='380.0' y='27'>it worked, unexplained</text>
-      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
-      <text class='why' x='570.5' y='27'>a folk remedy becomes a rule</text>
+    <svg viewBox='0 0 760 178' role='img' aria-label='Roadmap of normalizer placement: warm-up appears in 2017, the rearrangement spreads in 2018 to 2019, Xiong et al. explain it in 2020, pre-norm is the default after.'>
+      <path class='spine' d='M94.2,52.4 Q380.1,53.0 666.1,52.3'/>
+      <path class='head' d='M178.3,51.5 Q189.0,51.5 199.8,51.9'/>
+      <path class='head' d='M178.5,52.3 Q189.5,52.4 200.5,52.0'/>
+      <path class='head' d='M200.2,52.3 Q198.2,54.1 196.0,55.8'/>
+      <path class='head' d='M199.9,51.6 Q197.4,50.4 194.8,49.6'/>
+      <text class='why' x='189.5' y='27.0'>nobody could say what it was</text>
+      <text class='why' x='189.5' y='39.0'>for</text>
+      <path class='head' d='M368.6,51.9 Q379.7,52.2 390.7,51.9'/>
+      <path class='head' d='M368.4,51.5 Q379.7,52.2 391.0,52.4'/>
+      <path class='head' d='M391.3,51.5 Q388.2,52.9 385.3,54.8'/>
+      <path class='head' d='M390.7,51.9 Q388.1,51.0 385.8,49.5'/>
+      <text class='why' x='380.0' y='39.0'>it worked, unexplained</text>
+      <path class='head' d='M559.7,52.1 Q570.9,52.2 582.0,52.0'/>
+      <path class='head' d='M559.3,52.1 Q570.4,51.8 581.6,51.9'/>
+      <path class='head' d='M581.0,52.2 Q578.2,53.3 575.9,55.2'/>
+      <path class='head' d='M581.7,51.6 Q579.5,50.1 576.9,49.2'/>
+      <text class='why' x='570.5' y='39.0'>a folk remedy becomes a rule</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='94.2' y='65.0'>2017</text>
-        <text class='stage' x='94.2' y='79.0'>warm-up appears</text>
-        <text class='body' x='94.2' y='97.0'>The Transformer needs a</text>
-        <text class='body' x='94.2' y='111.5'>learning rate that ramps</text>
-        <text class='body' x='94.2' y='126.0'>for 4,000 steps. Offered as</text>
-        <text class='body' x='94.2' y='140.5'>recipe, not finding.</text>
+        <rect class='hit' x='6.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M12.4,67.2 Q93.5,66.5 174.7,67.2 Q181.7,67.2 181.7,74.2 Q180.7,118.4 181.7,162.6 Q181.7,169.6 174.7,169.6 Q93.5,169.5 12.4,169.6 Q5.4,169.6 5.4,162.6 Q5.3,118.4 5.4,74.2 Q5.4,67.2 12.4,67.2'/>
+        <path class='box' d='M12.5,67.2 Q93.9,66.3 175.4,67.2 Q182.4,67.2 182.4,74.2 Q182.2,118.1 182.4,162.0 Q182.4,169.0 175.4,169.0 Q93.9,168.4 12.5,169.0 Q5.5,169.0 5.5,162.0 Q5.9,118.1 5.5,74.2 Q5.5,67.2 12.5,67.2'/>
+        <text class='yr' x='94.2' y='77.0'>2017</text>
+        <text class='stage' x='94.2' y='91.0'>warm-up appears</text>
+        <text class='body' x='94.2' y='109.0'>The Transformer needs a</text>
+        <text class='body' x='94.2' y='123.5'>learning rate that ramps</text>
+        <text class='body' x='94.2' y='138.0'>for 4,000 steps. Offered as</text>
+        <text class='body' x='94.2' y='152.5'>recipe, not finding.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-        <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='284.8' y='65.0'>2018-19</text>
-        <text class='stage' x='284.8' y='79.0'>a quiet rearrangement</text>
-        <text class='body' x='284.8' y='97.0'>Baevski and Auli, the</text>
-        <text class='body' x='284.8' y='111.5'>Sparse Transformer, GPT-2:</text>
-        <text class='body' x='284.8' y='126.0'>the normalizer moves into</text>
-        <text class='body' x='284.8' y='140.5'>the branch. In none of them</text>
-        <text class='body' x='284.8' y='155.0'>is it the headline.</text>
+        <rect class='hit' x='196.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M203.3,68.7 Q284.8,68.1 366.3,68.7 Q373.3,68.7 373.3,75.7 Q372.6,119.0 373.3,162.3 Q373.3,169.3 366.3,169.3 Q284.8,168.4 203.3,169.3 Q196.3,169.3 196.3,162.3 Q196.8,119.0 196.3,75.7 Q196.3,68.7 203.3,68.7'/>
+        <path class='box' d='M203.6,67.3 Q285.2,67.2 366.7,67.3 Q373.7,67.3 373.7,74.3 Q374.0,118.8 373.7,163.2 Q373.7,170.2 366.7,170.2 Q285.2,170.5 203.6,170.2 Q196.6,170.2 196.6,163.2 Q195.9,118.8 196.6,74.3 Q196.6,67.3 203.6,67.3'/>
+        <text class='yr' x='284.8' y='77.0'>2018-19</text>
+        <text class='stage' x='284.8' y='91.0'>a quiet rearrangement</text>
+        <text class='body' x='284.8' y='109.0'>Baevski and Auli, the</text>
+        <text class='body' x='284.8' y='123.5'>Sparse Transformer, GPT-2:</text>
+        <text class='body' x='284.8' y='138.0'>the normalizer moves into</text>
+        <text class='body' x='284.8' y='152.5'>the branch. In none of them</text>
+        <text class='body' x='284.8' y='167.0'>is it the headline.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-        <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='475.2' y='65.0'>2020</text>
-        <text class='stage' x='475.2' y='79.0'>someone works out why</text>
-        <text class='body' x='475.2' y='97.0'>Xiong et al.: at</text>
-        <text class='body' x='475.2' y='111.5'>initialization post-norm</text>
-        <text class='body' x='475.2' y='126.0'>gradients near the output</text>
-        <text class='body' x='475.2' y='140.5'>are large, so warm-up is</text>
-        <text class='body' x='475.2' y='155.0'>the workaround.</text>
+        <rect class='hit' x='387.0' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M393.7,68.3 Q474.8,68.5 555.8,68.3 Q562.8,68.3 562.8,75.3 Q563.5,118.8 562.8,162.3 Q562.8,169.3 555.8,169.3 Q474.8,169.5 393.7,169.3 Q386.7,169.3 386.7,162.3 Q385.9,118.8 386.7,75.3 Q386.7,68.3 393.7,68.3'/>
+        <path class='box' d='M393.2,67.7 Q474.6,68.6 555.9,67.7 Q562.9,67.7 562.9,74.7 Q563.5,119.0 562.9,163.2 Q562.9,170.2 555.9,170.2 Q474.6,169.7 393.2,170.2 Q386.2,170.2 386.2,163.2 Q385.5,119.0 386.2,74.7 Q386.2,67.7 393.2,67.7'/>
+        <text class='yr' x='475.2' y='77.0'>2020</text>
+        <text class='stage' x='475.2' y='91.0'>someone works out why</text>
+        <text class='body' x='475.2' y='109.0'>Xiong et al.: at</text>
+        <text class='body' x='475.2' y='123.5'>initialization post-norm</text>
+        <text class='body' x='475.2' y='138.0'>gradients near the output</text>
+        <text class='body' x='475.2' y='152.5'>are large, so warm-up is</text>
+        <text class='body' x='475.2' y='167.0'>the workaround.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30' width='176.5' height='125.5'/>
-        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-        <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
-        <text class='yr' x='665.8' y='65.0'>2020-</text>
-        <text class='stage' x='665.8' y='79.0'>pre-norm by default</text>
-        <text class='body' x='665.8' y='97.0'>GPT-3, LLaMA, Mistral,</text>
-        <text class='body' x='665.8' y='111.5'>Qwen, Gemma, DeepSeek.</text>
-        <text class='body' x='665.8' y='126.0'>Then, from 2022, people</text>
-        <text class='body' x='665.8' y='140.5'>begin moving it back.</text>
+        <rect class='hit' x='577.5' y='42.0' width='176.5' height='125.5'/>
+        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M583.8,68.1 Q665.6,68.7 747.4,68.1 Q754.4,68.1 754.4,75.1 Q754.3,119.2 754.4,163.2 Q754.4,170.2 747.4,170.2 Q665.6,170.0 583.8,170.2 Q576.8,170.2 576.8,163.2 Q576.6,119.2 576.8,75.1 Q576.8,68.1 583.8,68.1'/>
+        <path class='box' d='M584.6,67.8 Q666.2,67.2 747.9,67.8 Q754.9,67.8 754.9,74.8 Q754.7,118.7 754.9,162.6 Q754.9,169.6 747.9,169.6 Q666.2,169.4 584.6,169.6 Q577.6,169.6 577.6,162.6 Q577.8,118.7 577.6,74.8 Q577.6,67.8 584.6,67.8'/>
+        <text class='yr' x='665.8' y='77.0'>2020-</text>
+        <text class='stage' x='665.8' y='91.0'>pre-norm by default</text>
+        <text class='body' x='665.8' y='109.0'>GPT-3, LLaMA, Mistral,</text>
+        <text class='body' x='665.8' y='123.5'>Qwen, Gemma, DeepSeek.</text>
+        <text class='body' x='665.8' y='138.0'>Then, from 2022, people</text>
+        <text class='body' x='665.8' y='152.5'>begin moving it back.</text>
       </g>
     </svg>
 </div>

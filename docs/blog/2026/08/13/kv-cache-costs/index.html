@@ -49,7 +49,7 @@
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
-                    <p>16 min read</p>
+                    <p>17 min read</p>
                 </div>
                 <div class='byline'>
                     <h3>Tags</h3>
@@ -85,95 +85,127 @@ $$
 <p>For Llama 3 8B, with 32 layers, 8 key-value heads and 128 numbers per head, that comes to 128 KiB for every token. For Llama 3 70B it is 320 KiB, so a conversation that fills its 128K-token context window — 131,072 tokens, since these are always powers of two — is sitting on exactly 40 GiB. A <strong>context window</strong> is just the model's limit on how much text it can consider at once.</p>
 <p>Two things about that number matter, and the whole of this post is really about the second. The first is that it is large. The second is that it belongs to <em>one conversation</em>, and nobody else can touch it.</p>
 <p>One last piece of vocabulary, since I will lean on it. Answering happens in two phases that behave nothing alike. <strong>Prefill</strong> is the model reading your prompt, which it can do in one pass because the whole prompt is already there. <strong>Decode</strong> is the model writing the answer, one token at a time, because it cannot start the second token until it has seen the first. Everything expensive in this post happens during decode.</p>
-<div class='loop-anim'>
-    <svg viewBox='0 0 720 210' role='img'
-         aria-label='One block of model weights, read by every conversation on the machine, beside four separate key-value caches, one per conversation, each growing on its own and usable by nobody else.'>
-        <text class='step' x='8' y='26'>shared by everyone</text>
-        <rect class='gu-w' x='8' y='38' width='150' height='150' rx='6'/>
-        <text class='gu-lbl' x='83' y='105'>model weights</text>
-        <text class='gu-lbl' x='83' y='122' font-weight='400'>read once per step</text>
-        <text class='step' x='196' y='26'>one per conversation, shared with nobody</text>
-        <rect class='gu-room' x='196' y='38' width='516' height='32' rx='4'/>
-        <rect class='gu-c g1' x='198' y='40' width='512' height='28' rx='3'/>
-        <rect class='gu-room' x='196' y='78' width='516' height='32' rx='4'/>
-        <rect class='gu-c g2' x='198' y='80' width='512' height='28' rx='3'/>
-        <rect class='gu-room' x='196' y='118' width='516' height='32' rx='4'/>
-        <rect class='gu-c g3' x='198' y='120' width='512' height='28' rx='3'/>
-        <rect class='gu-room' x='196' y='158' width='516' height='32' rx='4'/>
-        <rect class='gu-c g4' x='198' y='160' width='512' height='28' rx='3'/>
-        <text class='note' x='454' y='206'>every one of these has to be read on every single step, too</text>
+<div class='sketch'>
+    <svg viewBox='0 0 720 222' role='img' aria-label='One block of model weights read by every conversation, beside four separate caches of different sizes, one per conversation and usable by nobody else.'>
+      <text class='sk-lbl' x='14.0' y='24.0' text-anchor='start'>shared by everyone</text>
+      <path class='sk-s3' d='M21.5,35.3 Q97.4,34.4 173.2,35.3 Q181.2,35.3 181.2,43.3 Q181.8,109.9 181.2,176.6 Q181.2,184.6 173.2,184.6 Q97.4,185.0 21.5,184.6 Q13.5,184.6 13.5,176.6 Q12.6,109.9 13.5,43.3 Q13.5,35.3 21.5,35.3'/>
+      <path class='sk-s3' d='M21.6,35.8 Q98.1,36.5 174.7,35.8 Q182.7,35.8 182.7,43.8 Q182.4,110.3 182.7,176.8 Q182.7,184.8 174.7,184.8 Q98.1,184.0 21.6,184.8 Q13.6,184.8 13.6,176.8 Q14.5,110.3 13.6,43.8 Q13.6,35.8 21.6,35.8'/>
+      <text class='sk-t' x='98.0' y='108.0' text-anchor='middle'>model weights</text>
+      <text class='sk-sub' x='98.0' y='123.0' text-anchor='middle'>read once per step</text>
+      <text class='sk-lbl' x='212.0' y='24.0' text-anchor='start'>one per conversation, shared with nobody</text>
+      <path class='sk-faint' d='M217.9,36.5 Q459.1,37.4 700.3,36.5 Q706.3,36.5 706.3,42.5 Q707.2,50.9 706.3,59.3 Q706.3,65.3 700.3,65.3 Q459.1,64.7 217.9,65.3 Q211.9,65.3 211.9,59.3 Q211.9,50.9 211.9,42.5 Q211.9,36.5 217.9,36.5'/>
+      <path class='sk-faint' d='M218.3,36.8 Q459.2,36.9 700.1,36.8 Q706.1,36.8 706.1,42.8 Q705.7,51.3 706.1,59.8 Q706.1,65.8 700.1,65.8 Q459.2,65.9 218.3,65.8 Q212.3,65.8 212.3,59.8 Q212.9,51.3 212.3,42.8 Q212.3,36.8 218.3,36.8'/>
+      <rect x='214.0' y='38.0' width='430.0' height='26.0' rx='5' fill='#8C77BC' stroke='none'/>
+      <path class='sk-s' d='M218.5,37.4 Q428.6,36.7 638.7,37.4 Q643.7,37.4 643.7,42.4 Q644.0,50.5 643.7,58.5 Q643.7,63.5 638.7,63.5 Q428.6,64.2 218.5,63.5 Q213.5,63.5 213.5,58.5 Q212.7,50.5 213.5,42.4 Q213.5,37.4 218.5,37.4'/>
+      <path class='sk-s' d='M219.8,38.3 Q429.8,38.9 639.8,38.3 Q644.8,38.3 644.8,43.3 Q644.1,50.8 644.8,58.2 Q644.8,63.2 639.8,63.2 Q429.8,63.0 219.8,63.2 Q214.8,63.2 214.8,58.2 Q214.6,50.8 214.8,43.3 Q214.8,38.3 219.8,38.3'/>
+      <text class='sk-in' x='226.0' y='56.0' text-anchor='start'>conversation 1</text>
+      <path class='sk-faint' d='M218.1,74.0 Q458.7,73.9 699.3,74.0 Q705.3,74.0 705.3,80.0 Q705.6,89.3 705.3,98.6 Q705.3,104.6 699.3,104.6 Q458.7,104.8 218.1,104.6 Q212.1,104.6 212.1,98.6 Q211.8,89.3 212.1,80.0 Q212.1,74.0 218.1,74.0'/>
+      <path class='sk-faint' d='M217.7,74.9 Q458.9,74.3 700.0,74.9 Q706.0,74.9 706.0,80.9 Q705.4,89.4 706.0,98.0 Q706.0,104.0 700.0,104.0 Q458.9,103.2 217.7,104.0 Q211.7,104.0 211.7,98.0 Q211.3,89.4 211.7,80.9 Q211.7,74.9 217.7,74.9'/>
+      <rect x='214.0' y='76.0' width='300.0' height='26.0' rx='5' fill='#8C77BC' stroke='none'/>
+      <path class='sk-s' d='M219.1,76.3 Q364.3,75.7 509.6,76.3 Q514.6,76.3 514.6,81.3 Q515.4,89.5 514.6,97.7 Q514.6,102.7 509.6,102.7 Q364.3,103.1 219.1,102.7 Q214.1,102.7 214.1,97.7 Q214.7,89.5 214.1,81.3 Q214.1,76.3 219.1,76.3'/>
+      <path class='sk-s' d='M218.5,76.8 Q363.9,76.5 509.3,76.8 Q514.3,76.8 514.3,81.8 Q514.9,89.4 514.3,96.9 Q514.3,101.9 509.3,101.9 Q363.9,101.2 218.5,101.9 Q213.5,101.9 213.5,96.9 Q213.7,89.4 213.5,81.8 Q213.5,76.8 218.5,76.8'/>
+      <text class='sk-in' x='226.0' y='94.0' text-anchor='start'>conversation 2</text>
+      <path class='sk-faint' d='M218.0,112.8 Q458.8,112.0 699.7,112.8 Q705.7,112.8 705.7,118.8 Q706.3,127.8 705.7,136.8 Q705.7,142.8 699.7,142.8 Q458.8,143.3 218.0,142.8 Q212.0,142.8 212.0,136.8 Q211.9,127.8 212.0,118.8 Q212.0,112.8 218.0,112.8'/>
+      <path class='sk-faint' d='M218.9,112.1 Q459.1,112.3 699.3,112.1 Q705.3,112.1 705.3,118.1 Q704.9,126.8 705.3,135.6 Q705.3,141.6 699.3,141.6 Q459.1,142.5 218.9,141.6 Q212.9,141.6 212.9,135.6 Q212.7,126.8 212.9,118.1 Q212.9,112.1 218.9,112.1'/>
+      <rect x='214.0' y='114.0' width='496.0' height='26.0' rx='5' fill='#8C77BC' stroke='none'/>
+      <path class='sk-s' d='M219.1,113.7 Q462.4,113.0 705.6,113.7 Q710.6,113.7 710.6,118.7 Q711.2,127.0 710.6,135.3 Q710.6,140.3 705.6,140.3 Q462.4,140.0 219.1,140.3 Q214.1,140.3 214.1,135.3 Q213.8,127.0 214.1,118.7 Q214.1,113.7 219.1,113.7'/>
+      <path class='sk-s' d='M219.3,114.1 Q462.6,115.0 705.9,114.1 Q710.9,114.1 710.9,119.1 Q710.4,127.1 710.9,135.1 Q710.9,140.1 705.9,140.1 Q462.6,140.5 219.3,140.1 Q214.3,140.1 214.3,135.1 Q214.6,127.1 214.3,119.1 Q214.3,114.1 219.3,114.1'/>
+      <text class='sk-in' x='226.0' y='132.0' text-anchor='start'>conversation 3</text>
+      <path class='sk-faint' d='M218.0,149.7 Q458.9,149.2 699.8,149.7 Q705.8,149.7 705.8,155.7 Q705.0,164.9 705.8,174.1 Q705.8,180.1 699.8,180.1 Q458.9,179.2 218.0,180.1 Q212.0,180.1 212.0,174.1 Q211.4,164.9 212.0,155.7 Q212.0,149.7 218.0,149.7'/>
+      <path class='sk-faint' d='M217.1,150.5 Q458.4,150.9 699.6,150.5 Q705.6,150.5 705.6,156.5 Q705.4,165.4 705.6,174.2 Q705.6,180.2 699.6,180.2 Q458.4,179.6 217.1,180.2 Q211.1,180.2 211.1,174.2 Q210.3,165.4 211.1,156.5 Q211.1,150.5 217.1,150.5'/>
+      <rect x='214.0' y='152.0' width='210.0' height='26.0' rx='5' fill='#8C77BC' stroke='none'/>
+      <path class='sk-s' d='M219.3,151.6 Q319.4,151.0 419.6,151.6 Q424.6,151.6 424.6,156.6 Q423.7,164.7 424.6,172.8 Q424.6,177.8 419.6,177.8 Q319.4,176.9 219.3,177.8 Q214.3,177.8 214.3,172.8 Q215.2,164.7 214.3,156.6 Q214.3,151.6 219.3,151.6'/>
+      <path class='sk-s' d='M218.3,152.6 Q318.4,152.7 418.6,152.6 Q423.6,152.6 423.6,157.6 Q423.9,165.1 423.6,172.6 Q423.6,177.6 418.6,177.6 Q318.4,177.3 218.3,177.6 Q213.3,177.6 213.3,172.6 Q213.5,165.1 213.3,157.6 Q213.3,152.6 218.3,152.6'/>
+      <text class='sk-in' x='226.0' y='170.0' text-anchor='start'>conversation 4</text>
+      <text class='sk-note' x='360.0' y='208.0' text-anchor='middle'>every one of these is read on every step, too</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
         The asymmetry this whole post is about. On the left, one set of
         weights, read once per step no matter how many people are being
         served — the more of them there are, the better that bargain looks. On
-        the right, one cache per conversation, growing as each one goes on,
-        and useful to nobody but its owner. Adding a fifth conversation adds a
-        fifth bar, and every bar has to be read on every step.
+        the right, one cache per conversation, each a different size because
+        each conversation is a different length, and each useful to nobody but
+        its owner. Adding a fifth conversation adds a fifth bar, and every bar
+        has to be read on every step.
     </div>
 </div>
 <h2 id='1-four-ways-to-fight-the-same-number'>1. Four Ways to Fight the Same Number</h2>
 <p>The story of the last few years is a sequence of attempts to make that number smaller, or at least cheaper to live with.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 194' role='img' aria-label='Roadmap of the fight against the cost of the KV cache: multi-query attention in 2019, grouped-query in 2023, paging in 2023, and latent compression in 2024.'>
-      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
-      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
-      <text class='why' x='189.5' y='27'>one shared head was too few</text>
-      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
-      <text class='why' x='380.0' y='27'>a smaller cache, still allocated badly</text>
-      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
-      <text class='why' x='570.5' y='27'>better layout, but the tensor was still large</text>
+    <svg viewBox='0 0 760 206' role='img' aria-label='Roadmap of the fight against the cost of the KV cache: multi-query attention in 2019, grouped-query in 2023, paging in 2023, and latent compression in 2024.'>
+      <path class='spine' d='M94.2,51.4 Q379.8,51.8 665.4,51.9'/>
+      <path class='head' d='M178.3,52.3 Q189.5,52.3 200.8,51.8'/>
+      <path class='head' d='M179.0,51.6 Q189.9,52.5 200.7,52.6'/>
+      <path class='head' d='M200.5,52.0 Q198.3,53.8 195.8,55.2'/>
+      <path class='head' d='M200.5,52.3 Q198.3,50.3 195.7,48.8'/>
+      <text class='why' x='189.5' y='39.0'>one shared head was too few</text>
+      <path class='head' d='M369.3,52.1 Q379.9,52.7 390.5,52.7'/>
+      <path class='head' d='M368.9,52.5 Q380.2,52.6 391.5,52.6'/>
+      <path class='head' d='M390.8,51.7 Q388.3,53.0 385.8,54.5'/>
+      <path class='head' d='M390.9,51.7 Q388.6,50.5 386.5,48.9'/>
+      <text class='why' x='380.0' y='27.0'>a smaller cache, still</text>
+      <text class='why' x='380.0' y='39.0'>allocated badly</text>
+      <path class='head' d='M559.7,51.9 Q570.9,52.0 582.1,51.4'/>
+      <path class='head' d='M560.0,52.2 Q570.5,52.4 581.0,51.5'/>
+      <path class='head' d='M582.0,52.6 Q579.2,53.3 576.5,54.6'/>
+      <path class='head' d='M581.5,52.3 Q579.0,50.8 576.9,48.8'/>
+      <text class='why' x='570.5' y='27.0'>better layout, but the tensor</text>
+      <text class='why' x='570.5' y='39.0'>was still large</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='176.5' height='154.5'/>
-        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='176.5' height='130.5' rx='7'/>
-        <text class='yr' x='94.2' y='65.0'>2019</text>
-        <text class='stage' x='94.2' y='79.0'>share one head</text>
-        <text class='body' x='94.2' y='97.0'>Multi-query attention gives</text>
-        <text class='body' x='94.2' y='111.5'>every query head the same</text>
-        <text class='body' x='94.2' y='126.0'>keys and values, dividing</text>
-        <text class='body' x='94.2' y='140.5'>the cache by the head</text>
-        <text class='body' x='94.2' y='155.0'>count. Quality slips.</text>
+        <rect class='hit' x='6.0' y='42.0' width='176.5' height='154.5'/>
+        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M13.7,67.5 Q94.4,68.1 175.0,67.5 Q182.0,67.5 182.0,74.5 Q182.2,132.9 182.0,191.3 Q182.0,198.3 175.0,198.3 Q94.4,197.9 13.7,198.3 Q6.7,198.3 6.7,191.3 Q7.0,132.9 6.7,74.5 Q6.7,67.5 13.7,67.5'/>
+        <path class='box' d='M13.7,68.8 Q95.0,68.2 176.3,68.8 Q183.3,68.8 183.3,75.8 Q182.9,133.6 183.3,191.5 Q183.3,198.5 176.3,198.5 Q95.0,198.7 13.7,198.5 Q6.7,198.5 6.7,191.5 Q7.0,133.6 6.7,75.8 Q6.7,68.8 13.7,68.8'/>
+        <text class='yr' x='94.2' y='77.0'>2019</text>
+        <text class='stage' x='94.2' y='91.0'>share one head</text>
+        <text class='body' x='94.2' y='109.0'>Multi-query attention gives</text>
+        <text class='body' x='94.2' y='123.5'>every query head the same</text>
+        <text class='body' x='94.2' y='138.0'>keys and values, dividing</text>
+        <text class='body' x='94.2' y='152.5'>the cache by the head</text>
+        <text class='body' x='94.2' y='167.0'>count. Quality slips.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30' width='176.5' height='154.5'/>
-        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-        <rect class='box' x='196.5' y='56' width='176.5' height='130.5' rx='7'/>
-        <text class='yr' x='284.8' y='65.0'>2023</text>
-        <text class='stage' x='284.8' y='79.0'>share a few</text>
-        <text class='body' x='284.8' y='97.0'>Grouped-query attention</text>
-        <text class='body' x='284.8' y='111.5'>gives each group of query</text>
-        <text class='body' x='284.8' y='126.0'>heads its own, uptrained</text>
-        <text class='body' x='284.8' y='140.5'>from a normal checkpoint</text>
-        <text class='body' x='284.8' y='155.0'>with 5% of pretraining</text>
-        <text class='body' x='284.8' y='169.5'>compute. Llama 3 and</text>
-        <text class='body' x='284.8' y='184.0'>Mistral ship it.</text>
+        <rect class='hit' x='196.5' y='42.0' width='176.5' height='154.5'/>
+        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M203.9,68.7 Q285.1,69.1 366.3,68.7 Q373.3,68.7 373.3,75.7 Q372.4,133.4 373.3,191.1 Q373.3,198.1 366.3,198.1 Q285.1,197.4 203.9,198.1 Q196.9,198.1 196.9,191.1 Q197.8,133.4 196.9,75.7 Q196.9,68.7 203.9,68.7'/>
+        <path class='box' d='M202.8,68.0 Q284.5,67.2 366.1,68.0 Q373.1,68.0 373.1,75.0 Q372.5,133.1 373.1,191.2 Q373.1,198.2 366.1,198.2 Q284.5,197.3 202.8,198.2 Q195.8,198.2 195.8,191.2 Q195.1,133.1 195.8,75.0 Q195.8,68.0 202.8,68.0'/>
+        <text class='yr' x='284.8' y='77.0'>2023</text>
+        <text class='stage' x='284.8' y='91.0'>share a few</text>
+        <text class='body' x='284.8' y='109.0'>Grouped-query attention</text>
+        <text class='body' x='284.8' y='123.5'>gives each group of query</text>
+        <text class='body' x='284.8' y='138.0'>heads its own, uptrained</text>
+        <text class='body' x='284.8' y='152.5'>from a normal checkpoint</text>
+        <text class='body' x='284.8' y='167.0'>with 5% of pretraining</text>
+        <text class='body' x='284.8' y='181.5'>compute. Llama 3 and</text>
+        <text class='body' x='284.8' y='196.0'>Mistral ship it.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30' width='176.5' height='154.5'/>
-        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-        <rect class='box' x='387.0' y='56' width='176.5' height='130.5' rx='7'/>
-        <text class='yr' x='475.2' y='65.0'>2023</text>
-        <text class='stage' x='475.2' y='79.0'>stop reserving it</text>
-        <text class='body' x='475.2' y='97.0'>vLLM hands the cache out in</text>
-        <text class='body' x='475.2' y='111.5'>small blocks as it is</text>
-        <text class='body' x='475.2' y='126.0'>needed, the way an</text>
-        <text class='body' x='475.2' y='140.5'>operating system pages</text>
-        <text class='body' x='475.2' y='155.0'>memory. Nothing gets</text>
-        <text class='body' x='475.2' y='169.5'>smaller.</text>
+        <rect class='hit' x='387.0' y='42.0' width='176.5' height='154.5'/>
+        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
+        <path class='box' d='M394.3,68.7 Q475.2,68.6 556.2,68.7 Q563.2,68.7 563.2,75.7 Q563.4,133.5 563.2,191.3 Q563.2,198.3 556.2,198.3 Q475.2,198.8 394.3,198.3 Q387.3,198.3 387.3,191.3 Q386.6,133.5 387.3,75.7 Q387.3,68.7 394.3,68.7'/>
+        <path class='box' d='M393.4,68.4 Q474.7,69.2 556.0,68.4 Q563.0,68.4 563.0,75.4 Q562.9,133.1 563.0,190.8 Q563.0,197.8 556.0,197.8 Q474.7,198.1 393.4,197.8 Q386.4,197.8 386.4,190.8 Q385.7,133.1 386.4,75.4 Q386.4,68.4 393.4,68.4'/>
+        <text class='yr' x='475.2' y='77.0'>2023</text>
+        <text class='stage' x='475.2' y='91.0'>stop reserving it</text>
+        <text class='body' x='475.2' y='109.0'>vLLM hands the cache out in</text>
+        <text class='body' x='475.2' y='123.5'>small blocks as it is</text>
+        <text class='body' x='475.2' y='138.0'>needed, the way an</text>
+        <text class='body' x='475.2' y='152.5'>operating system pages</text>
+        <text class='body' x='475.2' y='167.0'>memory. Nothing gets</text>
+        <text class='body' x='475.2' y='181.5'>smaller.</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30' width='176.5' height='154.5'/>
-        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-        <rect class='box' x='577.5' y='56' width='176.5' height='130.5' rx='7'/>
-        <text class='yr' x='665.8' y='65.0'>2024</text>
-        <text class='stage' x='665.8' y='79.0'>compress it</text>
-        <text class='body' x='665.8' y='97.0'>DeepSeek squeezes the keys</text>
-        <text class='body' x='665.8' y='111.5'>and values of a token into</text>
-        <text class='body' x='665.8' y='126.0'>one shared latent vector,</text>
-        <text class='body' x='665.8' y='140.5'>and reconstructs them on</text>
-        <text class='body' x='665.8' y='155.0'>the way in.</text>
+        <rect class='hit' x='577.5' y='42.0' width='176.5' height='154.5'/>
+        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
+        <path class='box' d='M584.7,67.3 Q666.1,67.2 747.6,67.3 Q754.6,67.3 754.6,74.3 Q754.3,132.7 754.6,191.1 Q754.6,198.1 747.6,198.1 Q666.1,197.3 584.7,198.1 Q577.7,198.1 577.7,191.1 Q578.4,132.7 577.7,74.3 Q577.7,67.3 584.7,67.3'/>
+        <path class='box' d='M584.0,68.7 Q665.8,68.5 747.5,68.7 Q754.5,68.7 754.5,75.7 Q754.2,133.4 754.5,191.2 Q754.5,198.2 747.5,198.2 Q665.8,197.3 584.0,198.2 Q577.0,198.2 577.0,191.2 Q577.5,133.4 577.0,75.7 Q577.0,68.7 584.0,68.7'/>
+        <text class='yr' x='665.8' y='77.0'>2024</text>
+        <text class='stage' x='665.8' y='91.0'>compress it</text>
+        <text class='body' x='665.8' y='109.0'>DeepSeek squeezes the keys</text>
+        <text class='body' x='665.8' y='123.5'>and values of a token into</text>
+        <text class='body' x='665.8' y='138.0'>one shared latent vector,</text>
+        <text class='body' x='665.8' y='152.5'>and reconstructs them on</text>
+        <text class='body' x='665.8' y='167.0'>the way in.</text>
       </g>
     </svg>
 </div>
@@ -382,8 +414,8 @@ $$
     s += "<circle cx='" + px(b).toFixed(1) + "' cy='" + py(cur.tps).toFixed(1) +
          "' r='5' fill='#A8443E' stroke='#FFFFFF' stroke-width='1.6'/>";
     s += "<text class='axlabel' x='" + X0 + "' y='" + (Y0 + 22) + "'>batch size &#8594;</text>";
-    s += "<text class='axlabel' x='" + (X0 - 8) + "' y='" + (YTOP - 8) +
-         "' text-anchor='end'>tokens/s, all sequences</text>";
+    s += "<text class='axlabel' x='" + X0 + "' y='" + (YTOP - 10) +
+         "'>tokens/s, summed over every conversation</text>";
     var tot = cur.w + cur.c, BY = 236, W = X1 - X0;
     s += "<rect x='" + X0 + "' y='" + BY + "' width='" + (W * cur.w / tot).toFixed(1) +
          "' height='26' rx='3' fill='#3E6491' fill-opacity='0.85'/>";

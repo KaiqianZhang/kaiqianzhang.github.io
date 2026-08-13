@@ -63,52 +63,69 @@
 <p>Each idea in the chain answers a specific, nameable failure in the one before it. This post walks that chain, with the map's own structure as the outline. The whole of it fits on one line:</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 122' role='img' aria-label='Roadmap: counts, then vectors, then memory, then context, then all at once. Each step is forced by a failure in the one before it.'>
-      <line class='spine' x1='75.2' y1='40' x2='684.8' y2='40'/>
-      <polygon class='head' points='160.4,40 151.4,36 151.4,44'/>
-      <text class='why' x='151.4' y='27'>no similarity</text>
-      <polygon class='head' points='312.8,40 303.8,36 303.8,44'/>
-      <text class='why' x='303.8' y='27'>no order</text>
-      <polygon class='head' points='465.2,40 456.2,36 456.2,44'/>
-      <text class='why' x='456.2' y='27'>embeddings still static</text>
-      <polygon class='head' points='617.6,40 608.6,36 608.6,44'/>
-      <text class='why' x='608.6' y='27'>sequential</text>
+      <path class='spine' d='M75.2,40.5 Q380.1,40.2 685.0,39.5'/>
+      <path class='head' d='M140.3,39.4 Q151.3,39.3 162.3,40.1'/>
+      <path class='head' d='M141.0,40.1 Q152.0,40.4 163.0,39.7'/>
+      <path class='head' d='M162.4,40.6 Q160.0,42.0 157.9,43.8'/>
+      <path class='head' d='M162.2,40.6 Q160.1,38.9 158.0,37.3'/>
+      <text class='why' x='151.4' y='27.0'>no similarity</text>
+      <path class='head' d='M293.2,40.1 Q304.2,39.8 315.1,40.3'/>
+      <path class='head' d='M292.8,40.0 Q303.5,39.8 314.2,39.9'/>
+      <path class='head' d='M314.9,40.0 Q312.0,41.5 309.2,43.1'/>
+      <path class='head' d='M314.6,40.7 Q312.5,38.6 310.3,36.5'/>
+      <text class='why' x='303.8' y='27.0'>no order</text>
+      <path class='head' d='M445.3,39.6 Q456.3,39.6 467.3,39.9'/>
+      <path class='head' d='M444.9,39.5 Q456.3,39.9 467.8,40.4'/>
+      <path class='head' d='M467.5,39.7 Q465.3,41.4 462.7,42.4'/>
+      <path class='head' d='M466.5,40.2 Q464.6,38.2 462.6,36.3'/>
+      <text class='why' x='456.2' y='27.0'>embeddings still static</text>
+      <path class='head' d='M597.3,40.3 Q608.4,39.7 619.5,39.8'/>
+      <path class='head' d='M597.2,40.6 Q608.1,40.8 619.0,40.4'/>
+      <path class='head' d='M619.4,39.8 Q616.7,41.6 614.2,43.7'/>
+      <path class='head' d='M620.0,40.2 Q617.1,38.8 614.2,37.3'/>
+      <text class='why' x='608.6' y='27.0'>sequential</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30' width='138.4' height='82.0'/>
-        <circle class='dot' cx='75.2' cy='40' r='4.5'/>
-        <rect class='box' x='6.0' y='56' width='138.4' height='58.0' rx='7'/>
+        <rect class='hit' x='6.0' y='30.0' width='138.4' height='82.0'/>
+        <circle class='dot' cx='75.2' cy='40.0' r='4.5'/>
+        <path class='box' d='M12.6,55.3 Q74.9,55.9 137.2,55.3 Q144.2,55.3 144.2,62.3 Q144.3,84.6 144.2,106.9 Q144.2,113.9 137.2,113.9 Q74.9,114.6 12.6,113.9 Q5.6,113.9 5.6,106.9 Q6.2,84.6 5.6,62.3 Q5.6,55.3 12.6,55.3'/>
+        <path class='box' d='M13.5,56.4 Q75.0,56.7 136.6,56.4 Q143.6,56.4 143.6,63.4 Q143.5,85.6 143.6,107.7 Q143.6,114.7 136.6,114.7 Q75.0,114.2 13.5,114.7 Q6.5,114.7 6.5,107.7 Q6.7,85.6 6.5,63.4 Q6.5,56.4 13.5,56.4'/>
         <text class='yr' x='75.2' y='65.0'>§1</text>
         <text class='stage' x='75.2' y='79.0'>counts</text>
         <text class='body' x='75.2' y='97.0'>n-gram, NNLM 2003</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='158.4' y='30' width='138.4' height='82.0'/>
-        <circle class='dot' cx='227.6' cy='40' r='4.5'/>
-        <rect class='box' x='158.4' y='56' width='138.4' height='58.0' rx='7'/>
+        <rect class='hit' x='158.4' y='30.0' width='138.4' height='82.0'/>
+        <circle class='dot' cx='227.6' cy='40.0' r='4.5'/>
+        <path class='box' d='M164.9,55.8 Q227.1,55.4 289.3,55.8 Q296.3,55.8 296.3,62.8 Q297.2,84.6 296.3,106.4 Q296.3,113.4 289.3,113.4 Q227.1,113.6 164.9,113.4 Q157.9,113.4 157.9,106.4 Q158.7,84.6 157.9,62.8 Q157.9,55.8 164.9,55.8'/>
+        <path class='box' d='M164.8,56.8 Q227.0,56.8 289.3,56.8 Q296.3,56.8 296.3,63.8 Q297.0,85.8 296.3,107.9 Q296.3,114.9 289.3,114.9 Q227.0,114.7 164.8,114.9 Q157.8,114.9 157.8,107.9 Q157.6,85.8 157.8,63.8 Q157.8,56.8 164.8,56.8'/>
         <text class='yr' x='227.6' y='65.0'>§2</text>
         <text class='stage' x='227.6' y='79.0'>vectors</text>
         <text class='body' x='227.6' y='97.0'>Word2Vec 2013, GloVe</text>
         <text class='body' x='227.6' y='111.5'>2014</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='310.8' y='30' width='138.4' height='82.0'/>
-        <circle class='dot' cx='380.0' cy='40' r='4.5'/>
-        <rect class='box' x='310.8' y='56' width='138.4' height='58.0' rx='7'/>
+        <rect class='hit' x='310.8' y='30.0' width='138.4' height='82.0'/>
+        <circle class='dot' cx='380.0' cy='40.0' r='4.5'/>
+        <path class='box' d='M318.4,56.8 Q380.7,57.5 443.0,56.8 Q450.0,56.8 450.0,63.8 Q450.6,85.7 450.0,107.6 Q450.0,114.6 443.0,114.6 Q380.7,115.2 318.4,114.6 Q311.4,114.6 311.4,107.6 Q311.6,85.7 311.4,63.8 Q311.4,56.8 318.4,56.8'/>
+        <path class='box' d='M318.4,56.6 Q380.2,55.7 441.9,56.6 Q448.9,56.6 448.9,63.6 Q449.6,85.3 448.9,106.9 Q448.9,113.9 441.9,113.9 Q380.2,113.9 318.4,113.9 Q311.4,113.9 311.4,106.9 Q311.9,85.3 311.4,63.6 Q311.4,56.6 318.4,56.6'/>
         <text class='yr' x='380.0' y='65.0'>§3</text>
         <text class='stage' x='380.0' y='79.0'>memory</text>
         <text class='body' x='380.0' y='97.0'>RNN 1990, LSTM 1997</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='463.2' y='30' width='138.4' height='82.0'/>
-        <circle class='dot' cx='532.4' cy='40' r='4.5'/>
-        <rect class='box' x='463.2' y='56' width='138.4' height='58.0' rx='7'/>
+        <rect class='hit' x='463.2' y='30.0' width='138.4' height='82.0'/>
+        <circle class='dot' cx='532.4' cy='40.0' r='4.5'/>
+        <path class='box' d='M470.9,55.5 Q532.5,54.7 594.1,55.5 Q601.1,55.5 601.1,62.5 Q600.2,84.8 601.1,107.0 Q601.1,114.0 594.1,114.0 Q532.5,114.5 470.9,114.0 Q463.9,114.0 463.9,107.0 Q463.0,84.8 463.9,62.5 Q463.9,55.5 470.9,55.5'/>
+        <path class='box' d='M470.3,56.1 Q532.0,56.3 593.7,56.1 Q600.7,56.1 600.7,63.1 Q600.7,85.2 600.7,107.2 Q600.7,114.2 593.7,114.2 Q532.0,114.1 470.3,114.2 Q463.3,114.2 463.3,107.2 Q463.7,85.2 463.3,63.1 Q463.3,56.1 470.3,56.1'/>
         <text class='yr' x='532.4' y='65.0'>§4</text>
         <text class='stage' x='532.4' y='79.0'>context</text>
         <text class='body' x='532.4' y='97.0'>ELMo 2018</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='615.6' y='30' width='138.4' height='82.0'/>
-        <circle class='dot' cx='684.8' cy='40' r='4.5'/>
-        <rect class='box' x='615.6' y='56' width='138.4' height='58.0' rx='7'/>
+        <rect class='hit' x='615.6' y='30.0' width='138.4' height='82.0'/>
+        <circle class='dot' cx='684.8' cy='40.0' r='4.5'/>
+        <path class='box' d='M622.2,56.8 Q684.5,56.1 746.8,56.8 Q753.8,56.8 753.8,63.8 Q754.7,85.6 753.8,107.4 Q753.8,114.4 746.8,114.4 Q684.5,113.6 622.2,114.4 Q615.2,114.4 615.2,107.4 Q615.0,85.6 615.2,63.8 Q615.2,56.8 622.2,56.8'/>
+        <path class='box' d='M621.9,56.1 Q684.2,55.2 746.6,56.1 Q753.6,56.1 753.6,63.1 Q752.9,85.1 753.6,107.1 Q753.6,114.1 746.6,114.1 Q684.2,113.4 621.9,114.1 Q614.9,114.1 614.9,107.1 Q614.1,85.1 614.9,63.1 Q614.9,56.1 621.9,56.1'/>
         <text class='yr' x='684.8' y='65.0'>§5</text>
         <text class='stage' x='684.8' y='79.0'>all at once</text>
         <text class='body' x='684.8' y='97.0'>Transformer 2017</text>
