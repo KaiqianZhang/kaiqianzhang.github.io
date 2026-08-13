@@ -204,6 +204,30 @@ ROADMAPS = {
              'The causal mask has already broken permutation equivariance. '
              'Jamba ships with no encoding; Llama 4 interleaves.'),
         ]),
+
+    'kvcache': dict(
+        label='Roadmap of the KV cache: an unpublished implementation trick '
+              'in 2017, named as a bandwidth cost in 2019, shrunk by grouped '
+              'heads in 2023, and paged or compressed after.',
+        arrows=['the cache outgrew the arithmetic',
+                'one shared head was too few',
+                'a small cache, still allocated badly'],
+        stops=[
+            ('2017-', 'a trick, not a paper',
+             'Implementations keep past keys and values instead of redoing '
+             'them. No paper claims it as a contribution; the name arrives '
+             'around 2022.'),
+            ('2019', 'Shazeer names the cost',
+             'Multi-query attention. Decoding is limited by reloading K and '
+             'V, not by arithmetic, so share one KV head across all queries.'),
+            ('2023', 'GQA splits the difference',
+             'One KV head per group of query heads, uptrained from an MHA '
+             'checkpoint with 5% of pretraining compute. Llama 3 and '
+             'Mistral ship it.'),
+            ('2023-', 'page it, or compress it',
+             'vLLM gives the cache virtual memory and blocks. DeepSeek '
+             'compresses K and V into one latent vector per token.'),
+        ]),
 }
 
 

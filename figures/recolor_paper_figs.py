@@ -176,6 +176,26 @@ im = recolour(im, [('#5e81b5', PRE)])     # the single plotted curve
 im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
     os.path.join(OUT, 'rope-long-term-decay.png'))
 
+# -- Kwon et al. (2023), Figure 2: where the KV cache memory actually goes ---
+# The original gives one category ("External frag. & Others") a grey fill,
+# which this site never allows for data. recolour() deliberately skips
+# near-grey pixels -- they are usually axes and text -- so that bar is mapped
+# separately here, by opacity against white, with dark pixels left alone so
+# the black numerals printed on it survive.
+print('kwon2023-fig2-memory-waste.png')
+im = flatten(os.path.join(SRC, 'kwon2023-fig2-memory-waste.png'))
+im = recolour(im, [('#6aa84f', '#8C77BC'),    # token states -> lavender
+                   ('#edae49', '#B07E55'),    # reservation  -> clay
+                   ('#e63946', '#C48BAC')])   # internal frag -> rose
+a = np.asarray(im).astype(float)
+grey = ((a.max(2) - a.min(2)) < 24) & (a.mean(2) > 150) & (a.mean(2) < 236)
+alpha = ((255.0 - a.mean(2)) / (255.0 - 192.0))[..., None]      # #c0c0c0 fill
+a[grey] = (255.0 - alpha * (255.0 - rgb('#3E6491'))[None, None, :])[grey]
+im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+im = trim(im, pad=10)
+im.save(os.path.join(OUT, 'kvcache-memory-waste.png'))
+print('      %d x %d' % (im.width, im.height))
+
 # -- Mikolov et al. (2013), Figure 1 ----------------------------------------
 # Pure black line art, so there is no hue to swap. Tint it instead: every
 # pixel keeps its darkness and is re-emitted in the site's ink colour.

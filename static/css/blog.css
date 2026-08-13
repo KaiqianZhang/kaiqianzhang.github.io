@@ -1126,3 +1126,112 @@ table td {
   .article .ffn-anim .wire { stroke: #4A4640; }
   .article .ffn-anim .lbl { fill: #D8D4CE; }
 }
+
+/* --------------------------------------------------------------------------
+   The KV cache post. One static schematic of where the cache sits, plus four
+   widgets that share a vocabulary: a cell is either empty, freshly written
+   this step, or kept from an earlier one.
+   -------------------------------------------------------------------------- */
+.article .kv-anim {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 0 6px 0;
+  margin: 34px 0;
+}
+.article .kv-anim svg { width: 100%; height: auto; display: block; }
+.article .kv-anim .wire { stroke: #C9C3BC; stroke-width: 1.8; fill: none; }
+.article .kv-anim .mat { stroke-width: 0; fill-opacity: 0.92; }
+.article .kv-anim .mat.q { fill: #3E6491; }
+.article .kv-anim .mat.k { fill: #8C77BC; }
+.article .kv-anim .mat.v { fill: #8C77BC; }
+.article .kv-anim .mat.o { fill: #22253E; }
+.article .kv-anim .cache {
+  fill: rgba(140, 119, 188, 0.10); stroke: #8C77BC; stroke-width: 1.2;
+}
+.article .kv-anim .row.new { fill: #A8443E; fill-opacity: 0.85; }
+.article .kv-anim .op { fill: none; stroke: #A8443E; stroke-width: 1.8; }
+.article .kv-anim .oplbl {
+  font: 600 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #A8443E; text-anchor: middle;
+}
+.article .kv-anim .mlbl {
+  font: 600 12px -apple-system, Helvetica, arial, sans-serif;
+  fill: #FFFFFF; text-anchor: middle;
+}
+.article .kv-anim .sub { font-size: 8.5px; }
+.article .kv-anim .lbl {
+  font: 600 15px Georgia, serif; fill: #3F3F3F; text-anchor: middle;
+}
+.article .kv-anim .dim {
+  font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C8C8C; text-anchor: middle; letter-spacing: 0.04em;
+}
+.article .kv-anim .clbl {
+  font: 600 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #6B5A93; text-anchor: middle;
+}
+.article .kv-anim .cdim {
+  font: 500 9px ui-monospace, Menlo, monospace;
+  fill: #8C8C8C; text-anchor: middle;
+}
+.article .kv-anim .note {
+  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C8C8C; text-anchor: middle;
+}
+.article .kv-anim .note-hi {
+  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C77BC; text-anchor: middle;
+}
+@media (prefers-color-scheme: dark) {
+  .article .kv-anim .wire { stroke: #4A4640; }
+  .article .kv-anim .lbl { fill: #D8D4CE; }
+  .article .kv-anim .clbl { fill: #B7A7D6; }
+}
+
+/* Shared by the stepper, the mask grid and the allocation strip. */
+.article .knob .btn {
+  font: 500 12.5px -apple-system, Helvetica, arial, sans-serif;
+  color: #FFFFFF; background: #8C77BC; border: 0; border-radius: 4px;
+  padding: 4px 12px; cursor: pointer; min-width: 118px;
+}
+.article .knob .btn:hover { background: #7A66A8; }
+.article .knob .cell, .article .knob .mcell { stroke-width: 0.8; }
+.article .knob .cell.empty, .article .knob .mcell.off {
+  fill: #FFFFFF; stroke: #DEDAD4;
+}
+.article .knob .cell.kept, .article .knob .mcell.kept {
+  fill: #8C77BC; fill-opacity: 0.22; stroke: #8C77BC; stroke-opacity: 0.5;
+}
+.article .knob .cell.fresh, .article .knob .mcell.fresh {
+  fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
+}
+.article .knob .mcell.stale {
+  fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
+}
+.article .knob .num {
+  font: 500 7.5px ui-monospace, Menlo, monospace;
+  fill: #3F3F3F; text-anchor: middle;
+}
+.article .knob .tk {
+  font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #3F3F3F; text-anchor: end;
+}
+.article .knob .tk.off { fill: #C9C3BC; }
+.article .knob .gl {
+  font: 600 10px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+}
+.article .knob .hd {
+  font: 600 10.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
+}
+.article .knob .wbar { fill: #8C77BC; fill-opacity: 0.75; }
+.article .knob .wnum {
+  font: 500 9.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
+}
+.article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
+@media (prefers-color-scheme: dark) {
+  .article .knob .num, .article .knob .tk, .article .knob .wnum { fill: #D8D4CE; }
+  .article .knob .cell.empty, .article .knob .mcell.off {
+    fill: #1B1B1B; stroke: #4A4640;
+  }
+  .article .knob .sep { stroke: #4A4640; }
+}

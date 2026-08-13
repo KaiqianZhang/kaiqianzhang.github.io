@@ -7,6 +7,14 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>The KV Cache</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</guid>
+        <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
+        <description>The buffer that makes generation affordable is also the reason serving a language model is hard.</description>
+    </item>
+
+    <item>
         <title>FFN-SwiGLU</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/13/ffn-swiglu/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/ffn-swiglu/</guid>

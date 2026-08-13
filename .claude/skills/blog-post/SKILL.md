@@ -12,7 +12,8 @@ figure pipeline.
 
 ## Two checkpoints, then run
 
-Do not write the post in one shot. There are exactly two places to stop.
+Do not write the post in one shot. There are exactly two places to stop, and
+the length is settled at the first of them.
 
 **Checkpoint 1 — on activation.** If the topic came with the invocation, do
 not re-ask it. Ask only what you cannot infer, in one round:
@@ -21,6 +22,13 @@ not re-ask it. Ask only what you cannot infer, in one round:
   new one.
 - Publish or keep as `draft: true`.
 - Post icon, only if they want something other than the 🍵 default.
+- **Length — ask this every time, in this first round.** *Is this a long
+  post?* If no, it targets **5–8 minutes** and you trim to that. If yes, ask
+  whether they want **15 minutes or longer**, take the answer as the ceiling,
+  and record it as `length: long` in the front matter. Never infer the answer
+  from how much research later turns up: a large pile of material is a reason
+  to trim, not a licence to run long. Knowing the budget before you research
+  is what stops you assembling a 20-minute post you then have to gut.
 
 **Checkpoint 2 — after research, before writing.** Come back with:
 
@@ -30,27 +38,19 @@ not re-ask it. Ask only what you cannot infer, in one round:
   sections* below. Ask about every drop and every addition — never silently
   do either.
 - The exact figures found, named by paper and figure number, **with a sentence
-  each on why that figure is the essence of its paper**. If no paper has a
-  figure that carries its argument, say so plainly and propose dropping that
-  section rather than filling it with a weak one.
+  each on why that figure is the essence of its paper**. If the topic has a
+  famous or frontier paper, this section is not optional — find its figure. If
+  no paper has a figure that carries its argument, say so plainly and propose
+  dropping the section rather than filling it with a weak one.
+- **How the teaching section will teach it** — the worked example's numbers,
+  and the "what it is not" contrast you found.
 - The simulation idea, and the closed form it will be checked against if one
   exists.
 
 Get a yes before writing prose. This is the checkpoint that prevents building
 a post around the wrong figures or padding it with sections it does not need.
 
-**Checkpoint 3 — length, immediately after the plan is agreed.** By this point
-you know how much material there is, so ask:
-
-> Is this a long post?
-
-If no, it targets **5–8 minutes** and you trim to that. If yes, ask whether
-they want **15 minutes or longer**, take the answer as the ceiling, and record
-it as `length: long` in the front matter. Ask this every time; do not infer it
-from how much research turned up. A large pile of material is a reason to ask,
-not a licence to assume.
-
-After that, run to completion: write, generate figures, build, verify, commit.
+Get the plan agreed, then run to completion: write, generate figures, build, verify, commit.
 **Stop before `git push`.** Show the local preview URL and let them review.
 
 ## Deciding the sections
@@ -63,8 +63,9 @@ verdicts to the user — propose, do not decide alone.
 |---|---|---|
 | Opener: where it sits | The thing has a definite place in the architecture | Topics about training procedure, data, tokenization, evaluation, scaling laws, or theory have no block to point at |
 | History (roadmap) | Almost always — motivation is the point | Only if the idea has no history worth telling |
-| The math | There is a formula worth deriving | Empirical or engineering topics where the maths is trivial or absent |
-| Paper figures | A paper has a figure that *carries its argument* | The papers are table-only or their figures are all minor experiments. Say so and offer to drop it or substitute an original diagram |
+| **What it is** | **Always. This is the section the reader came for** | — never dropped; see *The teaching section* below |
+| The math | There is a formula worth deriving *that the teaching section did not already make obvious* | Empirical or engineering topics where the maths is trivial or absent — or where §2 already taught it, in which case fold the formula into §2 and drop this |
+| Paper figures | **Mandatory** if the topic has a famous or frontier paper — the one everybody cites, or the one that moved the field this year. **Optional otherwise** | The topic has no landmark paper, or the papers are table-only and their figures are all minor experiments. Then say so and either drop it or substitute an original diagram |
 | Compare and contrast | The topic is genuinely X versus Y | A single-subject topic has nothing to contrast. Offer to drop it, or to replace it with something that fits — "When to use it", "How it fails", "What it costs" |
 | Simulation | Nearly always — usually the most valuable section | Nothing simulable; then propose a worked example by hand, or an ablation, instead |
 | Chat This Over With Friends, References | Always | — |
@@ -81,6 +82,48 @@ reason. Do not limit yourself to this list:
 
 Bring the whole plan at once — keeps, drops, and additions — so the user sees
 the shape of the post before any prose exists.
+
+## The teaching section
+
+Section 2, straight after the history roadmap, is where the reader learns
+**what the thing actually is**. It is the section they came for, it is never
+dropped, and it is written before any section that depends on it.
+
+The failure it exists to prevent: a post that explains a mechanism's history,
+its cost, and its failure modes, and never quite says what it does. That post
+leaves a reader able to repeat opinions about a thing they cannot describe.
+Write this section and you can compress everything downstream, because the
+cost and failure sections stop re-teaching the mechanism in passing.
+
+What it has to contain, in this order:
+
+- **The object itself.** What is stored, computed, or changed — named, with
+  shapes and units where they exist. A reader should be able to say what the
+  thing *is* in one sentence afterwards.
+- **What it is not.** The neighbouring thing it gets confused with, and the
+  asymmetry that separates them. This is usually the sharpest teaching moment
+  in the whole post — *why is there no cache for the queries?* — so look for it
+  deliberately rather than hoping it turns up.
+- **The two regimes**, if the thing behaves differently in different phases —
+  training versus inference, prefill versus decode, warm versus cold. Say it
+  here, plainly, before any section reasons about it.
+- **A worked example with small numbers**, computed by hand. Four tokens, two
+  heads, dimension four — small enough that every quantity is on the page.
+  Budget about 200 words for it and take them from the history and the
+  derivations, not from the simulation.
+- **Why it is allowed** — the invariant or assumption the whole thing rests
+  on. Then let the reader test it: state the received rule, and let the
+  invariant show where the rule is too strong.
+
+**The animation or interactive in this section should animate the worked
+example**, not float free of it. The same four tokens, the same numbers, the
+same names. An animation showing a generic version of a mechanism the reader
+has just been walked through concretely wastes both.
+
+Then, downstream: anything already taught here gets *referred to*, never
+re-explained. If the maths section restates the mechanism in symbols and adds
+nothing, fold its one useful formula into this section and drop it — that is
+the section budget the teaching section pays for itself with.
 
 ## The figure rule
 
@@ -122,13 +165,16 @@ annotated separately.
 
 1. An unnumbered opener showing *where* the thing sits in the architecture.
 2. History — **as a roadmap, not prose**. See *The history roadmap* below.
-3. The math — formal, with derivations, explained in plain language.
-4. The essential figure(s) from the original paper(s), annotated.
-5. Compare and contrast — takeaways, and why it matters for LLMs at large.
-6. A simulation — a visualization, plus a code snippet only if it is genuinely
+3. **What it is** — the teaching section. See below; it is never dropped.
+4. The math — formal, with derivations, explained in plain language. Often
+   short, because section 3 has already carried the idea.
+5. The essential figure(s) from the original paper(s), annotated. Mandatory
+   when the topic has a landmark paper; optional otherwise.
+6. Compare and contrast — takeaways, and why it matters for LLMs at large.
+7. A simulation — a visualization, plus a code snippet only if it is genuinely
    short.
-7. Chat This Over With Friends.
-8. References.
+8. Chat This Over With Friends.
+9. References.
 
 Sections are numbered in the post; the opener is unnumbered. Renumber after
 any drop so the sequence has no gaps.
