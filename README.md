@@ -152,20 +152,23 @@ replacement hue, which leaves text, axes, and gridlines untouched. If you
 reproduce a figure from a paper, say so in the caption and note the
 recolouring.
 
-## The thumbs-up
+## The like button
 
-Every post ends with a thumbs-up button, emitted by `templates/post.html`, so
-posts get it without doing anything. Clicking it pops the thumb, fires a small
-burst of dots, and stores the tap under `liked:<path>` in the reader's
-`localStorage`.
+Every post ends with a like button, emitted by `templates/post.html`, so posts
+get it without doing anything. It is three Notion hearts — white, blue, white
+— over a lowercase "like". Tapping turns all three blue, beats them in
+sequence, flips the label to "liked", and stores the tap under `liked:<path>`
+in the reader's `localStorage`.
+
+The hearts are written as CSS escapes (`\1F90D`, `\1F499`) rather than literal
+emoji so the stylesheet cannot be broken by a charset guess.
 
 It is deliberately client-side only. There is **no shared count** — the site is
-static files on GitHub Pages with no backend, and the button says so
-underneath itself. A real count would need a serverless endpoint or a
-third-party widget.
+static files on GitHub Pages with no backend. A real count would need a
+serverless endpoint or a third-party widget.
 
-Styling and the animation live under `.applause` in `static/css/blog.css`; both
-animations stop under `prefers-reduced-motion`.
+Styling lives under `.applause` in `static/css/blog.css`; the animation stops
+under `prefers-reduced-motion`.
 
 ## Post icons
 
