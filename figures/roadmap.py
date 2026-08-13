@@ -193,13 +193,13 @@ ROADMAPS = {
         stops=[
             ('2017', 'a tag you add',
              'A sinusoidal or learned absolute vector, added to the embedding. '
-             'The model is told its index and must infer distance itself.'),
+             'The model is told its index and must infer distance.'),
             ('2018', 'distances, not indices',
              'Shaw et al. learn a vector per relative offset, added inside '
-             'attention. T5 cuts it to one scalar per bucketed offset.'),
+             'attention. T5 cuts it to a scalar per bucket.'),
             ('2021', 'rotate instead of add',
-             'Su et al. write absolute position in so that the dot product '
-             'depends only on the difference. Nothing extra in the matmul.'),
+             'Su et al. write absolute position in so the dot product depends '
+             'only on the difference. Nothing extra in the matmul.'),
             ('2022', 'say nothing at all',
              'The causal mask has already broken permutation equivariance. '
              'Jamba ships with no encoding; Llama 4 interleaves.'),
