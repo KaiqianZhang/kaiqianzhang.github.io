@@ -11,10 +11,9 @@ and ends at a single node reading *Transformer*, and the useful thing about
 having it on one page is that the arrows between branches turn out to matter
 more than the branches.
 
-Each idea in the chain is a repair of a specific, nameable failure in the one
-before it. Nothing appears because someone thought it was elegant. This post
-walks that chain, with the map's own structure as the outline. The whole of
-it fits on one line:
+Each idea in the chain answers a specific, nameable failure in the one before
+it. This post walks that chain, with the map's own structure as the outline.
+The whole of it fits on one line:
 
 <div class='roadmap'>
             <svg viewBox='0 0 720 118' role='img' aria-label='Roadmap: counts, then vectors, then memory, then context, then all at once. Each step is forced by a failure in the one before it.'>
@@ -25,44 +24,44 @@ it fits on one line:
               <polygon class='head' points='583,46 574,42 574,50'/>
               <text class='why' x='144' y='30'>no similarity</text>
               <text class='why' x='288' y='30'>no order</text>
-              <text class='why' x='432' y='30'>one vector per word</text>
+              <text class='why' x='432' y='30'>embeddings still static</text>
               <text class='why' x='576' y='30'>sequential</text>
               <circle class='dot' cx='72' cy='46' r='4.5'/>
               <text class='stage' x='72' y='72'>counts</text>
-              <text class='models' x='72' y='89'>n-gram · NNLM</text>
+              <text class='models' x='72' y='89'>n-gram · NNLM 2003</text>
               <text class='sec' x='72' y='108'>§1</text>
               <circle class='dot' cx='216' cy='46' r='4.5'/>
               <text class='stage' x='216' y='72'>vectors</text>
-              <text class='models' x='216' y='89'>Word2Vec · GloVe</text>
+              <text class='models' x='216' y='89'>Word2Vec 2013 · GloVe 2014</text>
               <text class='sec' x='216' y='108'>§2</text>
               <circle class='dot' cx='360' cy='46' r='4.5'/>
               <text class='stage' x='360' y='72'>memory</text>
-              <text class='models' x='360' y='89'>RNN · LSTM</text>
+              <text class='models' x='360' y='89'>RNN 1990 · LSTM 1997</text>
               <text class='sec' x='360' y='108'>§3</text>
               <circle class='dot' cx='504' cy='46' r='4.5'/>
               <text class='stage' x='504' y='72'>context</text>
-              <text class='models' x='504' y='89'>ELMo</text>
+              <text class='models' x='504' y='89'>ELMo 2018</text>
               <text class='sec' x='504' y='108'>§4</text>
               <circle class='dot' cx='648' cy='46' r='4.5'/>
               <text class='stage' x='648' y='72'>all at once</text>
-              <text class='models' x='648' y='89'>Transformer</text>
+              <text class='models' x='648' y='89'>Transformer 2017</text>
               <text class='sec' x='648' y='108'>§5</text>
             </svg>
         </div>
 
 [TOC]
 
-## What the Map Is For
+## One Line, Read Left to Right
 
-The map has two big branches — the era of counting and the era of sequences —
-and a scattering of side notes on evaluation and normalization. What the strip
-above compresses is the single line running through all of it: a word is a
-count, then a direction, then a direction that depends on its neighbours, then
-one that depends on all of them at once.
+The labels above the arrows are the load-bearing part: each names what was
+still missing at that point, and the stage to its right is the answer.
 
-The labels above the arrows are the load-bearing part. Each is a specific
-defect in the method to its left, and the method to its right exists to
-answer it. Read the post as four such answers.
+One warning before the dates mislead you. **This ordering is conceptual, not
+chronological** — read the years and the line stops being a timeline. LSTM
+predates Word2Vec by sixteen years, and ELMo appeared four months *after* the
+transformer, so the transformer cannot be a repair of ELMo and recurrence was
+not invented because word vectors lacked order. The arrows mean "this is what
+that could not do", not "this came next".
 
 ## 1. When a Word Was Just a Count
 
@@ -97,26 +96,43 @@ possible $n$-grams, and $V^n$ grows faster than any corpus.
     </div>
 </div>
 
-Everything unseen gets probability zero, which the chain rule then propagates
-to the whole sentence. Smoothing and backoff patch this; they do not fix it,
-because the real problem is that the model has no notion that two words might
-be *similar*. To an n-gram counter, "cat" and "dog" are as unrelated as "cat"
-and "thermodynamics".
+One honest caveat about that figure: a corpus of $N$ tokens holds at most $N$
+five-gram positions, so the flat line is pinned by arithmetic as much as by
+language. What it really shows is $V^n$ outrunning any corpus at all.
 
-**NNLM**, the neural language model, was the first serious attempt at that.
-Three layers — input, hidden, output — take a sequence and predict the
-probability of the next word. But the input is **one-hot**: a vector as long
-as the vocabulary, all zeros but one. My map's note on it is the whole
-problem in one line: *lose the word meaning, dimension is horribly large*.
-Two one-hot vectors for any two distinct words are orthogonal. Similarity is
-not merely unmeasured; it is unrepresentable.
+Everything unseen gets probability zero, which the chain rule propagates to
+the whole sentence. Smoothing and backoff repair that, and better than this
+framing usually admits — modified Kneser-Ney five-grams held the state of the
+art for roughly two decades and were still a serious baseline in 2013, the
+year word2vec appeared. What they cannot supply is any notion that two words
+are *similar*. To a counter, "cat" and "dog" are as unrelated as "cat" and
+"thermodynamics".
+
+**NNLM**, the neural language model, was the first *neural* attempt at that —
+latent semantic analysis and Brown clustering had been deriving similarity
+from counts since the early 1990s. Its input is **one-hot**, and my map's note
+is the whole complaint: *lose the word meaning, dimension is horribly large*.
+Two one-hot vectors are orthogonal, so at the input, similarity is not merely
+unmeasured; it is unrepresentable.
+
+That is a correction to my own map, because NNLM *already fixes it*. Between
+the one-hot input and the hidden layer sits a shared matrix $C$ whose rows are
+word vectors; learning a distributed representation is what Bengio's paper is
+*for*. The one-hot is an indexing convention, not a theory of meaning. So the
+next arrow is not "Word2Vec invented embeddings" but something narrower:
+NNLM's came attached to an expensive model, and Word2Vec got them cheap.
 
 ## 2. When a Word Became a Direction
 
-**Word2Vec**'s goal is stated in the map as: generate word embeddings. The
-insight is to get them as a side effect. Set up a fake prediction task, train
-a shallow network on it, and throw the network away — the weights are the
-embeddings.
+**Word2Vec**'s goal, in the map's words: generate word embeddings. The insight
+is to get them cheaply, as a side effect — set up a fake prediction task, train
+a shallow network, and keep the input-side weight matrix. Those rows are the
+embeddings, though the model learns two and which you keep is a convention.
+
+Mikolov et al. remove NNLM's nonlinear hidden layer, and the paper is explicit
+that this is a *compute* argument: without it they could train on 1.6 billion
+words. Collobert and Weston had already got embeddings as a by-product in
+2008. The 2013 contribution is that it became cheap enough for everyone.
 
 There are two ways to arrange that task, and they are mirror images.
 
@@ -179,9 +195,8 @@ There are two ways to arrange that task, and they are mirror images.
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
         The window slides across the sentence, and every position it stops at
-        is one training example. Neither task is interesting in itself —
-        nobody wants a model that predicts "sat" from "the cat on the". The
-        point is the projection layer in the middle, which has to compress a
+        is one training example. Neither task matters in itself; the point is
+        the projection layer between input and output, which has to compress a
         word into a few hundred numbers to do the job at all. Those numbers
         are what you keep.
     </div>
@@ -195,9 +210,10 @@ The original paper draws the same pair as wiring diagrams:
     <div class='caption'>
         <span class='caption-label'>Figure 3.</span>
         Note what is <i>not</i> in either diagram: any recurrence, any
-        ordering inside the window, any depth. The context words are
-        <i>averaged</i>, in the paper's own word, so "cat sat on the" and "the
-        on sat cat" produce the same projection.
+        ordering inside the window, any depth. The projection node is drawn
+        <b>SUM</b>, though the paper's prose says the vectors are
+        <i>averaged</i> — the same thing up to a constant, and either way "cat
+        sat on the" and "the on sat cat" give the same projection.
         This is a bag of words with a lookup table attached, and it was enough
         to make word vectors that do arithmetic.
         <br>
@@ -205,32 +221,35 @@ The original paper draws the same pair as wiring diagrams:
     </div>
 </div>
 
-Which of the two you want depends on the corpus, and my map is blunt about
-it: **CBOW is quick**, suits large-scale text like news; **Skip-gram is
-precise**, suits low-frequency words like legal terminology. That framing
-comes from word2vec's own documentation rather than from either paper — the
-2013 paper reports only that CBOW trained in about a day against Skip-gram's
-three — but the mechanism behind it is clear enough. The reason is sample
-count. Skip-gram generates one training pair per context word, so a
-rare word in the middle produces several gradient updates; CBOW averages its
-context into a single update and lets frequent patterns dominate.
+Which you want depends on the corpus, and my map is blunt: **CBOW is quick**,
+for large-scale text like news; **Skip-gram is precise**, for low-frequency
+words like legal terminology. That framing comes from word2vec's documentation
+rather than either paper — what the 2013 paper reports is a different axis,
+CBOW better on syntactic analogies, Skip-gram on semantic ones, and CBOW about
+three times faster.
+
+The mechanism usually offered concerns a word's role as *context*: Skip-gram
+factors each window into $2c$ pairs, so a rare context word gets its own
+gradient, while CBOW averages it in with $2c-1$ neighbours and dilutes it.
 
 ### The bill at the output layer
 
-Both models end in a softmax over the entire vocabulary, and that is $O(V)$
-work for every training example. With $V = 50{,}000$ and billions of
-examples, this is the whole cost of training.
-
-Word2Vec ships two ways out, and both are in the map.
+Both models end in a softmax over the whole vocabulary — $O(V)$ work per
+training example, which with $V = 50{,}000$ and billions of examples is the
+entire cost of training. Word2Vec ships two ways out, both in the map.
 
 **Negative sampling** stops trying to be a language model at all. Instead of
 "which of the 50,000 words is it?", ask "is this pair real?" — one true word
-against $k$ sampled fakes. The cost falls from $O(V)$ to $O(k)$, with $k$
-around 5.
+against $k$ sampled fakes, so the cost falls to $O(k)$ with $k$ around 5. It
+buys that by giving up normalization: the result is no longer a probability
+distribution, which is why you cannot read a perplexity off it.
 
 **Hierarchical softmax** keeps the probabilistic framing but arranges the
-vocabulary as a binary tree. Reaching a word means making $\log_2 V$ binary
-decisions, so the cost falls to $O(\log_2 V)$.
+vocabulary as a binary tree, so reaching a word means a sequence of binary
+decisions rather than scoring every word. That is $O(\log_2 V)$ for a balanced
+tree; word2vec uses a Huffman tree, which puts frequent words nearer the root
+and brings the average depth down to about the unigram entropy — better still
+than the plot below shows.
 
 <div class='figure'>
     <img src='/images/mindmap-softmax.png'
@@ -239,31 +258,36 @@ decisions, so the cost falls to $O(\log_2 V)$.
         <span class='caption-label'>Figure 4.</span>
         At a vocabulary of 50,000 the full softmax costs 50,000 units of work
         per example, hierarchical softmax costs about 16, and negative
-        sampling with $k=5$ costs 6. The gap is four orders of magnitude, and
-        it is the difference between an idea and a trainable model. Note the
+        sampling with $k=5$ costs 6 — 3.9 orders of magnitude for negative
+        sampling, 3.5 for hierarchical softmax, and the difference between an
+        idea and a trainable model. Note the
         shapes rather than the constants: negative sampling does not grow with
         $V$ at all, which is why it became the default.
     </div>
 </div>
 
 **GloVe** takes what my map calls the *global view*. Word2Vec learns from one
-window at a time and never sees the corpus as a whole. GloVe first builds a
-co-occurrence matrix $X \in \mathbb{R}^{V \times V}$, counting how often each
-word appears near each other word, then factorizes it so that vector
-arithmetic reproduces ratios of those counts. Same output — a table of word
-vectors — from the opposite direction: all the statistics at once rather than
-one window at a time. The matrix is enormous and, as the map notes, sparse.
+window at a time and never sees the corpus whole; GloVe first builds a
+co-occurrence matrix $X \in \mathbb{R}^{V \times V}$ and then fits
+$w_i^\top \tilde{w}_j + b_i + \tilde{b}_j = \log X_{ij}$.
 
-## 3. When Order Started to Matter
+That form comes from an observation worth keeping: what carries meaning is
+not a co-occurrence count but a *ratio* of them. $P(k \mid \text{ice}) /
+P(k \mid \text{steam})$ is large for *solid*, small for *gas*, and about 1 for
+*water* — so the ratio isolates exactly the dimension along which the two
+words differ. The matrix is enormous and, as the map notes, sparse, which is
+the point: only its nonzero entries are ever touched.
 
-Word vectors have a hard limit, and it is not subtle. They are a lookup
-table. "Bank" has one vector, whether the sentence is about money or a river.
-And a bag of context words has thrown away order, so "dog bites man" and "man
-bites dog" are the same input.
+## 3. A Matrix Multiplied by Itself
 
-Feed-forward networks cannot fix this — as the map puts it, *DNN and MLP
-cannot deal with time-series data*, because they take a fixed-size input and
-have nowhere to put a variable-length past.
+Word vectors have a hard limit. They are a lookup table: "bank" has one
+vector whether the sentence is about money or a river, and a bag of context
+has thrown away order, so "dog bites man" and "man bites dog" are one input.
+
+My map says *DNN and MLP cannot deal with time-series data*, which needs
+narrowing — NNLM is feed-forward and works fine, and so is a transformer. The
+true statement is that a fixed-width network over a *bag* of context can
+represent neither variable-length history nor order within the window.
 
 **RNN** answers with a loop. Process the sequence one token at a time, and
 carry a hidden state forward:
@@ -273,31 +297,31 @@ h_t = \tanh\!\big(W_{xh}\,x_t + W_{hh}\,h_{t-1} + b_h\big),
 \qquad y_t = W_{hy}\,h_t + b_y .
 $$
 
-The state $h_t$ depends on the current input and on everything before it
-through $h_{t-1}$; the $\tanh$ supplies the nonlinearity; and — the part that
-makes it a *model* rather than a very deep network — the same $W$ matrices
-are reused at every step. Training uses **backpropagation through time**,
-which unrolls the loop and backpropagates along it.
+The state carries everything before it through $h_{t-1}$, and the same $W$
+matrices are reused at every step, which is what lets one model handle any
+length. Training unrolls the loop — **backpropagation through time**.
 
-That reuse is exactly what breaks. Sending a gradient from step $T$ back to
-step $t$ means multiplying by the same Jacobian $T-t$ times, and repeated
-multiplication by a matrix has only two long-run outcomes.
+That reuse is what breaks. Sending a gradient from step $T$ back to step $t$
+means multiplying by the same Jacobian $T-t$ times.
 
 <div class='figure'>
     <img src='/images/mindmap-gradients.png'
-         alt='Log-scale plot of gradient norm against time steps, showing exponential decay for spectral radius below one, exponential growth above one, a damped curve through tanh, and a flat line for an additive path.'>
+         alt='Two log-scale panels of gradient norm against time steps. Panel (a), a linear recurrence: one curve decays and one grows. Panel (b), the same matrices through tanh: both curves decay, alongside a flat reference line for an idealized additive path.'>
     <div class='caption'>
         <span class='caption-label'>Figure 5.</span>
-        The gradient's fate is decided by the spectral radius $\rho(W)$. Below
-        1 it decays like $\rho^{\,T}$ and above 1 it grows the same way. At
-        $\rho = 0.8$ the law predicts $0.8^{50} = 1.4\times10^{-5}$ after fifty
-        steps; the simulation reaches $4\times10^{-6}$, a constant factor
-        below, because a random non-normal Jacobian carries a sub-unit
-        prefactor. The dotted line is the same spectral radius seen through
-        $\tanh$: saturation flattens the
-        derivative and damps the explosion, which is why exploding gradients
-        are usually cured by clipping while vanishing ones needed an
-        architecture. The flat sage line is what an additive path gives you.
+        <b>(a)</b> With no nonlinearity, the gradient decays like
+        $\rho^{\,T}$ below 1 and grows the same way above it. The simulation
+        runs a constant factor under the dashed law — $1.4\times10^{-5}$
+        predicted at $\rho=0.8$ after fifty steps, $4\times10^{-6}$ measured —
+        because a random non-normal matrix carries a sub-unit prefactor.
+        <b>(b)</b> The same matrices through the $\tanh$ this section actually
+        wrote down, where the symmetry disappears: <i>both</i> vanish,
+        $\rho=1.2$ down to $2.8\times10^{-1}$ by fifty steps as saturation kills the
+        derivative faster than the matrix amplifies. That is Pascanu et al.'s
+        asymmetry — a small spectral radius is <i>sufficient</i> for
+        vanishing, a large one only <i>necessary</i> for exploding. The sage
+        line is drawn, not measured: the idealization a purely additive path
+        would give.
     </div>
 </div>
 
@@ -376,22 +400,48 @@ gates that decide what happens to the cell:
 My map lists three gates, which is the LSTM everyone actually uses, but the
 credit is split: Hochreiter and Schmidhuber's 1997 paper has only the input
 and output gates. The forget gate — arguably the most important of the three,
-since without it the cell can only accumulate — was added two years later by
-Gers, Schmidhuber and Cummins, in a paper titled, exactly to the point,
-*Learning to Forget*.
+since without it the cell can only accumulate — arrived in 1999, from Gers,
+Schmidhuber and Cummins, in a paper titled exactly to the point: *Learning to
+Forget*.
 
-The cell state is updated mostly by addition rather than by repeated matrix
-multiplication, which gives the gradient a path closer to the flat green line
-in Figure 5. My map's phrasing is the right one: it *preserves a relatively
-stable gradient path*. Not a cure — a reprieve, and the map's estimate of the
-reach it buys is *T = 200*, four times the RNN's.
+The cell is updated by addition rather than by a matrix product:
+
+$$
+c_t = f_t \odot c_{t-1} + i_t \odot g_t,
+\qquad\text{so}\qquad
+\frac{\partial c_t}{\partial c_{t-1}} = f_t .
+$$
+
+That single line is the whole architecture. Sending a gradient back through
+the cell multiplies by $f_t$ rather than by $W^\top J$, so the backward
+product is $\prod_t f_t$ — still a product, but of numbers the model
+*chooses* rather than of a fixed matrix's spectrum.
+
+A reprieve, not a cure — and the 1997 original is the cleaner case, since its
+constant error carousel has a self-weight of exactly 1.0, making the sage line
+in Figure 5 literal. The forget gate put a learnable $f_t \in (0,1)$ back in
+the path, which decays again, just with a base the model can push toward 1.
+Hence the standard advice to initialize its bias high. My map's *T = 200*
+against the RNN's *T = 50* are rough marks in my own notes, not
+measurements.
+
+One more node from my map, and it matters shortly: **xLSTM** (2024) revisits
+all this with two variants — sLSTM, exponential gating on a scalar memory, and
+mLSTM, which swaps the scalar cell for a matrix and is parallelizable over the
+sequence.
 
 ## 4. When Meaning Started to Depend on Neighbours
 
 **ELMo** closes the loop back to section 2. Word2Vec and GloVe give each word
 one vector for all time; ELMo runs a two-layer bidirectional LSTM over the
-whole sentence — forward and backward — and takes the vector for a word from
-*that*. The output is an embedding of a word in a sequence, not of a word.
+whole sentence and takes the vector for a word from *that*. The output is an
+embedding of a word in a sequence, not of a word.
+
+Two details my map compresses. The forward and backward LSTMs are
+**independent**, trained separately and concatenated rather than jointly —
+precisely the criticism BERT's authors later levelled. And the output is a
+*learned, task-specific weighted sum of all layers*, which is the paper's real
+headline: layers encode different things, syntax lower, semantics higher.
 
 This is what my map means by fixing the polysemy problem: Word2Vec and GloVe
 have no way to represent word sense or sentence meaning, and ELMo's "bank"
@@ -412,31 +462,44 @@ input, not yet as the model itself.
 The map's last node in this branch is a single word: *Transformer*. It gets
 one word because everything above explains why it had to exist.
 
-Both RNN and LSTM share one defect that no amount of gating repairs:
-**sequential dependence**. Step $t$ cannot be computed until step $t-1$ is
-done, which forfeits the one thing modern hardware is good at. Attention
-computes every position against every other in one parallel operation, and
-the context it can reach is not limited by how far a gradient survives a
-matrix product.
+Both RNN and LSTM share one defect that no amount of gating repaired *at the
+time*: **sequential dependence**. Step $t$ cannot be computed until step $t-1$
+is done, which forfeits the one thing modern hardware is good at. The
+qualifier matters, because mLSTM later showed gating and parallelism are not
+actually incompatible — it simply took a decade.
 
-My map is careful to write down the price, and it is worth repeating because
-the cheerful version of this story usually omits it: **attention costs
-$O(T^2)$**, and autoregressive decoding needs a KV cache that grows with the
-sequence. RNNs were $O(T)$ with constant memory. The transformer traded
-asymptotic cost for parallelism and reach, and it was the right trade because
-parallelism is what scales.
+One link my map omits belongs here: attention was not the transformer's
+invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014,
+so a decoder could look back at any source position without squeezing through
+a bottleneck state. The transformer's contribution was deleting the recurrence
+around it — every position against every other in one parallel operation, with
+reach no longer set by how far a gradient survives a matrix product.
 
-What that node opens onto is three separate arguments I have written up
-elsewhere: which normalizer goes inside the block
+My map writes down the price, and it is worth repeating because the cheerful
+version of this story omits it: **attention costs $O(T^2)$**, and
+autoregressive decoding needs a KV cache that grows with the sequence.
+
+Two qualifications, since that sentence has aged. The quadratic term is
+*compute*: attention's memory has been linear in practice since FlashAttention
+showed the $T \times T$ matrix need never be materialized. And the parallelism
+is real in training and prefill but not in generation, which emits one token
+per forward pass and is as sequential as an RNN — which is why the KV cache
+exists at all.
+
+That node opens onto three arguments I have written up elsewhere: which
+normalizer goes inside the block
 ([RMSNorm vs. LayerNorm](/blog/2026/08/11/rmsnorm-vs-layernorm/)), where in
 the block it goes
 ([Pre-Norm vs. Post-Norm](/blog/2026/08/11/pre-norm-vs-post-norm/)), and how
 position gets into a model that has no sense of order
-([RoPE](/blog/2026/08/11/rope/)). The map's side note comparing BatchNorm —
-normalizing across samples — with LayerNorm — normalizing within one — is the
-first of those.
+([RoPE](/blog/2026/08/11/rope/)).
 
-## 6. How You Know Any of It Worked
+My map's last side note belongs here. **BatchNorm** normalizes a feature
+across the samples in a batch; **LayerNorm** across the features within one
+sample. The map's justification is the sharper half: the same channel of two
+images is comparable, two channels of one image are not.
+
+## 6. Counting the Doors Still Open
 
 The map answers this with one metric: **perplexity**.
 
@@ -449,25 +512,22 @@ the $N$ words it saw. Lower is better. The useful way to read it is as an
 **effective branching factor**: a model with perplexity 40 is, on average, as
 uncertain as if it were choosing uniformly among 40 words at every step.
 
-That reading is exact, not a metaphor. A model that spreads its probability
-uniformly over exactly $k$ words has perplexity exactly $k$ — I checked, and
-uniform over 1,000 words gives 1000.0000.
+A model spreading probability uniformly over exactly $k$ words has perplexity
+exactly $k$ — uniform over 1,000 gives 1000.0000. But "exact" belongs to that
+case only: in general perplexity is the size of the *uniform distribution with
+the same entropy*, so a model at 40 might be choosing between three words most
+of the time and five thousand occasionally.
 
-<div class='figure'>
-    <img src='/images/mindmap-perplexity.png'
-         alt='Log-log plot of perplexity against softmax temperature, running from near 1 when the distribution is sharp up to the vocabulary size when it is flat.'>
-    <div class='caption'>
-        <span class='caption-label'>Figure 6.</span>
-        Perplexity spans $[1, V]$. At the bottom the model is certain and has
-        one choice; at the top it is uniform over the vocabulary and has
-        learned nothing. Everything real sits in between, and the number is
-        only comparable between models that share a vocabulary — which is why
-        perplexity comparisons across tokenizers are meaningless.
-    </div>
-</div>
+A second distinction the formula hides, which caught me out: the equation
+above is **held-out** perplexity, measured against unseen text, and it is
+unbounded above — assign $10^{-9}$ to the word that actually occurred and you
+score $10^{9}$, far past $V$. What is bounded by $[1, V]$ is the exponentiated
+entropy of the model's *own* distribution — its confidence, no data involved.
+The figure below plots the second.
 
-The same idea is easier to feel than to read. Drag the distribution from
-peaked to flat and watch the number follow:
+Easier to feel than to read. Drag the distribution from peaked to flat and
+watch the number follow — it runs from 1 to the vocabulary size and no
+further:
 
 <div class='knob' id='ppl-knob'>
     <div class='controls'>
@@ -519,22 +579,21 @@ peaked to flat and watch the number follow:
 - The chain is one question asked repeatedly: what is a word, numerically? A
   count, then a direction, then a direction that depends on its neighbours,
   then one that depends on all of them at once.
-- $n$-grams fail on arithmetic. Five words of context over a 1,640-word
-  vocabulary is $10^{16}$ possibilities, and a corpus sees $10^{-13}$ of it —
-  almost all exactly once.
-- One-hot vectors make similarity unrepresentable, because any two distinct
-  words are orthogonal. Word2Vec fixes that by making the embedding a
-  by-product of a task nobody cares about.
-- The softmax over the vocabulary was the binding cost, and both escapes —
-  negative sampling and hierarchical softmax — bought about four orders of
-  magnitude.
-- RNNs put order back and pay for it in repeated Jacobian products, which
-  vanish or explode as $\rho^{\,T}$. LSTM's gates buy an additive path and
-  roughly four times the reach.
-- ELMo made the vector depend on the sentence. The transformer removed the
-  sequential dependence entirely, at a cost of $O(T^2)$ attention and a
-  growing cache — a trade that was worth it because parallelism scales and
-  recurrence does not.
+- $n$-grams fail on arithmetic: the space grows as $V^n$ and no corpus covers
+  it. Smoothing handles the gaps; what it cannot supply is similarity.
+- NNLM, not Word2Vec, first learned word vectors. Word2Vec's contribution was
+  making them cheap enough to train on billions of words.
+- The softmax over the vocabulary was the binding cost, and both escapes
+  bought three to four orders of magnitude.
+- RNNs put order back and pay in repeated Jacobian products. The clean
+  $\rho^{\,T}$ story is the linear one: through $\tanh$ both small and large
+  spectral radii vanish, which is the asymmetry Pascanu et al. proved.
+- LSTM replaces the matrix product with $\prod_t f_t$ — still a product, but
+  of numbers the model chooses.
+- ELMo made the vector depend on the sentence. The transformer removed
+  sequential dependence in training, though not in generation, and paid in
+  $O(T^2)$ compute and a growing cache.
+- The ordering is logical, not chronological; the roadmap's dates say so.
 
 ## 8. References
 

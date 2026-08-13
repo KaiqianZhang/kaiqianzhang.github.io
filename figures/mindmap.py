@@ -7,7 +7,9 @@ Four plots, one per stage of the map:
                           two ways word2vec avoids paying it
   mindmap-gradients.png   repeated Jacobian products through an RNN, against
                           an additive path of the kind a gate provides
-  mindmap-perplexity.png  perplexity read as an effective branching factor
+  mindmap-perplexity.png  the exponentiated entropy of a model's own
+                          predictive distribution -- which is bounded by V,
+                          unlike held-out perplexity, which is not
 
 The corpus for the first plot is the blog's other posts. The post this figure
 appears in is excluded, so the measurement does not include itself and the
@@ -107,11 +109,14 @@ ax.set_title('Every word of context multiplies the space by $V$',
 ax.grid(color=GRID, linewidth=0.8)
 ax.set_axisbelow(True)
 ax.legend(frameon=False, loc='upper left', fontsize=9)
-for n, p, s in zip(orders, possible, seen):
-    ax.annotate('%.0e' % (s / p), (n, s), textcoords='offset points',
-                xytext=(0, -17), ha='center', fontsize=8, color=MUTED)
-ax.text(0.99, 0.04, 'labels: fraction of the space ever observed',
-        transform=ax.transAxes, ha='right', fontsize=8.5, color=MUTED)
+# Label the shrinking coverage from n=2 on; at n=1 it is trivially 1.0.
+for n_, p_, s_ in zip(orders, possible, seen):
+    if n_ == 1:
+        continue
+    ax.annotate('%.0e of the space' % (s_ / p_) if n_ == 2 else '%.0e' % (s_ / p_),
+                (n_, s_), textcoords='offset points', xytext=(0, -18),
+                ha='center', fontsize=8, color=MUTED)
+ax.set_ylim(bottom=possible[0] / 60, top=possible[-1] * 40)
 save(fig, 'mindmap-sparsity.png')
 
 
@@ -136,8 +141,8 @@ ax.set_axisbelow(True)
 ax.legend(frameon=False, loc='upper left', fontsize=9)
 for x in (50000,):
     ax.axvline(x, color=MUTED, linewidth=0.8, linestyle=':')
-    ax.text(x * 1.15, 2.2, 'V = 50,000', fontsize=8.5, color=MUTED, rotation=90,
-            va='bottom')
+    ax.text(x * 1.25, 2.0e5, 'V = 50,000', fontsize=8.5, color=MUTED,
+            ha='left', va='top')
 print('at V=50000:  full=%d  hierarchical=%.1f  negative=6'
       % (50000, np.log2(50000)))
 save(fig, 'mindmap-softmax.png')
@@ -176,36 +181,46 @@ def back_through_time(rho, saturating):
     return np.exp(np.mean(np.log(np.array(out) + 1e-300), axis=0))
 
 
-fig, ax = plt.subplots(figsize=(7.2, 4.3))
-for rho, colour, lab in ((0.8, BLUE, r'$\rho(W)=0.8$: vanishes'),
-                         (1.2, PLUM, r'$\rho(W)=1.2$: explodes')):
-    ax.plot(steps, back_through_time(rho, False), color=colour, linewidth=2.2,
-            label=lab)
-    ax.plot(steps, rho ** steps, color=LAV, linewidth=1.3,
-            linestyle=(0, (5, 3)), zorder=5,
-            label=r'theory:  $\rho^{\,T}$' if rho == 0.8 else None)
-ax.plot(steps, back_through_time(1.2, True), color=CLAY, linewidth=1.8,
-        linestyle=(0, (1, 2)), label=r'same $\rho$, but through $\tanh$')
-ax.axhline(1.0, color=SAGE, linewidth=2.2,
-           label='additive path, as a gate provides')
+fig, (axA, axB) = plt.subplots(1, 2, figsize=(11, 4.3), sharey=True)
 
-ax.set_yscale('log')
-ax.set_xlabel('time steps back through the sequence')
-ax.set_ylabel('gradient norm reaching that step')
-ax.set_title('Multiply a matrix by itself sixty times',
-             fontsize=11, loc='left', pad=12)
-ax.set_xlim(1, T)
-ax.set_ylim(1e-8, 1e6)
-ax.grid(color=GRID, linewidth=0.8)
-ax.set_axisbelow(True)
-ax.legend(frameon=False, loc='lower left', fontsize=8.5)
+# (a) the textbook picture: a bare repeated Jacobian, no nonlinearity.
+for rho, colour in ((0.8, BLUE), (1.2, PLUM)):
+    axA.plot(steps, back_through_time(rho, False), color=colour, linewidth=2.2,
+             label=r'$\rho(W)=%.1f$' % rho)
+    axA.plot(steps, rho ** steps, color=LAV, linewidth=1.3,
+             linestyle=(0, (5, 3)), zorder=5,
+             label=r'$\rho^{\,T}$' if rho == 0.8 else None)
+axA.set_title('(a)  A bare matrix, applied over and over',
+              fontsize=11, loc='left', pad=12)
+axA.set_ylabel('gradient norm reaching that step')
+axA.legend(frameon=False, loc='lower left', fontsize=9)
 
-v = back_through_time(0.8, False)
-e = back_through_time(1.2, False)
-sat = back_through_time(1.2, True)
-print('linear rho=0.8 at T=50 : %.2e   (0.8^50 = %.2e)' % (v[49], 0.8 ** 50))
-print('linear rho=1.2 at T=50 : %.2e   (1.2^50 = %.2e)' % (e[49], 1.2 ** 50))
-print('tanh   rho=1.2 at T=50 : %.2e   <- saturation damps it' % sat[49])
+# (b) the same matrices through tanh, which is the model actually written down.
+for rho, colour in ((0.8, BLUE), (1.2, PLUM)):
+    axB.plot(steps, back_through_time(rho, True), color=colour, linewidth=2.2,
+             label=r'$\rho(W)=%.1f$, through $\tanh$' % rho)
+axB.plot(steps, np.ones_like(steps, dtype=float), color=SAGE, linewidth=2.0,
+         linestyle=(0, (6, 3)),
+         label='idealized additive path (not simulated)')
+axB.set_title('(b)  The same matrices, through the nonlinearity',
+              fontsize=11, loc='left', pad=12)
+axB.legend(frameon=False, loc='lower left', fontsize=9)
+
+for ax in (axA, axB):
+    ax.set_yscale('log')
+    ax.set_xlabel('time steps back through the sequence')
+    ax.set_xlim(1, T)
+    ax.set_ylim(1e-8, 1e6)
+    ax.grid(color=GRID, linewidth=0.8)
+    ax.set_axisbelow(True)
+
+print('linear rho=0.8 at T=50 : %.2e   (0.8^50 = %.2e)'
+      % (back_through_time(0.8, False)[49], 0.8 ** 50))
+print('linear rho=1.2 at T=50 : %.2e   (1.2^50 = %.2e)'
+      % (back_through_time(1.2, False)[49], 1.2 ** 50))
+print('tanh   rho=0.8 at T=50 : %.2e' % back_through_time(0.8, True)[49])
+print('tanh   rho=1.2 at T=50 : %.2e  <- still below 1: vanishes, not explodes'
+      % back_through_time(1.2, True)[49])
 save(fig, 'mindmap-gradients.png')
 
 
@@ -229,8 +244,8 @@ ax.text(temps[0] * 1.1, 1.25, 'PPL = 1: certain', fontsize=8.5, color=SAGE)
 ax.set_xscale('log')
 ax.set_yscale('log')
 ax.set_xlabel('softmax temperature (sharper $\\leftarrow$   $\\rightarrow$ flatter)')
-ax.set_ylabel('perplexity')
-ax.set_title('Perplexity is how many words the model is still choosing between',
+ax.set_ylabel("perplexity of the model's own next-word distribution")
+ax.set_title('Confidence, read as a number of options',
              fontsize=11, loc='left', pad=12)
 ax.set_ylim(0.8, 1.4e5)
 ax.grid(color=GRID, linewidth=0.8)

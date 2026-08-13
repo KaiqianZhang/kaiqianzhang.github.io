@@ -498,12 +498,15 @@ table td {
   transform-origin: 0 0;
   animation: w2v-slide 9s ease-in-out infinite;
 }
+/* Absolute stops, not offsets: a CSS transform replaces the SVG transform
+   attribute rather than composing with it, so the 170 base is discarded once
+   the animation runs. 170/230/290 are the three word centres. */
 @keyframes w2v-slide {
-  0%, 18%   { transform: translateX(0px); }
-  25%, 43%  { transform: translateX(60px); }
-  50%, 68%  { transform: translateX(120px); }
-  75%, 93%  { transform: translateX(60px); }
-  100%      { transform: translateX(0px); }
+  0%, 18%   { transform: translateX(170px); }
+  25%, 43%  { transform: translateX(230px); }
+  50%, 68%  { transform: translateX(290px); }
+  75%, 93%  { transform: translateX(230px); }
+  100%      { transform: translateX(170px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .article .w2v-anim .slide { animation: none; }
