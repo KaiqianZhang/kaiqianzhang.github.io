@@ -539,17 +539,28 @@ table td {
   line-height: 1;
 }
 .applause-btn .h {
-  display: inline-block;
-  font-style: normal;
+  width: 19px;
+  height: 19px;
+  display: block;
   transition: transform 0.18s ease;
 }
-/* Notion's hearts: white, purple, white -- all three turn purple once
-   tapped. Purple is the closest the emoji set gets to lavender. */
-.applause-btn .h1::before { content: '\1F90D'; }
-.applause-btn .h2::before { content: '\1F49C'; }
-.applause-btn .h3::before { content: '\1F90D'; }
-.applause-btn.is-on .h1::before,
-.applause-btn.is-on .h3::before { content: '\1F49C'; }
+/* White, lavender, white. Drawn rather than emoji, so the middle heart is
+   the exact lavender used for the theory lines in the figures. */
+.applause-btn .h path {
+  fill: #FFFFFF;
+  stroke: #C0B7CE;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+  transition: fill 0.2s ease, stroke 0.2s ease;
+}
+.applause-btn .h2 path {
+  fill: #8C7BA6;
+  stroke: #8C7BA6;
+}
+.applause-btn.is-on .h path {
+  fill: #8C7BA6;
+  stroke: #8C7BA6;
+}
 .applause-btn:hover .h1 { transform: translateY(-2px); }
 .applause-btn:hover .h2 { transform: translateY(-3px); }
 .applause-btn:hover .h3 { transform: translateY(-2px); }
@@ -564,6 +575,11 @@ table td {
   60% { transform: scale(0.92); }
   100% { transform: scale(1); }
 }
+.applause-count {
+  font: 400 12px -apple-system, Helvetica, arial, sans-serif;
+  color: rgba(0, 0, 0, 0.32);
+  font-variant-numeric: tabular-nums;
+}
 .applause-label {
   font: 400 12px -apple-system, Helvetica, arial, sans-serif;
   letter-spacing: 0.04em;
@@ -571,7 +587,12 @@ table td {
   transition: color 0.18s;
 }
 .applause-btn:hover .applause-label,
-.applause-btn.is-on .applause-label {
+.applause-btn.is-on .applause-count {
+  font: 400 12px -apple-system, Helvetica, arial, sans-serif;
+  color: rgba(0, 0, 0, 0.32);
+  font-variant-numeric: tabular-nums;
+}
+.applause-label {
   color: rgba(0, 0, 0, 0.65);
 }
 @media (prefers-reduced-motion: reduce) {

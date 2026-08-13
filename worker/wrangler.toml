@@ -1,0 +1,9 @@
+name = "blog-likes"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+# Created by:  npx wrangler kv namespace create LIKES
+# Paste the id it prints into the line below, then:  npx wrangler deploy
+[[kv_namespaces]]
+binding = "LIKES"
+id = "PASTE_THE_NAMESPACE_ID_HERE"

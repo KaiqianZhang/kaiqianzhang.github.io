@@ -641,6 +641,8 @@ def build():
                       tags=tags,
                       content=post.content,
                       footnotes=post.footnotes,
+                      slug=post.slug,
+                      likes_endpoint=config.get('likes_endpoint', '').rstrip('/'),
                       base=config['base'])
         write(post.out_path,
               page(config, body, '%s | %s' % (post.title, config['title']),

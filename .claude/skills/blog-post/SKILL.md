@@ -171,15 +171,14 @@ prose and again in a caption.
 
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
-**Like button.** Every post ends with one, and it is emitted by
-`templates/post.html` — do **not** add the markup to a post's Markdown, and do
-not remove it. It is three Notion hearts (white, purple, white) over a lowercase
-"like"; tapping turns all three purple, beats them in sequence, and changes the
-label to "liked". Client-side only: the tap is remembered in the reader's
-`localStorage` and there is no shared count, which the button's tooltip says.
-Verify it survived the build by grepping the generated page for
-`applause-btn`. A shared count would need a backend or a third-party service,
-which this site deliberately does not have.
+**Like button.** Every post ends with one, emitted by `templates/post.html` —
+do **not** add the markup to a post's Markdown, and do not remove it. Three
+drawn hearts (white, lavender, white) over a lowercase "like"; tapping turns
+all three lavender and beats them in sequence. A reader's own tap lives in
+their `localStorage`. A shared count is optional and comes from the Cloudflare
+Worker in `worker/`, switched on by `likes_endpoint` in `site.json`; with it
+empty the button still works and simply shows no number. Verify it survived
+the build by grepping the generated page for `applause-btn`.
 
 **Colour.** Deeper Morandi tones weighted toward blue and purple, no greys.
 The palette is defined in `figures/norm_comparison.py` and

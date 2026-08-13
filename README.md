@@ -155,17 +155,28 @@ recolouring.
 ## The like button
 
 Every post ends with a like button, emitted by `templates/post.html`, so posts
-get it without doing anything. It is three Notion hearts — white, purple, white
-— over a lowercase "like". Tapping turns all three purple, beats them in
-sequence, flips the label to "liked", and stores the tap under `liked:<path>`
-in the reader's `localStorage`.
+get it without doing anything. Three drawn hearts — white, lavender, white —
+over a lowercase "like". Tapping turns all three lavender, beats them in
+sequence, flips the label to "liked", and remembers the tap under
+`liked:<path>` in the reader's `localStorage`.
 
-The hearts are written as CSS escapes (`\1F90D`, `\1F49C`) rather than literal
-emoji so the stylesheet cannot be broken by a charset guess.
+The hearts are inline SVG rather than emoji so the middle one can be the exact
+`#8C7BA6` lavender used for the theory lines in the figures.
 
-It is deliberately client-side only. There is **no shared count** — the site is
-static files on GitHub Pages with no backend. A real count would need a
-serverless endpoint or a third-party widget.
+### The shared count
+
+Optional, and off until you deploy it. `worker/` holds a Cloudflare Worker
+that keeps one integer per post in Workers KV; see `worker/README.md` for the
+three commands. Once deployed, put its URL in `site.json`:
+
+```json
+"likes_endpoint": "https://blog-likes.<subdomain>.workers.dev"
+```
+
+Leave it `""` and the button still works — it just shows no number. The count
+is fetched on load and updated optimistically on click, and every network call
+is wrapped so a dead endpoint degrades to the local-only behaviour rather than
+breaking the button.
 
 Styling lives under `.applause` in `static/css/blog.css`; the animation stops
 under `prefers-reduced-motion`.

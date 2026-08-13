@@ -8,6 +8,7 @@
   "url": "https://kaiqianzhang.github.io",
   "base": "",
   "post_icon": "🍵",
+  "likes_endpoint": "",
   "credit": "Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.",
   "quote": {
     "text": "The best time to plant a tree was ten years ago. The second-best time is now.",

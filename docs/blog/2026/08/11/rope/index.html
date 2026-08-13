@@ -315,8 +315,9 @@ $$
             <button class='applause-btn' type='button' aria-pressed='false'
                     aria-label='Like this post'
                     title='Kept in your browser. Nothing is sent anywhere.'>
-                <span class='hearts' aria-hidden='true'><i class='h h1'></i><i class='h h2'></i><i class='h h3'></i></span>
+                <span class='hearts' aria-hidden='true'><svg class='h h1' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h2' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h3' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg></span>
                 <span class='applause-label'>like</span>
+                <span class='applause-count' hidden></span>
             </button>
         </div>
         <div id='more'>
@@ -328,25 +329,59 @@ $$
       var btn = document.querySelector('.applause-btn');
       if (!btn) return;
       var label = btn.querySelector('.applause-label');
+      var counter = btn.querySelector('.applause-count');
+      var api = '';
+      var slug = 'rope';
       var key = 'liked:' + location.pathname;
-      var said = 'liked';
+      var count = null;
+
+      function show() {
+        if (count === null) return;
+        counter.hidden = false;
+        counter.textContent = count;
+      }
       function paint(on, animate) {
         btn.classList.toggle('is-on', on);
         btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        label.textContent = on ? said : 'like';
+        label.textContent = on ? 'liked' : 'like';
         if (on && animate) {
           btn.classList.remove('is-popping');
           void btn.offsetWidth;
           btn.classList.add('is-popping');
         }
       }
-      var stored = false;
-      try { stored = localStorage.getItem(key) === '1'; } catch (e) {}
-      paint(stored, false);
+      function liked() {
+        try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+      }
+
+      paint(liked(), false);
+
+      if (api) {
+        fetch(api + '/' + slug, {cache: 'no-store'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      }
+
       btn.addEventListener('click', function () {
         var on = !btn.classList.contains('is-on');
-        try { on ? localStorage.setItem(key, '1') : localStorage.removeItem(key); } catch (e) {}
+        try {
+          on ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+        } catch (e) {}
         paint(on, true);
+        if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
+        if (!api) return;
+        fetch(api + '/' + slug, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({delta: on ? 1 : -1})
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
       });
     })();
     </script>
