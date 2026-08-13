@@ -321,6 +321,13 @@ when the point is *measured* data rather than a formula.
 
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
+**Chrome is not data, and `#8C7BA6` is fixed.** The like button's middle heart
+and the slider accent are furniture: they must look identical on every post,
+forever, so they do **not** come from `figures/palette.py` and do not move
+when the palette is revised. A palette sweep recoloured them to rose once and
+the change was immediately noticed. If you are doing a global colour pass,
+exclude these two.
+
 **Like button.** Every post ends with one, emitted by `templates/post.html` —
 do **not** add the markup to a post's Markdown, and do not remove it. Three
 drawn hearts (white, lavender, white) over a lowercase "like"; tapping turns

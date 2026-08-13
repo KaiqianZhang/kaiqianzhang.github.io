@@ -370,7 +370,7 @@ table td {
 .article .knob input[type='range'] {
   flex: 1 1 180px;
   min-width: 140px;
-  accent-color: #C48BAC;
+  accent-color: #8C7BA6;   /* chrome, not data — see the like button note */
   height: 3px;
   cursor: pointer;
 }
@@ -820,8 +820,13 @@ table td {
   display: block;
   transition: transform 0.18s ease;
 }
-/* White, lavender, white. Drawn rather than emoji, so the middle heart is
-   the exact lavender used for the theory lines in the figures. */
+/* White, lavender, white. Drawn rather than emoji so the middle heart is an
+   exact colour.
+
+   #8C7BA6 is fixed and deliberately NOT taken from figures/palette.py. The
+   like button is furniture, not data: it should look the same on every post
+   forever, and a palette revision moved it to rose once already. Leave it
+   alone. */
 .applause-btn .h path {
   fill: #FFFFFF;
   stroke: #C0B7CE;
@@ -830,12 +835,12 @@ table td {
   transition: fill 0.2s ease, stroke 0.2s ease;
 }
 .applause-btn .h2 path {
-  fill: #C48BAC;
-  stroke: #C48BAC;
+  fill: #8C7BA6;
+  stroke: #8C7BA6;
 }
 .applause-btn.is-on .h path {
-  fill: #C48BAC;
-  stroke: #C48BAC;
+  fill: #8C7BA6;
+  stroke: #8C7BA6;
 }
 .applause-btn:hover .h1 { transform: translateY(-2px); }
 .applause-btn:hover .h2 { transform: translateY(-3px); }
