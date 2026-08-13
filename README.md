@@ -155,12 +155,12 @@ recolouring.
 ## The like button
 
 Every post ends with a like button, emitted by `templates/post.html`, so posts
-get it without doing anything. It is three Notion hearts — white, blue, white
-— over a lowercase "like". Tapping turns all three blue, beats them in
+get it without doing anything. It is three Notion hearts — white, purple, white
+— over a lowercase "like". Tapping turns all three purple, beats them in
 sequence, flips the label to "liked", and stores the tap under `liked:<path>`
 in the reader's `localStorage`.
 
-The hearts are written as CSS escapes (`\1F90D`, `\1F499`) rather than literal
+The hearts are written as CSS escapes (`\1F90D`, `\1F49C`) rather than literal
 emoji so the stylesheet cannot be broken by a charset guess.
 
 It is deliberately client-side only. There is **no shared count** — the site is

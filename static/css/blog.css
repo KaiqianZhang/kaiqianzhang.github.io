@@ -543,12 +543,13 @@ table td {
   font-style: normal;
   transition: transform 0.18s ease;
 }
-/* Notion's hearts: white, blue, white -- all three turn blue once tapped. */
+/* Notion's hearts: white, purple, white -- all three turn purple once
+   tapped. Purple is the closest the emoji set gets to lavender. */
 .applause-btn .h1::before { content: '\1F90D'; }
-.applause-btn .h2::before { content: '\1F499'; }
+.applause-btn .h2::before { content: '\1F49C'; }
 .applause-btn .h3::before { content: '\1F90D'; }
 .applause-btn.is-on .h1::before,
-.applause-btn.is-on .h3::before { content: '\1F499'; }
+.applause-btn.is-on .h3::before { content: '\1F49C'; }
 .applause-btn:hover .h1 { transform: translateY(-2px); }
 .applause-btn:hover .h2 { transform: translateY(-3px); }
 .applause-btn:hover .h3 { transform: translateY(-2px); }

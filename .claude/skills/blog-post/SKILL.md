@@ -173,8 +173,8 @@ prose and again in a caption.
 
 **Like button.** Every post ends with one, and it is emitted by
 `templates/post.html` — do **not** add the markup to a post's Markdown, and do
-not remove it. It is three Notion hearts (white, blue, white) over a lowercase
-"like"; tapping turns all three blue, beats them in sequence, and changes the
+not remove it. It is three Notion hearts (white, purple, white) over a lowercase
+"like"; tapping turns all three purple, beats them in sequence, and changes the
 label to "liked". Client-side only: the tap is remembered in the reader's
 `localStorage` and there is no shared count, which the button's tooltip says.
 Verify it survived the build by grepping the generated page for
