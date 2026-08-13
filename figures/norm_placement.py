@@ -34,9 +34,9 @@ import numpy as np
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    'static', 'images', 'pre-vs-post-norm.png')
 
-PRE = '#5F7396'       # pre-norm, dusty blue
-POST = '#8B7194'      # post-norm, plum
-REF = '#8C7BA6'       # lavender, analytic reference
+PRE = '#3E6491'       # pre-norm, dusty blue
+POST = '#8C77BC'      # post-norm, plum
+REF = '#C48BAC'       # lavender, analytic reference
 GRID = '#DEDAD4'
 TEXT = '#3F3F3F'
 MUTED = '#6E6E6E'

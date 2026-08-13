@@ -19,9 +19,9 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 
 # Muted Morandi-ish palette, warm greys with a sage green that matches the
 # site's post icon.
-LN = '#5F7396'        # dusty blue
+LN = '#3E6491'        # dusty blue
 RMS = '#6E8C66'       # sage green
-REF = '#8C7BA6'       # lavender, used for analytic reference curves
+REF = '#C48BAC'       # lavender, used for analytic reference curves
 GRID = '#DEDAD4'
 TEXT = '#3F3F3F'
 MUTED = '#6E6E6E'

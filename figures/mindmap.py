@@ -30,11 +30,11 @@ import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(os.path.dirname(HERE), 'static', 'images')
 
-BLUE = '#5F7396'
-PLUM = '#8B7194'
+BLUE = '#3E6491'
+PLUM = '#8C77BC'
 SAGE = '#6E8C66'
-LAV = '#8C7BA6'
-CLAY = '#A87D76'
+LAV = '#C48BAC'
+CLAY = '#B07E55'
 GRID = '#DEDAD4'
 TEXT = '#3F3F3F'
 MUTED = '#6E6E6E'
@@ -71,6 +71,11 @@ def corpus_tokens():
         text = open(path, encoding='utf-8').read()
         text = text.split('---', 2)[2] if text.startswith('---') else text
         text = re.sub(r'```.*?```', ' ', text, flags=re.DOTALL)
+        # Script and style bodies sit between tags, not inside them, so
+        # stripping tags alone would leave JavaScript source in the corpus and
+        # count `function` and `var` as English words.
+        text = re.sub(r'<(script|style)\b.*?</\1>', ' ', text,
+                      flags=re.DOTALL | re.IGNORECASE)
         text = re.sub(r'<[^>]+>', ' ', text)
         text = re.sub(r'\$\$.*?\$\$', ' ', text, flags=re.DOTALL)
         text = re.sub(r'\$[^$]*\$', ' ', text)

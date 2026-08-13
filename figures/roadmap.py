@@ -75,19 +75,25 @@ def roadmap(stops, arrows, label):
         out.append("  <text class='why' x='%.1f' y='%d'>%s</text>"
                    % (mid, SPINE_Y - 13, reason))
 
+    # Each milestone is one <g class='stop'> so the CSS can lift the whole
+    # thing — dot, box and text together — when the mouse is over it.
     for i, (year, title, _body) in enumerate(stops):
         cx, x = centres[i], xs[i]
-        out.append("  <circle class='dot' cx='%.1f' cy='%d' r='4.5'/>"
+        out.append("  <g class='stop'>")
+        out.append("    <rect class='hit' x='%.1f' y='%d' width='%.1f' "
+                   "height='%.1f'/>" % (x, SPINE_Y - 10, boxw, boxh + 24))
+        out.append("    <circle class='dot' cx='%.1f' cy='%d' r='4.5'/>"
                    % (cx, SPINE_Y))
-        out.append("  <rect class='box' x='%.1f' y='%d' width='%.1f' "
+        out.append("    <rect class='box' x='%.1f' y='%d' width='%.1f' "
                    "height='%.1f' rx='7'/>" % (x, BOX_TOP, boxw, boxh))
-        out.append("  <text class='yr' x='%.1f' y='%.1f'>%s</text>"
+        out.append("    <text class='yr' x='%.1f' y='%.1f'>%s</text>"
                    % (cx, BOX_TOP + TITLE_DY - 12, year))
-        out.append("  <text class='stage' x='%.1f' y='%.1f'>%s</text>"
+        out.append("    <text class='stage' x='%.1f' y='%.1f'>%s</text>"
                    % (cx, BOX_TOP + TITLE_DY + 2, title))
         for j, line in enumerate(wrapped[i]):
-            out.append("  <text class='body' x='%.1f' y='%.1f'>%s</text>"
+            out.append("    <text class='body' x='%.1f' y='%.1f'>%s</text>"
                        % (cx, BOX_TOP + TITLE_DY + 20 + j * LINE_H, line))
+        out.append("  </g>")
 
     out.append('</svg>')
     return '\n'.join(out)
@@ -137,6 +143,22 @@ ROADMAPS = {
             ('2020-', 'pre-norm by default',
              'GPT-3, LLaMA, Mistral, Qwen, Gemma, DeepSeek. Then, from 2022, '
              'people begin moving it back.'),
+        ]),
+
+    # Five stops rather than four, which is why the bodies here are terser:
+    # at n=5 a box is 138px wide and holds about twenty characters a line.
+    'mindmap': dict(
+        label='Roadmap: counts, then vectors, then memory, then context, then '
+              'all at once. Each step is forced by a failure in the one '
+              'before it.',
+        arrows=['no similarity', 'no order', 'embeddings still static',
+                'sequential'],
+        stops=[
+            ('§1', 'counts', 'n-gram, NNLM 2003'),
+            ('§2', 'vectors', 'Word2Vec 2013, GloVe 2014'),
+            ('§3', 'memory', 'RNN 1990, LSTM 1997'),
+            ('§4', 'context', 'ELMo 2018'),
+            ('§5', 'all at once', 'Transformer 2017'),
         ]),
 
     'rope': dict(

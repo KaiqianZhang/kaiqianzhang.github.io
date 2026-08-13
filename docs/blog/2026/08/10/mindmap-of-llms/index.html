@@ -62,57 +62,78 @@
 <p>I keep a mindmap of how language models got here. It starts at counting words and ends at a single node reading <em>Transformer</em>, and the useful thing about having it on one page is that the arrows between branches turn out to matter more than the branches.</p>
 <p>Each idea in the chain answers a specific, nameable failure in the one before it. This post walks that chain, with the map's own structure as the outline. The whole of it fits on one line:</p>
 <div class='roadmap'>
-            <svg viewBox='0 0 720 118' role='img' aria-label='Roadmap: counts, then vectors, then memory, then context, then all at once. Each step is forced by a failure in the one before it.'>
-              <line class='spine' x1='72' y1='46' x2='648' y2='46'/>
-              <polygon class='head' points='151,46 142,42 142,50'/>
-              <polygon class='head' points='295,46 286,42 286,50'/>
-              <polygon class='head' points='439,46 430,42 430,50'/>
-              <polygon class='head' points='583,46 574,42 574,50'/>
-              <text class='why' x='144' y='30'>no similarity</text>
-              <text class='why' x='288' y='30'>no order</text>
-              <text class='why' x='432' y='30'>embeddings still static</text>
-              <text class='why' x='576' y='30'>sequential</text>
-              <circle class='dot' cx='72' cy='46' r='4.5'/>
-              <text class='stage' x='72' y='72'>counts</text>
-              <text class='models' x='72' y='89'>n-gram · NNLM 2003</text>
-              <text class='sec' x='72' y='108'>§1</text>
-              <circle class='dot' cx='216' cy='46' r='4.5'/>
-              <text class='stage' x='216' y='72'>vectors</text>
-              <text class='models' x='216' y='89'>Word2Vec 2013 · GloVe 2014</text>
-              <text class='sec' x='216' y='108'>§2</text>
-              <circle class='dot' cx='360' cy='46' r='4.5'/>
-              <text class='stage' x='360' y='72'>memory</text>
-              <text class='models' x='360' y='89'>RNN 1990 · LSTM 1997</text>
-              <text class='sec' x='360' y='108'>§3</text>
-              <circle class='dot' cx='504' cy='46' r='4.5'/>
-              <text class='stage' x='504' y='72'>context</text>
-              <text class='models' x='504' y='89'>ELMo 2018</text>
-              <text class='sec' x='504' y='108'>§4</text>
-              <circle class='dot' cx='648' cy='46' r='4.5'/>
-              <text class='stage' x='648' y='72'>all at once</text>
-              <text class='models' x='648' y='89'>Transformer 2017</text>
-              <text class='sec' x='648' y='108'>§5</text>
-            </svg>
-        </div>
+    <svg viewBox='0 0 760 122' role='img' aria-label='Roadmap: counts, then vectors, then memory, then context, then all at once. Each step is forced by a failure in the one before it.'>
+      <line class='spine' x1='75.2' y1='40' x2='684.8' y2='40'/>
+      <polygon class='head' points='160.4,40 151.4,36 151.4,44'/>
+      <text class='why' x='151.4' y='27'>no similarity</text>
+      <polygon class='head' points='312.8,40 303.8,36 303.8,44'/>
+      <text class='why' x='303.8' y='27'>no order</text>
+      <polygon class='head' points='465.2,40 456.2,36 456.2,44'/>
+      <text class='why' x='456.2' y='27'>embeddings still static</text>
+      <polygon class='head' points='617.6,40 608.6,36 608.6,44'/>
+      <text class='why' x='608.6' y='27'>sequential</text>
+      <g class='stop'>
+        <rect class='hit' x='6.0' y='30' width='138.4' height='82.0'/>
+        <circle class='dot' cx='75.2' cy='40' r='4.5'/>
+        <rect class='box' x='6.0' y='56' width='138.4' height='58.0' rx='7'/>
+        <text class='yr' x='75.2' y='65.0'>§1</text>
+        <text class='stage' x='75.2' y='79.0'>counts</text>
+        <text class='body' x='75.2' y='97.0'>n-gram, NNLM 2003</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='158.4' y='30' width='138.4' height='82.0'/>
+        <circle class='dot' cx='227.6' cy='40' r='4.5'/>
+        <rect class='box' x='158.4' y='56' width='138.4' height='58.0' rx='7'/>
+        <text class='yr' x='227.6' y='65.0'>§2</text>
+        <text class='stage' x='227.6' y='79.0'>vectors</text>
+        <text class='body' x='227.6' y='97.0'>Word2Vec 2013, GloVe</text>
+        <text class='body' x='227.6' y='111.5'>2014</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='310.8' y='30' width='138.4' height='82.0'/>
+        <circle class='dot' cx='380.0' cy='40' r='4.5'/>
+        <rect class='box' x='310.8' y='56' width='138.4' height='58.0' rx='7'/>
+        <text class='yr' x='380.0' y='65.0'>§3</text>
+        <text class='stage' x='380.0' y='79.0'>memory</text>
+        <text class='body' x='380.0' y='97.0'>RNN 1990, LSTM 1997</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='463.2' y='30' width='138.4' height='82.0'/>
+        <circle class='dot' cx='532.4' cy='40' r='4.5'/>
+        <rect class='box' x='463.2' y='56' width='138.4' height='58.0' rx='7'/>
+        <text class='yr' x='532.4' y='65.0'>§4</text>
+        <text class='stage' x='532.4' y='79.0'>context</text>
+        <text class='body' x='532.4' y='97.0'>ELMo 2018</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='615.6' y='30' width='138.4' height='82.0'/>
+        <circle class='dot' cx='684.8' cy='40' r='4.5'/>
+        <rect class='box' x='615.6' y='56' width='138.4' height='58.0' rx='7'/>
+        <text class='yr' x='684.8' y='65.0'>§5</text>
+        <text class='stage' x='684.8' y='79.0'>all at once</text>
+        <text class='body' x='684.8' y='97.0'>Transformer 2017</text>
+      </g>
+    </svg>
+</div>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
-        <li style='border-left-color: #5F7396'><a href='#one-line-read-left-to-right'>One Line, Read Left to Right</a></li>
-        <li style='border-left-color: #7E6B91'><a href='#1-when-a-word-was-just-a-count'>1. When a Word Was Just a Count</a></li>
+        <li style='border-left-color: #3E6491'><a href='#one-line-read-left-to-right'>One Line, Read Left to Right</a></li>
+        <li style='border-left-color: #8C77BC'><a href='#1-when-a-word-was-just-a-count'>1. When a Word Was Just a Count</a></li>
         <li style='border-left-color: #6E8C66'><a href='#2-when-a-word-became-a-direction'>2. When a Word Became a Direction</a></li>
-        <li style='border-left-color: #A87D76'><a href='#3-a-matrix-multiplied-by-itself'>3. A Matrix Multiplied by Itself</a></li>
-        <li style='border-left-color: #6B8FA8'><a href='#4-when-meaning-started-to-depend-on-neighbours'>4. When Meaning Started to Depend on Neighbours</a></li>
-        <li style='border-left-color: #8C6A9E'><a href='#5-when-everything-happened-at-once'>5. When Everything Happened At Once</a></li>
+        <li style='border-left-color: #B07E55'><a href='#3-a-matrix-multiplied-by-itself'>3. A Matrix Multiplied by Itself</a></li>
+        <li style='border-left-color: #7E9EC4'><a href='#4-when-meaning-started-to-depend-on-neighbours'>4. When Meaning Started to Depend on Neighbours</a></li>
+        <li style='border-left-color: #9B7FC4'><a href='#5-when-everything-happened-at-once'>5. When Everything Happened At Once</a></li>
         <li style='border-left-color: #5F8A8B'><a href='#6-counting-the-doors-still-open'>6. Counting the Doors Still Open</a></li>
         <li style='border-left-color: #9C7B62'><a href='#7-chat-this-over-with-friends'>7. Chat This Over With Friends</a></li>
-        <li style='border-left-color: #5F7396'><a href='#8-references'>8. References</a></li>
+        <li style='border-left-color: #3E6491'><a href='#8-references'>8. References</a></li>
     </ul>
 </nav>
 <h2 id='one-line-read-left-to-right'>One Line, Read Left to Right</h2>
 <p>The labels above the arrows are the load-bearing part: each names what was still missing at that point, and the stage to its right is the answer.</p>
 <p>One warning before the dates mislead you. <strong>This ordering is conceptual, not chronological</strong> — read the years and the line stops being a timeline. LSTM predates Word2Vec by sixteen years, and ELMo appeared four months <em>after</em> the transformer, so the transformer cannot be a repair of ELMo and recurrence was not invented because word vectors lacked order. The arrows mean "this is what that could not do", not "this came next".</p>
 <h2 id='1-when-a-word-was-just-a-count'>1. When a Word Was Just a Count</h2>
-<p>A language model assigns probability to text, and the chain rule says you can build it one word at a time:</p>
+<p>Begin where the field began. A language model assigns probability to text, and the chain rule says you can build that probability one word at a time:</p>
 $$
 P(w_1 w_2 \ldots w_T) = P(w_1)\,P(w_2 \mid w_1)\,P(w_3 \mid w_1 w_2)\cdots
 $$
@@ -123,11 +144,11 @@ $$
          alt='Log-scale plot of possible n-grams against n-grams ever observed, for n from 1 to 5. The possible count rises steeply; the observed count is nearly flat.'>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Measured on this blog's own three posts — 7,003 words, 1,514 of them
+        Measured on this blog's own three posts — 7,880 words, 1,594 of them
         distinct. At $n = 1$ every word in the space is observed by
-        definition. By $n = 5$ there are $8 \times 10^{15}$ possible
-        five-word sequences and exactly 6,860 ever occur, which is
-        $9\times10^{-13}$ of the space. Worse, <b>98.2%</b> of those 6,860
+        definition. By $n = 5$ there are $1 \times 10^{16}$ possible
+        five-word sequences and exactly 7,733 ever occur, which is
+        $8\times10^{-13}$ of the space. Worse, <b>98.4%</b> of those 7,733
         occur exactly once, so almost every count the model would rely on is
         the number 1. A bigger corpus moves these numbers and does not change
         their shape.
@@ -291,7 +312,7 @@ $$
         <text class='axlabel' x='16' y='118' text-anchor='middle' transform='rotate(-90 16 118)'>gradient norm</text>
     </svg>
     <p class='note' id='rho-note'></p>
-    <script>
+<script>
     (function () {
       var T = 60, LO = -12, HI = 12, X0 = 70, X1 = 680, Y0 = 215, Y1 = 20;
       var range = document.getElementById('rho-range');
@@ -331,7 +352,7 @@ $$
       draw();
     })();
     </script>
-</div>
+<p></div></p>
 <p>This is why the map annotates RNN with <em>short-term dependency (T=50)</em>. Not a hard limit — a practical one.</p>
 <p><strong>LSTM</strong> is the architecture that answer required. It carries two states rather than one: a hidden state $h_t$ and a <strong>cell state</strong> $c_t$, and it adds gates that decide what happens to the cell:</p>
 <ul>
@@ -357,6 +378,86 @@ $$
 <h2 id='5-when-everything-happened-at-once'>5. When Everything Happened At Once</h2>
 <p>The map's last node in this branch is a single word: <em>Transformer</em>. It gets one word because everything above explains why it had to exist.</p>
 <p>Both RNN and LSTM share one defect that no amount of gating repaired <em>at the time</em>: <strong>sequential dependence</strong>. Step $t$ cannot be computed until step $t-1$ is done, which forfeits the one thing modern hardware is good at. The qualifier matters, because mLSTM later showed gating and parallelism are not actually incompatible — it simply took a decade.</p>
+<div class='knob'>
+    <svg viewBox='0 0 720 260' id='par-svg' role='img'
+         aria-label='Two timelines. The recurrent model computes one token per step, so its wall clock grows with sequence length. The transformer computes every position in one step but does quadratically many pair comparisons.'>
+        <g id='par-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='par-t'>sequence length $T$</label>
+        <input type='range' id='par-t' min='2' max='24' value='8'>
+        <span class='readout' id='par-t-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='par-p'>parallel units available</label>
+        <input type='range' id='par-p' min='1' max='64' value='32'>
+        <span class='readout' id='par-p-out'></span>
+    </div>
+    <p class='note' id='par-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 6.</span>
+    The trade the transformer made, drawn as time. The
+    <span style='color:#3E6491'><b>recurrent</b></span> model takes $T$ steps
+    however much hardware you give it &#8212; each cell waits on the one
+    before, so the second slider does nothing to it at all. The
+    <span style='color:#8C77BC'><b>transformer</b></span> does more total work,
+    $T^2$ pair comparisons against the RNN's $T$, and finishes sooner anyway
+    because that work can all happen at once. Pull the parallel units down to
+    one and the advantage evaporates: this was a bet on hardware, not a
+    reduction in arithmetic.
+</div>
+<script>
+(function () {
+  var scene = document.getElementById('par-scene'),
+      tR = document.getElementById('par-t'), pR = document.getElementById('par-p'),
+      tOut = document.getElementById('par-t-out'), pOut = document.getElementById('par-p-out'),
+      note = document.getElementById('par-note');
+  var X0 = 118, X1 = 700, ROW1 = 74, ROW2 = 176, H = 20;
+
+  function draw() {
+    var T = +tR.value, P = +pR.value;
+    var rnnSteps = T;                         // strictly sequential
+    var attnWork = T * T;                     // every position against every other
+    var attnSteps = Math.ceil(attnWork / P);  // as many at a time as there are units
+    var span = Math.max(rnnSteps, attnSteps, 1);
+    var w = (X1 - X0) / span, s = '', i;
+
+    s += "<text x='8' y='" + (ROW1 - 22) + "' font-size='11' font-weight='600' fill='#3E6491'>RNN / LSTM</text>";
+    s += "<text x='8' y='" + (ROW1 - 7) + "' font-size='10' fill='#8C8C8C'>one token per step</text>";
+    for (i = 0; i < rnnSteps; i++) {
+      s += "<rect x='" + (X0 + i * w + 1.5).toFixed(1) + "' y='" + ROW1 + "' width='" +
+           Math.max(2, w - 3).toFixed(1) + "' height='" + H + "' rx='3' fill='#3E6491' fill-opacity='0.85'/>";
+      if (i < rnnSteps - 1 && w > 12) {
+        s += "<line x1='" + (X0 + (i + 1) * w - 1.5).toFixed(1) + "' y1='" + (ROW1 + H / 2) +
+             "' x2='" + (X0 + (i + 1) * w + 1.5).toFixed(1) + "' y2='" + (ROW1 + H / 2) +
+             "' stroke='#3E6491' stroke-width='1.4'/>";
+      }
+    }
+    s += "<text x='8' y='" + (ROW2 - 22) + "' font-size='11' font-weight='600' fill='#8C77BC'>Transformer</text>";
+    s += "<text x='8' y='" + (ROW2 - 7) + "' font-size='10' fill='#8C8C8C'>every pair at once</text>";
+    for (i = 0; i < attnSteps; i++) {
+      s += "<rect x='" + (X0 + i * w + 1.5).toFixed(1) + "' y='" + ROW2 + "' width='" +
+           Math.max(2, w - 3).toFixed(1) + "' height='" + H + "' rx='3' fill='#8C77BC' fill-opacity='0.85'/>";
+    }
+    s += "<line x1='" + X0 + "' y1='" + (ROW2 + H + 22) + "' x2='" + X1 + "' y2='" + (ROW2 + H + 22) +
+         "' stroke='#D8D4CE' stroke-width='1.2'/>";
+    s += "<text x='" + X0 + "' y='" + (ROW2 + H + 40) + "' font-size='10.5' fill='#6E6E6E'>wall-clock steps &#8594;</text>";
+    scene.innerHTML = s;
+    tOut.textContent = 'T = ' + T;
+    pOut.textContent = P + ' unit' + (P === 1 ? '' : 's');
+    note.textContent = 'The recurrent model needs ' + rnnSteps + ' sequential steps. The ' +
+      'transformer does ' + attnWork + ' pair comparisons \u2014 ' + (attnWork / rnnSteps).toFixed(0) +
+      '\u00d7 the work \u2014 but finishes in ' + attnSteps + ' step' + (attnSteps === 1 ? '' : 's') +
+      ' on ' + P + ' unit' + (P === 1 ? '' : 's') + '. ' +
+      (attnSteps < rnnSteps ? 'The extra arithmetic is free because it is not on the critical path.'
+                            : 'With this little hardware the extra arithmetic is not free at all.');
+  }
+  tR.addEventListener('input', draw);
+  pR.addEventListener('input', draw);
+  draw();
+})();
+</script>
 <p>One link my map omits belongs here: attention was not the transformer's invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014, so a decoder could look back at any source position without squeezing through a bottleneck state. The transformer deleted the recurrence around it — every position against every other in one parallel operation, with reach no longer set by how far a gradient survives a matrix product.</p>
 <p>My map writes down the price, and it is worth repeating because the cheerful version of this story omits it: <strong>attention costs $O(T^2)$</strong>, and autoregressive decoding needs a KV cache that grows with the sequence.</p>
 <p>Two qualifications, since that sentence has aged. The quadratic term is <em>compute</em>: attention's memory has been linear in practice since FlashAttention showed the $T \times T$ matrix need never be materialized. And the parallelism is real in training and prefill but not in generation, which emits one token per forward pass and is as sequential as an RNN — which is why the KV cache exists at all.</p>
@@ -383,7 +484,7 @@ $$
         <text class='axlabel' x='360' y='210' text-anchor='middle'>twenty-four candidate next words, most likely first</text>
     </svg>
     <p class='note' id='ppl-note'></p>
-    <script>
+<script>
     (function () {
       var K = 24, X0 = 44, X1 = 676, Y0 = 185, TOP = 24;
       var logits = [];
@@ -414,10 +515,10 @@ $$
       draw();
     })();
     </script>
-</div>
+<p></div></p>
 <h2 id='7-chat-this-over-with-friends'>7. Chat This Over With Friends</h2>
 <p><strong>The one-line version.</strong> The whole history before transformers is a single question asked over and over: what is a word, numerically? A count, then a direction, then a direction that depends on its neighbours, then one that depends on all of them at once. Each answer exists because the previous one could not do something specific.</p>
-<p><strong>The detail that lands.</strong> Counting dies of arithmetic. With a vocabulary of just 1,514 words there are $10^{15}$ possible five-word sequences, and a corpus sees around $10^{-13}$ of them — almost all exactly once. No amount of data fixes that, because the space grows faster than any corpus can.</p>
+<p><strong>The detail that lands.</strong> Counting dies of arithmetic. With a vocabulary of just 1,594 words there are $10^{16}$ possible five-word sequences, and a corpus sees around $10^{-13}$ of them — almost all exactly once. No amount of data fixes that, because the space grows faster than any corpus can.</p>
 <p><strong>What most people get wrong.</strong> Two things. Word2Vec did not invent word embeddings — Bengio's neural language model learned them a decade earlier, and learning them is what that paper is <em>for</em>. Word2Vec's contribution was making them cheap: strip out the expensive hidden layer and you can train on billions of words. And the lineage everyone recites is not chronological. LSTM predates Word2Vec by sixteen years, and ELMo came out four months <em>after</em> the transformer.</p>
 <p><strong>If someone pushes back.</strong> The fair objection is that smoothed n-grams were not the failure this framing implies — modified Kneser-Ney five-grams held the state of the art for roughly two decades. What they could never supply is any notion that two words are similar.</p>
 <p><strong>The one-line mechanism worth remembering.</strong> An RNN sends its gradient back by multiplying by the same matrix over and over, so it dies or diverges exponentially. An LSTM replaces that with $\prod_t f_t$ — still a product, but of numbers the model gets to choose.</p>

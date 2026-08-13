@@ -32,17 +32,17 @@ OUT = os.path.join(os.path.dirname(HERE), 'static', 'images')
 # The site palette. Semantics are kept consistent across every figure:
 # LayerNorm is dusty blue, RMSNorm is sage green, an un-normalized baseline is
 # plum. These match figures/norm_comparison.py.
-LN = '#5F7396'
+LN = '#3E6491'
 RMS = '#6E8C66'
-BASE = '#8B7194'
-PARTIAL = '#A87D76'
+BASE = '#8C77BC'
+PARTIAL = '#B07E55'
 MARK = '#A8443E'      # annotation markers, kept salient on purpose
 
 # Pre-norm / post-norm post. Pre-LN is blue, Post-LN is plum, and Post-LN
 # rescued by warm-up is sage, held constant across both reproduced figures.
-PRE = '#5F7396'
-PRE2 = '#6B8FA8'
-POST = '#8B7194'
+PRE = '#3E6491'
+PRE2 = '#7E9EC4'
+POST = '#8C77BC'
 POSTW = '#6E8C66'
 
 
@@ -136,9 +136,9 @@ print('xiong2020-fig1-preln-postln.png')
 im = flatten(os.path.join(SRC, 'xiong2020-fig1-preln-postln.png'))
 # Box fills sit behind black text, so they stay lighter than the line colours.
 im = recolour(im, [('#a9d18e', '#8FB183'),   # Layer Norm boxes -> sage
-                   ('#8faadc', '#8DA3C6'),   # FFN box -> dusty blue
-                   ('#ffd966', '#C7B0D2'),   # Attention box -> lilac
-                   ('#2f528f', '#4F5F7D')],  # box outlines
+                   ('#8faadc', '#93A9CB'),   # FFN box -> dusty blue
+                   ('#ffd966', '#C6ADDF'),   # Attention box -> lilac
+                   ('#2f528f', '#3E4560')],  # box outlines
              tol=60)
 panels = {'transformer-postln-block.png': im.crop((0, 0, 303, im.height)),
           'transformer-preln-block.png': im.crop((303, 0, im.width, im.height))}
@@ -183,12 +183,12 @@ print('mikolov2013-fig1-cbow-skipgram.png')
 im = flatten(os.path.join(SRC, 'mikolov2013-fig1-cbow-skipgram.png'))
 a = np.asarray(im).astype(float)
 alpha = (255.0 - a.mean(2, keepdims=True)) / 255.0      # 0 = white, 1 = black
-ink = rgb('#4A5468')
+ink = rgb('#3E4560')
 tinted = 255.0 - alpha * (255.0 - ink)[None, None, :]
 im = Image.fromarray(np.clip(tinted, 0, 255).astype(np.uint8))
 im = trim(im, pad=16)
 im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
     os.path.join(OUT, 'word2vec-architectures.png'))
-print('      tinted to #4A5468 (%d x %d)' % (im.width, im.height))
+print('      tinted to #3E4560 (%d x %d)' % (im.width, im.height))
 
 print('done ->', OUT)

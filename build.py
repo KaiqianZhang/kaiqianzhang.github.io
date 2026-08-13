@@ -99,6 +99,11 @@ class Markdown:
     def convert(self, text):
         text = text.replace('\r\n', '\n').replace('\r', '\n')
         text = self._extract_code_blocks(text)
+        # Script and style bodies are opaque and must survive verbatim. They
+        # go first, before anything can see a blank line inside them: block
+        # processing would otherwise split a function across two <p> tags,
+        # and a `//` comment would then swallow the rest of its line.
+        text = self._extract_raw_blocks(text)
         # Math and inline code are protected before footnotes are pulled out,
         # so that a footnote body gets the same treatment as body text.
         text = self._extract_math(text)
@@ -127,6 +132,12 @@ class Markdown:
             return '\n' + self._stash(highlight_code(code, lang)) + '\n'
         return re.sub(r'^```([^\n]*)\n(.*?)^```[ \t]*$', repl, text,
                       flags=re.DOTALL | re.MULTILINE)
+
+    def _extract_raw_blocks(self, text):
+        """Stash <script> and <style> bodies whole, exactly as written."""
+        return re.sub(r'<(script|style)\b[^>]*>.*?</\1>',
+                      lambda m: '\n' + self._stash(m.group(0)) + '\n',
+                      text, flags=re.DOTALL | re.IGNORECASE)
 
     def _extract_footnote_defs(self, text):
         lines = text.split('\n')
@@ -354,8 +365,8 @@ def highlight_code(code, lang):
 
 # Muted Morandi tones, cycled across the table of contents. Deeper than a
 # pastel so the accent bars read at small sizes, weighted toward blue/purple.
-TOC_COLOURS = ['#5F7396', '#7E6B91', '#6E8C66', '#A87D76',
-               '#6B8FA8', '#8C6A9E', '#5F8A8B', '#9C7B62']
+TOC_COLOURS = ['#3E6491', '#8C77BC', '#6E8C66', '#B07E55',
+               '#7E9EC4', '#9B7FC4', '#5F8A8B', '#9C7B62']
 
 # Deliberately conservative. General-audience blog conventions use 200-265,
 # but these posts are dense with derivations, figures to study and code to
@@ -576,6 +587,26 @@ def write(path, text):
         f.write(text)
 
 
+def check_figures(post):
+    """Fail the build if a post's figure numbers stopped making sense.
+
+    Inserting a figure in the middle of a post silently duplicates every
+    number after it, and the duplicate reads as correct in isolation. Catching
+    it here costs nothing and catches it every time.
+
+    Only captions are checked. A prose "Figure 4" may legitimately refer to a
+    figure in a cited paper, so those are the author's problem.
+    """
+    nums = [int(n) for n in
+            re.findall(r"caption-label'>Figure (\d+)\.", post.content)]
+    expected = list(range(1, len(nums) + 1))
+    if nums != expected:
+        raise SystemExit(
+            'post "%s": figure captions are numbered %s but should be %s. '
+            'Renumber them, and check every prose reference that points at a '
+            'figure whose number moved.' % (post.slug, nums, expected))
+
+
 def build():
     config = load_config()
 
@@ -641,6 +672,7 @@ def build():
 
     # Posts.
     for post in posts:
+        check_figures(post)
         tags = ', '.join(
             "<a href='%s/blog/tags/%s/'>%s</a>"
             % (config['base'], slug, html.escape(tag_name(config, slug)))

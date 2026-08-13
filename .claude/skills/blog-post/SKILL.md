@@ -39,6 +39,17 @@ not re-ask it. Ask only what you cannot infer, in one round:
 Get a yes before writing prose. This is the checkpoint that prevents building
 a post around the wrong figures or padding it with sections it does not need.
 
+**Checkpoint 3 — length, immediately after the plan is agreed.** By this point
+you know how much material there is, so ask:
+
+> Is this a long post?
+
+If no, it targets **5–8 minutes** and you trim to that. If yes, ask whether
+they want **15 minutes or longer**, take the answer as the ceiling, and record
+it as `length: long` in the front matter. Ask this every time; do not infer it
+from how much research turned up. A large pile of material is a reason to ask,
+not a licence to assume.
+
 After that, run to completion: write, generate figures, build, verify, commit.
 **Stop before `git push`.** Show the local preview URL and let them review.
 
@@ -128,6 +139,28 @@ plain declarative sentences, bold on first use of a defined term, historical
 narrative with explicit temporal transitions, minimal hedging. Prefer
 paragraphs over bullet lists for argument; use lists for enumerable things.
 
+**Tone.** A university research professor teaching you — patient, and
+genuinely interested in the material. Concretely, that means:
+
+- **Say why before what.** Set up the problem the reader is about to watch
+  someone solve, then solve it. A professor motivates; a reference work
+  states.
+- **Slow down at the hard step, not everywhere.** Take the difficult line of a
+  derivation and walk it out; do not pad the easy ones out of politeness.
+  Patience is spent where it is needed.
+- **Address the reader.** "Notice that", "follow the grey column", "read the
+  axis label" — the register of someone standing at a board pointing at
+  things, not of a paper's abstract.
+- **Be candid about what is unsettled**, what the field got wrong, and what
+  you yourself got wrong. The best teachers say "nobody checked this for three
+  years" and "this is easy to tell backwards".
+- **Let the interest show.** A sentence may be delighted by its subject. What
+  it may not be is pleased with itself — no showing off, no rhetorical
+  questions asked to be clever, no jokes at the reader's expense.
+- **Never condescend.** The reader is a capable graduate student, not a
+  novice. Do not over-explain what they already know, and do not apologise for
+  the mathematics.
+
 **Headings.** Literary. Carry an image, and let the sentence have some
 rhythm — a heading may be long if the length earns it. The image should be
 *true*: it has to encode what the section actually shows, so that it reads as
@@ -187,17 +220,22 @@ to five beats, each one sayable out loud.
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
 
-**Length.** 5–15 minutes, measured at a deliberately **conservative** 180
-words per minute (`WORDS_PER_MINUTE` in `build.py`). General blog convention
-is 200–265, but these posts carry derivations, figures to study and code to
-read, and nobody reads a derivation at cruising speed. Do not raise the number
-to make a post fit. Check with:
+**Length.** **5–8 minutes by default**, measured at a deliberately
+**conservative** 180 words per minute (`WORDS_PER_MINUTE` in `build.py`).
+General blog convention is 200–265, but these posts carry derivations, figures
+to study and code to read, and nobody reads a derivation at cruising speed. Do
+not raise the number to make a post fit.
+
+A post may exceed 8 minutes only if checkpoint 3 established it as a long
+post. Mark those `length: long` in the front matter so the ceiling is a
+recorded decision rather than something that crept up. Check with:
 
 ```sh
 python3 -c "import build; p=build.Post('posts/<file>.md', build.load_config()); print(p.read_minutes)"
 ```
 
-Over 15, trim, **in this order**:
+Over budget — 8 minutes normally, or whatever checkpoint 3 agreed — trim,
+**in this order**:
 
 1. Redundancy — anything stated twice in prose and again in a caption.
 2. **History.** It is a roadmap; keep it minimal. Prose around it should be
@@ -210,7 +248,7 @@ reaching 15 minutes from 19 needs paragraphs deleted, so delete them and say
 in the report exactly what went.
 
 A survey post whose subject *is* the history — the mindmap post is the
-standing example — is exempt from the ceiling. Nothing else is.
+standing example — is exempt from any ceiling. Nothing else is.
 
 One trap: any figure measured on the blog's own posts (`figures/mindmap.py`
 does this) moves when you trim other posts. Re-run it and update the numbers
@@ -239,6 +277,48 @@ Verify in a browser before committing: load the page and check that no
 `text` element overflows its `rect.box` and no arrow label is wider than the
 gap between two dots.
 
+**Motion and interaction.** Every post carries **at least five** animated or
+interactive pieces. This is a floor, not a target, and they must earn their
+place — each one has to show something a static image cannot.
+
+- **The simulation section is always interactive or animated** where the thing
+  being simulated has a parameter worth moving. A static plot of a simulation
+  is a last resort, and if you fall back to one, say why in the report.
+- **Give an interactive more than one control** whenever a second one is
+  meaningful. One slider shows a curve moving; two show how two effects trade
+  off against each other, which is usually the actual lesson. Label what each
+  one does and print the number it produces.
+- **Prefer the ambitious version.** 3-D, rotatable views, things that animate
+  on their own, things that respond to the mouse. The rotary dials and the
+  sliding window are the standard to beat, not to match.
+- **The history roadmap animates on hover** — this is automatic from the CSS,
+  and it counts as one of the five.
+- Vanilla JS and inline SVG only, no libraries. Honour
+  `prefers-reduced-motion`: self-running animation stops, interaction stays.
+- Every number an interactive prints must be computed, not tabulated. The same
+  rigour rule applies — an interactive that lies is worse than a static image
+  that does not.
+
+Which form fits which idea:
+
+- *Animation* when the point is a relationship that **holds while something
+  else changes** — the RoPE wedge staying rigid while both hands turn, the
+  word2vec window sliding along a sentence. Inline SVG plus a CSS keyframe,
+  no JavaScript needed.
+- *Sliders* when the point is how a quantity **responds to a parameter** — a
+  spectral radius swinging a gradient between vanishing and exploding, a
+  temperature swinging perplexity between 1 and V. Use the `.knob` pattern in
+  `blog.css`: `range` inputs, an inline SVG the script redraws, and a readout
+  underneath saying what the number *means*, not just what it is.
+- *A rotatable 3-D view* when the idea is geometric and a projection hides it
+  — which normalization does, and which the reader will otherwise take on
+  faith. Project by hand; there is no library.
+
+Keep the maths in a widget closed-form so it cannot disagree with the post's
+own figures, and check it with `node -e` before shipping — the same numbers
+should come out of the widget and the Python. A static plot is still right
+when the point is *measured* data rather than a formula.
+
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
 **Like button.** Every post ends with one, emitted by `templates/post.html` —
@@ -250,29 +330,35 @@ Worker in `worker/`, switched on by `likes_endpoint` in `site.json`; with it
 empty the button still works and simply shows no number. Verify it survived
 the build by grepping the generated page for `applause-btn`.
 
-**Motion and interaction.** The reader likes both, and asks for them. Prefer
-them wherever a static image would under-serve the idea:
+**Colour.** **Lavender-proned Morandi**: muted, slightly dusty, low
+saturation, built around a lavender primary and weighted toward violet and
+blue. **No grey ever carries meaning** — grey is for gridlines, axes and rules
+only. This is settled; do not drift toward brighter or more saturated
+palettes, and never fall back to matplotlib defaults.
 
-- *Animation* when the point is a relationship that holds while something
-  else changes — the RoPE wedge staying rigid while both hands turn, the
-  word2vec window sliding along a sentence. Inline SVG plus a CSS keyframe,
-  no JavaScript, and always an off switch under `prefers-reduced-motion`.
-- *A slider* when the point is how a quantity responds to a parameter — a
-  spectral radius swinging a gradient between vanishing and exploding, a
-  temperature swinging perplexity between 1 and V. Use the `.knob` pattern in
-  `blog.css`: a `range` input, an inline SVG the script redraws, and a
-  one-line readout underneath saying what the number means.
+The second half of the rule matters as much as the first: **different series
+must actually contrast.** The palette this replaced had plum and lavender at
+dE76 = 6.5, which is two curves a reader cannot tell apart. Separate in
+lightness as well as hue, so a figure survives greyscale and the common
+colour-vision deficiencies.
 
-Keep the maths in the widget trivial and closed-form so it cannot disagree
-with the post's own figures, and check it with `node -e` before shipping —
-the same numbers should come out of the widget and the Python. A static plot
-is still right when the point is *measured* data rather than a formula.
+| | Hex | L* | Use |
+|---|---|---|---|
+| lavender | `#8C77BC` | 54 | primary — first series, main curve |
+| blue | `#3E6491` | 42 | what it is compared against |
+| rose | `#C48BAC` | 64 | third series |
+| sage | `#6E8C66` | 55 | a rescued or corrected variant |
+| clay | `#B07E55` | 57 | fourth series |
+| ink | `#22253E` | 16 | fifth series, or emphasis |
+| marker | `#A8443E` | 43 | annotation only, deliberately salient |
+| gridlines | `#DEDAD4` | — | never a data colour |
 
-**Colour.** Deeper Morandi tones weighted toward blue and purple, no greys.
-The palette is defined in `figures/norm_comparison.py` and
-`figures/recolor_paper_figs.py`; reuse those constants. Hold colour semantics
-constant across every figure in a post, including reproduced ones — if a
-method is blue in one figure it is blue in all of them.
+Import these from `figures/palette.py` rather than retyping hexes — it applies
+to matplotlib figures, inline SVG, animations, interactive widgets and
+recoloured paper figures alike. Running that file prints the separation matrix
+and asserts every pair is at least dE 26; check any new colour against it
+before using one. Hold colour semantics constant across every figure in a
+post — if a method is lavender in one it is lavender in all of them.
 
 Recolour reproduced paper figures with `figures/recolor_paper_figs.py`. Add
 the original to `figures/originals/` first so it stays reproducible, and note

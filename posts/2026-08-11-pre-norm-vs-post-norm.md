@@ -4,6 +4,7 @@ subtitle: Moving the normalizer off the main path is what made deep transformers
 date: 2026-08-11
 tags: llm
 icon: 🍵
+length: long
 ---
 
 A transformer layer has three moving parts: a sub-layer that does the work
@@ -78,40 +79,52 @@ dates.
       <text class='why' x='380.0' y='27'>it worked, unexplained</text>
       <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
       <text class='why' x='570.5' y='27'>a folk remedy becomes a rule</text>
-      <circle class='dot' cx='94.2' cy='40' r='4.5'/>
-      <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
-      <text class='yr' x='94.2' y='65.0'>2017</text>
-      <text class='stage' x='94.2' y='79.0'>warm-up appears</text>
-      <text class='body' x='94.2' y='97.0'>The Transformer needs a</text>
-      <text class='body' x='94.2' y='111.5'>learning rate that ramps</text>
-      <text class='body' x='94.2' y='126.0'>for 4,000 steps. Offered as</text>
-      <text class='body' x='94.2' y='140.5'>recipe, not finding.</text>
-      <circle class='dot' cx='284.8' cy='40' r='4.5'/>
-      <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
-      <text class='yr' x='284.8' y='65.0'>2018-19</text>
-      <text class='stage' x='284.8' y='79.0'>a quiet rearrangement</text>
-      <text class='body' x='284.8' y='97.0'>Baevski and Auli, the</text>
-      <text class='body' x='284.8' y='111.5'>Sparse Transformer, GPT-2:</text>
-      <text class='body' x='284.8' y='126.0'>the normalizer moves into</text>
-      <text class='body' x='284.8' y='140.5'>the branch. In none of them</text>
-      <text class='body' x='284.8' y='155.0'>is it the headline.</text>
-      <circle class='dot' cx='475.2' cy='40' r='4.5'/>
-      <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
-      <text class='yr' x='475.2' y='65.0'>2020</text>
-      <text class='stage' x='475.2' y='79.0'>someone works out why</text>
-      <text class='body' x='475.2' y='97.0'>Xiong et al.: at</text>
-      <text class='body' x='475.2' y='111.5'>initialization post-norm</text>
-      <text class='body' x='475.2' y='126.0'>gradients near the output</text>
-      <text class='body' x='475.2' y='140.5'>are large, so warm-up is</text>
-      <text class='body' x='475.2' y='155.0'>the workaround.</text>
-      <circle class='dot' cx='665.8' cy='40' r='4.5'/>
-      <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
-      <text class='yr' x='665.8' y='65.0'>2020-</text>
-      <text class='stage' x='665.8' y='79.0'>pre-norm by default</text>
-      <text class='body' x='665.8' y='97.0'>GPT-3, LLaMA, Mistral,</text>
-      <text class='body' x='665.8' y='111.5'>Qwen, Gemma, DeepSeek.</text>
-      <text class='body' x='665.8' y='126.0'>Then, from 2022, people</text>
-      <text class='body' x='665.8' y='140.5'>begin moving it back.</text>
+      <g class='stop'>
+        <rect class='hit' x='6.0' y='30' width='176.5' height='125.5'/>
+        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
+        <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
+        <text class='yr' x='94.2' y='65.0'>2017</text>
+        <text class='stage' x='94.2' y='79.0'>warm-up appears</text>
+        <text class='body' x='94.2' y='97.0'>The Transformer needs a</text>
+        <text class='body' x='94.2' y='111.5'>learning rate that ramps</text>
+        <text class='body' x='94.2' y='126.0'>for 4,000 steps. Offered as</text>
+        <text class='body' x='94.2' y='140.5'>recipe, not finding.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='196.5' y='30' width='176.5' height='125.5'/>
+        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
+        <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
+        <text class='yr' x='284.8' y='65.0'>2018-19</text>
+        <text class='stage' x='284.8' y='79.0'>a quiet rearrangement</text>
+        <text class='body' x='284.8' y='97.0'>Baevski and Auli, the</text>
+        <text class='body' x='284.8' y='111.5'>Sparse Transformer, GPT-2:</text>
+        <text class='body' x='284.8' y='126.0'>the normalizer moves into</text>
+        <text class='body' x='284.8' y='140.5'>the branch. In none of them</text>
+        <text class='body' x='284.8' y='155.0'>is it the headline.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='387.0' y='30' width='176.5' height='125.5'/>
+        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
+        <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
+        <text class='yr' x='475.2' y='65.0'>2020</text>
+        <text class='stage' x='475.2' y='79.0'>someone works out why</text>
+        <text class='body' x='475.2' y='97.0'>Xiong et al.: at</text>
+        <text class='body' x='475.2' y='111.5'>initialization post-norm</text>
+        <text class='body' x='475.2' y='126.0'>gradients near the output</text>
+        <text class='body' x='475.2' y='140.5'>are large, so warm-up is</text>
+        <text class='body' x='475.2' y='155.0'>the workaround.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='577.5' y='30' width='176.5' height='125.5'/>
+        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
+        <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
+        <text class='yr' x='665.8' y='65.0'>2020-</text>
+        <text class='stage' x='665.8' y='79.0'>pre-norm by default</text>
+        <text class='body' x='665.8' y='97.0'>GPT-3, LLaMA, Mistral,</text>
+        <text class='body' x='665.8' y='111.5'>Qwen, Gemma, DeepSeek.</text>
+        <text class='body' x='665.8' y='126.0'>Then, from 2022, people</text>
+        <text class='body' x='665.8' y='140.5'>begin moving it back.</text>
+      </g>
     </svg>
 </div>
 
@@ -130,9 +143,10 @@ moving-back began around 2022; that is section 5.
 
 ## 2. The Stream That Only Rises
 
-The difference is one line of algebra, and the consequence follows directly.
-One caveat governs the whole section: everything below describes a network
-**at initialization**. That is where the theory lives, and it is not a claim
+The difference is one line of algebra, and everything else in this post falls
+out of it — so it is worth writing both arrangements down carefully before
+looking at either. One caveat governs the whole section: everything below
+describes a network **at initialization**. That is where the theory lives, and it is not a claim
 about a trained model.
 
 Write $F_l$ for the $l$-th sub-layer and $N$ for the normalizer. **Post-norm**
@@ -152,7 +166,8 @@ $$
 ### What the residual stream does
 
 Now follow $\|x_l\|$, the size of the vector on the main path — the
-**residual stream**.
+**residual stream**. Ask of each arrangement the same question: after $l$
+layers, how big is it?
 
 Under post-norm the last operation in every layer is $N$, so whatever went in
 comes out rescaled to a fixed size: $\|x_{l+1}\| = \sqrt{d}$ for every $l$,
@@ -181,12 +196,130 @@ writes rather than layers — a transformer layer contributes two — a 64-layer
 model performs 128 of them and carries a vector about eleven times larger at
 the top than at the bottom.
 
+<div class='knob'>
+    <svg viewBox='0 0 720 270' id='str-svg' role='img'
+         aria-label='Residual stream size against depth. The pre-norm curve climbs as the square root of depth; the post-norm curve is flat. A second control shrinks the branch weights and flattens the pre-norm curve.'>
+        <g id='str-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='str-l'>depth &#8212; residual writes $L$</label>
+        <input type='range' id='str-l' min='2' max='256' value='128'>
+        <span class='readout' id='str-l-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='str-b'>branch scale $\beta$ at initialization</label>
+        <input type='range' id='str-b' min='10' max='140' value='100'>
+        <span class='readout' id='str-b-out'></span>
+    </div>
+    <p class='note' id='str-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 2.</span>
+    The algebra above, with the knobs exposed. The first slider is depth: the
+    <span style='color:#8C77BC'><b>pre-norm</b></span> stream climbs as
+    $\sqrt{1 + L\beta^2}$ while <span style='color:#3E6491'><b>post-norm</b></span>
+    is pinned flat at $\sqrt{d}$ by the normalizer at the end of every layer.
+    The second slider is the one that matters for the caveat in the text.
+    Drag $\beta$ down to $1/\sqrt{L}$ &#8212; GPT-2's "modified
+    initialization" &#8212; and the climb flattens out almost completely. The
+    growth is a property of how the branch was initialized, not of the
+    architecture.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('str-scene'),
+      lR = document.getElementById('str-l'), bR = document.getElementById('str-b'),
+      lOut = document.getElementById('str-l-out'), bOut = document.getElementById('str-b-out'),
+      note = document.getElementById('str-note');
+  var X0 = 62, X1 = 700, Y0 = 214, YTOP = 26;
+
+  function draw() {
+    var L = +lR.value, beta = +bR.value / 100;
+    var top = Math.max(2.2, Math.sqrt(1 + L * beta * beta) * 1.12);
+    function px(l) { return X0 + l / L * (X1 - X0); }
+    function py(v) { return Y0 - v / top * (Y0 - YTOP); }
+    var s = '', i;
+    for (i = 0; i <= 4; i++) {
+      var v = top * i / 4;
+      s += "<line class='grid' x1='" + X0 + "' y1='" + py(v).toFixed(1) +
+           "' x2='" + X1 + "' y2='" + py(v).toFixed(1) + "'/>" +
+           "<text class='tick' x='" + (X0 - 8) + "' y='" + (py(v) + 3).toFixed(1) +
+           "' text-anchor='end'>" + v.toFixed(1) + "</text>";
+    }
+    var pre = [], post = [];
+    for (i = 0; i <= L; i++) {
+      pre.push(px(i).toFixed(1) + ',' + py(Math.sqrt(1 + i * beta * beta)).toFixed(1));
+      post.push(px(i).toFixed(1) + ',' + py(1).toFixed(1));
+    }
+    s += "<polyline points='" + post.join(' ') + "' fill='none' stroke='#3E6491' stroke-width='2.4'/>";
+    s += "<polyline points='" + pre.join(' ') + "' fill='none' stroke='#8C77BC' stroke-width='2.6'/>";
+    s += "<text class='axlabel' x='" + X0 + "' y='240'>residual write &#8594;</text>";
+    s += "<text class='axlabel' x='" + (X0 - 46) + "' y='" + (YTOP - 8) +
+         "'>&#8214;x&#8214; in units of &#8730;d</text>";
+    scene.innerHTML = s;
+    var end = Math.sqrt(1 + L * beta * beta);
+    lOut.textContent = 'L = ' + L;
+    bOut.textContent = '\u03b2 = ' + beta.toFixed(2);
+    var gpt2 = 1 / Math.sqrt(L);
+    note.textContent = 'At the top of the stack the pre-norm vector is ' +
+      end.toFixed(2) + '\u00d7 the size it started, against post-norm\u2019s 1.00\u00d7. ' +
+      'GPT-2\u2019s 1/\u221aL for this depth would be \u03b2 = ' + gpt2.toFixed(2) +
+      ', which lands the stream at ' + Math.sqrt(2).toFixed(2) + '\u00d7 however deep the model gets.';
+  }
+  lR.addEventListener('input', draw);
+  bR.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+
 The constant is only a sketch: Xiong et al.'s Lemma 2 brackets the real
 quantity between $(1+l/2)d$ and $(1+3l/2)d$. The $\sqrt{L}$ scaling survives,
 the constant does not. And the growth follows from how the branch is
 initialized rather than from the architecture — GPT-2 cancels it deliberately,
 scaling residual weights by $1/\sqrt{N}$ to account for "the accumulation on
 the residual path with model depth", two years before anyone explained it.
+
+
+<div class='pulse-anim'>
+    <svg viewBox='0 0 720 250' role='img'
+         aria-label='Two stacks of six layers. A gradient pulse travels down the post-norm stack passing through a normalizer at every layer, and down the pre-norm stack along an unbroken residual path.'>
+        <text class='rowlabel' x='96' y='18'>POST-NORM</text>
+        <text class='rowlabel' x='452' y='18'>PRE-NORM</text>
+        <g class='stack'>
+            <line class='spine-hard' x1='150' y1='34' x2='150' y2='214'/>
+            <rect class='norm' x='134' y='40'  width='32' height='13' rx='3'/>
+            <rect class='norm' x='134' y='70'  width='32' height='13' rx='3'/>
+            <rect class='norm' x='134' y='100' width='32' height='13' rx='3'/>
+            <rect class='norm' x='134' y='130' width='32' height='13' rx='3'/>
+            <rect class='norm' x='134' y='160' width='32' height='13' rx='3'/>
+            <rect class='norm' x='134' y='190' width='32' height='13' rx='3'/>
+            <circle class='pulse pulse-post' cx='150' cy='34' r='7'/>
+        </g>
+        <g class='stack'>
+            <line class='spine-clean' x1='506' y1='34' x2='506' y2='214'/>
+            <rect class='norm off' x='546' y='40'  width='32' height='13' rx='3'/>
+            <rect class='norm off' x='546' y='70'  width='32' height='13' rx='3'/>
+            <rect class='norm off' x='546' y='100' width='32' height='13' rx='3'/>
+            <rect class='norm off' x='546' y='130' width='32' height='13' rx='3'/>
+            <rect class='norm off' x='546' y='160' width='32' height='13' rx='3'/>
+            <rect class='norm off' x='546' y='190' width='32' height='13' rx='3'/>
+            <circle class='pulse pulse-pre' cx='506' cy='34' r='7'/>
+        </g>
+        <text class='cap' x='96' y='236'>six normalizers stand in the road</text>
+        <text class='cap' x='452' y='236'>the road is clear; they stand beside it</text>
+    </svg>
+    <div class='caption'>
+        <span class='caption-label'>Figure 3.</span>
+        A gradient travelling back down each arrangement. On the left it is
+        squeezed through a normalizer at every layer and arrives faint. On the
+        right the main path is an unbroken chain of additions, the normalizers
+        have stepped into the branches, and the pulse reaches the bottom with
+        its size intact. This is the picture behind every equation in this
+        section, and it is the whole reason the rearrangement works.
+    </div>
+</div>
 
 ### Why that determines the gradients
 
@@ -266,7 +399,7 @@ warm-up.
         </div>
     </div>
     <div class='caption'>
-        <span class='caption-label'>Figure 2.</span>
+        <span class='caption-label'>Figure 4.</span>
         Panel (a) is the argument, panel (b) the payoff. Note what (a) says
         about warm-up: it does not make Post-LN's gradients well proportioned
         across layers, it makes them all small. It survives the dangerous
@@ -364,6 +497,98 @@ NormFormer all sit in this space — but it captures the compromise: keep the
 main path free of normalizers, pre-norm's insight, while stopping the branch
 writing unbounded quantities into it, post-norm's.
 
+<div class='knob'>
+    <svg viewBox='0 0 720 250' id='arr-svg' role='img'
+         aria-label='A transformer sub-layer with the normalizer able to sit in four places: on the main path after the addition, inside the branch before the sub-layer, inside the branch after it, or both.'>
+        <g id='arr-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='arr-w'>where the normalizer sits</label>
+        <input type='range' id='arr-w' min='0' max='3' value='1' step='1'>
+        <span class='readout' id='arr-w-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='arr-l'>depth $L$</label>
+        <input type='range' id='arr-l' min='6' max='256' value='64'>
+        <span class='readout' id='arr-l-out'></span>
+    </div>
+    <p class='note' id='arr-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 5.</span>
+    All four live arrangements, as one diagram with a movable part. Drag the
+    first slider and watch the <span style='color:#6E8C66'><b>normalizer</b></span>
+    step off the main path, into the branch, to the far end of the branch, and
+    then into both ends at once. The second slider says what each choice costs
+    at depth: only the arrangement that leaves a normalizer on the grey main
+    path holds the stream flat, and only the arrangements that leave it clear
+    escape the warm-up. Everything since 2021 has been an attempt to have both.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('arr-scene'),
+      wR = document.getElementById('arr-w'), lR = document.getElementById('arr-l'),
+      wOut = document.getElementById('arr-w-out'), lOut = document.getElementById('arr-l-out'),
+      note = document.getElementById('arr-note');
+  var MODES = [
+    {name: 'post-norm', users: 'Transformer, BERT', formula: 'x \u2190 N(x + F(x))',
+     onPath: true,  pre: false, post: false},
+    {name: 'pre-norm', users: 'GPT-2 onwards, LLaMA, Mistral', formula: 'x \u2190 x + F(N(x))',
+     onPath: false, pre: true,  post: false},
+    {name: 'reordered', users: 'Swin V2, OLMo 2', formula: 'x \u2190 x + N(F(x))',
+     onPath: false, pre: false, post: true},
+    {name: 'peri-norm', users: 'Gemma 2', formula: 'x \u2190 x + N(F(N(x)))',
+     onPath: false, pre: true,  post: true}
+  ];
+  var SPINE_X = 150, TOP = 40, BOT = 200, BR = 430;
+
+  function box(x, y, w, h, fill, label, cls) {
+    return "<g class='" + (cls || '') + "'><rect x='" + x + "' y='" + y + "' width='" + w +
+      "' height='" + h + "' rx='5' fill='" + fill + "' fill-opacity='0.9'/>" +
+      "<text x='" + (x + w / 2) + "' y='" + (y + h / 2 + 4) +
+      "' text-anchor='middle' font-size='11' font-weight='600' fill='#FFFFFF'>" +
+      label + "</text></g>";
+  }
+  function draw() {
+    var m = MODES[+wR.value], L = +lR.value, s = '';
+    s += "<line x1='" + SPINE_X + "' y1='" + TOP + "' x2='" + SPINE_X + "' y2='" + BOT +
+         "' stroke='#C9C3BC' stroke-width='9' stroke-linecap='round'/>";
+    s += "<text x='" + (SPINE_X - 16) + "' y='" + (TOP + 6) +
+         "' text-anchor='end' font-size='10.5' fill='#8C8C8C'>out</text>";
+    s += "<text x='" + (SPINE_X - 16) + "' y='" + BOT +
+         "' text-anchor='end' font-size='10.5' fill='#8C8C8C'>in</text>";
+    // branch: leaves the path low, returns high
+    s += "<path d='M " + SPINE_X + " 168 H " + BR + " V 82 H " + SPINE_X +
+         "' fill='none' stroke='#C6BBDD' stroke-width='2.4'/>";
+    s += "<circle cx='" + SPINE_X + "' cy='82' r='7' fill='none' stroke='#8C77BC' stroke-width='2.2'/>";
+    s += "<text x='" + (SPINE_X + 1) + "' y='86' text-anchor='middle' font-size='11' fill='#8C77BC'>+</text>";
+    s += box(BR - 46, 108, 92, 34, '#3E6491', 'sub-layer F');
+    if (m.onPath) s += box(SPINE_X - 46, 44, 92, 26, '#6E8C66', 'Norm');
+    if (m.pre)  s += box(BR - 150, 155, 78, 26, '#6E8C66', 'Norm');
+    if (m.post) s += box(BR - 150, 69, 78, 26, '#6E8C66', 'Norm');
+    s += "<text x='560' y='196' font-size='12' font-weight='600' fill='#3F3F3F'>" + m.name + "</text>";
+    s += "<text x='560' y='214' font-size='10.5' fill='#7A7A7A'>" + m.users + "</text>";
+    s += "<text x='560' y='232' font-size='10.5' fill='#8C77BC'>" + m.formula + "</text>";
+    scene.innerHTML = s;
+    wOut.textContent = m.name;
+    lOut.textContent = 'L = ' + L;
+    var grow = m.onPath ? 1 : Math.sqrt(1 + L);
+    note.textContent = m.onPath
+      ? 'The stream is rinsed at every layer, so it stays at 1.00\u00d7 however deep the '
+        + 'model gets \u2014 and the gradient is undamped, which is what warm-up is for.'
+      : 'The main path is clear, so the gradient reaches the bottom having passed through '
+        + 'nothing \u2014 and the stream reaches ' + grow.toFixed(1) + '\u00d7 its starting size at L = '
+        + L + '. ' + (m.post
+          ? 'Normalizing the branch output bounds what gets written into it.'
+          : 'Nothing here bounds what the branch writes into the stream.');
+  }
+  wR.addEventListener('input', draw);
+  lR.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
 So "moving it back" needs qualifying. Only DeepNet went back literally.
 Reordered and peri-norm leave the residual path clean and move the normalizer
 around *within* the branch. What was recovered is not post-norm's position but
@@ -388,7 +613,7 @@ def post_norm_step(x, W):
     <img src='/images/pre-vs-post-norm.png'
          alt='Two panels. Left: residual stream norm against layer, with pre-norm following a square-root curve and post-norm flat. Right: log-log plot of last-layer gradient norm against depth, with pre-norm falling along a one-over-root-L line and post-norm constant.'>
     <div class='caption'>
-        <span class='caption-label'>Figure 3.</span>
+        <span class='caption-label'>Figure 6.</span>
         Norms are in units of $\sqrt{d}$, so a post-norm stream held there
         reads as 1; each curve is the mean of 24 random stacks.
         <b>(a)</b> The pre-norm stream (blue) tracks $\sqrt{L+1}$: 4.14
@@ -400,6 +625,132 @@ def post_norm_step(x, W):
         \sqrt{2d}$. Reference lines are closed forms, not fits.
     </div>
 </div>
+
+Better still, drive it. The widget below runs that stack live &#8212; new
+random matrices on every move &#8212; and prints what it measured beside the
+closed form.
+
+<div class='knob'>
+    <svg viewBox='0 0 720 250' id='stk-svg' role='img'
+         aria-label='Measured last-layer gradient against depth for both arrangements, drawn against the closed-form curves.'>
+        <g id='stk-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='stk-l'>depth $L$</label>
+        <input type='range' id='stk-l' min='2' max='128' value='64'>
+        <span class='readout' id='stk-l-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='stk-d'>width $d$</label>
+        <input type='range' id='stk-d' min='3' max='9' value='6'>
+        <span class='readout' id='stk-d-out'></span>
+    </div>
+    <p class='note' id='stk-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 7.</span>
+    The same toy, measured in your browser. Dots are a live run over random
+    Gaussian sub-layers; the dashed lines are $1/\sqrt{L+1}$ and
+    $1/\sqrt{2}$, which were not fitted to anything. Widening $d$ tightens
+    the dots onto the curves &#8212; the argument is an asymptotic one, and
+    narrow models are visibly noisy. Note what does *not* happen on the
+    <span style='color:#3E6491'><b>post-norm</b></span> line as you drag
+    depth: nothing at all.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('stk-scene'),
+      lR = document.getElementById('stk-l'), dR = document.getElementById('stk-d'),
+      lOut = document.getElementById('stk-l-out'), dOut = document.getElementById('stk-d-out'),
+      note = document.getElementById('stk-note');
+  var X0 = 66, X1 = 700, Y0 = 196, YTOP = 24;
+
+  function gauss() {
+    var u = 1 - Math.random(), v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  // A stack of random linear sub-layers, W ~ N(0, 1/d), stacked both ways.
+  // Only the two things section 2 predicts are measured: how the stream grows
+  // and what the final normalizer does to the gradient.
+  function run(L, d, pre) {
+    var x = new Float64Array(d), i, l, last = 1;
+    for (i = 0; i < d; i++) x[i] = gauss();
+    var scale = 1 / Math.sqrt(d);
+    for (l = 0; l < L; l++) {
+      var inp = x, n = 0;
+      if (pre) { n = 0; for (i = 0; i < d; i++) n += x[i] * x[i];
+                 n = Math.sqrt(n / d); inp = x.map(function (t) { return t / n; }); }
+      var out = new Float64Array(d);
+      for (i = 0; i < d; i++) {
+        var acc = 0;
+        for (var j = 0; j < d; j++) acc += gauss() * scale * inp[j];
+        out[i] = acc;
+      }
+      if (pre) { for (i = 0; i < d; i++) x[i] = x[i] + out[i]; }
+      else {
+        var y = new Float64Array(d), m = 0;
+        for (i = 0; i < d; i++) { y[i] = x[i] + out[i]; m += y[i] * y[i]; }
+        // What the last normalizer divides by is the size of the sum going
+        // *into* it, not the unit-size vector coming out. Measuring after the
+        // division would report 1.000 for every depth, which is the shape of
+        // the answer but not the number.
+        last = Math.sqrt(d) / Math.sqrt(m);
+        m = Math.sqrt(m / d);
+        for (i = 0; i < d; i++) x[i] = y[i] / m;
+      }
+    }
+    if (!pre) return last;
+    var nn = 0;
+    for (i = 0; i < d; i++) nn += x[i] * x[i];
+    // the final normalizer contributes sqrt(d)/||x||, which is the damping
+    return Math.sqrt(d) / Math.sqrt(nn);
+  }
+  function draw() {
+    var L = +lR.value, d = Math.pow(2, +dR.value);
+    var pts = [], i;
+    var xs = [];
+    for (i = 2; i <= L; i = Math.ceil(i * 1.7)) xs.push(i);
+    if (xs[xs.length - 1] !== L) xs.push(L);
+    function px(l) { return X0 + Math.log(l) / Math.log(Math.max(3, L)) * (X1 - X0); }
+    function py(v) { return Y0 - v / 1.15 * (Y0 - YTOP); }
+    var s = '', k;
+    for (k = 0; k <= 4; k++) {
+      var v = 1.15 * k / 4;
+      s += "<line class='grid' x1='" + X0 + "' y1='" + py(v).toFixed(1) + "' x2='" + X1 +
+           "' y2='" + py(v).toFixed(1) + "'/><text class='tick' x='" + (X0 - 8) +
+           "' y='" + (py(v) + 3).toFixed(1) + "' text-anchor='end'>" + v.toFixed(2) + "</text>";
+    }
+    var theory = [];
+    for (k = 2; k <= L; k++) theory.push(px(k).toFixed(1) + ',' + py(1 / Math.sqrt(k + 1)).toFixed(1));
+    s += "<polyline points='" + theory.join(' ') + "' fill='none' stroke='#8C77BC' " +
+         "stroke-width='1.6' stroke-dasharray='5 3'/>";
+    s += "<line x1='" + X0 + "' y1='" + py(1 / Math.SQRT2).toFixed(1) + "' x2='" + X1 +
+         "' y2='" + py(1 / Math.SQRT2).toFixed(1) + "' stroke='#3E6491' stroke-width='1.6' stroke-dasharray='5 3'/>";
+    var lastPre = 0, lastPost = 0;
+    xs.forEach(function (l) {
+      var a = run(l, d, true), b = run(l, d, false);
+      lastPre = a; lastPost = b;
+      s += "<circle cx='" + px(l).toFixed(1) + "' cy='" + py(a).toFixed(1) +
+           "' r='4' fill='#8C77BC'/>";
+      s += "<circle cx='" + px(l).toFixed(1) + "' cy='" + py(b).toFixed(1) +
+           "' r='4' fill='#3E6491'/>";
+      s += "<text class='tick' x='" + px(l).toFixed(1) + "' y='" + (Y0 + 16) +
+           "' text-anchor='middle'>" + l + "</text>";
+    });
+    s += "<text class='axlabel' x='" + X0 + "' y='232'>depth $L$, log spaced &#8594;</text>";
+    scene.innerHTML = s;
+    lOut.textContent = 'L = ' + L;
+    dOut.textContent = 'd = ' + d;
+    note.textContent = 'At L = ' + L + ': pre-norm measured ' + lastPre.toFixed(3) +
+      ' against a predicted ' + (1 / Math.sqrt(L + 1)).toFixed(3) +
+      '; post-norm measured ' + lastPost.toFixed(3) + ' against 1/\u221a2 = 0.707.';
+  }
+  lR.addEventListener('input', draw);
+  dR.addEventListener('input', draw);
+  draw();
+})();
+</script>
 
 Panel (b) is the *mechanism* behind Theorem 1 rather than the theorem: this
 stack has no attention, no nonlinearity and no data, and the damping needs
@@ -468,5 +819,5 @@ post-norm's restraint, not its position.
     (2019) argued it compensates for the high variance of Adam's adaptive
     learning rate early in training, and proposed RAdam to fix that directly.
     Xiong et al. note that warm-up helps other optimizers too, which suggests
-    Adam is not the whole story — and Figure 2(b) shows Pre-LN doing fine
+    Adam is not the whole story — and Figure 4(b) shows Pre-LN doing fine
     under both. Both effects are probably real.

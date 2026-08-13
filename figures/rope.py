@@ -23,9 +23,9 @@ from matplotlib.colors import LinearSegmentedColormap
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                    'static', 'images')
 
-Q = '#5F7396'         # query / band curve, dusty blue
-K = '#8B7194'         # key, plum
-REF = '#8C7BA6'       # lavender
+Q = '#3E6491'         # query / band curve, dusty blue
+K = '#8C77BC'         # key, plum
+REF = '#C48BAC'       # lavender
 ACCENT = '#A8443E'    # salient marker
 GRID = '#DEDAD4'
 TEXT = '#3F3F3F'
@@ -45,8 +45,8 @@ plt.rcParams.update({
 })
 
 DIVERGING = LinearSegmentedColormap.from_list(
-    'morandi', ['#6E5A78', '#8B7194', '#C9BFC9', '#F2EFEA',
-                '#B9C2D0', '#5F7396', '#3E5273'])
+    'morandi', ['#5A4A73', '#8C77BC', '#D6C9DC', '#F2EFEA',
+                '#AFC0D8', '#3E6491', '#2A4468'])
 
 
 def rope(x, pos, base=10000.0):
