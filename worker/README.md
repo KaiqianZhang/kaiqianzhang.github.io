@@ -1,5 +1,7 @@
 # Like counter
 
+Deployed at <https://blog-likes.kaiqianzhang.workers.dev>.
+
 A ~60-line Cloudflare Worker holding one integer per post in Workers KV. The
 blog works fine without it — the like button falls back to remembering a
 reader's own tap in their browser and simply shows no number.
@@ -18,11 +20,11 @@ Paste the printed id into `wrangler.toml`, then:
 npx wrangler deploy
 ```
 
-Wrangler prints a URL like `https://blog-likes.<subdomain>.workers.dev`. Put it
+Wrangler prints a URL like `https://blog-likes.kaiqianzhang.workers.dev`. Put it
 in the repo root's `site.json`:
 
 ```json
-"likes_endpoint": "https://blog-likes.<subdomain>.workers.dev"
+"likes_endpoint": "https://blog-likes.kaiqianzhang.workers.dev"
 ```
 
 Then `python3 build.py` and push. Leave `likes_endpoint` as `""` to switch the
@@ -31,8 +33,8 @@ counter off everywhere.
 ## Check it
 
 ```sh
-curl https://blog-likes.<subdomain>.workers.dev/rope
-curl -X POST https://blog-likes.<subdomain>.workers.dev/rope \
+curl https://blog-likes.kaiqianzhang.workers.dev/rope
+curl -X POST https://blog-likes.kaiqianzhang.workers.dev/rope \
      -H 'Content-Type: application/json' -d '{"delta":1}'
 ```
 

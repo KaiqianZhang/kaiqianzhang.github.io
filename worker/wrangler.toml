@@ -6,4 +6,4 @@ compatibility_date = "2026-01-01"
 # Paste the id it prints into the line below, then:  npx wrangler deploy
 [[kv_namespaces]]
 binding = "LIKES"
-id = "PASTE_THE_NAMESPACE_ID_HERE"
+id = "166267636c854568b406c4316b888b74"
