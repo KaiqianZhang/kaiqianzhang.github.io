@@ -7,11 +7,19 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>What the KV Cache Costs</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache-costs/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache-costs/</guid>
+        <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
+        <description>The buffer that makes generation affordable is the reason serving a language model is hard.</description>
+    </item>
+
+    <item>
         <title>The KV Cache</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</guid>
         <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
-        <description>The trick that makes a chatbot answer at a readable speed is also the reason it runs out of memory.</description>
+        <description>How a model avoids rereading the whole conversation every time it writes a word.</description>
     </item>
 
     <item>

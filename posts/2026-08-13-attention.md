@@ -180,6 +180,16 @@ restricted to the summary. At each word it produced, it could look back over
 computed fresh each time. The bottleneck disappears, because there is no longer
 one vector that has to hold everything.
 
+There is one thing the third arrow says that I should make good on. It
+mentions "a cache to feed", which is a consequence of dropping the recurrence
+that nobody planned: because attention looks back at every earlier token, a
+model generating text ends up storing the keys and values of everything it has
+already said. That store is the KV cache, and it turns out to be the dominant
+cost of running these models. I have written about
+[what it is](/blog/2026/08/13/kv-cache/) and
+[what it costs](/blog/2026/08/13/kv-cache-costs/) separately, because it is a
+large subject and this post has a different job.
+
 The step I find most striking is the third one. For three years attention was
 an accessory bolted onto a recurrent network, which read the sentence one word
 at a time. In 2017 Vaswani and colleagues asked what would happen if you
@@ -196,8 +206,9 @@ Now let me build the mechanism. I will do it in four steps, and I will not use
 the formula until the end.
 
 **Step one: every word becomes a list of numbers.** Before anything else, each
-token — a token is a chunk of text, roughly a word — is turned into a **vector**,
-which is just an ordered list of numbers, perhaps 4,096 of them. You can think
+token — a token is a chunk of text, roughly a word — is turned into a
+**vector**, which is nothing more frightening than an ordered list of numbers,
+perhaps 4,096 of them. You can think
 of that list as coordinates: words used in similar ways end up with similar
 coordinates. Nothing in this post depends on how those coordinates are learned.
 
@@ -229,16 +240,17 @@ query. Where a query matches a notice, the word takes a copy of what is behind
 that notice, which is the value. A word that matches several notices takes some
 of each, in proportion to how well each one matched.
 
-**Step three: score every pair.** To find out how well a query matches a key, we
-take their **dot product**: multiply the two lists together entry by entry and
-add up the results. This gives one number per pair. It is large when the two
-vectors point in similar directions, and larger still when the vectors are
-long — a point I will come back to, because it turns out to matter enormously.
+**Step three: score every pair.** To find out how well a query matches a key,
+we take their **dot product**: multiply the two lists together entry by entry
+and add up the results. That gives us one number per pair. It comes out large
+when the two vectors point in similar directions, and larger still when the
+vectors themselves are long — and I want to flag that second half now, because
+it is the seed of the whole of section 4.
 
-**Step four: turn the scores into weights, and average.** The scores can be any
-size, positive or negative, and we need weights. So we push them through a
-function called the **softmax**, which exponentiates each score and then divides
-by the total. Everything that comes out is positive, and the results add up to
+**Step four: turn the scores into weights, and average.** The scores can come
+out any size, positive or negative, and what we need is proportions. So we
+push them through a function called the **softmax**, which raises $e$ to the
+power of each score and then divides by the total. Everything that comes out is positive, and the results add up to
 one, which is precisely what lets us treat them as proportions of a blend. Then
 we use those proportions to average the value vectors together.
 
@@ -510,10 +522,17 @@ $$
 $$
 
 So the typical size of a score grows like $\sqrt{d}$. A model 64 times wider
-produces scores 8 times larger, for no reason connected to meaning. This is
-the argument the transformer paper gives in an appendix, in a single sentence,
-and the fix follows immediately: divide by $\sqrt{d}$ and the variance goes back
-to one.
+produces scores 8 times larger, for no reason connected to meaning, and the
+fix follows immediately: divide by $\sqrt{d}$ and the variance goes back to
+one.
+
+The transformer paper gives this argument in a single footnote, and I find its
+brevity slightly remarkable given how much rests on it. There is a nice piece
+of evidence that the authors thought about saying more: their arXiv source
+contains a whole section called "Justfication of the Scaling Factor in
+Dot-product Attention" — typo theirs — which is commented out and never
+appears in the paper you can read. What survived is one sentence in small
+type.
 
 Now, why does that matter? Because of what large scores do to the softmax.
 Exponentiating a set of numbers exaggerates the gaps between them. If the
@@ -522,13 +541,19 @@ behaves like a blend. If one score is far above the others, its exponential
 dominates everything, the weight on it approaches one, and every other weight
 approaches zero. Attention stops averaging and starts picking a single word.
 
-That is bad for two reasons. The obvious one is that a blend is what we wanted.
-The subtler and more serious one is that training a network requires gradients,
-which measure how much the output would change if you nudged the inputs. When
-a softmax has collapsed onto one option, nudging the scores barely changes
-anything, so the gradient is nearly zero and the model stops learning.
+That is bad for two reasons. The obvious one is that a blend is what we
+wanted. The subtler and more serious one is that training a network requires
+gradients, which measure how much the output would change if you nudged the
+inputs. When a softmax has collapsed onto one option, nudging the scores
+barely changes anything, so the gradient is nearly zero and the model stops
+learning.
 
-I did not want to take any of that on trust, so I measured it.
+I should be careful about how firmly to state that, because the paper itself
+is not firm about it. Its words are that they *suspect* the dot products grow
+large and push the softmax "into regions where it has extremely small
+gradients". That is a conjecture offered without evidence, and it has been
+repeated ever since as though it were established. So let me supply the
+evidence, since it turns out to be easy to obtain.
 
 <div class='figure'>
     <img src='/images/attention-scaling.png'
@@ -548,7 +573,7 @@ I did not want to take any of that on trust, so I measured it.
 
 Panel (a) is the closed form, checked. I sampled pairs of random vectors at
 each width and measured the variance of their dot product, and the measurements
-land on the line $\operatorname{Var} = d$ with a worst error of 1.3% across
+land on the line $\operatorname{Var} = d$ with a worst error of 1.26% across
 three orders of magnitude. There is nothing subtle happening; it really is just
 the variance of a sum.
 
@@ -580,9 +605,9 @@ to stack eighty of.
 </div>
 <div class='caption'>
     <span class='caption-label'>Figure 6.</span>
-    The same sixteen keys, scored twice. On the left the raw dot products go
-    straight into the softmax; on the right they are divided by $\sqrt{d}$
-    first. Push the width up and watch the
+    The same sixteen keys, scored twice. On the left I send the raw dot
+    products straight into the softmax; on the right I divide them by
+    $\sqrt{d}$ first. Push the width up and watch the
     <span style='color:#B07E55'><b>unscaled</b></span> weights collapse onto
     one key while the <span style='color:#8C77BC'><b>scaled</b></span> ones
     keep their shape. Both columns are computed live from the same random
@@ -663,19 +688,19 @@ to stack eighty of.
 
 ## 5. Chat This Over With Friends
 
-The problem attention solves is one you can state without any mathematics: the
-meaning of a word depends on which other words you look at, and the useful ones
-are not at a fixed distance. So instead of averaging everything equally, or
+The problem attention solves is one I can state without any mathematics at
+all: the meaning of a word depends on which other words you look at, and the
+useful ones are never at a fixed distance. So instead of averaging everything equally, or
 looking back a fixed number of words, the model computes for each word how
 much every other word matters to it, and blends them in those proportions. Each
 word puts out three things — a description of what it is looking for, an advert
 for what it offers, and the content it hands over — and the first two are
-matched against each other to set the proportions. What convinced people this
-was more than a trick is a picture from 2014: if you draw the weights a
-translation model learned, you get the word alignment between the two
-languages, including the places where French reverses the order of English
-adjectives. Nobody put a dictionary in the model. It worked that out from
-examples.
+matched against each other to set the proportions. What convinced me this was more
+than a trick is a picture from 2014: if you draw the weights a translation
+model learned, you get the word alignment between the two languages, including
+the places where French reverses the order of English adjectives. Nobody put a
+dictionary in that model. It worked the alignment out from examples of
+translated sentences, and you can see it having done so.
 
 The thing most often skipped is the square root in the formula, which looks
 like housekeeping and is not. Dot products of $d$ random numbers have variance
@@ -688,9 +713,10 @@ I have told this is that my measurement uses random vectors, and a trained
 model's queries and keys are not random — they are correlated in ways that
 change the constants. What is genuinely unsettled is more interesting still:
 attention costs time and memory that grow with the square of the sequence
-length, and the current wave of models is quietly replacing some of it with
-cheaper mechanisms, which means the thing everyone learned as the foundation is
-already being partly designed out.
+length — and the [memory in particular](/blog/2026/08/13/kv-cache-costs/) is
+now the hardest thing about running these models — so the current wave of
+designs is quietly replacing some of it with cheaper mechanisms. The thing
+everyone learns as the foundation is already being partly designed out.
 
 ## 6. References
 

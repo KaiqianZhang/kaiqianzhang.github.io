@@ -206,27 +206,48 @@ ROADMAPS = {
         ]),
 
     'kvcache': dict(
-        label='Roadmap of the KV cache: an unpublished implementation trick '
-              'in 2017, named as a bandwidth cost in 2019, shrunk by grouped '
-              'heads in 2023, and paged or compressed after.',
-        arrows=['the cache outgrew the arithmetic',
-                'one shared head was too few',
-                'a small cache, still allocated badly'],
+        label='Roadmap of the KV cache: an unpublished trick in 2017, '
+              'diagnosed as a bandwidth cost in 2019, named in 2022, and the '
+              'thing serving systems are built around by 2023.',
+        arrows=['it worked, so nobody asked what it cost',
+                'a bottleneck with no name is hard to discuss',
+                'and then everything was designed around it'],
         stops=[
             ('2017-', 'a trick, not a paper',
              'Implementations keep past keys and values instead of redoing '
-             'them. No paper claims it as a contribution; the name arrives '
-             'around 2022.'),
+             'them. No paper claims it as a contribution.'),
             ('2019', 'Shazeer names the cost',
-             'Multi-query attention. Decoding is limited by reloading K and '
-             'V, not by arithmetic, so share one KV head across all queries.'),
-            ('2023', 'GQA splits the difference',
-             'One KV head per group of query heads, uptrained from an MHA '
-             'checkpoint with 5% of pretraining compute. Llama 3 and '
-             'Mistral ship it.'),
-            ('2023-', 'page it, or compress it',
-             'vLLM gives the cache virtual memory and blocks. DeepSeek '
-             'compresses K and V into one latent vector per token.'),
+             'Incremental decoding is limited by reloading the keys and '
+             'values, he argues, and not by the arithmetic at all.'),
+            ('2022', 'it gets its name',
+             'Pope et al. write "the KV cache" as a defined term while '
+             'working out how to serve very large models. The name sticks.'),
+            ('2023-', 'the centre of serving',
+             'vLLM organises an entire serving system around managing it, '
+             'and the cache stops being an implementation detail.'),
+        ]),
+
+    'kvcost': dict(
+        label='Roadmap of the fight against the cost of the KV cache: '
+              'multi-query attention in 2019, grouped-query in 2023, paging '
+              'in 2023, and latent compression in 2024.',
+        arrows=['one shared head was too few',
+                'a smaller cache, still allocated badly',
+                'better layout, but the tensor was still large'],
+        stops=[
+            ('2019', 'share one head',
+             'Multi-query attention gives every query head the same keys and '
+             'values, dividing the cache by the head count. Quality slips.'),
+            ('2023', 'share a few',
+             'Grouped-query attention gives each group of query heads its '
+             'own, uptrained from a normal checkpoint with 5% of pretraining '
+             'compute. Llama 3 and Mistral ship it.'),
+            ('2023', 'stop reserving it',
+             'vLLM hands the cache out in small blocks as it is needed, the '
+             'way an operating system pages memory. Nothing gets smaller.'),
+            ('2024', 'compress it',
+             'DeepSeek squeezes the keys and values of a token into one '
+             'shared latent vector, and reconstructs them on the way in.'),
         ]),
 
     'attention': dict(

@@ -1306,3 +1306,33 @@ table td {
 @media (prefers-reduced-motion: reduce) {
   .article .loop-anim .bn-att { animation: none; stroke-opacity: 0.55; }
 }
+
+/* The costs post's opening figure: one set of weights, read by everyone, and
+   one cache per guest that nobody else can touch. The caches breathe so the
+   picture reads as growing rather than fixed. */
+.article .loop-anim .gu-w {
+  fill: rgba(62, 100, 145, 0.85); stroke: none;
+}
+.article .loop-anim .gu-c { fill: #8C77BC; fill-opacity: 0.85; stroke: none; }
+.article .loop-anim .gu-room {
+  fill: none; stroke: #8C77BC; stroke-opacity: 0.45; stroke-width: 1;
+}
+.article .loop-anim .gu-lbl {
+  font: 600 10px -apple-system, Helvetica, arial, sans-serif;
+  fill: #FFFFFF; text-anchor: middle;
+}
+@keyframes gu-grow {
+  0%, 100% { transform: scaleX(0.35); }
+  50%      { transform: scaleX(1); }
+}
+.article .loop-anim .gu-c {
+  transform-box: fill-box; transform-origin: left center;
+  animation: gu-grow 6s ease-in-out infinite;
+}
+.article .loop-anim .g1 { animation-delay: 0s; }
+.article .loop-anim .g2 { animation-delay: 0.8s; }
+.article .loop-anim .g3 { animation-delay: 1.6s; }
+.article .loop-anim .g4 { animation-delay: 2.4s; }
+@media (prefers-reduced-motion: reduce) {
+  .article .loop-anim .gu-c { animation: none; transform: scaleX(0.8); }
+}

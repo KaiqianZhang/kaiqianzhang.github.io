@@ -1,8 +1,10 @@
 """Figure for 'Attention'.
 
 Why dot-product attention divides by sqrt(d). The Transformer paper justifies
-it in an appendix, in one sentence: if q and k have independent components
-with mean 0 and variance 1, then
+it in a single footnote to section 3.2.1 -- an appendix on the same subject
+exists in its arXiv source but is commented out -- and the argument is one
+sentence: if q and k have independent components with mean 0 and variance 1,
+then
 
     q . k = sum_i q_i k_i     has mean 0 and variance d,
 
