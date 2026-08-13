@@ -11,7 +11,7 @@
         <link>https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/kv-cache/</guid>
         <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
-        <description>The buffer that makes generation affordable is also the reason serving a language model is hard.</description>
+        <description>The trick that makes a chatbot answer at a readable speed is also the reason it runs out of memory.</description>
     </item>
 
     <item>
@@ -20,6 +20,14 @@
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/ffn-swiglu/</guid>
         <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
         <description>The feed-forward layer holds most of a transformer&#x27;s parameters, and the field demoted its activation to a gate that nobody can explain.</description>
+    </item>
+
+    <item>
+        <title>Attention</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/13/attention/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/13/attention/</guid>
+        <pubDate>Thu, 13 Aug 2026 00:00:00 +0000</pubDate>
+        <description>How a model lets each word look at the others, and why the formula divides by a square root.</description>
     </item>
 
     <item>

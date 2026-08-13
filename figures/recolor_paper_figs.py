@@ -196,6 +196,32 @@ im = trim(im, pad=10)
 im.save(os.path.join(OUT, 'kvcache-memory-waste.png'))
 print('      %d x %d' % (im.width, im.height))
 
+# -- Bahdanau et al. (2015), Figure 3(a): the alignment matrix ---------------
+# This one is a greyscale heatmap, so the grey *is* the data, which this site
+# does not allow. A hue swap cannot fix that; the whole luminance ramp has to
+# be remapped. Two care points. The axis labels live outside the plot on white,
+# so only the plotted rectangle is touched, found as the bounding box of the
+# dark pixels. And the original runs black-for-low to white-for-high, which
+# reads badly on a light page, so the ramp is inverted: darker now means more
+# attention. The caption says so.
+print('bahdanau2015-fig3a-alignment.png')
+im = flatten(os.path.join(SRC, 'bahdanau2015-fig3a-alignment.png'))
+a = np.asarray(im).astype(float)
+lum = a.mean(2)
+# The axis labels are dark too, so a bounding box of dark pixels swallows them.
+# The plot is the block where most of a row, and most of a column, is dark.
+dark = lum < 128
+rows = np.where(dark.mean(1) > 0.5)[0]
+cols = np.where(dark.mean(0) > 0.5)[0]
+y0, y1, x0, x1 = rows.min(), rows.max() + 1, cols.min(), cols.max() + 1
+print('      plot box: x %d-%d, y %d-%d' % (x0, x1, y0, y1))
+lo, hi = rgb('#F4F1F8'), rgb('#5B4A80')          # low weight -> high weight
+v = (lum[y0:y1, x0:x1] / 255.0)[..., None]        # 0 = black = low attention
+a[y0:y1, x0:x1] = lo + v * (hi - lo)
+im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+im.save(os.path.join(OUT, 'attention-alignment.png'))
+print('      %d x %d' % (im.width, im.height))
+
 # -- Mikolov et al. (2013), Figure 1 ----------------------------------------
 # Pure black line art, so there is no hue to swap. Tint it instead: every
 # pixel keeps its darkness and is re-emitted in the site's ink colour.

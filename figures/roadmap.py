@@ -228,6 +228,29 @@ ROADMAPS = {
              'vLLM gives the cache virtual memory and blocks. DeepSeek '
              'compresses K and V into one latent vector per token.'),
         ]),
+
+    'attention': dict(
+        label='Roadmap of attention: a fix for a bottleneck in 2014, a '
+              'simpler score in 2015, the recurrence dropped in 2017, and '
+              'the transformer everywhere after.',
+        arrows=['the scoring network was extra machinery',
+                'attention was fine; the recurrence was not',
+                'quadratic cost, and a cache to feed'],
+        stops=[
+            ('2014', 'a fix for a bottleneck',
+             'Bahdanau et al. let a translator look back at every source '
+             'word instead of squeezing the sentence into one vector.'),
+            ('2015', 'the score gets simpler',
+             'Luong et al. replace the small alignment network with a plain '
+             'dot product. Cheaper, and the form still used today.'),
+            ('2017', 'drop the recurrence',
+             'Vaswani et al. keep only attention, pointed at the sequence '
+             'itself. Multiple heads, and the division by the square root '
+             'of the width.'),
+            ('2018-', 'everything is a transformer',
+             'BERT and GPT build on it. By the 2020s, hybrids swap some '
+             'attention layers out again to shrink what it must store.'),
+        ]),
 }
 
 

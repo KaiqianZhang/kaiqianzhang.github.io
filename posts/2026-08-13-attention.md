@@ -1,0 +1,706 @@
+---
+title: Attention
+subtitle: How a model lets each word look at the others, and why the formula divides by a square root.
+date: 2026-08-13
+tags: llm
+icon: 🍵
+---
+
+I want to explain attention, which is the mechanism that made modern language
+models possible. If you have read anything about how these models work you
+will have seen the word, and probably the formula, and possibly a diagram with
+arrows in it. What I would like to do here is slower than that. I want to
+start from the problem attention was invented to solve, build the mechanism up
+one piece at a time, and finish somewhere you might not expect: with an
+explanation of why there is a square root in the denominator, which I think is
+the most quietly interesting detail in the whole design.
+
+I am going to assume you know nothing about neural networks. If you know a
+great deal, the first two sections will be familiar and you can skim them.
+
+[TOC]
+
+## The Problem, Which Is About Sentences and Not About Machines
+
+Here is the difficulty, and it has nothing to do with computers.
+
+The meaning of a word depends on the other words around it. In "the cat sat on
+the mat", the word "sat" is doing something that involves the cat, and the word
+"the" appears twice while pointing at two different things. If I asked you what
+"it" refers to in "the trophy did not fit in the suitcase because it was too
+big", you would have to weigh up two candidates and pick one, and you would use
+the rest of the sentence to do it.
+
+So a machine that processes language needs some way for each word to take
+account of the others. The question is which others, and how much.
+
+The obvious answers are both bad. You could let every word simply average all
+the others, but then "cat" contributes exactly as much to "sat" as "the" does,
+which is plainly wrong. Or you could fix the pattern in advance — always look
+at the previous three words, say — but the words that matter are not at a fixed
+distance. In "the trophy did not fit in the suitcase because it was too big",
+the word "it" needs "trophy", which is nine words back.
+
+What we want is for the model to *decide*, for each word, which other words to
+draw on, and by how much. And we want it to learn how to make that decision
+from data, rather than being told. That is what attention does.
+
+<div class='loop-anim'>
+    <svg viewBox='0 0 720 230' role='img'
+         aria-label='Two ways to translate a sentence. Above, every source word is squeezed through a single small vector before the output is written from it. Below, each output word draws directly on all of the source words, with the strengths of those connections varying.'>
+        <text class='step' x='8' y='20'>before 2014</text>
+        <g class='bn-src'>
+            <rect class='tok old' x='90' y='30' width='58' height='22' rx='4'/><text class='tk' x='119' y='45'>L'accord</text>
+            <rect class='tok old' x='154' y='30' width='58' height='22' rx='4'/><text class='tk' x='183' y='45'>sur</text>
+            <rect class='tok old' x='218' y='30' width='58' height='22' rx='4'/><text class='tk' x='247' y='45'>la</text>
+            <rect class='tok old' x='282' y='30' width='58' height='22' rx='4'/><text class='tk' x='311' y='45'>zone</text>
+        </g>
+        <line class='bn-wire' x1='119' y1='52' x2='400' y2='68'/>
+        <line class='bn-wire' x1='183' y1='52' x2='400' y2='68'/>
+        <line class='bn-wire' x1='247' y1='52' x2='400' y2='68'/>
+        <line class='bn-wire' x1='311' y1='52' x2='400' y2='68'/>
+        <rect class='bn-box' x='378' y='58' width='44' height='20' rx='4'/>
+        <text class='bn-lbl' x='400' y='72'>one vector</text>
+        <line class='bn-wire' x1='422' y1='68' x2='470' y2='68'/>
+        <rect class='tok new' x='470' y='58' width='62' height='22' rx='4'/><text class='tk nw' x='501' y='73'>The</text>
+        <rect class='tok new' x='538' y='58' width='78' height='22' rx='4'/><text class='tk nw' x='577' y='73'>agreement</text>
+        <text class='note' x='640' y='73'>everything</text>
+        <text class='note' x='640' y='87'>through here</text>
+
+        <text class='step' x='8' y='140'>after 2014</text>
+        <g class='bn-src'>
+            <rect class='tok old' x='90' y='150' width='58' height='22' rx='4'/><text class='tk' x='119' y='165'>L'accord</text>
+            <rect class='tok old' x='154' y='150' width='58' height='22' rx='4'/><text class='tk' x='183' y='165'>sur</text>
+            <rect class='tok old' x='218' y='150' width='58' height='22' rx='4'/><text class='tk' x='247' y='165'>la</text>
+            <rect class='tok old' x='282' y='150' width='58' height='22' rx='4'/><text class='tk' x='311' y='165'>zone</text>
+        </g>
+        <line class='bn-att a1' x1='119' y1='150' x2='501' y2='128'/>
+        <line class='bn-att a2' x1='183' y1='150' x2='501' y2='128'/>
+        <line class='bn-att a3' x1='247' y1='150' x2='501' y2='128'/>
+        <line class='bn-att a4' x1='311' y1='150' x2='501' y2='128'/>
+        <rect class='tok new' x='470' y='106' width='62' height='22' rx='4'/><text class='tk nw' x='501' y='121'>The</text>
+        <line class='bn-att a3' x1='119' y1='172' x2='577' y2='196'/>
+        <line class='bn-att a1' x1='183' y1='172' x2='577' y2='196'/>
+        <line class='bn-att a4' x1='247' y1='172' x2='577' y2='196'/>
+        <line class='bn-att a2' x1='311' y1='172' x2='577' y2='196'/>
+        <rect class='tok new' x='538' y='196' width='78' height='22' rx='4'/><text class='tk nw' x='577' y='211'>agreement</text>
+        <text class='note' x='648' y='160'>each output word</text>
+        <text class='note' x='648' y='174'>picks its own blend</text>
+    </svg>
+    <div class='caption'>
+        <span class='caption-label'>Figure 1.</span>
+        The change that started all of this. Above, a translator squeezes the
+        whole source sentence into one fixed vector and then writes the output
+        from it, which is why long sentences went badly. Below, each output
+        word reaches back to all of the source words directly and takes its
+        own weighted blend of them — the lines pulse because those weights are
+        recomputed for every word produced. I have drawn only four source
+        words; imagine forty.
+    </div>
+</div>
+
+## 1. Four Steps From a Translation Bug to Every Model You Have Heard Of
+
+The idea arrived in 2014, and not as a grand theory. It was a fix for a
+specific, visible failure.
+
+<div class='roadmap'>
+    <svg viewBox='0 0 760 180' role='img' aria-label='Roadmap of attention: a fix for a bottleneck in 2014, a simpler score in 2015, the recurrence dropped in 2017, and the transformer everywhere after.'>
+      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
+      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
+      <text class='why' x='189.5' y='27'>the scoring network was extra machinery</text>
+      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
+      <text class='why' x='380.0' y='27'>attention was fine; the recurrence was not</text>
+      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
+      <text class='why' x='570.5' y='27'>quadratic cost, and a cache to feed</text>
+      <g class='stop'>
+        <rect class='hit' x='6.0' y='30' width='176.5' height='140.0'/>
+        <circle class='dot' cx='94.2' cy='40' r='4.5'/>
+        <rect class='box' x='6.0' y='56' width='176.5' height='116.0' rx='7'/>
+        <text class='yr' x='94.2' y='65.0'>2014</text>
+        <text class='stage' x='94.2' y='79.0'>a fix for a bottleneck</text>
+        <text class='body' x='94.2' y='97.0'>Bahdanau et al. let a</text>
+        <text class='body' x='94.2' y='111.5'>translator look back at</text>
+        <text class='body' x='94.2' y='126.0'>every source word instead</text>
+        <text class='body' x='94.2' y='140.5'>of squeezing the sentence</text>
+        <text class='body' x='94.2' y='155.0'>into one vector.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='196.5' y='30' width='176.5' height='140.0'/>
+        <circle class='dot' cx='284.8' cy='40' r='4.5'/>
+        <rect class='box' x='196.5' y='56' width='176.5' height='116.0' rx='7'/>
+        <text class='yr' x='284.8' y='65.0'>2015</text>
+        <text class='stage' x='284.8' y='79.0'>the score gets simpler</text>
+        <text class='body' x='284.8' y='97.0'>Luong et al. replace the</text>
+        <text class='body' x='284.8' y='111.5'>small alignment network</text>
+        <text class='body' x='284.8' y='126.0'>with a plain dot product.</text>
+        <text class='body' x='284.8' y='140.5'>Cheaper, and the form still</text>
+        <text class='body' x='284.8' y='155.0'>used today.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='387.0' y='30' width='176.5' height='140.0'/>
+        <circle class='dot' cx='475.2' cy='40' r='4.5'/>
+        <rect class='box' x='387.0' y='56' width='176.5' height='116.0' rx='7'/>
+        <text class='yr' x='475.2' y='65.0'>2017</text>
+        <text class='stage' x='475.2' y='79.0'>drop the recurrence</text>
+        <text class='body' x='475.2' y='97.0'>Vaswani et al. keep only</text>
+        <text class='body' x='475.2' y='111.5'>attention, pointed at the</text>
+        <text class='body' x='475.2' y='126.0'>sequence itself. Multiple</text>
+        <text class='body' x='475.2' y='140.5'>heads, and the division by</text>
+        <text class='body' x='475.2' y='155.0'>the square root of the</text>
+        <text class='body' x='475.2' y='169.5'>width.</text>
+      </g>
+      <g class='stop'>
+        <rect class='hit' x='577.5' y='30' width='176.5' height='140.0'/>
+        <circle class='dot' cx='665.8' cy='40' r='4.5'/>
+        <rect class='box' x='577.5' y='56' width='176.5' height='116.0' rx='7'/>
+        <text class='yr' x='665.8' y='65.0'>2018-</text>
+        <text class='stage' x='665.8' y='79.0'>everything is a transformer</text>
+        <text class='body' x='665.8' y='97.0'>BERT and GPT build on it.</text>
+        <text class='body' x='665.8' y='111.5'>By the 2020s, hybrids swap</text>
+        <text class='body' x='665.8' y='126.0'>some attention layers out</text>
+        <text class='body' x='665.8' y='140.5'>again to shrink what it</text>
+        <text class='body' x='665.8' y='155.0'>must store.</text>
+      </g>
+    </svg>
+</div>
+
+I want to say more about that first box, because the failure is easy to
+picture. Machine translation at the time worked by having one network read the
+source sentence and compress it into a single fixed-length vector, and a second
+network write the translation out of that vector. Everything the first network
+understood had to fit through that one bottleneck. It worked for short
+sentences and fell apart on long ones, which is exactly what you would expect
+if you had to summarise a paragraph in a fixed number of syllables and then
+reconstruct it from the summary.
+
+Bahdanau, Cho and Bengio proposed that the writing network should not be
+restricted to the summary. At each word it produced, it could look back over
+*all* of the source words and take a weighted blend of them, with the weights
+computed fresh each time. The bottleneck disappears, because there is no longer
+one vector that has to hold everything.
+
+The step I find most striking is the third one. For three years attention was
+an accessory bolted onto a recurrent network, which read the sentence one word
+at a time. In 2017 Vaswani and colleagues asked what would happen if you
+removed the recurrent network and kept only the attention. The answer was that
+it worked better, and — because attention looks at all positions at once rather
+than walking through them in order — it could be trained on many more words in
+parallel. That is the transformer, and essentially every language model you
+have heard of is built from it, including the recent hybrid designs that
+replace some of its attention layers with cheaper alternatives.
+
+## 2. What Each Word Asks, Offers, and Hands Over
+
+Now let me build the mechanism. I will do it in four steps, and I will not use
+the formula until the end.
+
+**Step one: every word becomes a list of numbers.** Before anything else, each
+token — a token is a chunk of text, roughly a word — is turned into a **vector**,
+which is just an ordered list of numbers, perhaps 4,096 of them. You can think
+of that list as coordinates: words used in similar ways end up with similar
+coordinates. Nothing in this post depends on how those coordinates are learned.
+
+**Step two: each word produces three different vectors, not one.** This is the
+part that looks arbitrary when you first meet it, so let me describe what each
+one is for before I give it a name.
+
+The first vector describes what this word is *looking for*. In our trophy
+sentence, the word "it" is looking for something that could plausibly be a
+large object mentioned earlier.
+
+The second vector advertises what this word *has to offer*, so that other words
+can judge whether it is what they need. "Trophy" advertises that it is a
+concrete object.
+
+The third vector is the *content* that gets handed over if the offer is
+accepted.
+
+These three are called the **query**, the **key**, and the **value**. The names
+are borrowed from databases, where you look something up by matching a query
+against a key and receiving back a value. Each is produced from the word's
+original vector by multiplying it by a matrix of learned numbers, and those
+three matrices are among the things the model learns during training.
+
+An analogy, as long as you do not lean on it too hard. Imagine every word pins
+a small notice to a board describing itself; that notice is its key. Every word
+also walks along the board carrying a description of what it wants; that is its
+query. Where a query matches a notice, the word takes a copy of what is behind
+that notice, which is the value. A word that matches several notices takes some
+of each, in proportion to how well each one matched.
+
+**Step three: score every pair.** To find out how well a query matches a key, we
+take their **dot product**: multiply the two lists together entry by entry and
+add up the results. This gives one number per pair. It is large when the two
+vectors point in similar directions, and larger still when the vectors are
+long — a point I will come back to, because it turns out to matter enormously.
+
+**Step four: turn the scores into weights, and average.** The scores can be any
+size, positive or negative, and we need weights. So we push them through a
+function called the **softmax**, which exponentiates each score and then divides
+by the total. Everything that comes out is positive, and the results add up to
+one, which is precisely what lets us treat them as proportions of a blend. Then
+we use those proportions to average the value vectors together.
+
+That is the whole mechanism. Written down, with $q$ the current word's query,
+$K$ all the keys stacked up, and $V$ all the values:
+
+$$
+\text{Attention}(q, K, V) = \text{softmax}\!\left(\frac{q K^{\top}}{\sqrt{d}}\right) V .
+$$
+
+Read it right to left if the notation is unfamiliar. $qK^{\top}$ is step three,
+every score at once. The softmax is step four. Multiplying by $V$ is the
+weighted average. The $\sqrt{d}$ in the denominator is the one thing I have not
+explained, and section 4 is entirely about it.
+
+<div class='knob'>
+    <svg viewBox='0 0 720 300' id='qkv-svg' role='img'
+         aria-label='An interactive sentence. Choosing one word as the query shows the dot product it forms with every other word, and the attention weights that come out of the softmax.'>
+        <g id='qkv-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='qkv-q'>which word is asking</label>
+        <input type='range' id='qkv-q' min='0' max='9' value='9' step='1'>
+        <span class='readout' id='qkv-q-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='qkv-t'>how sharply it chooses</label>
+        <input type='range' id='qkv-t' min='20' max='300' value='100'>
+        <span class='readout' id='qkv-t-out'></span>
+    </div>
+    <p class='note' id='qkv-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 2.</span>
+    A sentence, with one word chosen to be the one asking. The bars are the
+    <span style='color:#8C77BC'><b>attention weights</b></span> that word puts
+    on each of the others, and I have computed them here in your browser from
+    the little query and key vectors drawn underneath — this is the real
+    arithmetic, not a mock-up. Slide the second control to see the softmax
+    change its mind about how decisive to be.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('qkv-scene'),
+      qR = document.getElementById('qkv-q'), tR = document.getElementById('qkv-t'),
+      qOut = document.getElementById('qkv-q-out'), tOut = document.getElementById('qkv-t-out'),
+      note = document.getElementById('qkv-note');
+  var W = ['the', 'trophy', 'did', 'not', 'fit', 'in', 'the', 'suitcase', 'because', 'it'];
+  // Hand-picked 4-dimensional keys and queries. They are made up, but the
+  // arithmetic done with them below is genuine, and they are chosen so the
+  // pronoun "it" leans towards the two nouns, which is the point being made.
+  var K = [[0.1, 0.2, -0.3, 0.1], [0.9, 0.8, 0.1, -0.2], [-0.2, 0.1, 0.4, 0.2],
+           [-0.3, -0.1, 0.5, 0.1], [0.1, -0.2, 0.7, 0.3], [-0.1, 0.1, 0.2, -0.4],
+           [0.1, 0.2, -0.3, 0.1], [0.8, 0.6, 0.0, 0.3], [-0.2, 0.0, 0.3, 0.6],
+           [0.3, 0.4, -0.1, 0.2]];
+  var Q = [[0.2, 0.1, 0.0, 0.1], [0.3, 0.2, 0.4, 0.0], [0.1, 0.0, 0.5, 0.2],
+           [0.0, 0.1, 0.6, 0.1], [0.4, 0.3, 0.2, 0.1], [0.2, 0.1, 0.1, 0.3],
+           [0.2, 0.1, 0.0, 0.1], [0.3, 0.3, 0.1, 0.2], [0.1, 0.2, 0.2, 0.4],
+           [0.95, 0.85, -0.1, 0.15]];
+  var N = W.length, X0 = 30, CW = 66;
+
+  function draw() {
+    var qi = +qR.value, sharp = +tR.value / 100, s = '', i, j;
+    var scores = [], p = [], sum = 0;
+    for (i = 0; i < N; i++) {
+      var d = 0;
+      for (j = 0; j < 4; j++) { d += Q[qi][j] * K[i][j]; }
+      scores.push(d / Math.sqrt(4) * sharp);
+    }
+    var m = Math.max.apply(null, scores);
+    for (i = 0; i < N; i++) { p.push(Math.exp(scores[i] - m)); sum += p[i]; }
+    for (i = 0; i < N; i++) { p[i] /= sum; }
+
+    s += "<text class='gl' x='" + X0 + "' y='22'>the sentence, one column per word</text>";
+    for (i = 0; i < N; i++) {
+      var x = X0 + i * CW, isq = i === qi;
+      s += "<rect class='cell " + (isq ? 'fresh' : 'kept') + "' x='" + x + "' y='32' width='" +
+           (CW - 8) + "' height='24' rx='3'/>";
+      s += "<text class='tk' x='" + (x + (CW - 8) / 2) + "' y='48' text-anchor='middle'>" +
+           W[i] + "</text>";
+      // key vector, drawn small
+      for (j = 0; j < 4; j++) {
+        var v = K[i][j], h = Math.abs(v) * 22;
+        s += "<rect x='" + (x + 4 + j * 12) + "' y='" + (250 - (v > 0 ? h : 0)).toFixed(1) +
+             "' width='9' height='" + h.toFixed(1) + "' rx='1' fill='#3E6491' fill-opacity='0.6'/>";
+      }
+      // weight bar
+      var bh = p[i] * 150;
+      s += "<rect x='" + (x + 6) + "' y='" + (232 - bh).toFixed(1) + "' width='" + (CW - 20) +
+           "' height='" + bh.toFixed(1) + "' rx='2' fill='#8C77BC' fill-opacity='0.85'/>";
+      s += "<text class='wnum' x='" + (x + (CW - 8) / 2) + "' y='" + (226 - bh).toFixed(1) +
+           "' text-anchor='middle'>" + (p[i] * 100).toFixed(0) + "%</text>";
+    }
+    s += "<line class='sep' x1='" + X0 + "' y1='250' x2='" + (X0 + N * CW - 8) + "' y2='250'/>";
+    s += "<text class='gl' x='" + X0 + "' y='268'>each word's key vector, four numbers</text>";
+    s += "<text class='gl' x='" + X0 + "' y='72'>attention weight from &#8220;" + W[qi] + "&#8221;</text>";
+    scene.innerHTML = s;
+    qOut.textContent = '“' + W[qi] + '”';
+    tOut.textContent = '×' + sharp.toFixed(2) + ' on the scores';
+    var best = p.indexOf(Math.max.apply(null, p));
+    note.textContent = '“' + W[qi] + '” puts ' + (p[best] * 100).toFixed(0) +
+      '% of its attention on “' + W[best] + '”. Every weight is positive and the ten of ' +
+      'them add up to ' + p.reduce(function (a, b) { return a + b; }, 0).toFixed(3) +
+      ', which is what makes this a blend rather than a pick. Turn the sharpness up and the ' +
+      'softmax stops blending: that is exactly what section 4 is about.';
+  }
+  qR.addEventListener('input', draw);
+  tR.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+### Heads, and the Width They Share Out
+
+Two pieces of structure and we have a real model.
+
+The first is that this is not done once across the full width of the vectors.
+The width is *split* into several smaller pieces, and the whole procedure runs
+on each piece independently with its own learned matrices. These pieces are
+called **heads**, and the point of them is that a word can look for several
+different things at once — one head might track grammatical subjects while
+another tracks which noun a pronoun refers to. Because the width is divided
+rather than duplicated, thirty-two heads cost about the same as one head using
+the full width. This surprised me when I first worked it out, and it is worth
+knowing if you were about to assume that more heads means proportionally more
+computation.
+
+The second is that the whole arrangement repeats. A model stacks this
+structure into **layers**, dozens deep, each with its own learned matrices, and
+the output of one layer is the input to the next. Llama 3 70B has 80 layers of
+it.
+
+<div class='knob'>
+    <svg viewBox='0 0 720 200' id='hd-svg' role='img'
+         aria-label='A bar representing the full width of a model vector, divided into a chosen number of heads. The total width and the total parameter count stay the same however many heads there are.'>
+        <g id='hd-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='hd-n'>number of heads</label>
+        <input type='range' id='hd-n' min='0' max='6' value='5' step='1'>
+        <span class='readout' id='hd-n-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='hd-d'>model width $d$</label>
+        <input type='range' id='hd-d' min='0' max='3' value='1' step='1'>
+        <span class='readout' id='hd-d-out'></span>
+    </div>
+    <p class='note' id='hd-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 3.</span>
+    The thing I got wrong when I first learned this. Adding heads does not add
+    computation: the width is <b>divided</b> among them, so the pieces get
+    narrower as they get more numerous. Watch the parameter count underneath
+    stay perfectly still while you slide the number of heads from one to
+    sixty-four.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('hd-scene'),
+      nR = document.getElementById('hd-n'), dR = document.getElementById('hd-d'),
+      nOut = document.getElementById('hd-n-out'), dOut = document.getElementById('hd-d-out'),
+      note = document.getElementById('hd-note');
+  var HEADS = [1, 2, 4, 8, 16, 32, 64], DS = [1024, 4096, 8192, 16384];
+  var X0 = 30, X1 = 690, Y = 60, H = 40;
+  var COLS = ['#8C77BC', '#3E6491', '#C48BAC', '#6E8C66', '#B07E55', '#22253E'];
+
+  function draw() {
+    var n = HEADS[+nR.value], d = DS[+dR.value], dh = d / n, s = '', i;
+    var w = (X1 - X0) / n;
+    for (i = 0; i < n; i++) {
+      s += "<rect x='" + (X0 + i * w + 1).toFixed(1) + "' y='" + Y + "' width='" +
+           (w - 2).toFixed(1) + "' height='" + H + "' rx='3' fill='" + COLS[i % COLS.length] +
+           "' fill-opacity='0.8'/>";
+      if (w > 34) {
+        s += "<text class='wnum' x='" + (X0 + i * w + w / 2).toFixed(1) + "' y='" + (Y + 25) +
+             "' text-anchor='middle' fill='#FFFFFF'>" + dh + "</text>";
+      }
+    }
+    s += "<text class='gl' x='" + X0 + "' y='" + (Y - 10) + "'>one token's vector, " + d +
+         " numbers wide, split into " + n + " head" + (n === 1 ? '' : 's') + "</text>";
+    s += "<line class='sep' x1='" + X0 + "' y1='" + (Y + H + 14) + "' x2='" + X1 +
+         "' y2='" + (Y + H + 14) + "'/>";
+    // Parameters in the four projection matrices, which do not depend on n.
+    var params = 4 * d * d;
+    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + 44) +
+         "'>each head is " + dh + " numbers wide</text>";
+    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + 66) +
+         "'>parameters in this layer's four projection matrices: " +
+         (params / 1e6).toFixed(1) + "M</text>";
+    var bw = (X1 - X0) * 0.55;
+    s += "<rect x='" + X0 + "' y='" + (Y + 76) + "' width='" + bw.toFixed(1) +
+         "' height='16' rx='3' fill='#8C77BC' fill-opacity='0.5'/>";
+    s += "<text class='wnum' x='" + (X0 + bw + 8).toFixed(1) + "' y='" + (Y + 89) +
+         "'>unchanged by the head count</text>";
+    scene.innerHTML = s;
+    nOut.textContent = n + ' head' + (n === 1 ? '' : 's');
+    dOut.textContent = 'd = ' + d;
+    note.textContent = n + ' heads of width ' + dh + ' comes to ' + (n * dh) +
+      ' numbers in total, which is the width we started with. The projection matrices are ' +
+      d + ' by ' + d + ' whatever we do, so this layer holds ' + (params / 1e6).toFixed(1) +
+      'M parameters at one head and ' + (params / 1e6).toFixed(1) + 'M at ' + n +
+      '. Splitting is free; the model simply gets to ask several narrower questions at once.';
+  }
+  nR.addEventListener('input', draw);
+  dR.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+## 3. A Dictionary Nobody Wrote
+
+Everything so far has been mechanism. The question that decides whether any of
+it was a good idea is what those weights turn out to be, once a model has been
+trained. Bahdanau and colleagues drew them, and I think this is still the most
+persuasive picture in the subject.
+
+<div class='figure'>
+    <img src='/images/attention-alignment.png'
+         alt='A grid with English words across the top and their French translation down the side.
+              Dark cells mark high attention weight. A strong diagonal runs through it, and the
+              rows for zone economique europeenne pick up Area, Economic and European in reverse
+              order.'>
+    <div class='caption'>
+        <span class='caption-label'>Figure 4.</span>
+        Reproduced from Bahdanau et al. (2014), Figure 3(a). Each cell is the
+        attention weight the model put on an English word while producing a
+        French one. I have recoloured it into this site's palette and inverted
+        the scale, so darker now means more attention where the original used
+        white; no weight has been altered.
+    </div>
+</div>
+
+Take a moment over what this shows. Nobody told the model which English word
+corresponds to which French one. There is no dictionary in the system, and no
+component whose job is alignment. The model was trained to produce good
+translations, and the weights are just the internal blend proportions it
+happened to settle on.
+
+What it settled on is the alignment. The strong diagonal is the easy part,
+since translation mostly preserves order. The interesting part is where the
+diagonal breaks. Follow the rows for "zone économique européenne" and you will
+see them picking up "Area", "Economic" and "European" in reverse, because
+French puts those adjectives after the noun and English puts them before. The
+model learned to reorder, from nothing but examples of translated sentences.
+
+This is also, I think, why attention became popular so quickly. It is unusual
+to be able to look inside a neural network and find something so legible.
+
+## 4. The Square Root, and What Breaks Without It
+
+Now the detail I promised, which is the division by $\sqrt{d}$.
+
+When I first saw that, I assumed it was a small numerical convenience, the kind
+of constant that gets added to a denominator to avoid dividing by zero. It is
+not. It is there to stop the model from becoming untrainable as it gets wider,
+and the argument for it is short enough to do here in full.
+
+Suppose the entries of $q$ and $k$ are independent, with mean zero and variance
+one. Their dot product is $q \cdot k = \sum_{i=1}^{d} q_i k_i$, a sum of $d$
+independent terms. Each term has mean zero, so the sum does too. And because
+the variance of a sum of independent things is the sum of their variances, and
+each term here has variance one,
+
+$$
+\operatorname{Var}(q \cdot k) \;=\; \sum_{i=1}^{d} \operatorname{Var}(q_i k_i) \;=\; d .
+$$
+
+So the typical size of a score grows like $\sqrt{d}$. A model 64 times wider
+produces scores 8 times larger, for no reason connected to meaning. This is
+the argument the transformer paper gives in an appendix, in a single sentence,
+and the fix follows immediately: divide by $\sqrt{d}$ and the variance goes back
+to one.
+
+Now, why does that matter? Because of what large scores do to the softmax.
+Exponentiating a set of numbers exaggerates the gaps between them. If the
+scores are close together, the weights come out fairly even and attention
+behaves like a blend. If one score is far above the others, its exponential
+dominates everything, the weight on it approaches one, and every other weight
+approaches zero. Attention stops averaging and starts picking a single word.
+
+That is bad for two reasons. The obvious one is that a blend is what we wanted.
+The subtler and more serious one is that training a network requires gradients,
+which measure how much the output would change if you nudged the inputs. When
+a softmax has collapsed onto one option, nudging the scores barely changes
+anything, so the gradient is nearly zero and the model stops learning.
+
+I did not want to take any of that on trust, so I measured it.
+
+<div class='figure'>
+    <img src='/images/attention-scaling.png'
+         alt='Two panels. On the left, the measured variance of a dot product plotted against the
+              width of the vectors on log axes, landing on the predicted line variance equals d.
+              On the right, the attention weight falling on the single largest of 64 keys, which
+              climbs to 95 percent without scaling but stays near 11 percent with it.'>
+    <div class='caption'>
+        <span class='caption-label'>Figure 5.</span>
+        My own measurements, from <code>figures/attention.py</code>. In (a) I
+        sampled random vectors at each width and measured the variance of
+        their dot product; the points land on the predicted line. In (b) I
+        pushed those scores through a softmax over 64 keys and measured how
+        much weight fell on the largest one.
+    </div>
+</div>
+
+Panel (a) is the closed form, checked. I sampled pairs of random vectors at
+each width and measured the variance of their dot product, and the measurements
+land on the line $\operatorname{Var} = d$ with a worst error of 1.3% across
+three orders of magnitude. There is nothing subtle happening; it really is just
+the variance of a sum.
+
+Panel (b) is the consequence, and it is the part I would put on a slide. With
+no scaling, the fraction of attention weight landing on the single largest key
+climbs steadily with width: at $d = 1024$ it reaches **94.9%**, meaning the
+softmax is effectively choosing one word out of sixty-four and ignoring the
+rest. Divide by $\sqrt{d}$ and that same number sits at **10.7%**, essentially
+unchanged from its value at $d = 2$. One division makes the mechanism behave
+the same way at every width, which is what you want from a component you intend
+to stack eighty of.
+
+<div class='knob'>
+    <svg viewBox='0 0 720 280' id='sc-svg' role='img'
+         aria-label='Attention weights over sixteen keys, drawn twice: once from raw dot product scores and once after dividing by the square root of the width. As the width grows the unscaled weights collapse onto a single key while the scaled ones stay spread out.'>
+        <g id='sc-scene'></g>
+    </svg>
+    <div class='controls'>
+        <label for='sc-d'>width of the vectors, $d$</label>
+        <input type='range' id='sc-d' min='0' max='9' value='6' step='1'>
+        <span class='readout' id='sc-d-out'></span>
+    </div>
+    <div class='controls'>
+        <label for='sc-s'>draw a fresh set of random vectors</label>
+        <input type='range' id='sc-s' min='0' max='19' value='0' step='1'>
+        <span class='readout' id='sc-s-out'></span>
+    </div>
+    <p class='note' id='sc-note'></p>
+</div>
+<div class='caption'>
+    <span class='caption-label'>Figure 6.</span>
+    The same sixteen keys, scored twice. On the left the raw dot products go
+    straight into the softmax; on the right they are divided by $\sqrt{d}$
+    first. Push the width up and watch the
+    <span style='color:#B07E55'><b>unscaled</b></span> weights collapse onto
+    one key while the <span style='color:#8C77BC'><b>scaled</b></span> ones
+    keep their shape. Both columns are computed live from the same random
+    vectors, so the only difference between them is the division.
+</div>
+
+<script>
+(function () {
+  var scene = document.getElementById('sc-scene'),
+      dR = document.getElementById('sc-d'), sR = document.getElementById('sc-s'),
+      dOut = document.getElementById('sc-d-out'), sOut = document.getElementById('sc-s-out'),
+      note = document.getElementById('sc-note');
+  var DIMS = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024], KEYS = 16;
+
+  // A small deterministic generator, so the picture is reproducible and the
+  // "fresh draw" slider is a seed rather than randomness the reader cannot
+  // return to.
+  function rand(seed) {
+    var s = seed >>> 0;
+    return function () {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      var u = ((s >>> 8) / 16777216) || 1e-9;
+      s = (s * 1664525 + 1013904223) >>> 0;
+      var v = ((s >>> 8) / 16777216) || 1e-9;
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+  }
+
+  function softmax(z) {
+    var m = Math.max.apply(null, z), p = z.map(function (x) { return Math.exp(x - m); });
+    var t = p.reduce(function (a, b) { return a + b; }, 0);
+    return p.map(function (x) { return x / t; });
+  }
+
+  function draw() {
+    var d = DIMS[+dR.value], seed = +sR.value, g = rand(seed * 7919 + 13), i, j;
+    var q = [], scores = [];
+    for (j = 0; j < d; j++) { q.push(g()); }
+    for (i = 0; i < KEYS; i++) {
+      var dot = 0;
+      for (j = 0; j < d; j++) { dot += q[j] * g(); }
+      scores.push(dot);
+    }
+    var raw = softmax(scores), sca = softmax(scores.map(function (x) { return x / Math.sqrt(d); }));
+    var s = '', PW = 300, GAP = 60, BW = PW / KEYS;
+    [[raw, 30, '#B07E55', 'raw scores, straight into the softmax'],
+     [sca, 30 + PW + GAP, '#8C77BC', 'scores divided by √d']].forEach(function (col) {
+      var p = col[0], x0 = col[1];
+      s += "<text class='gl' x='" + x0 + "' y='24'>" + col[3] + "</text>";
+      for (i = 0; i < KEYS; i++) {
+        var h = p[i] * 190;
+        s += "<rect x='" + (x0 + i * BW + 1).toFixed(1) + "' y='" + (230 - h).toFixed(1) +
+             "' width='" + (BW - 2).toFixed(1) + "' height='" + h.toFixed(1) +
+             "' rx='1.5' fill='" + col[2] + "' fill-opacity='0.85'/>";
+      }
+      s += "<line class='sep' x1='" + x0 + "' y1='230' x2='" + (x0 + PW) + "' y2='230'/>";
+      var top = Math.max.apply(null, p);
+      s += "<text class='axlabel' x='" + x0 + "' y='250'>largest weight: " +
+           (top * 100).toFixed(1) + "%</text>";
+      s += "<text class='axlabel' x='" + x0 + "' y='266'>a flat blend would be " +
+           (100 / KEYS).toFixed(1) + "% each</text>";
+    });
+    scene.innerHTML = s;
+    dOut.textContent = 'd = ' + d;
+    sOut.textContent = 'draw ' + (seed + 1) + ' of 20';
+    var tr = Math.max.apply(null, raw) * 100, ts = Math.max.apply(null, sca) * 100;
+    note.textContent = 'At d = ' + d + ', the unscaled softmax puts ' + tr.toFixed(1) +
+      '% of the weight on one key and the scaled one puts ' + ts.toFixed(1) + '%. ' +
+      (tr > 80 ? 'The left column has stopped being an average and become a choice, and a ' +
+                 'softmax that has committed like that has almost no gradient left to learn from.'
+               : 'Keep pushing the width up and watch the left column commit.');
+  }
+  dR.addEventListener('input', draw);
+  sR.addEventListener('input', draw);
+  draw();
+})();
+</script>
+
+## 5. Chat This Over With Friends
+
+The problem attention solves is one you can state without any mathematics: the
+meaning of a word depends on which other words you look at, and the useful ones
+are not at a fixed distance. So instead of averaging everything equally, or
+looking back a fixed number of words, the model computes for each word how
+much every other word matters to it, and blends them in those proportions. Each
+word puts out three things — a description of what it is looking for, an advert
+for what it offers, and the content it hands over — and the first two are
+matched against each other to set the proportions. What convinced people this
+was more than a trick is a picture from 2014: if you draw the weights a
+translation model learned, you get the word alignment between the two
+languages, including the places where French reverses the order of English
+adjectives. Nobody put a dictionary in the model. It worked that out from
+examples.
+
+The thing most often skipped is the square root in the formula, which looks
+like housekeeping and is not. Dot products of $d$ random numbers have variance
+$d$, so the scores grow with the width of the model, and a softmax fed large
+scores stops blending and starts picking one word. I measured it: without the
+scaling, 94.9% of the attention weight lands on a single key by the time the
+vectors are 1,024 wide, and there is almost no gradient left to train on. With
+it, that figure is 10.7% and barely moves with width. The fair objection to how
+I have told this is that my measurement uses random vectors, and a trained
+model's queries and keys are not random — they are correlated in ways that
+change the constants. What is genuinely unsettled is more interesting still:
+attention costs time and memory that grow with the square of the sequence
+length, and the current wave of models is quietly replacing some of it with
+cheaper mechanisms, which means the thing everyone learned as the foundation is
+already being partly designed out.
+
+## 6. References
+
+1. Bahdanau, D., Cho, K., & Bengio, Y. (2014). Neural Machine Translation by
+   Jointly Learning to Align and Translate. *ICLR* 2015.
+   [arXiv:1409.0473](https://arxiv.org/abs/1409.0473)
+2. Luong, M.-T., Pham, H., & Manning, C. D. (2015). Effective Approaches to
+   Attention-based Neural Machine Translation. *EMNLP*.
+   [arXiv:1508.04025](https://arxiv.org/abs/1508.04025)
+3. Vaswani, A., et al. (2017). Attention Is All You Need. *NeurIPS*.
+   [arXiv:1706.03762](https://arxiv.org/abs/1706.03762)
+4. Grattafiori, A., et al. (2024). The Llama 3 Herd of Models.
+   [arXiv:2407.21783](https://arxiv.org/abs/2407.21783)

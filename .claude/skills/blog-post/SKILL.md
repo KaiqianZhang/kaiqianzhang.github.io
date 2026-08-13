@@ -12,8 +12,7 @@ figure pipeline.
 
 ## Two checkpoints, then run
 
-Do not write the post in one shot. There are exactly two places to stop, and
-the length is settled at the first of them.
+Do not write the post in one shot. There are exactly two places to stop.
 
 **Checkpoint 1 — on activation.** If the topic came with the invocation, do
 not re-ask it. Ask only what you cannot infer, in one round:
@@ -22,13 +21,8 @@ not re-ask it. Ask only what you cannot infer, in one round:
   new one.
 - Publish or keep as `draft: true`.
 - Post icon, only if they want something other than the 🍵 default.
-- **Length — ask this every time, in this first round.** *Is this a long
-  post?* If no, it targets **5–8 minutes** and you trim to that. If yes, ask
-  whether they want **15 minutes or longer**, take the answer as the ceiling,
-  and record it as `length: long` in the front matter. Never infer the answer
-  from how much research later turns up: a large pile of material is a reason
-  to trim, not a licence to run long. Knowing the budget before you research
-  is what stops you assembling a 20-minute post you then have to gut.
+Do **not** ask how long the post should be. There is no length budget; see
+*Length* below. The post takes the space the explanation needs.
 
 **Checkpoint 2 — after research, before writing.** Come back with:
 
@@ -179,11 +173,103 @@ annotated separately.
 Sections are numbered in the post; the opener is unnumbered. Renumber after
 any drop so the sequence has no gaps.
 
-**Writing style.** Follow John Storey
-(<https://jdstorey.org/fas/stat-overview.html>): motivate before formalizing,
-plain declarative sentences, bold on first use of a defined term, historical
-narrative with explicit temporal transitions, minimal hedging. Prefer
-paragraphs over bullet lists for argument; use lists for enumerable things.
+**Writing style.** Write like a person explaining something to another person,
+in a blog, because that is what this is. The reference for register is
+<https://lsl.zone/blog/2026/a-taxonomy-of-self-evolving-agents/>. Follow John
+Storey (<https://jdstorey.org/fas/stat-overview.html>) for structure — motivate
+before formalizing, bold on first use of a defined term, historical narrative
+with explicit temporal transitions — but take the *sentences* from the first
+reference.
+
+Four rules, and they matter more than anything else in this file, because a
+post that is right and unreadable has failed.
+
+**1. Say "I", and say it often, because it is what makes the post warm.**
+This is a blog, not a paper. The first person is not a stylistic garnish to
+sprinkle on the introduction and then drop — it is the main thing separating
+a person teaching you something from a manual. Own the judgements, the
+surprises, the mistakes and the enthusiasms:
+
+> *I want to explain… Let me start with something that surprised me… I got
+> this backwards for years… This is my favourite thing in the whole topic…
+> I did not want to take that on trust, so I wrote the experiment… The part
+> I did not expect is… I find this figure quietly remarkable… Let me show you
+> what I mean… I should be more careful about that word…*
+
+Use "we" for the shared walk: *we can compute this directly*, *now we can see
+the waste*, *notice that we never needed the queries*. "We" puts you and the
+reader on the same side of the problem, which is the whole feeling to aim for.
+
+Aim for first person in **most paragraphs of prose**, not just the opening
+and closing. If you read a section back and it could have come from
+documentation, it needs an "I" in it. Figure captions are prose too: *the one
+I did not expect*, *watch what happens when you*, *I have drawn this at
+absurdly small scale so you can see every number* — a caption written as a
+label is a missed chance to keep talking to the reader.
+
+**2. Complete sentences, one idea each.** Every sentence gets a subject and a
+verb. No telegraphic clauses, no fragments for effect, no stacking three
+claims into one line with commas and dashes. Compression is the enemy here.
+Compare:
+
+> Bad: "Near 1, the hardware moves a byte per operation, on a machine built
+> for three hundred operations a byte."
+>
+> Good: "When this ratio is close to one, the chip moves one byte of memory
+> for every arithmetic operation it performs. That is a terrible trade. An
+> H100 can perform about three hundred operations in the time it takes to
+> fetch a single byte, so a ratio near one means the chip spends nearly all
+> of its time waiting for memory and almost none of it computing."
+
+Both say the same thing. The first records it and the second teaches it. Write
+the second, every time, even though it is three times longer.
+
+**3. Assume no background, and build up to the hard part.** The reader may
+never have opened a transformer. Start from something they certainly know,
+and add one idea at a time, defining each term in a sentence of its own the
+first time it appears. Never use a term in the paragraph before you explain
+it. If a section needs three concepts, introduce them in three separate
+passes rather than one dense one. It is fine — expected, even — for the first
+third of a post to be things an expert already knows.
+
+**Keep the essential background in, even though it is not the topic.** Before
+writing, list what somebody must already understand to follow this post, and
+then check that the post itself supplies every item on that list. A post on
+the KV cache cannot assume the reader knows what a token is, that generation
+happens one token at a time, or what a key and a value are — so it teaches all
+three before it needs them. This background is not padding to be trimmed when
+the post runs long; it is the difference between a reader finishing with a
+real understanding of language models and finishing with a memorised fact
+about one buffer. Each post should leave the reader knowing more about how
+LLMs work in general, not only about its own narrow subject.
+
+The test: could a reader who has never read anything else on this blog follow
+the post from the first sentence to the last without opening another tab? If
+not, something essential is missing, and the fix is to add it rather than to
+assume it.
+
+**Splitting a topic across posts does not suspend this rule.** When a subject
+is large enough to want two posts, each one still has to teach what its own
+argument needs. A link to the companion post is an *offer of depth*, not a
+substitute for explaining. So write "I have written a whole post about this,
+and if you want the derivations that is where they are — but here is
+everything you actually need", and then give it, building from the beginning.
+Never write "read that one first": the reader is already here, and a post that
+sends them away to become qualified to read it has failed at the only job it
+had. The companion post is where the same material gets the full treatment,
+so a compressed retelling in one post and a slow one in the other is the
+correct outcome, not duplication to be trimmed.
+
+**4. Say what it means, not only what it is.** After a fact, add the sentence
+that tells the reader why to care. *In other words… The practical effect is
+that… This is the part that surprised me… What this buys you is…* A fact
+without its consequence is a note to yourself.
+
+Prefer paragraphs over bullet lists for argument; use lists for enumerable
+things. Ask the reader's question on their behalf and then answer it — *you
+might reasonably wonder why the queries are not stored too, and the answer is
+the best thing in this topic* — but do not ask rhetorical questions to sound
+clever.
 
 **Tone.** A university research professor teaching you — patient, and
 genuinely interested in the material. Concretely, that means:
@@ -203,9 +289,11 @@ genuinely interested in the material. Concretely, that means:
 - **Let the interest show.** A sentence may be delighted by its subject. What
   it may not be is pleased with itself — no showing off, no rhetorical
   questions asked to be clever, no jokes at the reader's expense.
-- **Never condescend.** The reader is a capable graduate student, not a
-  novice. Do not over-explain what they already know, and do not apologise for
-  the mathematics.
+- **Never condescend, but never assume either.** Explaining something from
+  the beginning is not condescension; skipping it is not respect. Treat the
+  reader as intelligent and uninformed, which is the normal condition of
+  someone reading about a topic for the first time. Do not apologise for the
+  mathematics, and do not skip the sentence that makes it followable.
 
 **Headings.** Literary. Carry an image, and let the sentence have some
 rhythm — a heading may be long if the length earns it. The image should be
@@ -266,39 +354,40 @@ captions. Every sentence should survive being said out loud.
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
 
-**Length.** **5–8 minutes by default**, measured at a deliberately
-**conservative** 180 words per minute (`WORDS_PER_MINUTE` in `build.py`).
-General blog convention is 200–265, but these posts carry derivations, figures
-to study and code to read, and nobody reads a derivation at cruising speed. Do
-not raise the number to make a post fit.
-
-A post may exceed 8 minutes only if checkpoint 3 established it as a long
-post. Mark those `length: long` in the front matter so the ceiling is a
-recorded decision rather than something that crept up. Check with:
+**Length.** **There is no time limit, and you should not impose one.** A post
+is finished when a reader with no background could follow it from the first
+sentence to the last, and not before. Read time is reported in the byline at
+180 words per minute (`WORDS_PER_MINUTE` in `build.py`) as information for the
+reader, not as a budget for you:
 
 ```sh
 python3 -c "import build; p=build.Post('posts/<file>.md', build.load_config()); print(p.read_minutes)"
 ```
 
-Over budget — 8 minutes normally, or whatever checkpoint 3 agreed — trim,
-**in this order**:
+This rule replaces an earlier 5–8 minute ceiling, and it was changed for a
+reason worth remembering. Trimming the KV cache post to fit that ceiling took
+eight passes, and what went first was the connective tissue — the sentence
+after the fact that says what the fact means, the clause that unpacks a
+compressed clause, the paragraph that introduces a term before using it.
+Every cut was locally defensible and the result was prose that recorded the
+subject instead of teaching it. **A post that is too long is a small problem.
+A post the reader cannot follow has failed completely.**
 
-1. Redundancy — anything stated twice in prose and again in a caption.
-2. **History.** It is a roadmap; keep it minimal. Prose around it should be
-   only what the boxes cannot hold.
-3. **The math.** Compress derivations to the load-bearing steps and shorten
-   the surrounding commentary.
+So: never cut for length. Cut only these, and only because they are bad:
 
-Rewording does not cut. A sentence rewritten more tightly saves five words;
-reaching 15 minutes from 19 needs paragraphs deleted, so delete them and say
-in the report exactly what went.
+1. Redundancy — the same thing said twice, in prose and again in a caption.
+2. Padding — a paragraph that adds no idea, restates the previous one in
+   different words, or exists because the template implied a section.
 
-A survey post whose subject *is* the history — the mindmap post is the
-standing example — is exempt from any ceiling. Nothing else is.
+If a post runs to twenty minutes because the subject needs twenty minutes,
+that is the correct length. Say so in the report and move on. If it runs long
+because it is repeating itself, fix that — but fix it by deleting whole
+paragraphs, never by compressing sentences, because compressing sentences is
+exactly how the prose got bad the first time.
 
 One trap: any figure measured on the blog's own posts (`figures/mindmap.py`
-does this) moves when you trim other posts. Re-run it and update the numbers
-quoted in the prose and captions.
+does this) moves when other posts change length. Re-run it and update the
+numbers quoted in the prose and captions.
 
 **The history roadmap.** Section 1 is not paragraphs of dates. It is a
 horizontal spine of four milestones, each in a rounded box holding two or

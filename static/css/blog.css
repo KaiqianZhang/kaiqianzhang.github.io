@@ -1235,3 +1235,74 @@ table td {
   }
   .article .knob .sep { stroke: #4A4640; }
 }
+
+/* The generation loop that opens the KV cache post: four rows, each one token
+   longer than the last, fading in one after another so the repetition is the
+   thing you notice. */
+.article .loop-anim {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 0 6px 0;
+  margin: 34px 0;
+}
+.article .loop-anim svg { width: 100%; height: auto; display: block; }
+.article .loop-anim .tok { stroke-width: 0; }
+.article .loop-anim .tok.old { fill: #8C77BC; fill-opacity: 0.20; }
+.article .loop-anim .tok.new { fill: #A8443E; fill-opacity: 0.30; }
+.article .loop-anim .tk {
+  font: 500 11px -apple-system, Helvetica, arial, sans-serif;
+  fill: #3F3F3F; text-anchor: middle;
+}
+.article .loop-anim .tk.nw { fill: #A8443E; font-weight: 600; }
+.article .loop-anim .step {
+  font: 600 10px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+}
+.article .loop-anim .arrow { font-size: 15px; fill: #C9C3BC; text-anchor: middle; }
+.article .loop-anim .note {
+  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C77BC; text-anchor: middle;
+}
+@keyframes loop-row {
+  0%, 4%    { opacity: 0; }
+  10%, 92%  { opacity: 1; }
+  100%      { opacity: 0; }
+}
+.article .loop-anim .row { animation: loop-row 7s ease-in-out infinite; }
+.article .loop-anim .r1 { animation-delay: 0s; }
+.article .loop-anim .r2 { animation-delay: 0.5s; }
+.article .loop-anim .r3 { animation-delay: 1.0s; }
+.article .loop-anim .r4 { animation-delay: 1.5s; }
+@media (prefers-reduced-motion: reduce) {
+  .article .loop-anim .row { animation: none; opacity: 1; }
+}
+@media (prefers-color-scheme: dark) {
+  .article .loop-anim .tk { fill: #D8D4CE; }
+  .article .loop-anim .arrow { fill: #4A4640; }
+}
+
+/* The bottleneck-versus-attention figure that opens the attention post. The
+   attention lines pulse at different rates, so the picture reads as weights
+   being recomputed for every output word rather than as fixed wiring. */
+.article .loop-anim .bn-wire { stroke: #C9C3BC; stroke-width: 1.4; fill: none; }
+.article .loop-anim .bn-box {
+  fill: rgba(168, 68, 62, 0.14); stroke: #A8443E; stroke-width: 1.2;
+}
+.article .loop-anim .bn-lbl {
+  font: 600 9px -apple-system, Helvetica, arial, sans-serif;
+  fill: #A8443E; text-anchor: middle;
+}
+.article .loop-anim .bn-att {
+  stroke: #8C77BC; stroke-width: 2; fill: none; stroke-linecap: round;
+}
+@keyframes bn-pulse {
+  0%, 100% { stroke-opacity: 0.15; }
+  50%      { stroke-opacity: 0.9; }
+}
+.article .loop-anim .bn-att { animation: bn-pulse 4s ease-in-out infinite; }
+.article .loop-anim .a1 { animation-delay: 0s; }
+.article .loop-anim .a2 { animation-delay: 1s; }
+.article .loop-anim .a3 { animation-delay: 2s; }
+.article .loop-anim .a4 { animation-delay: 3s; }
+@media (prefers-reduced-motion: reduce) {
+  .article .loop-anim .bn-att { animation: none; stroke-opacity: 0.55; }
+}
