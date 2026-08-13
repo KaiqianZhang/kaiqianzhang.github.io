@@ -114,10 +114,10 @@ ROADMAPS = {
              'become trainable.'),
             ('2016', 'LayerNorm',
              'Normalize each example across its own features instead. No '
-             'batch dependence, no train/test gap, any sequence length.'),
+             'batch dependence, no train/test gap.'),
             ('2019', 'RMSNorm',
-             'Zhang and Sennrich drop the mean subtraction and keep only the '
-             'division. 7 to 64% less running time.'),
+             'Zhang and Sennrich drop the mean subtraction, keeping only '
+             'the division. 7 to 64% less running time.'),
             ('2023-', 'the default',
              'LLaMA ships it; Mistral, Qwen, Gemma, DeepSeek follow. '
              'LayerNorm becomes the exception.'),

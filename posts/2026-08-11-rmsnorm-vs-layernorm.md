@@ -1,34 +1,23 @@
 ---
 title: RMSNorm vs. LayerNorm
-subtitle: Nearly every modern language model deleted one step from LayerNorm — here is exactly how little that step was doing.
+subtitle: Modern language models deleted one step from the operation that normalizes them, and the deleted step turns out to have been doing almost nothing.
 date: 2026-08-11
 tags: llm
 icon: 🍵
-length: long
 ---
 
-Every transformer normalizes. Between the attention block and the feed-forward
-block, and again before the next attention block, the hidden vector for each
-token is rescaled so that its entries have a controlled size. Without this the
-models do not train.
-
-For seven years the standard way to do this was **layer normalization**, or
-**LayerNorm**. Today almost every large language model uses something simpler
-called **root mean square layer normalization**, or **RMSNorm**. The change
-between them is small enough to state in one sentence: RMSNorm does not
-subtract the mean.
-
-This post is about why that one deletion was worth making, and what it tells
-us about how progress in this field actually happens.
+Every transformer normalizes: between attention and the feed-forward block,
+each token's hidden vector is rescaled so its entries have a controlled size.
+For seven years that meant **layer normalization**. Today almost every large
+language model uses **root mean square layer normalization** — LayerNorm with
+one step deleted. This post is about why deleting it was worth doing.
 
 [TOC]
 
 ## Two Small Rooms in Every Layer
 
-Before the history, it is worth seeing where in the network any of this
-happens. RMSNorm is a drop-in replacement for LayerNorm, not a rearrangement
-of the architecture — both occupy exactly the same slot. So the useful picture
-is of the slot itself.
+RMSNorm is a drop-in replacement, not a rearrangement: both occupy the same
+two slots.
 
 <div class='figure-pair tall'>
     <div class='panels'>
@@ -56,14 +45,11 @@ is of the slot itself.
     </div>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Two normalization sites per layer, marked in green — one before
-        attention, one before the feed-forward network. Everything in this post
-        happens inside a green box. The boxes are labelled "Layer Norm" because
-        the diagram predates the switch; in a current model they contain
-        RMSNorm instead, in the same positions. Note that moving from (a) to
-        (b) is a <i>separate</i> change from the one this post is about, made
-        for reasons to do with gradients rather than cost. Today's models made
-        both.
+        Two normalization sites per layer, in green — everything here happens
+        inside a green box. They read "Layer Norm" because the diagram
+        predates the switch; a current model has RMSNorm in the same
+        positions. Moving from (a) to (b) is a <i>separate</i> change, about
+        gradients rather than cost.
         <br>
         Reproduced figures throughout this post are recoloured to the
         palette used here, so that LayerNorm is always blue, RMSNorm always
@@ -77,9 +63,8 @@ is of the slot itself.
 
 ## 1. Seven Years of Subtracting a Ghost
 
-Normalization was invented to solve a problem, and each attempt to fix it
-charged something. Read the labels above the arrows: each names what the step
-to its left was still paying.
+Each attempt charged something. The labels above the arrows name what the
+step to their left was still paying.
 
 <div class='roadmap'>
     <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
@@ -110,7 +95,7 @@ to its left was still paying.
         <text class='body' x='284.8' y='111.5'>across its own features</text>
         <text class='body' x='284.8' y='126.0'>instead. No batch</text>
         <text class='body' x='284.8' y='140.5'>dependence, no train/test</text>
-        <text class='body' x='284.8' y='155.0'>gap, any sequence length.</text>
+        <text class='body' x='284.8' y='155.0'>gap.</text>
       </g>
       <g class='stop'>
         <rect class='hit' x='387.0' y='30' width='176.5' height='125.5'/>
@@ -119,7 +104,7 @@ to its left was still paying.
         <text class='yr' x='475.2' y='65.0'>2019</text>
         <text class='stage' x='475.2' y='79.0'>RMSNorm</text>
         <text class='body' x='475.2' y='97.0'>Zhang and Sennrich drop the</text>
-        <text class='body' x='475.2' y='111.5'>mean subtraction and keep</text>
+        <text class='body' x='475.2' y='111.5'>mean subtraction, keeping</text>
         <text class='body' x='475.2' y='126.0'>only the division. 7 to 64%</text>
         <text class='body' x='475.2' y='140.5'>less running time.</text>
       </g>
@@ -137,61 +122,36 @@ to its left was still paying.
     </svg>
 </div>
 
-Two things are worth pulling out of that line. The first is that the
-motivation was cost, not quality. Normalization is paid once per layer, on
-every token, on every step, forever — section 3 is the figure Zhang and
-Sennrich opened with, and it is worth looking at before reading on. The second
-is what they were willing to say out loud:
+The motivation was **cost, not quality**, and they said plainly what they
+thought was load-bearing:
 
 > In this paper, we hypothesize that the re-scaling invariance is the reason
 > for success of LayerNorm, rather than re-centering invariance.
 
-Across machine translation, image classification, image-caption retrieval, and
-question answering, RMSNorm matched LayerNorm's quality. LayerNorm has not
-disappeared — it is in the older models people run every day, and in plenty of
-vision architectures — but for new language models it is now the exception.
-
-The interesting part of this history is not that a faster method won. It is
-that a widely repeated explanation for *why* LayerNorm worked turned out to be
-half wrong, and nobody checked for three years.
+The interesting part is not that a faster method won, but that the standard
+explanation for *why* LayerNorm worked was half wrong, and nobody checked for
+three years.
 
 ## 2. The Arithmetic of an Absence
 
-Both methods take a single token's hidden vector $x \in \mathbb{R}^d$ and
-return a vector of the same shape. The only difference is which statistics
-they use.
-
-**LayerNorm** computes both the mean and the standard deviation across the $d$
-entries,
+Both take a token's hidden vector $x \in \mathbb{R}^d$ and return one of the
+same shape. **LayerNorm** computes two statistics across the $d$ entries:
 
 $$
-\mu = \frac{1}{d}\sum_{i=1}^{d} x_i, \qquad
-\sigma = \sqrt{\frac{1}{d}\sum_{i=1}^{d}(x_i - \mu)^2},
+\mu = \frac{1}{d}\sum_i x_i, \quad
+\sigma = \sqrt{\frac{1}{d}\sum_i (x_i - \mu)^2}, \quad
+\text{LayerNorm}(x)_i = g_i \frac{x_i - \mu}{\sigma} + b_i .
 $$
 
-and then standardizes, rescales by a learned gain $g$, and shifts by a learned
-bias $b$:
+**RMSNorm** computes one, and divides:
 
 $$
-\text{LayerNorm}(x)_i = g_i \cdot \frac{x_i - \mu}{\sigma} + b_i.
+\text{RMS}(x) = \sqrt{\frac{1}{d}\sum_i x_i^2}, \qquad
+\text{RMSNorm}(x)_i = g_i \frac{x_i}{\text{RMS}(x)} .
 $$
 
-**RMSNorm** computes one statistic, the root mean square,
-
-$$
-\text{RMS}(x) = \sqrt{\frac{1}{d}\sum_{i=1}^{d} x_i^2},
-$$
-
-and divides by it:
-
-$$
-\text{RMSNorm}(x)_i = g_i \cdot \frac{x_i}{\text{RMS}(x)}.
-$$
-
-That is the whole difference. No $\mu$, no subtraction, and in the original
-formulation no bias either. Hold on to how small that change is; the rest of
-the post is an argument about why something so small was worth doing, and what
-it quietly gave up.
+That is the whole difference: no $\mu$, no subtraction, and originally no
+bias.
 
 <div class='pipe-anim'>
     <div class='panels'>
@@ -243,33 +203,28 @@ it quietly gave up.
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
         The same eight activations through both normalizers, on a loop. Watch
-        the dashed mean line: LayerNorm drags it down to zero before scaling,
-        and RMSNorm leaves it exactly where it was. That one missing step is
-        the entire difference between the two methods, and the rest of this
-        post is about what it costs.
+        the dashed mean line: LayerNorm drags it to zero before scaling,
+        RMSNorm leaves it where it was. That missing step is the whole
+        difference.
     </div>
 </div>
 
-### Why RMS Stands In for $\sigma$
+### Why RMS stands in for $\sigma$
 
-These two statistics are more closely related than they look, and the
-relationship is worth deriving rather than asserting, because everything else
-in this post follows from it. Expand the sum of squares by adding and
-subtracting $\mu$ — the standard trick, and the only one needed here:
+The two statistics are closer than they look, and everything else follows
+from the relationship. Expand the sum of squares around the mean:
 
 $$
 \frac{1}{d}\sum_i x_i^2
-= \frac{1}{d}\sum_i (x_i - \mu + \mu)^2
 = \underbrace{\frac{1}{d}\sum_i (x_i-\mu)^2}_{\sigma^2}
 + \underbrace{\frac{2\mu}{d}\sum_i (x_i - \mu)}_{= \, 0}
-+ \; \mu^2 .
++ \; \mu^2 ,
+\qquad\text{so}\qquad \text{RMS}^2 = \sigma^2 + \mu^2 .
 $$
 
 The middle term vanishes because deviations from the mean sum to zero. So
-
-$$
-\text{RMS}(x)^2 = \sigma^2 + \mu^2 .
-$$
+**the RMS is the standard deviation plus whatever the mean contributes** — and
+the real question is how big $\mu$ is next to $\sigma$.
 
 <div class='knob'>
     <svg viewBox='0 0 720 300' id='geo-svg' role='img'
@@ -290,15 +245,14 @@ $$
 </div>
 <div class='caption'>
     <span class='caption-label'>Figure 3.</span>
-    The identity above, drawn in three dimensions. <span style='color:#C48BAC'><b>&#956;&#8901;1</b></span>
-    runs along the all-ones diagonal, <span style='color:#3E6491'><b>x &#8722; &#956;&#8901;1</b></span>
-    lies flat in the shaded plane where coordinates sum to zero, and
-    <span style='color:#8C77BC'><b>x</b></span> is their sum. They meet at a
-    right angle, so $\text{RMS}^2 = \sigma^2 + \mu^2$ is the theorem of
-    Pythagoras and nothing more. Drag $\mu$ and watch the angle between the
-    two normalizers open up; spin the view to see the plane edge-on.
+    The identity, in three dimensions.
+    <span style='color:#C48BAC'><b>&#956;&#8901;1</b></span> runs along the
+    all-ones diagonal and
+    <span style='color:#3E6491'><b>x &#8722; &#956;&#8901;1</b></span> lies in
+    the plane where coordinates sum to zero. They meet at a right angle, so
+    $\text{RMS}^2 = \sigma^2 + \mu^2$ is Pythagoras. Drag $\mu$; spin the
+    view to see the plane edge-on.
 </div>
-
 <script>
 (function () {
   var svg = document.getElementById('geo-svg'),
@@ -366,91 +320,44 @@ $$
 })();
 </script>
 
-This is the familiar identity that the mean square equals the variance plus
-the squared mean, and it says something useful here. **The RMS is the standard
-deviation plus whatever the mean contributes.** When $\mu = 0$ the two are
-identical, and RMSNorm and LayerNorm compute exactly the same thing. The
-original paper makes precisely this observation: "When the mean of summed
-inputs is zero, RMSNorm is exactly equal to LayerNorm."
+### Exactly how far apart are they
 
-So the real question is not whether the two formulas look different. It is how
-big $\mu$ is compared to $\sigma$ in practice.
-
-### Exactly How Far Apart Are They?
-
-We can answer that question with an identity rather than a guess.
-
-Set the learned parameters aside for a moment ($g = 1$, $b = 0$) and notice
-that each method returns a *positive scalar multiple* of a vector: LayerNorm
-returns a multiple of $x - \mu\mathbf{1}$, and RMSNorm returns a multiple of
-$x$. Scaling a vector does not change the direction it points, so the angle
-between the two outputs is just the angle between $x - \mu\mathbf{1}$ and $x$.
-
-Take the cosine of that angle. Two facts do all the work — that
-$\sum_i x_i = d\mu$, and that $\|x - \mu\mathbf{1}\|^2 = \|x\|^2 - d\mu^2$:
+Set $g = 1$, $b = 0$. Each method returns a positive multiple of a vector —
+LayerNorm of $x - \mu\mathbf{1}$, RMSNorm of $x$ — and scale is irrelevant to
+both, so the entire disagreement is the angle $\theta$ between those
+directions. Using $\|x - \mu\mathbf{1}\|^2 = \|x\|^2 - d\mu^2$:
 
 $$
-\cos\theta
-= \frac{\langle x - \mu\mathbf{1},\, x\rangle}{\|x - \mu\mathbf{1}\|\,\|x\|}
-= \frac{\|x\|^2 - d\mu^2}{\sqrt{\|x\|^2 - d\mu^2}\;\|x\|}
+\cos\theta = \frac{\langle x - \mu\mathbf{1},\, x\rangle}{\|x - \mu\mathbf{1}\|\,\|x\|}
 = \frac{\sqrt{\|x\|^2 - d\mu^2}}{\|x\|}
-= \sqrt{1 - \frac{d\mu^2}{\|x\|^2}} .
+= \sqrt{1 - \frac{\mu^2}{\text{RMS}(x)^2}} = \frac{\sigma}{\text{RMS}(x)} .
 $$
 
-Now use $\|x\|^2 = d \cdot \text{RMS}(x)^2$ and the identity from above:
+**The agreement is exactly $\sigma/\text{RMS}$** — no approximation, no
+assumption about the distribution of $x$.
+
+Now add the assumption real networks satisfy: $d$ is large. If the entries of
+$x$ are independent with mean zero and variance one, $\mu$ has variance $1/d$,
+and expanding the square root gives
 
 $$
-\boxed{\;\cos\theta = \sqrt{1 - \frac{\mu^2}{\text{RMS}(x)^2}} = \frac{\sigma}{\text{RMS}(x)}\;}
+\mathbb{E}\!\left[1 - \cos\theta\right] \approx \frac{1}{2d} .
 $$
 
-I find this satisfying. **The agreement between LayerNorm and RMSNorm is
-exactly the ratio $\sigma / \text{RMS}$.** No approximation, no assumption
-about the distribution of $x$. If the mean is small relative to the overall
-scale, the two normalizers point in nearly the same direction, and the "nearly"
-is quantified precisely.
+**The disagreement shrinks like $1/d$** — about $0.00065$ at GPT-2's
+$d = 768$, and $0.00012$ at Llama 2 7B's $d = 4096$. Section 4 checks it.
 
-### What Width Does to the Difference
+### The invariance left behind
 
-Now add the one assumption that matters for real networks: $d$ is large.
+Both are invariant to **re-scaling**, since
+$\text{RMS}(\alpha x) = \alpha\,\text{RMS}(x)$ cancels. Only LayerNorm is
+invariant to **re-centering**: add $c$ to every entry and each deviation
+$x_i - \mu$ is unchanged, so its output is identical. RMSNorm sees a different
+vector.
 
-Suppose the entries of $x$ are independent draws with mean zero and variance
-one. The sample mean $\mu$ then has variance $1/d$, so $d\mu^2$ follows a
-chi-square distribution with one degree of freedom, and $\|x\|^2 \approx d$.
-Substituting into the identity and using $\sqrt{1-u} \approx 1 - u/2$ for
-small $u$:
-
-$$
-1 - \cos\theta \;\approx\; \frac{d\mu^2}{2\|x\|^2} \;\approx\; \frac{\chi^2_1}{2d},
-\qquad \text{so} \qquad
-\mathbb{E}\!\left[1 - \cos\theta\right] \approx \frac{1}{2d}.
-$$
-
-**The disagreement between LayerNorm and RMSNorm shrinks in proportion to
-$1/d$.** GPT-2 has $d = 768$, which puts the expected disagreement near
-$1/1536 \approx 0.00065$. Llama 2 7B has $d = 4096$, giving about $0.00012$.
-The mean that LayerNorm works to remove is, in a model of realistic width,
-almost not there.
-
-Section 5 puts this prediction to the test.
-
-### The Invariance Left Behind
-
-The papers frame the comparison in terms of *invariance*: which changes to the
-input leave the output untouched. This is the right frame, and it is worth
-being slow about, because it is where the trade actually lives.
-
-Both are invariant to **re-scaling**. Since $\text{RMS}(\alpha x) = \alpha\,
-\text{RMS}(x)$ for $\alpha > 0$, the factor cancels:
-
-$$
-\text{RMSNorm}(\alpha x) = \frac{\alpha x}{\alpha \,\text{RMS}(x)} = \text{RMSNorm}(x).
-$$
-
-Only LayerNorm is invariant to **re-centering**. Add a constant $c$ to every
-entry: the mean becomes $\mu + c$, each deviation $x_i - \mu$ is unchanged,
-and $\sigma$ is unchanged, so $\text{LayerNorm}(x + c\mathbf{1}) =
-\text{LayerNorm}(x)$ exactly. RMSNorm has no such property — it sees a
-genuinely different vector.
+That is the real trade, stated without spin: RMSNorm gives up a genuine
+mathematical property, and the claim — supported then by experiments and since
+by the field — is that this property was not the one carrying the load.
 
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='inv-svg' role='img'
@@ -471,17 +378,14 @@ genuinely different vector.
 </div>
 <div class='caption'>
     <span class='caption-label'>Figure 4.</span>
-    The two invariances, side by side. Move $\alpha$ and nothing at all
-    happens to either output: both methods are re-scaling invariant. Move $c$
-    and the <span style='color:#3E6491'><b>LayerNorm</b></span> row stays
-    frozen while the <span style='color:#8C77BC'><b>RMSNorm</b></span> row
-    visibly walks away from its dashed starting position. That is the property
-    RMSNorm sells, drawn to scale. The readout is section 5's
-    $1/\sqrt{1+c^2}$, written in the shift *relative to the scale* &#8212;
-    since $\alpha$ divides out of RMSNorm entirely, what the output actually
-    sees is $c/\alpha$.
+    The two invariances. Move $\alpha$ and nothing happens to either
+    output. Move $c$ and the
+    <span style='color:#3E6491'><b>LayerNorm</b></span> row stays frozen while
+    the <span style='color:#8C77BC'><b>RMSNorm</b></span> row walks away from
+    its dashed start — the property RMSNorm sells, drawn to scale. The readout
+    is $1/\sqrt{1+(c/\alpha)^2}$, since $\alpha$ divides out of RMSNorm
+    entirely.
 </div>
-
 <script>
 (function () {
   var scene = document.getElementById('inv-scene'),
@@ -555,18 +459,11 @@ genuinely different vector.
 })();
 </script>
 
-This is the real trade, and it is worth stating without spin. RMSNorm is not a
-free lunch or a strictly better method. It gives up a genuine mathematical
-property. The claim of the paper — supported by experiments then, and by the
-entire field since — is that this particular property was not the one carrying
-the load.
-
 ## 3. What the Clock Knew and the Counter Did Not
 
-Every paper has one figure carrying its argument. For RMSNorm it is Figure 1,
-and it contains no RMSNorm at all. It shows the same two training runs — a GRU
-translation model with and without LayerNorm — plotted twice, against two
-different x-axes.
+Every paper has one figure carrying its argument, and RMSNorm's contains no
+RMSNorm at all: one translation model with and without LayerNorm, plotted
+against steps and then against seconds.
 
 <div class='figure-pair'>
     <div class='panels'>
@@ -593,87 +490,18 @@ different x-axes.
     </div>
     <div class='caption'>
         <span class='caption-label'>Figure 5.</span>
-        The whole case for RMSNorm, in one pair of axes. 5.4 against 5.9 is
-        the entire opening: normalization earns its keep per step, then hands
-        a large share of it back per second. Everything that follows —
-        deleting the mean, keeping the RMS — is an attempt to collect the
-        difference. Note what is <i>not</i> being argued: nobody is proposing
-        to drop normalization. The target is its price.
+        The whole case, in one pair of axes. 5.4 against 5.9: normalization
+        earns its keep per step, then hands much of it back per second.
+        Deleting the mean collects the difference. Note what is <i>not</i>
+        argued — nobody proposes dropping normalization, only its price.
         <br>
         Figure 1, Zhang &amp; Sennrich (2019), recoloured.
     </div>
 </div>
 
-Having posed the problem that way, the paper has to show that its answer costs
-nothing in quality. It reports that across machine translation, image
-classification, image-caption retrieval, and question answering, RMSNorm
-matches LayerNorm — mostly in tables. This is the one they plotted:
+## 4. Watching a Difference Vanish into Width
 
-<div class='figure narrow'>
-    <img src='/images/rmsnorm-2019-recall1.png'
-         alt='Mean Recall@1 against training steps for Baseline, LayerNorm, RMSNorm and pRMSNorm. The three normalized curves lie on top of one another, all above the baseline.'>
-    <div class='caption'>
-        <span class='caption-label'>Figure 6.</span>
-        <b>RMSNorm</b> (green) and <b>pRMSNorm</b> (rose) sit on top of
-        <b>LayerNorm</b> (blue), all well above <b>Baseline</b> (plum). The
-        curves to compare are not the highest and the lowest — they are the
-        three that are indistinguishable. A tie is the result being claimed,
-        and a tie is what makes the speed argument in Figure 5 decisive.
-        <br>
-        Figure 2(a), Zhang &amp; Sennrich (2019), recoloured.
-    </div>
-</div>
-
-Read those two figures together and the paper is done. Normalization is worth
-its quality gain but not its full price; removing the mean recovers part of
-the price and costs none of the gain.
-
-## 4. A Ledger of What Was Kept and What Was Sold
-
-|  | LayerNorm | RMSNorm |
-|---|---|---|
-| Statistics computed | mean and variance | root mean square |
-| Learned parameters | gain and bias, $2d$ | gain, $d$ |
-| Invariant to re-scaling | yes | yes |
-| Invariant to re-centering | yes | **no** |
-| Equal to the other when | — | $\mu = 0$ |
-| Agreement with the other | $\sigma/\text{RMS}$ | $\sigma/\text{RMS}$ |
-| Typical era | Transformer, BERT, GPT-2, GPT-3 | T5, LLaMA, Mistral, Qwen, Gemma, DeepSeek |
-
-A few points worth carrying away.
-
-**The savings are real but modest, and that is fine.** The 7%–64% range comes
-from the 2019 paper's models, several of which were RNNs where normalization
-is a large share of the work. In a modern transformer the normalization layers
-are a small fraction of total arithmetic, and fused kernels have narrowed the
-gap further. The honest summary is that RMSNorm is somewhat cheaper, slightly
-smaller, and *no worse* — and "no worse but simpler" is enough to win a
-default.
-
-**Small per-token costs multiply at scale.** A 70B-parameter model has on the
-order of 80 layers with two normalization sites each, applied to every token
-of every sequence, across trillions of training tokens and then across the
-entire deployed lifetime of the model. Anything on that path is worth
-simplifying.
-
-**Simplicity compounds beyond speed.** One statistic instead of two means one
-reduction pass over the activation, which matters because these layers are
-limited by memory bandwidth rather than arithmetic. Dropping the bias removes
-parameters. Fewer moving parts make the kernel easier to fuse and the
-numerics easier to reason about in low precision. None of these is dramatic
-alone.
-
-**The methodological lesson is the durable one.** The field had a story about
-why LayerNorm worked, and the story named two mechanisms. Someone tested them
-separately and found that one was carrying the weight. Removing a component
-and showing that nothing breaks is a real contribution, and it is rarer than
-it should be — partly because a paper reporting a tie is harder to publish
-than one reporting a win.
-
-## 5. Watching a Difference Vanish into Width
-
-The derivation in section 2 makes two falsifiable predictions. Simulating them
-takes very little code, because both normalizers are two lines:
+Both are checkable, and each normalizer is two lines:
 
 ```python
 def layernorm(x):
@@ -683,30 +511,7 @@ def rmsnorm(x):
     return x / np.sqrt((x ** 2).mean(-1, keepdims=True))
 ```
 
-The first prediction is that the disagreement between them, measured as one
-minus the cosine similarity of their outputs, should average $1/2d$. The
-second is that adding a constant $c$ to every coordinate should leave
-LayerNorm's output *exactly* unchanged, while rotating RMSNorm's output away
-by a factor of $1/\sqrt{1+c^2}$.[^shift]
-
-<div class='figure'>
-    <img src='/images/rmsnorm-vs-layernorm.png'
-         alt='Two panels. Left: log-log plot of disagreement between LayerNorm and RMSNorm against width d, following a 1/2d line. Right: cosine similarity to the unshifted output against shift c, with LayerNorm flat at 1 and RMSNorm decaying.'>
-    <div class='caption'>
-        <span class='caption-label'>Figure 7.</span>
-        Gaussian inputs, 4,000 draws per point. <b>(a)</b> The two normalizers
-        disagree less and less as the model gets wider, and the simulated mean
-        lands on the predicted $1/2d$ line. At GPT-2's width the disagreement
-        is about $7\times10^{-4}$; at Llama 2 7B's width, about
-        $1\times10^{-4}$. <b>(b)</b> The property RMSNorm gives up. Shifting
-        every coordinate by $c$ leaves LayerNorm's output identical, while
-        RMSNorm's rotates away exactly as $1/\sqrt{1+c^2}$.
-    </div>
-</div>
-
-Better than reading the plot is driving it. The widget below runs the same
-experiment in your browser — fresh Gaussian draws every time you move
-something — and prints the measured mean next to the predicted $1/2d$.
+The widget runs it live, on fresh draws.
 
 <div class='knob'>
     <svg viewBox='0 0 720 260' id='sim-svg' role='img'
@@ -726,15 +531,13 @@ something — and prints the measured mean next to the predicted $1/2d$.
     <p class='note' id='sim-note'></p>
 </div>
 <div class='caption'>
-    <span class='caption-label'>Figure 8.</span>
-    Four hundred fresh random vectors per redraw, measured live. With
-    zero-mean activations the histogram walks left as $d$ grows and its mean
-    lands on the dashed $1/2d$ prediction. Then push the second slider: give
-    the activations a mean, and the agreement comes apart. That is the honest
-    boundary of the result — the two normalizers converge because the mean of
-    a wide random vector is near zero, not because the mean never mattered.
+    <span class='caption-label'>Figure 6.</span>
+    Four hundred fresh random vectors per redraw. The histogram walks left
+        as $d$ grows and its mean lands on the dashed $1/2d$. Then push the
+        second slider: give the activations a mean and the agreement comes
+        apart. That is the honest boundary — the two converge because the mean
+        of a wide random vector is near zero, not because it never mattered.
 </div>
-
 <script>
 (function () {
   var scene = document.getElementById('sim-scene'),
@@ -801,71 +604,46 @@ something — and prints the measured mean next to the predicted $1/2d$.
 })();
 </script>
 
-Both predictions hold. In panel (a) the dashed theory line is not fitted to
-anything — it is $1/2d$, and the simulated mean sits on it across four orders
-of magnitude. At $d = 768$ the measured disagreement is $6.53\times10^{-4}$
-against a predicted $6.51\times10^{-4}$.
+Both hold — and hold them together: at realistic widths the two do nearly the
+same thing, which is why the swap is safe, while the property RMSNorm sold is
+real, which is why it was a bet.[^shift]
 
-Panel (a) is the case for RMSNorm and panel (b) is the case against it, and
-both are worth holding at once. At realistic widths the two methods are doing
-nearly the same thing, which is why the swap is safe. But they are not
-identical, and if a model's activations ever developed a large shared offset
-across the feature dimension, the two would diverge exactly as panel (b) shows.
-The empirical claim underneath every modern LLM is that this does not happen
-enough to matter.
-
-## 6. Chat This Over With Friends
+## 5. Chat This Over With Friends
 
 The story worth telling is that every large language model of the last few
 years quietly deleted a step from the operation that normalizes it, and
 nothing broke. LayerNorm subtracts the mean of a token's features before
 dividing by their spread; RMSNorm simply does not subtract. What lifts this
-above a micro-optimization is that you can say exactly how much was given up.
-The cosine between the two outputs is $\sigma/\text{RMS}$ — not approximately,
-exactly — which in a model as wide as GPT-2 puts them about seven parts in ten
-thousand apart, and the gap closes as $1/2d$ as models get wider. The mean
-that LayerNorm had been carefully subtracting for seven years was, in a
-network that wide, very nearly not there at all.
+above a micro-optimization is that you can say exactly how much was given up:
+the cosine between the two outputs is $\sigma/\text{RMS}$, exactly, which at
+GPT-2's width puts them about seven parts in ten thousand apart and closing as
+$1/2d$. The mean LayerNorm spent seven years subtracting was, in a network
+that wide, very nearly not there at all.
 
 Where the usual telling goes wrong is the moral. "RMSNorm is faster" is true
 and is not the finding; the finding is that it *ties*, and the tie is the
 whole argument, because when two methods reach the same quality the one doing
-less work should win. The famous 7–64% speed-up comes from 2019 recurrent
-experiments, and in a modern transformer normalization is a thin slice of the
-compute. It is worth being honest that something real was sold: LayerNorm is
-invariant to adding a constant to every feature and RMSNorm is not, and the
-field's position amounts to a bet that this invariance was never the property
-doing the work. Seven years of models suggest the bet was right. The part I
-find genuinely worth raising with someone is that this is a *negative* result
-— somebody removed a step, showed that nothing broke, and it turned out to
-matter more than most additions do.
+less work should win. Something real was sold, though: LayerNorm is invariant to adding a constant
+to every feature and RMSNorm is not, and the field's position is a bet that
+this invariance was never doing the work. Seven years of models suggest it was
+right. The part worth raising is that this is a *negative* result — somebody
+removed a step, showed nothing broke, and it mattered more than most additions
+do.
 
-## 7. References
+## 6. References
 
 1. Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization.
-   [arXiv:1607.06450](https://arxiv.org/abs/1607.06450).
+   [arXiv:1607.06450](https://arxiv.org/abs/1607.06450)
 2. Zhang, B., & Sennrich, R. (2019). Root Mean Square Layer Normalization.
-   *Advances in Neural Information Processing Systems 32*.
-   [arXiv:1910.07467](https://arxiv.org/abs/1910.07467). Code:
-   [github.com/bzhangGo/rmsnorm](https://github.com/bzhangGo/rmsnorm).
-3. Ioffe, S., & Szegedy, C. (2015). Batch Normalization: Accelerating Deep
-   Network Training by Reducing Internal Covariate Shift.
-   [arXiv:1502.03167](https://arxiv.org/abs/1502.03167).
-4. Vaswani, A., et al. (2017). Attention Is All You Need.
-   [arXiv:1706.03762](https://arxiv.org/abs/1706.03762).
-5. Santurkar, S., Tsipras, D., Ilyas, A., & Madry, A. (2018). How Does Batch
-   Normalization Help Optimization?
-   [arXiv:1805.11604](https://arxiv.org/abs/1805.11604).
-6. Raffel, C., et al. (2020). Exploring the Limits of Transfer Learning with a
-   Unified Text-to-Text Transformer (T5).
-   [arXiv:1910.10683](https://arxiv.org/abs/1910.10683).
-7. Xiong, R., et al. (2020). On Layer Normalization in the Transformer
-   Architecture. [arXiv:2002.04745](https://arxiv.org/abs/2002.04745).
-8. Touvron, H., et al. (2023). LLaMA: Open and Efficient Foundation Language
-   Models. [arXiv:2302.13971](https://arxiv.org/abs/2302.13971).
+   *NeurIPS*. [arXiv:1910.07467](https://arxiv.org/abs/1910.07467)
+3. Vaswani, A., et al. (2017). Attention Is All You Need. *NeurIPS*.
+   [arXiv:1706.03762](https://arxiv.org/abs/1706.03762)
+4. Raffel, C., et al. (2020). Exploring the Limits of Transfer Learning with a
+   Unified Text-to-Text Transformer. *JMLR*.
+   [arXiv:1910.10683](https://arxiv.org/abs/1910.10683)
+5. Touvron, H., et al. (2023). LLaMA: Open and Efficient Foundation Language
+   Models. [arXiv:2302.13971](https://arxiv.org/abs/2302.13971)
 
-[^shift]: Both results in panel (b) are exact rather than empirical. Because
-    normalizing only rescales, the cosine between RMSNorm's shifted and
-    unshifted outputs equals the cosine between $x + c\mathbf{1}$ and $x$,
-    which for a zero-mean $x$ with $\|x\|^2 \approx d$ works out to
-    $1/\sqrt{1+c^2}$. The figure's code is in `figures/norm_comparison.py`.
+[^shift]: For zero-mean unit-RMS $x$, shifting by $c$ gives
+    $\cos = 1/\sqrt{1+c^2}$; with a scale $\alpha$, the shift that matters is
+    $c/\alpha$.
