@@ -51,7 +51,7 @@ verdicts to the user — propose, do not decide alone.
 | Section | Include only if | Typical reason to drop |
 |---|---|---|
 | Opener: where it sits | The thing has a definite place in the architecture | Topics about training procedure, data, tokenization, evaluation, scaling laws, or theory have no block to point at |
-| History | Almost always — motivation is the point | Only if the idea has no history worth telling |
+| History (roadmap) | Almost always — motivation is the point | Only if the idea has no history worth telling |
 | The math | There is a formula worth deriving | Empirical or engineering topics where the maths is trivial or absent |
 | Paper figures | A paper has a figure that *carries its argument* | The papers are table-only or their figures are all minor experiments. Say so and offer to drop it or substitute an original diagram |
 | Compare and contrast | The topic is genuinely X versus Y | A single-subject topic has nothing to contrast. Offer to drop it, or to replace it with something that fits — "When to use it", "How it fails", "What it costs" |
@@ -110,7 +110,7 @@ annotated separately.
 **Structure.** The default shape, not a form to fill in:
 
 1. An unnumbered opener showing *where* the thing sits in the architecture.
-2. History — why it exists, what current models do.
+2. History — **as a roadmap, not prose**. See *The history roadmap* below.
 3. The math — formal, with derivations, explained in plain language.
 4. The essential figure(s) from the original paper(s), annotated.
 5. Compare and contrast — takeaways, and why it matters for LLMs at large.
@@ -187,14 +187,57 @@ to five beats, each one sayable out loud.
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
 
-**Length.** 5–15 minutes. Check with:
+**Length.** 5–15 minutes, measured at a deliberately **conservative** 180
+words per minute (`WORDS_PER_MINUTE` in `build.py`). General blog convention
+is 200–265, but these posts carry derivations, figures to study and code to
+read, and nobody reads a derivation at cruising speed. Do not raise the number
+to make a post fit. Check with:
 
 ```sh
 python3 -c "import build; p=build.Post('posts/<file>.md', build.load_config()); print(p.read_minutes)"
 ```
 
-Over 15, trim — cut redundancy first, especially anything stated twice in
-prose and again in a caption.
+Over 15, trim, **in this order**:
+
+1. Redundancy — anything stated twice in prose and again in a caption.
+2. **History.** It is a roadmap; keep it minimal. Prose around it should be
+   only what the boxes cannot hold.
+3. **The math.** Compress derivations to the load-bearing steps and shorten
+   the surrounding commentary.
+
+Rewording does not cut. A sentence rewritten more tightly saves five words;
+reaching 15 minutes from 19 needs paragraphs deleted, so delete them and say
+in the report exactly what went.
+
+A survey post whose subject *is* the history — the mindmap post is the
+standing example — is exempt from the ceiling. Nothing else is.
+
+One trap: any figure measured on the blog's own posts (`figures/mindmap.py`
+does this) moves when you trim other posts. Re-run it and update the numbers
+quoted in the prose and captions.
+
+**The history roadmap.** Section 1 is not paragraphs of dates. It is a
+horizontal spine of four milestones, each in a rounded box holding two or
+three sentences, with **the reason the next milestone had to happen written
+above the arrow between them**. Those arrow labels are the load-bearing part:
+a history that only lists dates has explained nothing.
+
+Generate it, do not hand-write the SVG — the body text has to be wrapped and
+centred inside each box, and doing that by hand is how tspan positions end up
+wrong:
+
+```sh
+python3 figures/roadmap.py <name>     # add the spec to ROADMAPS first
+```
+
+Paste the output inside a `<div class='roadmap'>`. Keep to four stops; five
+leaves boxes too narrow to hold a sentence. After the roadmap, write only the
+prose the boxes cannot carry — a quoted hypothesis, a correction, a pointer
+forward. Two or three short paragraphs, not a section.
+
+Verify in a browser before committing: load the page and check that no
+`text` element overflows its `rect.box` and no arrow label is wider than the
+gap between two dots.
 
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 

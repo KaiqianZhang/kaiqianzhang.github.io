@@ -357,7 +357,10 @@ def highlight_code(code, lang):
 TOC_COLOURS = ['#5F7396', '#7E6B91', '#6E8C66', '#A87D76',
                '#6B8FA8', '#8C6A9E', '#5F8A8B', '#9C7B62']
 
-WORDS_PER_MINUTE = 220
+# Deliberately conservative. General-audience blog conventions use 200-265,
+# but these posts are dense with derivations, figures to study and code to
+# read, and nobody reads a derivation at cruising speed.
+WORDS_PER_MINUTE = 180
 
 
 def reading_time(body):

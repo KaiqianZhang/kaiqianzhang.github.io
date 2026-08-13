@@ -459,6 +459,28 @@ table td {
 .article .roadmap .head {
   fill: #C7C2BA;
 }
+/* Boxed milestones. Used by the history roadmap that opens each post's
+   section 1; the bare-label roadmap on the mindmap post uses none of these. */
+.article .roadmap .box {
+  fill: #FAF8F5;
+  stroke: #E2DDD6;
+  stroke-width: 1;
+}
+.article .roadmap .yr {
+  font: 600 10px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C7BA6;
+  text-anchor: middle;
+  letter-spacing: 0.08em;
+}
+.article .roadmap .body {
+  font: 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #5E5E5E;
+  text-anchor: middle;
+}
+@media (prefers-color-scheme: dark) {
+  .article .roadmap .box { fill: rgba(255, 255, 255, 0.035); stroke: rgba(255, 255, 255, 0.12); }
+  .article .roadmap .body { fill: #A9A29A; }
+}
 
 /* Sliding-window animation for CBOW and Skip-gram. Same technique as the
    rotary dials: a CSS keyframe on a group, no JavaScript. */

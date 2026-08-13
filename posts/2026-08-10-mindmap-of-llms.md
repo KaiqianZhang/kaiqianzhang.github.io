@@ -85,11 +85,11 @@ possible $n$-grams, and $V^n$ grows faster than any corpus.
          alt='Log-scale plot of possible n-grams against n-grams ever observed, for n from 1 to 5. The possible count rises steeply; the observed count is nearly flat.'>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Measured on this blog's own three posts — 8,293 words, 1,659 of them
+        Measured on this blog's own three posts — 7,003 words, 1,514 of them
         distinct. At $n = 1$ every word in the space is observed by
-        definition. By $n = 5$ there are $1.3 \times 10^{16}$ possible
-        five-word sequences and exactly 8,128 ever occur, which is
-        $6\times10^{-13}$ of the space. Worse, <b>98.2%</b> of those 8,128
+        definition. By $n = 5$ there are $8 \times 10^{15}$ possible
+        five-word sequences and exactly 6,860 ever occur, which is
+        $9\times10^{-13}$ of the space. Worse, <b>98.2%</b> of those 6,860
         occur exactly once, so almost every count the model would rely on is
         the number 1. A bigger corpus moves these numbers and does not change
         their shape.
@@ -579,7 +579,7 @@ depends on all of them at once. Each answer exists because the previous one
 could not do something specific.
 
 **The detail that lands.** Counting dies of arithmetic. With a vocabulary of
-just 1,659 words there are $10^{16}$ possible five-word sequences, and a
+just 1,514 words there are $10^{15}$ possible five-word sequences, and a
 corpus sees around $10^{-13}$ of them — almost all exactly once. No amount of
 data fixes that, because the space grows faster than any corpus can.
 

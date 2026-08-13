@@ -77,19 +77,60 @@
     </ul>
 </nav>
 <h2 id='a-rotation-that-is-thrown-away'>A Rotation That Is Thrown Away</h2>
-<p>Two things are worth fixing in place before the mechanism.</p>
-<p>In its original formulation RoPE is applied <strong>inside each attention head</strong>, to the queries and keys only, after projection and just before the dot product. It never touches the values and never touches the residual stream. Whatever a token's vector means, the rotation happens to a copy, is used once, and is gone. That already distinguishes it from an additive tag, which travels with the representation through the whole network.</p>
-<p>"Original formulation" is doing real work in that sentence. GPT-J rotates only a quarter of each head's dimensions. DeepSeek's multi-head latent attention carries RoPE on a small dedicated subset and leaves the rest position-free. Llama 4 applies it in three layers out of four. The clean description is a starting point, not a description of the field.</p>
-<p>RoPE also has <strong>no learned parameters</strong>: the angles come from a formula. That too has eroded, and section 5 is largely the story of how.</p>
+<p>In its original formulation RoPE is applied <strong>inside each attention head</strong>, to the queries and keys only, just before the dot product. It never touches the values and never touches the residual stream: the rotation happens to a copy, is used once, and is gone. That already distinguishes it from an additive tag, which travels with the representation through the whole network.</p>
+<p>"Original formulation" is doing real work there. GPT-J rotates a quarter of each head's dimensions; DeepSeek's latent attention carries RoPE on a small dedicated subset; Llama 4 applies it in three layers out of four. The clean description is a starting point, not a description of the field.</p>
+<p>RoPE also has <strong>no learned parameters</strong> — the angles come from a formula. That too has eroded; section 5 is the story of how.</p>
 <h2 id='1-four-answers-and-one-of-them-is-silence'>1. Four Answers, and One of Them Is Silence</h2>
-<p><strong>2017: a tag you add.</strong> The Transformer gave each position a fixed sinusoidal vector and added it to the embedding; BERT and GPT replaced the formula with a learned lookup table. Both are <strong>absolute</strong> — the model is told "you are at index 5" and must work out distances itself.</p>
-<p>The two fail differently past the training length, and the difference matters. A learned table simply has no row for position 5000; there is nothing to look up. Sinusoids are defined at every integer, so the model runs — it just degrades, because it is being handed combinations of phases it never saw. Extrapolation was Vaswani et al.'s stated reason for preferring them, and it did not really work.</p>
-<p><strong>2018: distances instead of indices.</strong> Shaw and colleagues changed the target: rather than telling each token where it is, tell each <em>pair</em> how far apart they are. Their scheme learns a vector for every relative offset and adds it to the key before the dot product, with a second added to the value. T5 later cut this down to a single learned scalar per bucketed offset, added straight to the attention logit.</p>
-<p>This matches what language cares about — "the previous word" is a real relation, "word number 5000" mostly isn't. The cost is mechanical, and it is the cost that eventually decided things: a per-pair term has to be fetched and added inside the attention computation, which does not fit the clean matrix multiply that makes attention fast, and does not compose comfortably with a key-value cache.</p>
-<p><strong>2021: rotate instead of add.</strong> Jianlin Su and colleagues asked a sharper question. Instead of designing a relative scheme, ask whether there is a function $f$ that writes <em>absolute</em> position into each vector such that the dot product between any two automatically depends only on their <em>relative</em> position. If such an $f$ exists, you get relative behaviour with no relative machinery — nothing extra inside the attention matmul at all.</p>
-<p>It exists. Section 2 derives it.</p>
-<p><strong>2022: say nothing at all.</strong> The fourth answer is to skip position encoding entirely. In a decoder-only model the causal mask has already broken permutation equivariance — token 5 sees five things, token 900 sees nine hundred — and that turns out to be enough for a model to reconstruct position on its own. Haviv and colleagues showed such models learn positional information regardless; Kazemnejad and colleagues found that on some tasks no encoding <em>extrapolates better</em> than RoPE.</p>
-<p>That fourth answer has come back. Jamba ships without positional encoding. Llama 4's iRoPE interleaves plain layers with RoPE layers, roughly one in four, precisely because the un-encoded layers handle long range better.</p>
+<p>Four ways to tell a model where a token sits, in the order tried. The labels above the arrows are what each answer was still paying.</p>
+<div class='roadmap'>
+    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of position encoding: absolute tags in 2017, relative offsets in 2018, rotation in 2021, and no encoding at all from 2022.'>
+      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
+      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
+      <text class='why' x='189.5' y='27'>breaks past the training length</text>
+      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
+      <text class='why' x='380.0' y='27'>does not fit the matmul</text>
+      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
+      <text class='why' x='570.5' y='27'>is any of it needed?</text>
+      <circle class='dot' cx='94.2' cy='40' r='4.5'/>
+      <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='94.2' y='65.0'>2017</text>
+      <text class='stage' x='94.2' y='79.0'>a tag you add</text>
+      <text class='body' x='94.2' y='97.0'>A sinusoidal or learned</text>
+      <text class='body' x='94.2' y='111.5'>absolute vector, added to</text>
+      <text class='body' x='94.2' y='126.0'>the embedding. The model is</text>
+      <text class='body' x='94.2' y='140.5'>told its index and must</text>
+      <text class='body' x='94.2' y='155.0'>infer distance itself.</text>
+      <circle class='dot' cx='284.8' cy='40' r='4.5'/>
+      <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='284.8' y='65.0'>2018</text>
+      <text class='stage' x='284.8' y='79.0'>distances, not indices</text>
+      <text class='body' x='284.8' y='97.0'>Shaw et al. learn a vector</text>
+      <text class='body' x='284.8' y='111.5'>per relative offset, added</text>
+      <text class='body' x='284.8' y='126.0'>inside attention. T5 cuts</text>
+      <text class='body' x='284.8' y='140.5'>it to one scalar per</text>
+      <text class='body' x='284.8' y='155.0'>bucketed offset.</text>
+      <circle class='dot' cx='475.2' cy='40' r='4.5'/>
+      <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='475.2' y='65.0'>2021</text>
+      <text class='stage' x='475.2' y='79.0'>rotate instead of add</text>
+      <text class='body' x='475.2' y='97.0'>Su et al. write absolute</text>
+      <text class='body' x='475.2' y='111.5'>position in so that the dot</text>
+      <text class='body' x='475.2' y='126.0'>product depends only on the</text>
+      <text class='body' x='475.2' y='140.5'>difference. Nothing extra</text>
+      <text class='body' x='475.2' y='155.0'>in the matmul.</text>
+      <circle class='dot' cx='665.8' cy='40' r='4.5'/>
+      <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='665.8' y='65.0'>2022</text>
+      <text class='stage' x='665.8' y='79.0'>say nothing at all</text>
+      <text class='body' x='665.8' y='97.0'>The causal mask has already</text>
+      <text class='body' x='665.8' y='111.5'>broken permutation</text>
+      <text class='body' x='665.8' y='126.0'>equivariance. Jamba ships</text>
+      <text class='body' x='665.8' y='140.5'>with no encoding; Llama 4</text>
+      <text class='body' x='665.8' y='155.0'>interleaves.</text>
+    </svg>
+</div>
+<p>One distinction inside the first box matters later. Past the training length a learned table has no row for position 5000, while sinusoids are defined at every integer, so the model runs and merely degrades. Extrapolation was Vaswani et al.'s stated reason for preferring sinusoids, and it did not really work.</p>
+<p>The 2021 question is the sharp one: is there a function $f$ writing <em>absolute</em> position into each vector such that the dot product depends only on the <em>relative</em> one? If so, you get relative behaviour with no relative machinery. It exists, and section 2 derives it.</p>
 <p><strong>Adoption, stated carefully.</strong> Among dense open-weight decoder-only models released since 2023 — LLaMA, Mistral, Qwen, Gemma, DeepSeek, Phi, OLMo — RoPE is close to universal. It is not universal in general: BLOOM and MPT use ALiBi, Jamba uses nothing, the Mamba and RWKV families are not attention models at all, and nobody outside the labs knows what the closed frontier models do.</p>
 <h2 id='2-the-angle-that-cancels'>2. The Angle That Cancels</h2>
 <p>Take two dimensions. Let $R(\alpha)$ be rotation by $\alpha$, and write $q = W_q x_m$ and $k = W_k x_n$ for the ordinary projected query and key. RoPE defines</p>
@@ -103,26 +144,26 @@ q_m^\top k_n
 = q^\top R(-m\theta)R(n\theta)\,k
 = q^\top R\big((n-m)\theta\big)\,k .
 $$
-<p><strong>The absolute positions have cancelled.</strong> What is left depends on $m$ and $n$ only through their difference — not approximately, not for large $d$, but exactly, by the group structure of rotation.</p>
+<p><strong>The absolute positions have cancelled.</strong> What is left depends on $m$ and $n$ only through their difference — exactly, by the group structure of rotation.</p>
 <h3 id='why-a-rotation-and-not-something-else'>Why a rotation, and not something else</h3>
-<p>The cleanest way to see where rotation <em>comes from</em> is to read the two-dimensional vector as a complex number. We want some $f(q, m)$ whose inner product $\langle f(q,m), f(k,n)\rangle$ depends on $m$ and $n$ only through $n - m$. Give $f$ a magnitude and a phase of its own, $f(q,m) = R_q(m)\,q\,e^{i\Theta_q(m)}$. The inner product then contributes $R_q(m)R_k(n)$ to the magnitude and $\Theta_k(n) - \Theta_q(m)$ to the phase. For both to depend only on $n-m$, the phase forces $\Theta(m) = m\theta$ for a constant $\theta$, and the magnitude forces the product $R_q(m)R_k(n)$ to be constant. Set both radii to 1 and $f$ is a rotation.</p>
-<p>Which is a derivation, not a uniqueness theorem, and the difference is worth being precise about. The magnitude condition only pins down the <em>product</em> of the two radii. <strong>xPos</strong> takes exactly that freedom, using $\zeta^{m}$ for queries and $\zeta^{-m}$ for keys on top of the rotation: the product is still constant, the relative-only property still holds, and the result is not a rotation. Rotation is the unique answer among maps that preserve norm and treat queries and keys alike — a real constraint, but an assumption rather than a consequence.</p>
-<p>Norm preservation is also what makes RoPE safe. A rotation cannot change $\|q\|$, so position is injected without touching the scale of the attention logits. An additive tag changes both the direction and the length of the vector it is added to.</p>
+<p>Read the two-dimensional vector as a complex number and give $f$ a magnitude and a phase of its own, $f(q,m) = R_q(m)\,q\,e^{i\Theta_q(m)}$. Its inner product contributes $R_q(m)R_k(n)$ to the magnitude and $\Theta_k(n) - \Theta_q(m)$ to the phase. For both to depend only on $n-m$, the phase forces $\Theta(m) = m\theta$ for a constant $\theta$ and the magnitude forces $R_q(m)R_k(n)$ to be constant. Set both radii to 1 and $f$ is a rotation.</p>
+<p>Which is a derivation, not a uniqueness theorem. The magnitude condition pins down only the <em>product</em> of the two radii, and <strong>xPos</strong> takes exactly that freedom, using $\zeta^{m}$ for queries and $\zeta^{-m}$ for keys on top of the rotation — product still constant, relative-only property intact, result not a rotation. Rotation is unique among maps that preserve norm and treat queries and keys alike: a real constraint, but an assumption rather than a consequence.</p>
+<p>Norm preservation is also what makes RoPE safe: a rotation cannot change $\|q\|$, so position is injected without touching the scale of the logits. An additive tag changes both direction and length.</p>
 <h3 id='beyond-two-dimensions'>Beyond two dimensions</h3>
-<p>A head is 64 or 128 dimensional, so RoPE chops the vector into consecutive coordinate pairs and rotates each at its own rate:</p>
+<p>A head is 64 or 128 dimensional, so RoPE chops the vector into consecutive pairs and rotates each at its own rate:</p>
 $$
 \theta_i = \text{base}^{-2i/d}, \qquad i = 0, 1, \ldots, d/2 - 1,
 $$
 <p>with $\text{base} = 10{,}000$ originally. Pair $0$ turns one radian per token; each subsequent pair turns geometrically slower, until the last barely moves.</p>
-<p>The cancellation holds pair by pair, so it holds for the whole vector. Each pair contributes a sinusoid in $(n-m)\theta_i$ with its own amplitude <em>and its own phase</em>, both set by the contents of $q$ and $k$:<sup id='fnref:sincos' class='footnote'><a href='#fn:sincos'>1</a></sup></p>
+<p>The cancellation holds pair by pair, so it holds for the whole vector. Each pair contributes a sinusoid in $(n-m)\theta_i$ with its own amplitude <em>and phase</em>, both set by the contents of $q$ and $k$:<sup id='fnref:sincos' class='footnote'><a href='#fn:sincos'>1</a></sup></p>
 $$
 q_m^\top k_n = \sum_{i} \Big[ a_i \cos\big((n-m)\theta_i\big)
                             + b_i \sin\big((n-m)\theta_i\big) \Big].
 $$
-<p>That the model controls the phases, and not merely the amplitudes, matters in section 6. And the chopping into consecutive pairs is a convention: conjugating the whole scheme by any fixed orthogonal matrix gives an equally valid one.</p>
-<p>RoPE is not one clock. It is a bank of them.</p>
+<p>That the model controls the phases, not merely the amplitudes, matters in section 6. The chopping into consecutive pairs is a convention: conjugating by any fixed orthogonal matrix gives an equally valid scheme.</p>
+<p>RoPE is not one clock but a bank of them.</p>
 <h2 id='3-watching-the-gap-refuse-to-move'>3. Watching the Gap Refuse to Move</h2>
-<p>The algebra above is four lines, and four lines is exactly the length at which something can be true without being <em>felt</em>. So here it is moving.</p>
+<p>Four lines of algebra is exactly the length at which something can be true without being <em>felt</em>. So here it is moving.</p>
 <div class='figure-pair rope-anim'>
     <div class='panels'>
         <div class='panel'>
@@ -145,8 +186,8 @@ $$
             <div class='annot'>
                 <span class='who'>(a) Position becomes angle.</span>
                 Read two coordinates of a token's vector as a point on a dial.
-                RoPE turns that point by an angle proportional to the token's
-                position: one step forward, one turn of&nbsp;$\theta$.
+                RoPE turns it by an angle proportional to position: one step
+                forward, one turn of&nbsp;$\theta$.
             </div>
         </div>
         <div class='panel'>
@@ -185,39 +226,35 @@ $$
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
         Absolute position moves; relative position does not. Watch the wedge in
-        (b) rather than the arrows: the arrows are doing all the visible work
-        and none of the important work. This is one frequency band of one head.
-        A real head runs $d/2$ of these dials at once, at speeds four orders of
-        magnitude apart.
+        (b) rather than the arrows — the arrows do all the visible work and
+        none of the important work. This is one frequency band of one head; a
+        real head runs $d/2$ dials at once, at speeds four orders of magnitude
+        apart.
     </div>
 </div>
-<p>Made concrete, the same statement looks like this. Fix a random query and key, rotate them to every pair of positions in a 128-token window, and plot the resulting logit:</p>
+<p>Made concrete: rotate a fixed random $(q, k)$ to every pair of positions in a 128-token window and plot the logit.</p>
 <div class='figure narrow'>
     <img src='/images/rope-invariance.png'
          alt='A heatmap of the attention logit against query position and key position, showing perfectly straight diagonal bands.'>
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
         The logit for one fixed $(q, k)$ pair at every combination of
-        positions, constant along every diagonal — because a diagonal is a set
-        of pairs sharing the same $n - m$. This is a demonstration rather than
-        a test: section 2 proves it as an identity, so the picture cannot come
-        out otherwise unless the code is wrong. What it adds is a sense of
-        scale, and one caveat. In float64 the variation along a diagonal is
-        under $10^{-14}$, against logits spanning about three units. Run the
-        same sweep in bfloat16, which is what inference actually uses, and it
-        is $1.2\times10^{-1}$ — thirteen orders of magnitude larger. The
-        cancellation is exact in the algebra, not in the arithmetic.
+        positions, constant along every diagonal — a diagonal being a set of
+        pairs sharing the same $n - m$. A demonstration rather than a test:
+        section 2 proves it as an identity. What it adds is one caveat. In
+        float64 the variation along a diagonal is under $10^{-14}$, against
+        logits spanning about three units; in bfloat16, which inference
+        actually uses, it is $1.2\times10^{-1}$. The cancellation is exact in
+        the algebra, not in the arithmetic.
     </div>
 </div>
 <h2 id='4-the-version-in-the-paper-and-the-version-in-the-weights'>4. The Version in the Paper and the Version in the Weights</h2>
 <p>Between the derivation and a running model sits a layer of convention, and two of these bite.</p>
-<p><strong>The pairing is not the paper's.</strong> Section 2 pairs coordinate $0$ with $1$, $2$ with $3$, and so on, which is how the paper writes it. The implementation almost everyone runs, inherited from GPT-NeoX and Hugging Face, instead pairs coordinate $i$ with $i + d/2$ — the <code>rotate_half</code> convention. The two are equivalent up to a fixed permutation of dimensions, so the mathematics is untouched, but weights moved between them without re-permuting are silently wrong.</p>
-<p><strong>It is cheap, and that is probably why it won.</strong> RoPE is $O(d)$ elementwise work on $q$ and $k$: a table of cosines and sines, one multiply-add pass. No per-pair term, nothing inside the attention matrix, nothing for a fused kernel to route around. It composes with FlashAttention and with a key-value cache untouched — you rotate a key once, when it is written to the cache, and never again. Relative-bias schemes can claim none of that, and the elegance of section 2 is likely a smaller part of RoPE's victory than this paragraph is.</p>
-<p><strong>The angles are computed in fp32</strong>, above the precision of the activations, because bfloat16 cannot resolve distinct large positions — the limitation Figure 2 measures.</p>
-<p>One consequence of caching rotated keys: any method that changes the angles after training, which is all of section 5, must either recompute the cache or apply its correction consistently to what is already in it.</p>
+<p><strong>The pairing is not the paper's.</strong> Section 2 pairs coordinate $0$ with $1$, $2$ with $3$, as the paper writes it. The implementation almost everyone runs, from GPT-NeoX and Hugging Face, pairs $i$ with $i + d/2$ — the <code>rotate_half</code> convention. Equivalent up to a fixed permutation, so the mathematics is untouched, but weights moved between them without re-permuting are silently wrong.</p>
+<p><strong>It is cheap, and that is probably why it won.</strong> RoPE is $O(d)$ elementwise work on $q$ and $k$: a table of cosines and sines, one multiply-add pass. No per-pair term, nothing inside the attention matrix for a fused kernel to route around. It composes with FlashAttention and with a key-value cache untouched — you rotate a key once, when it is written, and never again. Relative-bias schemes can claim none of that, and the elegance of section 2 is likely a smaller part of RoPE's victory than this paragraph is.</p>
+<p><strong>The angles are computed in fp32</strong>, above the precision of the activations, because bfloat16 cannot resolve distinct large positions. And because keys are cached already rotated, any method that changes the angles after training — all of section 5 — must recompute the cache or correct what is in it.</p>
 <h2 id='5-stretching-a-context-it-was-never-given'>5. Stretching a Context It Was Never Given</h2>
-<p>Now the bank of clocks starts to pay.</p>
-<p>A model trained with a 4,096-token context has seen every angle each band produces inside that window and none beyond it. Ask about position 100,000 and the fast bands are unbothered — they wrap constantly, so a large position is just another point on a circle they have been round thousands of times. The slow bands are the problem. They have never completed a turn, so a position past the training length puts them somewhere genuinely new.</p>
+<p>A model trained with a 4,096-token context has seen every angle each band produces inside that window and none beyond it. Ask about position 100,000 and the fast bands are unbothered — they wrap constantly, so a large position is just another point on a circle. The slow bands are the problem: never having completed a turn, they are put somewhere genuinely new.</p>
 <div class='figure'>
     <img src='/images/rope-wavelengths.png'
          alt='Wavelength per frequency band on a log scale, rising from about six tokens to millions, with the training context marked and three regimes shaded.'>
@@ -225,24 +262,21 @@ $$
         <span class='caption-label'>Figure 3.</span>
         How many tokens each band needs to return to where it started. The
         fastest wraps every $2\pi \approx 6.3$ tokens; with the original base
-        of $10^4$ the slowest needs 54,410. Against a 4,096-token training
-        context, 18 of the 64 bands never complete a turn. A larger base of
+        of $10^4$ the slowest needs 54,410, so against a 4,096-token context
+        18 of the 64 bands never complete a turn. A larger base of
         $5\times10^5$ (plum) stretches the slowest to 2.6 million. Grey shading
-        marks the three regimes the NTK-by-parts rule treats differently and
-        carries no relation to either curve. Generated for this post, not
-        reproduced from a paper.
+        marks the three NTK-by-parts regimes and relates to neither curve.
+        Generated for this post.
     </div>
 </div>
 <p>Every extension method is an answer to that picture.</p>
-<p><strong>Position interpolation</strong> (Chen et al., 2023) is the blunt one: to double the context, halve every position index, so everything lands back inside the range the model has seen. It works — with about a thousand steps of fine-tuning, which is not free and is often dropped when the method is described.</p>
-<p><strong>NTK-aware scaling</strong> changes the base rather than the positions, stretching slow bands more than fast ones. Its origin is a good story: it appeared in June 2023 as a post by a pseudonymous user, bloc97, on the LocalLLaMA forum, and was in production models before it was in any paper.</p>
-<p><strong>NTK-by-parts</strong>, from the same author, is the three-regime split Figure 3 shades. For each band compute $r = L/\lambda$, how many times it wraps within the context. Bands with $r > \beta$ are left alone, bands with $r < \alpha$ are interpolated exactly as PI does, and the rest get a smooth ramp; the YaRN paper reports $\alpha = 1$, $\beta = 32$ for the Llama family.</p>
-<p><strong>YaRN</strong> (Peng et al., 2023) is that method plus a temperature on the attention logits, correcting an entropy drift that appears when you stretch — and it is the combination that reaches a given context with, in their words, "10x less tokens and 2.5x less training steps than previous methods."</p>
-<p><strong>LongRoPE</strong> (Ding et al., 2024) abandons the idea that the rescaling should follow a formula at all, searching per-band factors directly and extending to 2M tokens in stages.</p>
-<p><strong>Choosing the base up front</strong> is a different act from all of these, and worth separating. Extension methods take a trained model and change its angles afterwards. CodeLlama and then Llama 3 simply pretrained with a larger base — 500,000 in Llama 3's case — which is a hyperparameter decision made before any weights existed. Llama 3.1's 128k context still needed a piecewise scheme on top; the base alone was not the whole story.</p>
-<p>The through-line is that all of these are statements about <em>which clocks to slow down</em>. That is a coherent question only because RoPE built position out of many independent frequencies in the first place.</p>
+<p><strong>Position interpolation</strong> (Chen et al., 2023) is the blunt one: to double the context, halve every position index, so everything lands back inside the range the model has seen. It works — with about a thousand steps of fine-tuning, usually dropped when the method is described.</p>
+<p><strong>NTK-aware scaling</strong> changes the base rather than the positions, stretching slow bands more than fast ones. It appeared in June 2023 as a post by a pseudonymous user, bloc97, on the LocalLLaMA forum, and was in production models before it was in any paper.</p>
+<p><strong>NTK-by-parts</strong>, from the same author, is the three-regime split Figure 3 shades: for each band, $r = L/\lambda$ counts its wraps within the context, and bands with $r > \beta$ are left alone, $r < \alpha$ are interpolated as PI does, the rest ramped. <strong>YaRN</strong> (Peng et al., 2023) is that plus a temperature on the logits, correcting an entropy drift that appears when you stretch — reaching a given context with "10x less tokens and 2.5x less training steps than previous methods." <strong>LongRoPE</strong> (Ding et al., 2024) drops formulas altogether, searching per-band factors directly out to 2M tokens.</p>
+<p><strong>Choosing the base up front</strong> is a different act. Extension methods change a trained model's angles afterwards; CodeLlama and Llama 3 simply pretrained with a larger base — 500,000 in Llama 3's case — before any weights existed. Llama 3.1's 128k context still needed a piecewise scheme on top.</p>
+<p>All of these are statements about <em>which clocks to slow down</em> — a coherent question only because RoPE built position out of many independent frequencies in the first place.</p>
 <h2 id='6-a-bound-that-falls-and-nothing-underneath-it'>6. A Bound That Falls, and Nothing Underneath It</h2>
-<p>The RoPE paper offers a second argument for its design, and it is the one that got repeated everywhere. Setting $\theta_i = \text{base}^{-2i/d}$ gives, in the authors' words, "a long-term decay property [...], which means the inner-product will decay when the relative position increase. This property coincides with the intuition that a pair of tokens with a long relative distance should have less connection."</p>
+<p>The paper's second argument is the one that got repeated everywhere. Setting $\theta_i = \text{base}^{-2i/d}$ gives, in the authors' words, "a long-term decay property [...], which means the inner-product will decay when the relative position increase."</p>
 <div class='figure narrow'>
     <img src='/images/rope-long-term-decay.png'
          alt='A decaying, heavily oscillating curve of a relative upper bound against relative distance, falling from about 20 to roughly 7 over 250 tokens.'>
@@ -250,13 +284,12 @@ $$
         <span class='caption-label'>Figure 4.</span>
         The paper's evidence. Read the axis label: this is an <i>upper bound</i>
         on the inner product, not the inner product. It falls from about 20 to
-        roughly 7 across 250 tokens, oscillating the whole way, with the
-        troughs running into the bottom of the plot frame.
+        roughly 7 across 250 tokens, oscillating the whole way.
         <br>
         Figure 2, Su et al. (2021), recoloured.
     </div>
 </div>
-<p>A bound that falls does not oblige anything underneath it to fall. That is checkable, and the check is short, because section 2 already gives the closed form. For $q$ and $k$ with independent standard-normal entries, $\mathbb{E}[a_i^2] = \mathbb{E}[b_i^2] = 2$ and the cross terms vanish, so</p>
+<p>A bound that falls does not oblige anything underneath it to fall, and the check is short because section 2 already gives the closed form. For $q$ and $k$ with independent standard-normal entries, $\mathbb{E}[a_i^2] = \mathbb{E}[b_i^2] = 2$ and the cross terms vanish, so</p>
 $$
 \operatorname{Var}\big(q_m^\top k_n\big)
 = \sum_{i} \Big[ 2\cos^2\big((n{-}m)\theta_i\big)
@@ -277,16 +310,16 @@ $$
         can arrange, if it wants it.
     </div>
 </div>
-<p>Which is close to what Barbero and colleagues reported in 2024, from the other direction. Their abstract: "A common belief is that RoPE is useful because it helps to decay token dependency as relative distance increases. In this work, we argue that this is unlikely to be the core reason." Studying Gemma 7B, they found the model builds robust positional attention patterns out of the <strong>highest</strong> frequencies, and leans most heavily on the <strong>lowest</strong> — bands so slow that within the context they barely rotate, which makes them nearly position-independent channels available to carry semantics instead.</p>
-<p>It is worth getting the mechanism the right way round, because this is easy to tell backwards. The decay in Figure 4 comes from <em>dephasing</em>. At distance 250 the fastest band has turned 250 radians and its contributions cancel, while band 63 has turned 0.0 radians and adds coherently: summing only the sixteen fastest bands gives a magnitude of 2.0 out of a possible 16, while all 64 together give 22.2. <strong>The fast clocks are what makes the bound fall.</strong> So the frequencies Gemma leans on for position are exactly the ones responsible for whatever decay exists, and the slow ones, which contribute no decay at all, are the ones it appears to have repurposed.</p>
-<p>None of this is a refutation, and the same paper argues <em>for</em> RoPE elsewhere: it shows that an attention head with no positional encoding cannot construct certain diagonal patterns a RoPE head can. Their ablation removing the lowest frequencies moves Gemma 2B's perplexity from 4.4627 to 4.4414 — an improvement, but a slim one to rest a large claim on.</p>
-<p>What survives is narrower and more interesting than a debunking. The decay property is real as a bound and absent as a typical behaviour; whether a model uses it is the model's choice; and the frequencies it actually leans on are not the ones the original argument would predict. RoPE stopped being a fixed formula some time ago. It is a spectrum, and both the engineering of section 5 and the interpretability of this one are arguments about which parts of it to use.</p>
+<p>Barbero and colleagues reached the same place in 2024 from the other direction: "A common belief is that RoPE is useful because it helps to decay token dependency as relative distance increases [...] we argue that this is unlikely to be the core reason." Studying Gemma 7B, they found the model builds positional patterns out of the <strong>highest</strong> frequencies and leans most heavily on the <strong>lowest</strong> — bands so slow they barely rotate, leaving them as nearly position-independent channels for semantics.</p>
+<p>The mechanism is easy to tell backwards. The decay in Figure 4 comes from <em>dephasing</em>: at distance 250 the fastest band has turned 250 radians and its contributions cancel, while band 63 has turned 0.0 radians and adds coherently. The sixteen fastest bands together give a magnitude of 2.0 out of a possible 16; all 64 give 22.2. <strong>The fast clocks are what makes the bound fall</strong> — so the frequencies Gemma leans on for position are exactly the ones responsible for whatever decay exists.</p>
+<p>None of this is a refutation; the same paper argues <em>for</em> RoPE elsewhere, showing that a head with no positional encoding cannot construct certain diagonal patterns a RoPE head can.</p>
+<p>What survives is narrower than a debunking. The decay property is real as a bound and absent as a typical behaviour, and the frequencies a model leans on are not the ones the original argument would predict. RoPE stopped being a fixed formula some time ago: it is a spectrum, and both the engineering of section 5 and the interpretability of this one are arguments about which parts of it to use.</p>
 <h2 id='7-chat-this-over-with-friends'>7. Chat This Over With Friends</h2>
-<p><strong>The one-line version.</strong> RoPE encodes a token's position by <em>rotating</em> its query and key rather than adding anything to them, and the rotation is chosen so that when you take the dot product the absolute positions cancel — exactly, by the algebra of rotations, leaving only the distance between the two tokens.</p>
-<p><strong>The detail that lands.</strong> A single attention head is running 64 clocks at once, at geometrically spaced speeds. The fastest completes a full turn every 6.3 tokens; the slowest needs 54,410. Against a 4,096-token training window, <strong>18 of those 64 clocks never complete a single turn</strong> — and that is precisely why models break past their trained context, and why every context-extension method is really a decision about which clocks to slow down. Llama 3 changed one number, the base, from 10,000 to 500,000, which stretches the slowest clock out to 2.6 million tokens.</p>
-<p><strong>What most people get wrong.</strong> Nearly every explanation says RoPE works because attention decays with distance. The paper does claim it. But that decay is a property of an <em>upper bound</em>, and for random queries and keys the realised size of the attention logit is exactly flat in distance — provably, since the variance works out to $d$ regardless of how far apart the tokens are. A 2024 study of Gemma argues decay is "unlikely to be the core reason" RoPE helps.</p>
-<p><strong>If someone pushes back.</strong> Fairly. That is one paper on one model family, and the same paper argues <em>for</em> RoPE elsewhere. What survives is narrower: decay is real as a bound, absent as a typical behaviour, and whether a model uses it is the model's choice.</p>
-<p><strong>The bit that surprises people.</strong> RoPE has no learned parameters at all. The angles come from a formula fixed before training starts, and the model's only freedom is deciding which of them to lean on.</p>
+<p><strong>The one-line version.</strong> RoPE encodes position by <em>rotating</em> a token's query and key rather than adding anything to them, chosen so that in the dot product the absolute positions cancel exactly, leaving only the distance between the two tokens.</p>
+<p><strong>The detail that lands.</strong> A single head runs 64 clocks at once, at geometrically spaced speeds. The fastest turns fully every 6.3 tokens; the slowest needs 54,410. Against a 4,096-token training window, <strong>18 of those 64 clocks never complete a single turn</strong> — which is why models break past their trained context, and why every extension method is really a decision about which clocks to slow down. Llama 3 changed one number, the base, from 10,000 to 500,000, stretching the slowest clock to 2.6 million tokens.</p>
+<p><strong>What most people get wrong.</strong> Nearly every explanation says RoPE works because attention decays with distance. The paper does claim it — but that decay is a property of an <em>upper bound</em>, and for random queries and keys the realised logit size is exactly flat in distance, since the variance works out to $d$ regardless of separation. A 2024 study of Gemma argues decay is "unlikely to be the core reason" RoPE helps.</p>
+<p><strong>If someone pushes back.</strong> Fairly — that is one paper on one model family, and it argues <em>for</em> RoPE elsewhere. What survives is narrower: decay is real as a bound, absent as a typical behaviour, and whether a model uses it is the model's choice.</p>
+<p><strong>The bit that surprises people.</strong> RoPE has no learned parameters at all. The angles are fixed by formula before training starts, and the model's only freedom is which of them to lean on.</p>
 <h2 id='8-references'>8. References</h2>
 <ol>
   <li>Su, J., Lu, Y., Pan, S., Murtadha, A., Wen, B., & Liu, Y. (2021). RoFormer: Enhanced Transformer with Rotary Position Embedding. <a href='https://arxiv.org/abs/2104.09864'>arXiv:2104.09864</a>.</li>

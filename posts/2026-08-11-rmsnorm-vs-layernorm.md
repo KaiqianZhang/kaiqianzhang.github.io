@@ -76,62 +76,67 @@ is of the slot itself.
 
 ## 1. Seven Years of Subtracting a Ghost
 
-To see why RMSNorm exists, it helps to know what problem normalization was
-invented to solve, and what each attempt cost.
+Normalization was invented to solve a problem, and each attempt to fix it
+charged something. Read the labels above the arrows: each names what the step
+to its left was still paying.
 
-**2015: normalization arrives.** Ioffe and Szegedy introduced **batch
-normalization**, which standardizes each feature using the mean and variance
-computed *across the examples in a mini-batch*. It worked remarkably well for
-convolutional networks, and it made much deeper networks trainable. But the
-statistics depend on the batch, and that dependence is a problem. Sequences
-have different lengths, so a recurrent network's batch statistics are
-different at every time step. Inference on a single example has no batch at
-all, so BatchNorm needs a separate set of running averages, which is one more
-thing to get wrong.
+<div class='roadmap'>
+    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
+      <line class='spine' x1='94.2' y1='40' x2='665.8' y2='40'/>
+      <polygon class='head' points='198.5,40 189.5,36 189.5,44'/>
+      <text class='why' x='189.5' y='27'>statistics depend on the batch</text>
+      <polygon class='head' points='389.0,40 380.0,36 380.0,44'/>
+      <text class='why' x='380.0' y='27'>is the mean doing any work?</text>
+      <polygon class='head' points='579.5,40 570.5,36 570.5,44'/>
+      <text class='why' x='570.5' y='27'>same quality, less time</text>
+      <circle class='dot' cx='94.2' cy='40' r='4.5'/>
+      <rect class='box' x='6.0' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='94.2' y='65.0'>2015</text>
+      <text class='stage' x='94.2' y='79.0'>BatchNorm</text>
+      <text class='body' x='94.2' y='97.0'>Standardize each feature</text>
+      <text class='body' x='94.2' y='111.5'>across the mini-batch. Deep</text>
+      <text class='body' x='94.2' y='126.0'>networks become trainable.</text>
+      <circle class='dot' cx='284.8' cy='40' r='4.5'/>
+      <rect class='box' x='196.5' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='284.8' y='65.0'>2016</text>
+      <text class='stage' x='284.8' y='79.0'>LayerNorm</text>
+      <text class='body' x='284.8' y='97.0'>Normalize each example</text>
+      <text class='body' x='284.8' y='111.5'>across its own features</text>
+      <text class='body' x='284.8' y='126.0'>instead. No batch</text>
+      <text class='body' x='284.8' y='140.5'>dependence, no train/test</text>
+      <text class='body' x='284.8' y='155.0'>gap, any sequence length.</text>
+      <circle class='dot' cx='475.2' cy='40' r='4.5'/>
+      <rect class='box' x='387.0' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='475.2' y='65.0'>2019</text>
+      <text class='stage' x='475.2' y='79.0'>RMSNorm</text>
+      <text class='body' x='475.2' y='97.0'>Zhang and Sennrich drop the</text>
+      <text class='body' x='475.2' y='111.5'>mean subtraction and keep</text>
+      <text class='body' x='475.2' y='126.0'>only the division. 7 to 64%</text>
+      <text class='body' x='475.2' y='140.5'>less running time.</text>
+      <circle class='dot' cx='665.8' cy='40' r='4.5'/>
+      <rect class='box' x='577.5' y='56' width='176.5' height='101.5' rx='7'/>
+      <text class='yr' x='665.8' y='65.0'>2023-</text>
+      <text class='stage' x='665.8' y='79.0'>the default</text>
+      <text class='body' x='665.8' y='97.0'>LLaMA ships it; Mistral,</text>
+      <text class='body' x='665.8' y='111.5'>Qwen, Gemma, DeepSeek</text>
+      <text class='body' x='665.8' y='126.0'>follow. LayerNorm becomes</text>
+      <text class='body' x='665.8' y='140.5'>the exception.</text>
+    </svg>
+</div>
 
-**2016: LayerNorm removes the batch.** Ba, Kiros, and Hinton made a small
-change with large consequences. Instead of normalizing each feature across the
-batch, normalize *each example across its own features*. The statistics for a
-token now depend on that token and nothing else. There is no batch dependence,
-no train/test discrepancy, and no difficulty with variable-length sequences.
-LayerNorm was designed with recurrent networks in mind, and the paper's
-experiments are on RNNs.
-
-Then the Transformer arrived in 2017 and used LayerNorm throughout. BERT used
-it. GPT-2 and GPT-3 used it. For most of a decade, if you were building a
-language model, LayerNorm was not a decision you thought about.
-
-**2019: someone questions the mean.** LayerNorm does two things: it subtracts
-the mean (**re-centering**) and it divides by the standard deviation
-(**re-scaling**). The standard explanation for why LayerNorm helps credited
-both. Biao Zhang and Rico Sennrich asked whether the first one was doing any
-work.
-
-Their motivation was cost. Normalization is not free, and its cost is paid
-once per normalization layer, on every token, on every step, forever. Part of
-what LayerNorm wins per step, it hands back per second — section 3 is the
-figure they opened with, and it is worth looking at before reading on.
-
-So they proposed removing the mean subtraction and keeping only the division,
-now by the root mean square. They stated the hypothesis plainly:
+Two things are worth pulling out of that line. The first is that the
+motivation was cost, not quality. Normalization is paid once per layer, on
+every token, on every step, forever — section 3 is the figure Zhang and
+Sennrich opened with, and it is worth looking at before reading on. The second
+is what they were willing to say out loud:
 
 > In this paper, we hypothesize that the re-scaling invariance is the reason
 > for success of LayerNorm, rather than re-centering invariance.
 
 Across machine translation, image classification, image-caption retrieval, and
-question answering, RMSNorm matched LayerNorm's quality while reducing running
-time by 7% to 64%.
-
-**2019–2020: quiet adoption.** T5 used a simplified LayerNorm with no mean
-subtraction and no bias — RMSNorm in all but name. The paper barely mentions
-it.
-
-**2023 onward: the new default.** LLaMA used RMSNorm, and the architecture it
-popularized — pre-norm placement, RMSNorm, rotary position embeddings, SwiGLU
-— became the template. Mistral, Qwen, Gemma, DeepSeek, Phi, and OLMo all use
-RMSNorm. LayerNorm has not disappeared; it is still in the older models people
-run every day, and in plenty of vision architectures. But for new large
-language models, RMSNorm is now the default and LayerNorm is the exception.
+question answering, RMSNorm matched LayerNorm's quality. LayerNorm has not
+disappeared — it is in the older models people run every day, and in plenty of
+vision architectures — but for new language models it is now the exception.
 
 The interesting part of this history is not that a faster method won. It is
 that a widely repeated explanation for *why* LayerNorm worked turned out to be
