@@ -342,6 +342,98 @@ table td {
     animation: none;
   }
 }
+/* Compact roadmap strip: the argument of a post in one line. */
+.article .roadmap {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 20px 0 16px 0;
+  margin: 34px 0;
+}
+.article .roadmap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.article .roadmap .stage {
+  font: 600 13px -apple-system, Helvetica, arial, sans-serif;
+  fill: #3F3F3F;
+  text-anchor: middle;
+}
+.article .roadmap .models {
+  font: 400 11px -apple-system, Helvetica, arial, sans-serif;
+  fill: #7A7A7A;
+  text-anchor: middle;
+}
+.article .roadmap .sec {
+  font: 500 10px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8C7BA6;
+  text-anchor: middle;
+  letter-spacing: 0.06em;
+}
+.article .roadmap .why {
+  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  fill: #8B7194;
+  text-anchor: middle;
+}
+.article .roadmap .spine {
+  stroke: #D8D4CE;
+  stroke-width: 1.6;
+}
+.article .roadmap .dot {
+  fill: #5F7396;
+}
+.article .roadmap .head {
+  fill: #C7C2BA;
+}
+
+/* Sliding-window animation for CBOW and Skip-gram. Same technique as the
+   rotary dials: a CSS keyframe on a group, no JavaScript. */
+.article .w2v-anim svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.article .w2v-anim .word {
+  font: 500 15px -apple-system, Helvetica, arial, sans-serif;
+  fill: #3F3F3F;
+  text-anchor: middle;
+}
+.article .w2v-anim .rowlabel {
+  font: 600 12px -apple-system, Helvetica, arial, sans-serif;
+  letter-spacing: 0.04em;
+}
+.article .w2v-anim .cbow .rowlabel { fill: #5F7396; }
+.article .w2v-anim .skip .rowlabel { fill: #8B7194; }
+.article .w2v-anim .frame {
+  fill: none;
+  stroke: #D8D4CE;
+  stroke-width: 1.6;
+}
+.article .w2v-anim .centre {
+  fill: #8C7BA6;
+  fill-opacity: 0.18;
+}
+.article .w2v-anim .arrow {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.article .w2v-anim .cbow .arrow { stroke: #5F7396; fill: #5F7396; }
+.article .w2v-anim .skip .arrow { stroke: #8B7194; fill: #8B7194; }
+.article .w2v-anim .slide {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: w2v-slide 9s ease-in-out infinite;
+}
+@keyframes w2v-slide {
+  0%, 18%   { transform: translateX(0px); }
+  25%, 43%  { transform: translateX(60px); }
+  50%, 68%  { transform: translateX(120px); }
+  75%, 93%  { transform: translateX(60px); }
+  100%      { transform: translateX(0px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .article .w2v-anim .slide { animation: none; }
+}
 .article .footnote {
   line-height: 0;
 }

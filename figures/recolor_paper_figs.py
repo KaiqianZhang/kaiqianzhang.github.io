@@ -176,4 +176,19 @@ im = recolour(im, [('#5e81b5', PRE)])     # the single plotted curve
 im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
     os.path.join(OUT, 'rope-long-term-decay.png'))
 
+# -- Mikolov et al. (2013), Figure 1 ----------------------------------------
+# Pure black line art, so there is no hue to swap. Tint it instead: every
+# pixel keeps its darkness and is re-emitted in the site's ink colour.
+print('mikolov2013-fig1-cbow-skipgram.png')
+im = flatten(os.path.join(SRC, 'mikolov2013-fig1-cbow-skipgram.png'))
+a = np.asarray(im).astype(float)
+alpha = (255.0 - a.mean(2, keepdims=True)) / 255.0      # 0 = white, 1 = black
+ink = rgb('#4A5468')
+tinted = 255.0 - alpha * (255.0 - ink)[None, None, :]
+im = Image.fromarray(np.clip(tinted, 0, 255).astype(np.uint8))
+im = trim(im, pad=16)
+im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
+    os.path.join(OUT, 'word2vec-architectures.png'))
+print('      tinted to #4A5468 (%d x %d)' % (im.width, im.height))
+
 print('done ->', OUT)
