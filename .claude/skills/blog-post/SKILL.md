@@ -630,7 +630,13 @@ when the palette is revised. A palette sweep recoloured them to rose once and
 the change was immediately noticed. If you are doing a global colour pass,
 exclude these two.
 
-**Like button.** Every post ends with one, emitted by `templates/post.html` —
+**Like button.** The middle heart breathes — a slow scale from 1 to 1.12 and
+back over three seconds — so the button reads as alive before anybody touches
+it. The scale sits on the `<path>` rather than the `<svg>`, because the `<svg>`
+already carries the hover lift and two transforms on one element fight; the tap
+animation suspends the breathing so the two scales cannot multiply into a
+jump; and `prefers-reduced-motion` stops it. Every post ends with one, emitted
+by `templates/post.html` —
 do **not** add the markup to a post's Markdown, and do not remove it. Three
 drawn hearts (white, lavender, white) over a lowercase "like"; tapping turns
 all three lavender and beats them in sequence. A reader's own tap lives in

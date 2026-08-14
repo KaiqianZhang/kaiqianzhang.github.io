@@ -921,6 +921,27 @@ table td {
   fill: #8C7BA6;
   stroke: #8C7BA6;
 }
+/* The middle heart breathes on its own, so the button reads as alive before
+   anybody touches it. The scale is on the <path> rather than on the <svg>,
+   because the <svg> already carries the hover lift and a transform on the
+   element would fight the animation. transform-box: fill-box makes the scale
+   happen about the heart's own centre instead of the SVG origin.
+
+   Kept small on purpose: 1.0 to 1.12 over three seconds reads as a pulse
+   rather than a throb, and this sits at the end of every post. */
+@keyframes applause-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
+}
+.applause-btn .h2 path {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: applause-breathe 3s ease-in-out infinite;
+}
+/* While the tap animation runs, the heart is already scaling; two scales at
+   once would multiply into a jump. */
+.applause-btn.is-popping .h2 path { animation: none; }
+
 .applause-btn:hover .h1 { transform: translateY(-2px); }
 .applause-btn:hover .h2 { transform: translateY(-3px); }
 .applause-btn:hover .h3 { transform: translateY(-2px); }
@@ -957,7 +978,8 @@ table td {
 }
 @media (prefers-reduced-motion: reduce) {
   .applause-btn .h,
-  .applause-btn.is-popping .h {
+  .applause-btn.is-popping .h,
+  .applause-btn .h2 path {
     animation: none;
     transition: none;
   }
