@@ -1098,13 +1098,33 @@ table td {
   margin: 34px 0 0 0;
 }
 .article .pipe-anim svg { width: 100%; height: auto; display: block; }
+/* The two panels sit side by side, exactly as in .figure-pair. This rule is
+   easy to forget and expensive to omit: .panels is styled only under
+   .figure-pair, so without it the panels stack at the full column width and
+   each 256-unit viewBox is stretched to 700px. At that 2.7x scale a 10px
+   label renders at 27px and the animation walks the bars into the caption. */
+.article .pipe-anim .panels {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.article .pipe-anim .panel {
+  flex: 1 1 0;
+  min-width: 0;
+}
+@media screen and (max-width: 700px) {
+  .article .pipe-anim .panels { display: block; }
+  .article .pipe-anim .panel + .panel { margin-top: 18px; }
+}
+/* Sized for the ~1.33x scale a half-column panel gives, so these land at
+   about 15px on the page like every other figure label. */
 .article .pipe-anim .rowlabel {
-  font: 600 9.5px -apple-system, Helvetica, arial, sans-serif;
+  font: 600 11.5px -apple-system, Helvetica, arial, sans-serif;
   fill: var(--fig-faint);
   letter-spacing: 0.1em;
 }
 .article .pipe-anim .cap {
-  font: 400 10px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 11px -apple-system, Helvetica, arial, sans-serif;
   fill: var(--fig-mute);
 }
 .article .pipe-anim .zero { stroke: var(--rule-fig); stroke-width: 1; }
@@ -1116,9 +1136,12 @@ table td {
   stroke: var(--c-marker);
 }
 
-/* mu = 1.125 at 22px per unit is 24.75px above the zero line (y = 104). */
-.article .pipe-anim .ln-meanline { y1: 79.25px; y2: 79.25px; }
-.article .pipe-anim .rms-meanline { y1: 79.25px; y2: 79.25px; }
+/* mu = 1.125 at 22px per unit is 24.75px above the zero line (y = 104), so
+   both mean lines start at y = 79.25. That lives on the elements as y1/y2
+   attributes and NOT here: x1/y1/x2/y2 are not SVG2 geometry properties, so
+   a CSS rule setting them is silently ignored and the line collapses to
+   y = 0 -- drawn across the top of the box, where it looks like a border
+   rather than a mean. Only the transform belongs in CSS. */
 
 @keyframes ln-shift {
   0%, 16%   { transform: translateY(0px); }
@@ -1140,9 +1163,19 @@ table td {
   0%, 46%   { transform: translateY(0px); }
   62%, 100% { transform: translateY(11.07px); }
 }
+/* The bar groups sit inside <g transform='translate(0 104)'>, so their local
+   origin is already the zero line -- and transform-box: view-box anchors the
+   reference box at the LOCAL origin, not at the viewBox's. Naming 104px again
+   therefore puts the scaling centre a whole zero-line BELOW the picture, and
+   every bar slides under the axis as it shrinks instead of shrinking towards
+   it. The mean lines are direct children of the <svg>, where 104px really is
+   the zero line, and they only translate, where the origin cannot matter. */
 .article .pipe-anim .ln-shift,
 .article .pipe-anim .ln-scale,
-.article .pipe-anim .rms-scale,
+.article .pipe-anim .rms-scale {
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+}
 .article .pipe-anim .ln-meanline,
 .article .pipe-anim .rms-meanline {
   transform-box: view-box;

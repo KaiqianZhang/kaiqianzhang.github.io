@@ -621,6 +621,33 @@ own figures, and check it with `node -e` before shipping — the same numbers
 should come out of the widget and the Python. A static plot is still right
 when the point is *measured* data rather than a formula.
 
+**Three ways an SVG animation lies quietly.** All three shipped in one figure
+and none of them threw an error; the figure simply drew the wrong picture for
+months. Check each before committing an animated diagram.
+
+1. **`x1`/`y1`/`x2`/`y2` are not CSS properties.** SVG2 promoted `x`, `y`,
+   `width`, `height`, `cx`, `cy`, `r`, `rx`, `ry` to geometry properties. It
+   did not promote the `<line>` endpoints. A rule setting `y1: 79.25px` is
+   ignored in silence and the line collapses to `y = 0`, drawn across the top
+   of the box where it reads as a border. Endpoints go on the element.
+2. **`transform-box: view-box` anchors at the *local* origin.** If the
+   animated group sits inside `<g transform='translate(0 104)'>`, its local
+   origin is already at 104, so `transform-origin: 0px 104px` puts the centre
+   at 208 — off the bottom of the picture — and a `scaleY` slides everything
+   downwards instead of shrinking it in place. Inside a translated group the
+   origin is almost always `0px 0px`.
+3. **`.panels` is styled only under `.figure-pair`.** Any other wrapper that
+   borrows the two-column markup gets no flex rule, so the panels stack at
+   full column width and each viewBox is stretched to 700px. At that scale a
+   10px label renders at 27px and the animation walks its bars into the
+   caption. Add the flex rule when you borrow the markup.
+
+Verify by driving the clock rather than by watching: set
+`el.getAnimations()[0].currentTime` to each keyframe boundary and assert the
+geometry — that the mean line lands *on* the zero line, that bars still
+straddle it — with `getBoundingClientRect`. Watching an animation is how all
+three of these survived review.
+
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
 **Dark mode exists, and it is a variable away.** Every colour in `blog.css`
