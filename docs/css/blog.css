@@ -11,9 +11,106 @@
   font-style: normal;
   font-display: swap;
 }
+/* --------------------------------------------------------------------------
+   Colour lives here, once, so the page can be repainted.
+
+   Everything below is a role, not a shade: --fig-mute is "the grey a figure
+   labels its axis in", and it happens to be #6E6E6E on a white page. The dark
+   block that follows redefines the roles and nothing else, which is the only
+   way a theme can reach eight posts' worth of hand-placed SVG without
+   editing any of it.
+
+   Two colours are deliberately absent: #8C7BA6, the like button and slider
+   accent, is furniture and stays put in both themes.
+   -------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+  --bg: #FFFFFF;
+  /* Body text and rules are drawn as rgba(var(--ink-rgb), a) throughout, so a
+     single triple flips every one of them. */
+  --ink-rgb: 0, 0, 0;
+  --panel: #FFFFFF;
+  --panel-dim: #FBFAF8;
+  --on-fill: #FFFFFF;
+  --on-fill-rgb: 255, 255, 255;
+
+  --fig-strong: #3F3F3F;
+  --fig-body: #5E5E5E;
+  --fig-mute: #6E6E6E;
+  --fig-faint: #8C8C8C;
+  --rule-fig: #C9C3BC;
+  --rule-soft: #DEDAD4;
+  --grid-faint: #EDEAE6;
+
+  --c-lav: #8C77BC;
+  --c-lav-rgb: 140, 119, 188;
+  --c-lav-soft: #B7A7D6;
+  --c-lav-deep: #6B5A93;
+  --c-lav-hover: #7A66A8;
+  --c-blue: #3E6491;
+  --c-blue-rgb: 62, 100, 145;
+  --c-rose: #C48BAC;
+  --c-sage: #6E8C66;
+  --c-clay: #B07E55;
+  --c-marker: #A8443E;
+  --c-marker-rgb: 168, 68, 62;
+  --c-ink: #22253E;
+  --c-icon: #3f7d47;
+
+  --heart-fill: #FFFFFF;
+  --heart-stroke: #C0B7CE;
+  --img-filter: none;
+  --img-mat: transparent;
+}
+/* The dark page. Every data colour is lifted in lightness rather than merely
+   inverted: the palette was chosen to separate on a white ground, and the
+   same hexes at L*42 disappear on a dark one. Because they are lifted, text
+   that sat *on* a filled shape flips the other way -- --on-fill is near-black
+   here, not white. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #16171C;
+  --ink-rgb: 232, 229, 224;
+  --panel: #1E1F26;
+  --panel-dim: #22232A;
+  --on-fill: #16171C;
+  --on-fill-rgb: 22, 23, 28;
+
+  --fig-strong: #E0DCD6;
+  --fig-body: #CAC5BE;
+  --fig-mute: #B0ABA4;
+  --fig-faint: #95908A;
+  --rule-fig: #55525C;
+  --rule-soft: #403E48;
+  --grid-faint: #2B2A32;
+
+  --c-lav: #A692D8;
+  --c-lav-rgb: 166, 146, 216;
+  --c-lav-soft: #C3B4E6;
+  --c-lav-deep: #CBBDEA;
+  --c-lav-hover: #B9A6E4;
+  --c-blue: #7BA5D6;
+  --c-blue-rgb: 123, 165, 214;
+  --c-rose: #D8A4C2;
+  --c-sage: #93B489;
+  --c-clay: #CFA079;
+  --c-marker: #E08078;
+  --c-marker-rgb: 224, 128, 120;
+  --c-ink: #6B70A8;
+  --c-icon: #6FA97A;
+
+  --heart-fill: #16171C;
+  --heart-stroke: #6E6480;
+  /* Reproduced paper figures are white-backgrounded PNGs. Nothing can recolour
+     a raster, so they sit on their own light mat and are dimmed enough not to
+     glare. */
+  --img-filter: brightness(0.9) contrast(0.96);
+  --img-mat: #EDEBE7;
+}
 html {
   font-family: -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(var(--ink-rgb), 0.8);
+  background: var(--bg);
   line-height: 1.5em;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -21,16 +118,18 @@ html {
 }
 body {
   margin: 0;
+  background: var(--bg);
+  transition: background-color 0.22s ease, color 0.22s ease;
 }
 body .content {
   margin-bottom: 120px;
 }
 a {
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(var(--ink-rgb), 0.8);
   text-decoration: underline;
 }
 a:hover {
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
   text-decoration: none;
 }
 h1,
@@ -64,7 +163,7 @@ h1 {
   /* Matches publications nav line-height. */
 }
 .nav a {
-  color: rgba(0, 0, 0, 0.6);
+  color: rgba(var(--ink-rgb), 0.6);
   text-decoration: none;
   border-bottom: none;
   font-size: 12px;
@@ -82,8 +181,8 @@ h1 {
 }
 .front-matter {
   padding: 20px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.1);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.1);
 }
 .front-matter h4 {
   font-family: -apple-system, Helvetica, arial, sans-serif;
@@ -100,7 +199,7 @@ h1 {
 .front-matter .bylines .byline h3 {
   font-size: 9px;
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
 }
 .front-matter .bylines .byline p {
   font-size: 10px;
@@ -124,11 +223,11 @@ table {
   font-size: 14px;
   margin: 0 auto;
   border-collapse: collapse;
-  border-top: 2px solid black;
-  border-bottom: 1px solid black;
+  border-top: 2px solid rgba(var(--ink-rgb), 0.8);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.8);
 }
 table thead > tr > th {
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.8);
   padding: 0 8px;
 }
 table td {
@@ -141,19 +240,19 @@ table td {
 .article {
   font-size: 15px;
   line-height: 1.6em;
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(var(--ink-rgb), 0.8);
   margin-top: 50px;
   margin-bottom: 50px;
 }
 .article blockquote {
   margin: 0;
   padding: 0 1em;
-  color: #777;
-  border-left: 0.25em solid #ddd;
+  color: var(--fig-mute);
+  border-left: 0.25em solid var(--rule-soft);
 }
 .article h2 {
   font-size: 26px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding-bottom: 1rem;
   padding-top: 1em;
 }
@@ -163,14 +262,14 @@ table td {
 }
 .article .figure-no-caption .caption {
   padding-top: 15px;
-  color: rgba(0, 0, 0, 0.8);
+  color: rgba(var(--ink-rgb), 0.8);
   display: inline-block;
   font-size: 12px;
   line-height: 1.2em;
 }
 .article .figure {
-  border-top: 1px solid hsla(0, 0%, 0%, 0.2);
-  border-bottom: 1px solid hsla(0, 0%, 0%, 0.2);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding: 20px 0;
 }
 .article .figure img {
@@ -200,8 +299,8 @@ table td {
   font-weight: bold;
 }
 .article .toc {
-  border-top: 1px solid rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding: 18px 0 22px 0;
   margin: 40px 0;
 }
@@ -209,7 +308,7 @@ table td {
   font-size: 9px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
   margin: 0 0 14px 0;
 }
 .article .toc ul {
@@ -229,11 +328,11 @@ table td {
 }
 .article .toc ul li a {
   text-decoration: none;
-  color: rgba(0, 0, 0, 0.78);
+  color: rgba(var(--ink-rgb), 0.78);
 }
 .article .toc ul li a:hover {
   text-decoration: underline;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
 }
 @media screen and (max-width: 700px) {
   .article .toc ul {
@@ -241,8 +340,8 @@ table td {
   }
 }
 .article .figure-pair {
-  border-top: 1px solid hsla(0, 0%, 0%, 0.2);
-  border-bottom: 1px solid hsla(0, 0%, 0%, 0.2);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding: 20px 0;
   margin: 40px 0;
 }
@@ -268,14 +367,14 @@ table td {
   font-size: 12px;
   line-height: 1.45em;
   padding-top: 10px;
-  color: rgba(0, 0, 0, 0.7);
+  color: rgba(var(--ink-rgb), 0.7);
 }
 .article .figure-pair .panel .annot .who {
   font-weight: bold;
 }
 .article .figure-pair .panel .source {
   font-size: 11px;
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(var(--ink-rgb), 0.45);
   padding-top: 6px;
 }
 .article .figure-pair .caption {
@@ -304,46 +403,46 @@ table td {
 }
 .article .rope-anim .dial {
   fill: none;
-  stroke: #D8D4CE;
+  stroke: var(--rule-soft);
   stroke-width: 1.5;
 }
 .article .rope-anim .tick {
-  stroke: #D8D4CE;
+  stroke: var(--rule-soft);
   stroke-width: 1.5;
 }
 .article .rope-anim .tick0 {
-  stroke: #A9A49C;
+  stroke: var(--fig-faint);
   stroke-width: 2.5;
 }
 .article .rope-anim .hub {
-  fill: #A9A49C;
+  fill: var(--fig-faint);
 }
 .article .rope-anim .q {
-  fill: #3E6491;
-  stroke: #3E6491;
+  fill: var(--c-blue);
+  stroke: var(--c-blue);
   stroke-width: 3.5;
   stroke-linecap: round;
 }
 .article .rope-anim .k {
-  fill: #8C77BC;
-  stroke: #8C77BC;
+  fill: var(--c-lav);
+  stroke: var(--c-lav);
   stroke-width: 3.5;
   stroke-linecap: round;
 }
 .article .rope-anim .wedge {
-  fill: #C48BAC;
+  fill: var(--c-rose);
   fill-opacity: 0.2;
   stroke: none;
 }
 .article .rope-anim .lbl {
   font: 500 13px -apple-system, Helvetica, arial, sans-serif;
-  fill: #4A4A4A;
+  fill: var(--fig-strong);
 }
 .article .rope-anim .lbl-q {
-  fill: #3E6491;
+  fill: var(--c-blue);
 }
 .article .rope-anim .lbl-k {
-  fill: #8C77BC;
+  fill: var(--c-lav);
 }
 .article .rope-anim .spin {
   transform-box: view-box;
@@ -366,8 +465,8 @@ table td {
 /* Interactive figures: a slider the reader drags, redrawing an inline SVG.
    Degrades to a static starting state if JavaScript is off. */
 .article .knob {
-  border-top: 1px solid hsla(0, 0%, 0%, 0.2);
-  border-bottom: 1px solid hsla(0, 0%, 0%, 0.2);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding: 18px 0 16px 0;
   margin: 40px 0;
 }
@@ -385,7 +484,7 @@ table td {
 }
 .article .knob label {
   font: 500 12px -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(var(--ink-rgb), 0.55);
   white-space: nowrap;
 }
 /* The track is meant to look thin, but styling the *input* to 3px made the
@@ -408,12 +507,12 @@ table td {
 .article .knob input[type='range']::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 2px;
-  background: #DEDAD4;
+  background: var(--rule-soft);
 }
 .article .knob input[type='range']::-moz-range-track {
   height: 3px;
   border-radius: 2px;
-  background: #DEDAD4;
+  background: var(--rule-soft);
 }
 .article .knob input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -423,7 +522,7 @@ table td {
   margin-top: -6px;
   border-radius: 50%;
   background: #8C7BA6;
-  border: 2px solid #FFFFFF;
+  border: 2px solid var(--bg);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 .article .knob input[type='range']::-moz-range-thumb {
@@ -431,26 +530,26 @@ table td {
   height: 15px;
   border-radius: 50%;
   background: #8C7BA6;
-  border: 2px solid #FFFFFF;
+  border: 2px solid var(--bg);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
 }
 .article .knob .readout {
   font: 500 12px -apple-system, Helvetica, arial, sans-serif;
-  color: #3E6491;
+  color: var(--c-blue);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .article .knob .axis {
-  stroke: #D8D4CE;
+  stroke: var(--rule-soft);
   stroke-width: 1.2;
 }
 .article .knob .grid {
-  stroke: #EDEAE6;
+  stroke: var(--grid-faint);
   stroke-width: 1;
 }
 .article .knob .tick {
   font: 400 14.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C8C8C;
+  fill: var(--fig-faint);
 }
 /* A second row of controls, for widgets with more than one slider. The rule
    is that a second slider earns its place only when the two trade off against
@@ -460,52 +559,52 @@ table td {
 }
 .article .knob .controls .note {
   font: 400 11.5px -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
   flex: 1 1 100%;
   margin: 0;
 }
-.article .knob .series-a { stroke: #8C77BC; }
-.article .knob .series-b { stroke: #3E6491; }
-.article .knob .series-c { stroke: #C48BAC; }
+.article .knob .series-a { stroke: var(--c-lav); }
+.article .knob .series-b { stroke: var(--c-blue); }
+.article .knob .series-c { stroke: var(--c-rose); }
 .article .knob .legend {
   font: 500 10.5px -apple-system, Helvetica, arial, sans-serif;
 }
 /* Rotatable 3-D views. The projection is done by hand in the widget script;
    these are only the strokes it draws with. */
-.article .knob .face { fill: rgba(140, 119, 188, 0.10); stroke: #B7A7D6; stroke-width: 1; }
-.article .knob .edge { stroke: #C9C3BC; stroke-width: 1; }
+.article .knob .face { fill: rgba(var(--c-lav-rgb), 0.10); stroke: var(--c-lav-soft); stroke-width: 1; }
+.article .knob .edge { stroke: var(--rule-fig); stroke-width: 1; }
 .article .knob .vec  { stroke-width: 2.4; fill: none; stroke-linecap: round; }
 .article .knob .ghost { stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; }
-.article .knob .node { stroke: #FFFFFF; stroke-width: 1.5; }
+.article .knob .node { stroke: var(--bg); stroke-width: 1.5; }
 
 .article .knob .axlabel {
   font: 400 15.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #6E6E6E;
+  fill: var(--fig-mute);
 }
 .article .knob .trace {
   fill: none;
-  stroke: #3E6491;
+  stroke: var(--c-blue);
   stroke-width: 2.4;
   stroke-linejoin: round;
 }
 .article .knob .ref {
-  stroke: #C7C2BA;
+  stroke: var(--rule-fig);
   stroke-width: 1.2;
   stroke-dasharray: 4 3;
 }
 .article .knob .bar {
-  fill: #3E6491;
+  fill: var(--c-blue);
 }
 .article .knob .note {
   font: 400 11px -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(var(--ink-rgb), 0.4);
   margin: 0;
 }
 
 /* Compact roadmap strip: the argument of a post in one line. */
 .article .roadmap {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 20px 0 16px 0;
   margin: 34px 0;
 }
@@ -520,43 +619,43 @@ table td {
 .article .roadmap .stage {
   font-size: 18.5px;
   font-weight: 700;
-  fill: #3F3F3F;
+  fill: var(--fig-strong);
 }
 .article .roadmap .stem {
   fill: none;
-  stroke: #C9C3BC;
+  stroke: var(--rule-fig);
   stroke-width: 1.2;
   stroke-linecap: round;
 }
-.article .roadmap .bul { fill: #8C77BC; }
+.article .roadmap .bul { fill: var(--c-lav); }
 .article .roadmap .models {
   font: 400 11px -apple-system, Helvetica, arial, sans-serif;
-  fill: #7A7A7A;
+  fill: var(--fig-faint);
   text-anchor: middle;
 }
 .article .roadmap .sec {
   font: 500 10px -apple-system, Helvetica, arial, sans-serif;
-  fill: #C48BAC;
+  fill: var(--c-rose);
   text-anchor: middle;
   letter-spacing: 0.06em;
 }
 .article .roadmap .why {
   font-size: 15px;
-  fill: #8C77BC;
+  fill: var(--c-lav);
   text-anchor: middle;
 }
 .article .roadmap .spine {
   fill: none;
-  stroke: #C9C3BC;
+  stroke: var(--rule-fig);
   stroke-width: 1.2;
   stroke-linecap: round;
 }
 .article .roadmap .dot {
-  fill: #3E6491;
+  fill: var(--c-blue);
 }
 .article .roadmap .head {
   fill: none;
-  stroke: #B7A7D6;
+  stroke: var(--c-lav-soft);
   stroke-width: 1.3;
   stroke-linecap: round;
 }
@@ -564,7 +663,7 @@ table td {
    section 1; the bare-label roadmap on the mindmap post uses none of these. */
 .article .roadmap .box {
   fill: none;
-  stroke: #C9C3BC;
+  stroke: var(--rule-fig);
   stroke-width: 1.3;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -572,11 +671,11 @@ table td {
 .article .roadmap .yr {
   font-size: 14.5px;
   font-weight: 700;
-  fill: #C48BAC;
+  fill: var(--c-rose);
 }
 .article .roadmap .body {
   font-size: 15.5px;
-  fill: #5E5E5E;
+  fill: var(--fig-body);
 }
 /* Hover a milestone and the whole group lifts: dot, box and text together.
    transform-box: fill-box makes the scale happen about the group's own centre
@@ -602,18 +701,18 @@ table td {
   transform: scale(1.06);
 }
 .article .roadmap .stop:hover path.box {
-  stroke: #8C77BC;
+  stroke: var(--c-lav);
   stroke-width: 1.6;
 }
 .article .roadmap .stop:hover .dot {
-  fill: #8C77BC;
+  fill: var(--c-lav);
   r: 6.5;
 }
 .article .roadmap .stop:hover .stage {
-  fill: #4A3D66;
+  fill: var(--c-lav-deep);
 }
 .article .roadmap svg:hover .stop:not(:hover) .box {
-  fill: #FBFAF8;
+  fill: var(--panel-dim);
 }
 @media (prefers-reduced-motion: reduce) {
   /* Keep the highlight, drop the movement. */
@@ -630,30 +729,30 @@ table td {
 }
 .article .w2v-anim .word {
   font: 500 15px -apple-system, Helvetica, arial, sans-serif;
-  fill: #3F3F3F;
+  fill: var(--fig-strong);
   text-anchor: middle;
 }
 .article .w2v-anim .rowlabel {
   font: 600 12px -apple-system, Helvetica, arial, sans-serif;
   letter-spacing: 0.04em;
 }
-.article .w2v-anim .cbow .rowlabel { fill: #3E6491; }
-.article .w2v-anim .skip .rowlabel { fill: #8C77BC; }
+.article .w2v-anim .cbow .rowlabel { fill: var(--c-blue); }
+.article .w2v-anim .skip .rowlabel { fill: var(--c-lav); }
 .article .w2v-anim .frame {
   fill: none;
-  stroke: #D8D4CE;
+  stroke: var(--rule-soft);
   stroke-width: 1.6;
 }
 .article .w2v-anim .centre {
-  fill: #C48BAC;
+  fill: var(--c-rose);
   fill-opacity: 0.18;
 }
 .article .w2v-anim .arrow {
   stroke-width: 2;
   stroke-linecap: round;
 }
-.article .w2v-anim .cbow .arrow { stroke: #3E6491; fill: #3E6491; }
-.article .w2v-anim .skip .arrow { stroke: #8C77BC; fill: #8C77BC; }
+.article .w2v-anim .cbow .arrow { stroke: var(--c-blue); fill: var(--c-blue); }
+.article .w2v-anim .skip .arrow { stroke: var(--c-lav); fill: var(--c-lav); }
 .article .w2v-anim .slide {
   transform-box: view-box;
   transform-origin: 0 0;
@@ -676,8 +775,8 @@ table td {
   line-height: 0;
 }
 .article div.highlight {
-  border-top: 1px solid rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   font-size: 13px;
   line-height: 1.3em;
   overflow-x: auto;
@@ -690,13 +789,13 @@ table td {
   padding: 0 15px;
 }
 #bibliography {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.1);
 }
 #bibliography ol.bibliography {
   padding-left: 15px;
   padding-top: 30px;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
 }
 #blog,
 .tag-page {
@@ -721,7 +820,7 @@ table td {
 #blog .post-date,
 .tag-page .post-date {
   text-transform: uppercase;
-  color: rgba(0, 0, 0, 0.7);
+  color: rgba(var(--ink-rgb), 0.7);
   font-size: 12px;
   font-weight: bold;
   margin-top: 4px;
@@ -742,7 +841,7 @@ table td {
   font-size: 15px;
   line-height: 1;
   text-align: center;
-  color: #3f7d47;
+  color: var(--c-icon);
   /* Emoji ignore font-weight; this keeps a text or SVG icon from inheriting
      the bold of .post-title. */
   font-weight: normal;
@@ -775,7 +874,7 @@ table td {
   font-size: 18px;
   position: relative;
   right: 100px;
-  color: rgba(0, 0, 0, 0.5);
+  color: rgba(var(--ink-rgb), 0.5);
   width: 100px;
   margin-bottom: -24px;
 }
@@ -803,7 +902,7 @@ table td {
 }
 #blog ul#tag-nav li a.active,
 .tag-page ul#tag-nav li a.active {
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(var(--ink-rgb), 0.4);
 }
 #blog #more,
 .tag-page #more {
@@ -816,7 +915,7 @@ table td {
 }
 .tag-page h2 {
   font-size: 26px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.2);
   padding-bottom: 1rem;
   padding-top: 1em;
 }
@@ -824,18 +923,18 @@ table td {
   margin-bottom: 40px;
   font-size: 12px;
   line-height: 1.5em;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(var(--ink-rgb), 0.4);
 }
 .credit .wrap {
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.1);
   padding-top: 15px;
 }
 .credit a {
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(var(--ink-rgb), 0.4);
   text-decoration: underline;
 }
 .credit a:hover {
-  color: rgba(0, 0, 0, 0.7);
+  color: rgba(var(--ink-rgb), 0.7);
   text-decoration: none;
 }
 /* Like button at the foot of every post. Client-side only: a reader's own tap
@@ -843,7 +942,7 @@ table td {
 .applause {
   margin-top: 70px;
   padding-top: 30px;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
   text-align: center;
 }
 .applause-btn {
@@ -884,8 +983,8 @@ table td {
    forever, and a palette revision moved it to rose once already. Leave it
    alone. */
 .applause-btn .h path {
-  fill: #FFFFFF;
-  stroke: #C0B7CE;
+  fill: var(--heart-fill);
+  stroke: var(--heart-stroke);
   stroke-width: 1.7;
   stroke-linejoin: round;
   transition: fill 0.2s ease, stroke 0.2s ease;
@@ -934,23 +1033,23 @@ table td {
 }
 .applause-count {
   font: 400 12px -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.32);
+  color: rgba(var(--ink-rgb), 0.32);
   font-variant-numeric: tabular-nums;
 }
 .applause-label {
   font: 400 12px -apple-system, Helvetica, arial, sans-serif;
   letter-spacing: 0.04em;
-  color: rgba(0, 0, 0, 0.4);
+  color: rgba(var(--ink-rgb), 0.4);
   transition: color 0.18s;
 }
 .applause-btn:hover .applause-label,
 .applause-btn.is-on .applause-count {
   font: 400 12px -apple-system, Helvetica, arial, sans-serif;
-  color: rgba(0, 0, 0, 0.32);
+  color: rgba(var(--ink-rgb), 0.32);
   font-variant-numeric: tabular-nums;
 }
 .applause-label {
-  color: rgba(0, 0, 0, 0.65);
+  color: rgba(var(--ink-rgb), 0.65);
 }
 @media (prefers-reduced-motion: reduce) {
   .applause-btn .h,
@@ -966,7 +1065,7 @@ table td {
 .footnotes {
   margin-top: 100px;
   font-size: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.1);
 }
 .footnotes ol {
   padding-left: 15px;
@@ -993,28 +1092,28 @@ table td {
    with it, so placement lives on a parent <g> and the animated <g> carries no
    transform attribute of its own. */
 .article .pipe-anim {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 18px 0 6px 0;
   margin: 34px 0 0 0;
 }
 .article .pipe-anim svg { width: 100%; height: auto; display: block; }
 .article .pipe-anim .rowlabel {
   font: 600 9.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #9A9A9A;
+  fill: var(--fig-faint);
   letter-spacing: 0.1em;
 }
 .article .pipe-anim .cap {
   font: 400 10px -apple-system, Helvetica, arial, sans-serif;
-  fill: #6E6E6E;
+  fill: var(--fig-mute);
 }
-.article .pipe-anim .zero { stroke: #C9C3BC; stroke-width: 1; }
-.article .pipe-anim .barpos { fill: #8C77BC; fill-opacity: 0.85; }
-.article .pipe-anim .panel:first-child .barpos { fill: #3E6491; }
+.article .pipe-anim .zero { stroke: var(--rule-fig); stroke-width: 1; }
+.article .pipe-anim .barpos { fill: var(--c-lav); fill-opacity: 0.85; }
+.article .pipe-anim .panel:first-child .barpos { fill: var(--c-blue); }
 .article .pipe-anim .meanline {
   stroke-width: 1.4;
   stroke-dasharray: 5 3;
-  stroke: #A8443E;
+  stroke: var(--c-marker);
 }
 
 /* mu = 1.125 at 22px per unit is 24.75px above the zero line (y = 104). */
@@ -1067,25 +1166,25 @@ table td {
    at each normalizer and arrives faint; the pre-norm pulse runs down a clear
    path. Placement lives on the parent, never on the animated element. */
 .article .pulse-anim {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 18px 0 6px 0;
   margin: 34px 0;
 }
 .article .pulse-anim svg { width: 100%; height: auto; display: block; }
 .article .pulse-anim .rowlabel {
   font: 600 9.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #9A9A9A; letter-spacing: 0.1em;
+  fill: var(--fig-faint); letter-spacing: 0.1em;
 }
 .article .pulse-anim .cap {
-  font: 400 10px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 400 10px -apple-system, Helvetica, arial, sans-serif; fill: var(--fig-mute);
 }
-.article .pulse-anim .spine-hard { stroke: #C9C3BC; stroke-width: 7; stroke-linecap: round; }
-.article .pulse-anim .spine-clean { stroke: #C6BBDD; stroke-width: 7; stroke-linecap: round; }
-.article .pulse-anim .norm { fill: #6E8C66; fill-opacity: 0.9; }
-.article .pulse-anim .norm.off { fill: #6E8C66; fill-opacity: 0.35; }
-.article .pulse-anim .pulse-post { fill: #3E6491; }
-.article .pulse-anim .pulse-pre { fill: #8C77BC; }
+.article .pulse-anim .spine-hard { stroke: var(--rule-fig); stroke-width: 7; stroke-linecap: round; }
+.article .pulse-anim .spine-clean { stroke: var(--c-lav-soft); stroke-width: 7; stroke-linecap: round; }
+.article .pulse-anim .norm { fill: var(--c-sage); fill-opacity: 0.9; }
+.article .pulse-anim .norm.off { fill: var(--c-sage); fill-opacity: 0.35; }
+.article .pulse-anim .pulse-post { fill: var(--c-blue); }
+.article .pulse-anim .pulse-pre { fill: var(--c-lav); }
 .article .pulse-anim .pulse {
   transform-box: view-box;
   transform-origin: 0px 0px;
@@ -1124,46 +1223,46 @@ table td {
    SVG transform attribute of its own, because a CSS transform replaces it
    rather than composing with it. All coordinates below are absolute. */
 .article .ffn-anim {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 20px 0 6px 0;
   margin: 34px 0;
 }
 .article .ffn-anim svg { width: 100%; height: auto; display: block; }
-.article .ffn-anim .wire { stroke: #C9C3BC; stroke-width: 1.8; fill: none; }
+.article .ffn-anim .wire { stroke: var(--rule-fig); stroke-width: 1.8; fill: none; }
 .article .ffn-anim .mat { stroke-width: 0; }
-.article .ffn-anim .mat.gate { fill: #8C77BC; fill-opacity: 0.92; }
-.article .ffn-anim .mat.val  { fill: #3E6491; fill-opacity: 0.92; }
-.article .ffn-anim .mat.down { fill: #22253E; fill-opacity: 0.90; }
-.article .ffn-anim .mat.act  { fill: #6E8C66; fill-opacity: 0.92; }
+.article .ffn-anim .mat.gate { fill: var(--c-lav); fill-opacity: 0.92; }
+.article .ffn-anim .mat.val  { fill: var(--c-blue); fill-opacity: 0.92; }
+.article .ffn-anim .mat.down { fill: var(--c-ink); fill-opacity: 0.90; }
+.article .ffn-anim .mat.act  { fill: var(--c-sage); fill-opacity: 0.92; }
 .article .ffn-anim .mlbl {
   font: 600 12px -apple-system, Helvetica, arial, sans-serif;
-  fill: #FFFFFF; text-anchor: middle;
+  fill: var(--on-fill); text-anchor: middle;
 }
 .article .ffn-anim .mdim {
   font: 400 9px -apple-system, Helvetica, arial, sans-serif;
-  fill: rgba(255, 255, 255, 0.82); text-anchor: middle;
+  fill: rgba(var(--on-fill-rgb), 0.82); text-anchor: middle;
 }
 .article .ffn-anim .lbl {
-  font: 600 15px Georgia, serif; fill: #3F3F3F; text-anchor: middle;
+  font: 600 15px Georgia, serif; fill: var(--fig-strong); text-anchor: middle;
 }
 .article .ffn-anim .dim {
   font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C8C8C; text-anchor: middle; letter-spacing: 0.04em;
+  fill: var(--fig-faint); text-anchor: middle; letter-spacing: 0.04em;
 }
 .article .ffn-anim .note {
   font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C77BC; text-anchor: middle;
+  fill: var(--c-lav); text-anchor: middle;
 }
-.article .ffn-anim .prod { fill: none; stroke: #A8443E; stroke-width: 1.8; }
+.article .ffn-anim .prod { fill: none; stroke: var(--c-marker); stroke-width: 1.8; }
 .article .ffn-anim .plbl {
   font: 600 14px -apple-system, Helvetica, arial, sans-serif;
-  fill: #A8443E; text-anchor: middle;
+  fill: var(--c-marker); text-anchor: middle;
 }
 .article .ffn-anim .tok {
   transform-box: view-box;
   transform-origin: 0px 0px;
-  fill: #A8443E;
+  fill: var(--c-marker);
 }
 /* gate branch: x(34,122) -> W(150,72) -> Swish(345,72) -> product(452,128) */
 @keyframes ffn-gate {
@@ -1206,122 +1305,122 @@ table td {
    this step, or kept from an earlier one.
    -------------------------------------------------------------------------- */
 .article .kv-anim {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 20px 0 6px 0;
   margin: 34px 0;
 }
 .article .kv-anim svg { width: 100%; height: auto; display: block; }
-.article .kv-anim .wire { stroke: #C9C3BC; stroke-width: 1.8; fill: none; }
+.article .kv-anim .wire { stroke: var(--rule-fig); stroke-width: 1.8; fill: none; }
 .article .kv-anim .mat { stroke-width: 0; fill-opacity: 0.92; }
-.article .kv-anim .mat.q { fill: #3E6491; }
-.article .kv-anim .mat.k { fill: #8C77BC; }
-.article .kv-anim .mat.v { fill: #8C77BC; }
-.article .kv-anim .mat.o { fill: #22253E; }
+.article .kv-anim .mat.q { fill: var(--c-blue); }
+.article .kv-anim .mat.k { fill: var(--c-lav); }
+.article .kv-anim .mat.v { fill: var(--c-lav); }
+.article .kv-anim .mat.o { fill: var(--c-ink); }
 .article .kv-anim .cache {
-  fill: rgba(140, 119, 188, 0.10); stroke: #8C77BC; stroke-width: 1.2;
+  fill: rgba(var(--c-lav-rgb), 0.10); stroke: var(--c-lav); stroke-width: 1.2;
 }
-.article .kv-anim .row.new { fill: #A8443E; fill-opacity: 0.85; }
-.article .kv-anim .op { fill: none; stroke: #A8443E; stroke-width: 1.8; }
+.article .kv-anim .row.new { fill: var(--c-marker); fill-opacity: 0.85; }
+.article .kv-anim .op { fill: none; stroke: var(--c-marker); stroke-width: 1.8; }
 .article .kv-anim .oplbl {
   font: 600 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #A8443E; text-anchor: middle;
+  fill: var(--c-marker); text-anchor: middle;
 }
 .article .kv-anim .mlbl {
   font: 600 12px -apple-system, Helvetica, arial, sans-serif;
-  fill: #FFFFFF; text-anchor: middle;
+  fill: var(--on-fill); text-anchor: middle;
 }
 .article .kv-anim .sub { font-size: 8.5px; }
 .article .kv-anim .lbl {
-  font: 600 15px Georgia, serif; fill: #3F3F3F; text-anchor: middle;
+  font: 600 15px Georgia, serif; fill: var(--fig-strong); text-anchor: middle;
 }
 .article .kv-anim .dim {
   font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C8C8C; text-anchor: middle; letter-spacing: 0.04em;
+  fill: var(--fig-faint); text-anchor: middle; letter-spacing: 0.04em;
 }
 .article .kv-anim .clbl {
   font: 600 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #6B5A93; text-anchor: middle;
+  fill: var(--c-lav-deep); text-anchor: middle;
 }
 .article .kv-anim .cdim {
   font: 500 9px ui-monospace, Menlo, monospace;
-  fill: #8C8C8C; text-anchor: middle;
+  fill: var(--fig-faint); text-anchor: middle;
 }
 .article .kv-anim .note {
   font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C8C8C; text-anchor: middle;
+  fill: var(--fig-faint); text-anchor: middle;
 }
 .article .kv-anim .note-hi {
   font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C77BC; text-anchor: middle;
+  fill: var(--c-lav); text-anchor: middle;
 }
 
 /* Shared by the stepper, the mask grid and the allocation strip. */
 .article .knob .btn {
   font: 500 12.5px -apple-system, Helvetica, arial, sans-serif;
-  color: #FFFFFF; background: #8C77BC; border: 0; border-radius: 4px;
+  color: var(--on-fill); background: var(--c-lav); border: 0; border-radius: 4px;
   padding: 4px 12px; cursor: pointer; min-width: 118px;
 }
-.article .knob .btn:hover { background: #7A66A8; }
+.article .knob .btn:hover { background: var(--c-lav-hover); }
 .article .knob .cell, .article .knob .mcell { stroke-width: 0.8; }
 .article .knob .cell.empty, .article .knob .mcell.off {
-  fill: #FFFFFF; stroke: #DEDAD4;
+  fill: var(--panel); stroke: var(--rule-soft);
 }
 .article .knob .cell.kept, .article .knob .mcell.kept {
-  fill: #8C77BC; fill-opacity: 0.22; stroke: #8C77BC; stroke-opacity: 0.5;
+  fill: var(--c-lav); fill-opacity: 0.22; stroke: var(--c-lav); stroke-opacity: 0.5;
 }
 .article .knob .cell.fresh, .article .knob .mcell.fresh {
-  fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
+  fill: var(--c-marker); fill-opacity: 0.30; stroke: var(--c-marker); stroke-opacity: 0.7;
 }
 .article .knob .mcell.stale {
-  fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
+  fill: var(--c-marker); fill-opacity: 0.30; stroke: var(--c-marker); stroke-opacity: 0.7;
 }
 .article .knob .num {
   font: 500 12.5px ui-monospace, Menlo, monospace;
-  fill: #3F3F3F;
+  fill: var(--fig-strong);
 }
 .article .knob .tk {
   font: 500 15.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #3F3F3F;
+  fill: var(--fig-strong);
 }
-.article .knob .tk.off { fill: #C9C3BC; }
+.article .knob .tk.off { fill: var(--rule-fig); }
 .article .knob .gl {
-  font: 600 15px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 600 15px -apple-system, Helvetica, arial, sans-serif; fill: var(--fig-mute);
 }
 .article .knob .hd {
-  font: 600 15.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
+  font: 600 15.5px -apple-system, Helvetica, arial, sans-serif; fill: var(--c-lav);
 }
-.article .knob .wbar { fill: #8C77BC; fill-opacity: 0.75; }
+.article .knob .wbar { fill: var(--c-lav); fill-opacity: 0.75; }
 .article .knob .wnum {
-  font: 500 14.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
+  font: 500 14.5px ui-monospace, Menlo, monospace; fill: var(--fig-strong);
 }
-.article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
+.article .knob .sep { stroke: var(--rule-soft); stroke-width: 1; }
 
 /* The generation loop that opens the KV cache post: four rows, each one token
    longer than the last, fading in one after another so the repetition is the
    thing you notice. */
 .article .loop-anim {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 20px 0 6px 0;
   margin: 34px 0;
 }
 .article .loop-anim svg { width: 100%; height: auto; display: block; }
 .article .loop-anim .tok { stroke-width: 0; }
-.article .loop-anim .tok.old { fill: #8C77BC; fill-opacity: 0.20; }
-.article .loop-anim .tok.new { fill: #A8443E; fill-opacity: 0.30; }
+.article .loop-anim .tok.old { fill: var(--c-lav); fill-opacity: 0.20; }
+.article .loop-anim .tok.new { fill: var(--c-marker); fill-opacity: 0.30; }
 .article .loop-anim .tk {
   font: 500 11px -apple-system, Helvetica, arial, sans-serif;
-  fill: #3F3F3F; text-anchor: middle;
+  fill: var(--fig-strong); text-anchor: middle;
 }
-.article .loop-anim .tk.nw { fill: #A8443E; font-weight: 600; }
+.article .loop-anim .tk.nw { fill: var(--c-marker); font-weight: 600; }
 .article .loop-anim .step {
-  font: 600 10px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 600 10px -apple-system, Helvetica, arial, sans-serif; fill: var(--fig-mute);
 }
-.article .loop-anim .arrow { font-size: 15px; fill: #C9C3BC; text-anchor: middle; }
+.article .loop-anim .arrow { font-size: 15px; fill: var(--rule-fig); text-anchor: middle; }
 .article .loop-anim .note {
   font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #8C77BC; text-anchor: middle;
+  fill: var(--c-lav); text-anchor: middle;
 }
 @keyframes loop-row {
   0%, 4%    { opacity: 0; }
@@ -1340,16 +1439,16 @@ table td {
 /* The bottleneck-versus-attention figure that opens the attention post. The
    attention lines pulse at different rates, so the picture reads as weights
    being recomputed for every output word rather than as fixed wiring. */
-.article .loop-anim .bn-wire { stroke: #C9C3BC; stroke-width: 1.4; fill: none; }
+.article .loop-anim .bn-wire { stroke: var(--rule-fig); stroke-width: 1.4; fill: none; }
 .article .loop-anim .bn-box {
-  fill: rgba(168, 68, 62, 0.14); stroke: #A8443E; stroke-width: 1.2;
+  fill: rgba(var(--c-marker-rgb), 0.14); stroke: var(--c-marker); stroke-width: 1.2;
 }
 .article .loop-anim .bn-lbl {
   font: 600 9px -apple-system, Helvetica, arial, sans-serif;
-  fill: #A8443E; text-anchor: middle;
+  fill: var(--c-marker); text-anchor: middle;
 }
 .article .loop-anim .bn-att {
-  stroke: #8C77BC; stroke-width: 2; fill: none; stroke-linecap: round;
+  stroke: var(--c-lav); stroke-width: 2; fill: none; stroke-linecap: round;
 }
 @keyframes bn-pulse {
   0%, 100% { stroke-opacity: 0.15; }
@@ -1368,15 +1467,15 @@ table td {
    one cache per guest that nobody else can touch. The caches breathe so the
    picture reads as growing rather than fixed. */
 .article .loop-anim .gu-w {
-  fill: rgba(62, 100, 145, 0.85); stroke: none;
+  fill: rgba(var(--c-blue-rgb), 0.85); stroke: none;
 }
-.article .loop-anim .gu-c { fill: #8C77BC; fill-opacity: 0.85; stroke: none; }
+.article .loop-anim .gu-c { fill: var(--c-lav); fill-opacity: 0.85; stroke: none; }
 .article .loop-anim .gu-room {
-  fill: none; stroke: #8C77BC; stroke-opacity: 0.45; stroke-width: 1;
+  fill: none; stroke: var(--c-lav); stroke-opacity: 0.45; stroke-width: 1;
 }
 .article .loop-anim .gu-lbl {
   font: 600 10px -apple-system, Helvetica, arial, sans-serif;
-  fill: #FFFFFF; text-anchor: middle;
+  fill: var(--on-fill); text-anchor: middle;
 }
 @keyframes gu-grow {
   0%, 100% { transform: scaleX(0.35); }
@@ -1400,35 +1499,171 @@ table td {
    while explaining; measured figures stay crisp, because those are data.
    -------------------------------------------------------------------------- */
 .article .sketch {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(var(--ink-rgb), 0.08);
+  border-bottom: 1px solid rgba(var(--ink-rgb), 0.08);
   padding: 22px 0 6px 0;
   margin: 34px 0;
 }
 .article .sketch svg { width: 100%; height: auto; display: block; }
 .article .sketch path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.article .sketch .sk-s     { stroke: #8C77BC; stroke-width: 1.6; }
-.article .sketch .sk-s2    { stroke: #3E6491; stroke-width: 1.6; }
-.article .sketch .sk-s3    { stroke: #22253E; stroke-width: 1.6; }
-.article .sketch .sk-mark  { stroke: #A8443E; stroke-width: 1.7; }
-.article .sketch .sk-att   { stroke: #8C77BC; stroke-width: 1.3; stroke-opacity: 0.5; }
-.article .sketch .sk-thin  { stroke: #6E6E6E; stroke-width: 1.2; }
-.article .sketch .sk-faint { stroke: #C9C3BC; stroke-width: 1.1; }
+.article .sketch .sk-s     { stroke: var(--c-lav); stroke-width: 1.6; }
+.article .sketch .sk-s2    { stroke: var(--c-blue); stroke-width: 1.6; }
+.article .sketch .sk-s3    { stroke: var(--c-ink); stroke-width: 1.6; }
+.article .sketch .sk-mark  { stroke: var(--c-marker); stroke-width: 1.7; }
+.article .sketch .sk-att   { stroke: var(--c-lav); stroke-width: 1.3; stroke-opacity: 0.5; }
+.article .sketch .sk-thin  { stroke: var(--fig-mute); stroke-width: 1.2; }
+.article .sketch .sk-faint { stroke: var(--rule-fig); stroke-width: 1.1; }
 .article .sketch text {
   font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
 }
-.article .sketch .sk-t   { font-size: 17.5px; fill: #3F3F3F; }
-.article .sketch .sk-sub { font-size: 14px; fill: #6E6E6E; }
-.article .sketch .sk-lbl { font-size: 15px; fill: #6E6E6E; }
+.article .sketch .sk-t   { font-size: 17.5px; fill: var(--fig-strong); }
+.article .sketch .sk-sub { font-size: 14px; fill: var(--fig-mute); }
+.article .sketch .sk-lbl { font-size: 15px; fill: var(--fig-mute); }
 /* No text-anchor here: CSS beats the per-element attribute, so setting it in
    the class silently re-centres labels that were placed with anchor='start'
    and pushes them off the edge of the viewBox. */
-.article .sketch .sk-note { font-size: 14.5px; fill: #8C77BC; }
-.article .sketch .sk-in { font-size: 14px; fill: #FFFFFF; }
+.article .sketch .sk-note { font-size: 14.5px; fill: var(--c-lav); }
+.article .sketch .sk-in { font-size: 14px; fill: var(--on-fill); }
 
-/* There is deliberately no dark mode on this site. Do not add
-   `prefers-color-scheme: dark` blocks for figures: the page background stays
-   light regardless of the reader's system setting, so a dark block only fires
-   for a dark-OS reader and repaints figure labels near-white on a white page,
-   which is how eight of them ended up invisible. If a real dark mode is ever
-   wanted it has to start with the page itself. */
+/* --------------------------------------------------------------------------
+   Dark mode.
+
+   The old comment here said there was none, and that adding one had to start
+   with the page itself rather than with `prefers-color-scheme` blocks bolted
+   onto figures. That is what this is: the roles at the top of the file are
+   redefined once, the reader chooses with the button at the top right, and
+   the choice is remembered. Nothing follows the operating system, because a
+   reader who never asked for a dark page should not be given one.
+
+   Three things the variables cannot reach, handled below.
+   -------------------------------------------------------------------------- */
+
+/* 1. Colour written as an attribute inside a post's own SVG, including the
+      attributes a widget's JavaScript writes at run time. A CSS declaration
+      beats a presentation attribute, so an attribute *selector* repaints
+      them without a line of any post changing. Shapes only: text carrying one
+      of these hexes is a label sitting on a filled shape, and it is handled
+      in (2). */
+:root[data-theme='dark'] .article :is(rect, circle, path, line, polygon, polyline, ellipse) {
+  &[fill='#8C77BC'] { fill: var(--c-lav); }
+  &[fill='#3E6491'] { fill: var(--c-blue); }
+  &[fill='#A8443E'] { fill: var(--c-marker); }
+  &[fill='#C48BAC'] { fill: var(--c-rose); }
+  &[fill='#6E8C66'] { fill: var(--c-sage); }
+  &[fill='#B07E55'] { fill: var(--c-clay); }
+  &[fill='#22253E'] { fill: var(--c-ink); }
+  &[fill='#DEDAD4'] { fill: var(--rule-soft); }
+  &[fill='#FFFFFF'] { fill: var(--panel); }
+  &[stroke='#8C77BC'] { stroke: var(--c-lav); }
+  &[stroke='#3E6491'] { stroke: var(--c-blue); }
+  &[stroke='#A8443E'] { stroke: var(--c-marker); }
+  &[stroke='#C48BAC'] { stroke: var(--c-rose); }
+  &[stroke='#C6BBDD'] { stroke: var(--c-lav-soft); }
+  &[stroke='#DEDAD4'], &[stroke='#D8D4CE'] { stroke: var(--rule-soft); }
+  &[stroke='#C9C3BC'] { stroke: var(--rule-fig); }
+  &[stroke='#FFFFFF'] { stroke: var(--bg); }
+}
+:root[data-theme='dark'] .article text {
+  &[fill='#8C77BC'] { fill: var(--c-lav); }
+  &[fill='#3E6491'] { fill: var(--c-blue); }
+  &[fill='#3F3F3F'] { fill: var(--fig-strong); }
+  &[fill='#6E6E6E'] { fill: var(--fig-mute); }
+  &[fill='#8C8C8C'], &[fill='#7A7A7A'] { fill: var(--fig-faint); }
+  /* A white label is only ever white because it is lying on a filled bar, and
+     every one of those bars is lighter in this theme, not darker. */
+  &[fill='#FFFFFF'] { fill: var(--on-fill); }
+}
+
+/* 2. Captions name their series by colouring a word inline, which is a style
+      attribute and therefore beats everything except !important. */
+:root[data-theme='dark'] .article .caption [style*='#8C77BC'] { color: var(--c-lav) !important; }
+:root[data-theme='dark'] .article .caption [style*='#3E6491'] { color: var(--c-blue) !important; }
+:root[data-theme='dark'] .article .caption [style*='#A8443E'] { color: var(--c-marker) !important; }
+:root[data-theme='dark'] .article .caption [style*='#C48BAC'] { color: var(--c-rose) !important; }
+:root[data-theme='dark'] .article .caption [style*='#6E8C66'] { color: var(--c-sage) !important; }
+:root[data-theme='dark'] .article .caption [style*='#B07E55'] { color: var(--c-clay) !important; }
+:root[data-theme='dark'] .article .caption [style*='#22253E'] { color: var(--c-lav-soft) !important; }
+
+/* 3. Rasters. A reproduced paper figure is pixels with a white background and
+      no amount of CSS will recolour its axes, so it keeps its own light mat
+      and is dimmed to sit at about the brightness of the surrounding text. */
+.article .figure img,
+.article .figure-pair .panel img {
+  filter: var(--img-filter);
+  background: var(--img-mat);
+  border-radius: 3px;
+}
+:root[data-theme='dark'] .article .figure img,
+:root[data-theme='dark'] .article .figure-pair .panel img {
+  padding: 6px;
+  box-sizing: border-box;
+}
+/* Code blocks come from Pygments, which ships one palette per stylesheet;
+   build.py writes a second one scoped to this theme. */
+:root[data-theme='dark'] .article div.highlight { background: var(--panel); }
+
+/* MathJax draws in currentColor, so the maths follows the body text on its
+   own -- except for the horizontal rules in fractions and radicals, which it
+   fills rather than strokes. */
+:root[data-theme='dark'] mjx-container { color: rgba(var(--ink-rgb), 0.85); }
+
+/* --------------------------------------------------------------------------
+   The switch. Fixed at the top right rather than sitting in the nav, because
+   these posts are long and a reader who wants the lights down at figure 6
+   should not have to scroll back to the masthead to ask for it.
+   -------------------------------------------------------------------------- */
+.theme-toggle {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 50;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  border: 1px solid rgba(var(--ink-rgb), 0.14);
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(var(--ink-rgb), 0.55);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.theme-toggle:hover {
+  color: var(--c-lav);
+  border-color: rgba(var(--c-lav-rgb), 0.55);
+  transform: scale(1.08);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid #8C7BA6;
+  outline-offset: 3px;
+}
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* One icon is drawn over the other and they trade places, so the button reads
+   as a switch being thrown rather than as a label being replaced. */
+.theme-toggle .icon {
+  grid-area: 1 / 1;
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.theme-toggle .moon { opacity: 0; transform: rotate(-60deg) scale(0.6); }
+.theme-toggle .sun  { opacity: 1; transform: rotate(0deg) scale(1); }
+:root[data-theme='dark'] .theme-toggle .moon { opacity: 1; transform: rotate(0deg) scale(1); }
+:root[data-theme='dark'] .theme-toggle .sun  { opacity: 0; transform: rotate(60deg) scale(0.6); }
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle .icon { transition: none; }
+  .theme-toggle:hover { transform: none; }
+}
+@media screen and (max-width: 700px) {
+  .theme-toggle { top: 8px; right: 8px; }
+}

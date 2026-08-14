@@ -623,15 +623,31 @@ when the point is *measured* data rather than a formula.
 
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
-**There is no dark mode, so do not write for one.** The page background is
-light whatever the reader's system is set to. A `prefers-color-scheme: dark`
-block therefore never makes the page dark — it only fires for a reader whose
-OS is dark and repaints figure labels near-white *on a white page*. Eight such
-blocks had accumulated, some inherited with the template and some added by me
-following the pattern, and between them they made the labels in most figures
-invisible to anyone browsing with a dark system theme. They are removed. If a
-real dark mode is ever wanted, it has to begin with the page itself, not with
-the figures.
+**Dark mode exists, and it is a variable away.** Every colour in `blog.css`
+is a role defined once on `:root` — `--fig-mute`, `--rule-soft`, `--c-lav`,
+`--panel`, and an `--ink-rgb` triple that all the `rgba(var(--ink-rgb), a)`
+text and rules are drawn from. A `:root[data-theme='dark']` block redefines
+the roles and nothing else. Two consequences when you write a figure:
+
+- **Never hard-code a colour in `blog.css`.** Use the role, or add one. A hex
+  written into a rule is a hex that stays light on a dark page.
+- **A hex written as an SVG *attribute* inside a post is repainted for you**,
+  by attribute selectors at the foot of `blog.css` — `[fill='#8C77BC']` and
+  the rest. If you introduce a palette colour that is not in that list, add
+  it, or your figure will keep its light-page colour on a dark page.
+- **White text on a filled shape is `--on-fill`, not `#FFFFFF`.** Data
+  colours are *lifted* in dark mode rather than inverted, so a label lying on
+  a lavender bar has to go dark, not stay white.
+- Reproduced paper figures are rasters and cannot be repainted. They get a
+  light mat and a `brightness()` dim instead, which is already in the CSS.
+
+The switch is a fixed button at the top right, emitted by `base.html` on every
+page, remembered in `localStorage`. It deliberately does **not** follow
+`prefers-color-scheme`: a reader who never asked for a dark page is not given
+one. What was wrong before was not dark styling but dark styling on a light
+page — eight `prefers-color-scheme: dark` blocks that fired for a dark-OS
+reader and painted figure labels near-white on white. Do not bring those back;
+theme with `[data-theme='dark']`, never with the media query.
 
 **Chrome is not data, and `#8C7BA6` is fixed.** The like button's middle heart
 and the slider accent are furniture: they must look identical on every post,

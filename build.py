@@ -630,8 +630,26 @@ def build():
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
-    pygments_css = (HtmlFormatter(style='friendly').get_style_defs('.highlight')
-                    if HAS_PYGMENTS else '/* Pygments is not installed. */')
+    # Two palettes in one stylesheet. Pygments emits one style per call and
+    # every rule it writes is a hard-coded colour, so the dark page cannot be
+    # served by variables the way the rest of the site is; it gets its own set
+    # of rules, scoped to the theme attribute and therefore inert until a
+    # reader asks for it.
+    if HAS_PYGMENTS:
+        pygments_css = '\n'.join([
+            HtmlFormatter(style='friendly').get_style_defs('.highlight'),
+            '',
+            # Only the scoped rules: Pygments also emits a bare `pre` and a
+            # few `td.linenos` rules that are not scoped to anything and
+            # would overwrite the light palette's versions of the same.
+            '\n'.join(
+                line for line in
+                HtmlFormatter(style='stata-dark')
+                .get_style_defs("[data-theme='dark'] .highlight").split('\n')
+                if line.startswith("[data-theme='dark']")),
+        ])
+    else:
+        pygments_css = '/* Pygments is not installed. */'
     write(os.path.join(OUT_DIR, 'css', 'pygments.css'), pygments_css)
 
     # Landing page.

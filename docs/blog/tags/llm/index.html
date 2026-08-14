@@ -14,6 +14,18 @@
     <link href='/css/pygments.css' rel='stylesheet'/>
 
     <script>
+    /* Runs before anything is painted: a reader who chose the dark page must
+       not be shown the white one first. Nothing here consults
+       prefers-color-scheme -- the site is light until somebody asks. */
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+    </script>
+    <script>
     window.MathJax = {
       tex: {
         inlineMath: [['$', '$']],
@@ -31,6 +43,16 @@
 
 </head>
 <body>
+    <button class='theme-toggle' type='button' aria-pressed='false'
+            aria-label='Switch to dark mode' title='Switch to dark mode'>
+        <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
+            <circle cx='12' cy='12' r='4.6'/>
+            <path d='M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7'/>
+        </svg>
+        <svg class='icon moon' viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z'/>
+        </svg>
+    </button>
     <div class='nav'>
     <ul class='wrap'>
         <li><a href='/'>Home</a></li>
@@ -160,5 +182,27 @@
     <div class='credit'>
         <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
     </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      function paint() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var say = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        btn.setAttribute('aria-label', say);
+        btn.setAttribute('title', say);
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') !== 'dark';
+        if (dark) { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    })();
+    </script>
 </body>
 </html>
