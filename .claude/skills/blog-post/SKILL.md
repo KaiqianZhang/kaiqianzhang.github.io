@@ -156,6 +156,29 @@ Two mechanical traps, both of which have bitten:
    a class carrying `text-anchor: middle` silently re-centres every label
    placed with `anchor='start'` and pushes it off the edge of the viewBox. Set
    anchoring on the element.
+3. **Matplotlib type is not CSS type, and raising one does nothing to the
+   other.** A plot's font is in points on a paper-sized figure, then the whole
+   image is scaled down to the 700px column. What the reader actually sees is
+
+   ```
+   css_px = font_pt * 700 / (72 * figsize_width_inches)
+   ```
+
+   so 10pt on an 11-inch figure arrives at **8.8 px** — smaller than any text
+   on the page. Size plot type against that number, not against how it looks
+   in the PNG. Aim for 13–15 CSS px, which is 16–17pt on an 11-inch figure.
+   And once the type is big enough to read, a legend is often big enough to
+   cover the data: label curves directly instead.
+4. **Derive box widths from the label.** A box with a hard-coded width will
+   eventually be given a longer word, and the text will hang out of it.
+   `figures/sketch.py` has `text_width()` and `box_width()` using a measured
+   Excalifont advance; use them rather than guessing a number that looked
+   right once.
+5. **Leading has to exceed the font size.** Every time the type grew this
+   session, some pair of stacked labels started overlapping, because their
+   line spacing had been chosen for the old size. If two lines are placed by
+   hand at `y` and `y + k`, then `k` must be comfortably larger than the
+   larger of the two font sizes.
 
 ## The figure rule
 
@@ -629,6 +652,15 @@ rather than edit:
    domain expert would raise.
 
 Then:
+
+**Before those agents, run the geometry sweep in a browser**, because it
+catches a class of thing no reader of the source can see. Serve the site, open
+each post, and for every `svg` in `.article` check that no `text` escapes its
+`viewBox` and that no two `text` elements overlap — then repeat the whole
+check with every slider driven to both extremes, since a widget that is clean
+at its default can break at the ends of its range. Check `elementFromPoint` at
+each slider's centre returns the slider. Nearly every layout bug this skill
+has recorded was found this way and not by eye.
 
 - **Do not take agent output at face value.** Check each reported issue
   yourself before changing anything; agents produce confident false positives.
