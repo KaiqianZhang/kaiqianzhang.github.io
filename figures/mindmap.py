@@ -56,7 +56,7 @@ plt.rcParams.update({
 def save(fig, name):
     fig.tight_layout(pad=1.2)
     os.makedirs(OUT, exist_ok=True)
-    fig.savefig(os.path.join(OUT, name), dpi=130, facecolor='white')
+    fig.savefig(os.path.join(OUT, name), dpi=220, facecolor='white')
     print('wrote', name)
 
 

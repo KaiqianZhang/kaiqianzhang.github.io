@@ -67,78 +67,82 @@ Each attempt charged something. The labels above the arrows name what the
 step to their left was still paying.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 277' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
-      <path class='spine' d='M99.4,138.0 Q379.9,138.8 660.4,137.8'/>
-      <path class='head' d='M180.5,138.4 Q193.3,137.9 206.0,138.2'/>
-      <path class='head' d='M179.8,138.3 Q193.2,138.4 206.5,138.3'/>
-      <path class='head' d='M206.5,139.1 Q203.9,140.5 201.1,141.7'/>
-      <path class='head' d='M206.2,137.9 Q203.2,136.7 200.2,135.7'/>
-      <text class='why' x='193.0' y='114.5'>statistics depend on the</text>
-      <text class='why' x='193.0' y='127.5'>batch</text>
-      <path class='head' d='M366.7,138.7 Q379.8,139.0 393.0,139.0'/>
-      <path class='head' d='M367.0,138.3 Q379.8,138.7 392.6,139.0'/>
-      <path class='head' d='M392.5,138.8 Q390.2,140.3 387.5,141.1'/>
-      <path class='head' d='M392.4,138.3 Q389.9,137.4 387.7,136.0'/>
-      <text class='why' x='380.0' y='114.5'>is the mean doing any</text>
-      <text class='why' x='380.0' y='127.5'>work?</text>
-      <path class='head' d='M554.2,138.4 Q567.1,137.9 580.0,138.0'/>
-      <path class='head' d='M554.6,137.9 Q567.4,137.5 580.2,138.3'/>
-      <path class='head' d='M580.3,138.2 Q578.0,139.7 575.5,141.0'/>
-      <path class='head' d='M579.3,138.0 Q577.1,137.4 575.4,136.0'/>
-      <text class='why' x='567.0' y='127.5'>same quality, less time</text>
+    <svg viewBox='0 0 760 344' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
+      <path class='spine' d='M99.4,171.5 Q379.9,172.3 660.4,171.3'/>
+      <path class='head' d='M180.5,171.9 Q193.3,171.4 206.0,171.7'/>
+      <path class='head' d='M179.8,171.8 Q193.2,171.9 206.5,171.8'/>
+      <path class='head' d='M206.5,172.6 Q203.9,174.0 201.1,175.2'/>
+      <path class='head' d='M206.2,171.4 Q203.2,170.2 200.2,169.2'/>
+      <text class='why' x='193.0' y='144.0'>statistics depend on</text>
+      <text class='why' x='193.0' y='161.0'>the batch</text>
+      <path class='head' d='M366.7,172.2 Q379.8,172.5 393.0,172.5'/>
+      <path class='head' d='M367.0,171.8 Q379.8,172.2 392.6,172.5'/>
+      <path class='head' d='M392.5,172.3 Q390.2,173.8 387.5,174.6'/>
+      <path class='head' d='M392.4,171.8 Q389.9,170.9 387.7,169.5'/>
+      <text class='why' x='380.0' y='144.0'>is the mean doing any</text>
+      <text class='why' x='380.0' y='161.0'>work?</text>
+      <path class='head' d='M554.2,171.9 Q567.1,171.4 580.0,171.5'/>
+      <path class='head' d='M554.6,171.4 Q567.4,171.0 580.2,171.8'/>
+      <path class='head' d='M580.3,171.7 Q578.0,173.2 575.5,174.5'/>
+      <path class='head' d='M579.3,171.5 Q577.1,170.9 575.4,169.5'/>
+      <text class='why' x='567.0' y='144.0'>same quality, less</text>
+      <text class='why' x='567.0' y='161.0'>time</text>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='0.0' width='356.0' height='92.5'/>
-        <path class='stem' d='M99.2,93.2 Q100.2,115.9 100.1,138.7'/>
-        <circle class='dot' cx='99.5' cy='138.5' r='5'/>
-        <path class='box' d='M24.7,-0.6 Q193.0,-1.0 361.3,-0.6 Q370.3,-0.6 370.3,8.4 Q369.8,45.7 370.3,83.0 Q370.3,92.0 361.3,92.0 Q193.0,92.7 24.7,92.0 Q15.7,92.0 15.7,83.0 Q16.0,45.7 15.7,8.4 Q15.7,-0.6 24.7,-0.6'/>
-        <path class='box' d='M23.6,-0.3 Q192.4,-0.1 361.1,-0.3 Q370.1,-0.3 370.1,8.7 Q369.8,46.5 370.1,84.3 Q370.1,93.3 361.1,93.3 Q192.4,93.1 23.6,93.3 Q14.6,93.3 14.6,84.3 Q14.1,46.5 14.6,8.7 Q14.6,-0.3 23.6,-0.3'/>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M99.2,118.7 Q100.2,145.4 100.1,172.2'/>
+        <circle class='dot' cx='99.5' cy='172.0' r='5'/>
+        <path class='box' d='M24.7,-0.6 Q193.0,-1.0 361.3,-0.6 Q370.3,-0.6 370.3,8.4 Q369.8,58.5 370.3,108.5 Q370.3,117.5 361.3,117.5 Q193.0,118.2 24.7,117.5 Q15.7,117.5 15.7,108.5 Q16.0,58.5 15.7,8.4 Q15.7,-0.6 24.7,-0.6'/>
+        <path class='box' d='M23.6,-0.3 Q192.4,-0.1 361.1,-0.3 Q370.1,-0.3 370.1,8.7 Q369.8,59.2 370.1,109.8 Q370.1,118.8 361.1,118.8 Q192.4,118.6 23.6,118.8 Q14.6,118.8 14.6,109.8 Q14.1,59.2 14.6,8.7 Q14.6,-0.3 23.6,-0.3'/>
         <text class='yr' x='29.0' y='19.0'>2015</text>
         <text class='stage' x='29.0' y='37.0'>BatchNorm</text>
         <circle class='bul' cx='33.0' cy='52.0' r='2'/>
-        <text class='body' x='42.0' y='56.0'>standardize each feature across the mini-batch</text>
-        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
-        <text class='body' x='42.0' y='71.5'>deep networks become trainable</text>
+        <text class='body' x='42.0' y='56.0'>standardize each feature across the</text>
+        <text class='body' x='42.0' y='74.0'>mini-batch</text>
+        <circle class='bul' cx='33.0' cy='88.0' r='2'/>
+        <text class='body' x='42.0' y='92.0'>deep networks become trainable</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='184.5' width='356.0' height='92.5'/>
-        <path class='stem' d='M286.4,184.9 Q287.1,161.6 287.0,138.3'/>
-        <circle class='dot' cx='286.5' cy='138.5' r='5'/>
-        <path class='box' d='M23.3,184.6 Q192.3,184.9 361.3,184.6 Q370.3,184.6 370.3,193.6 Q371.0,230.9 370.3,268.2 Q370.3,277.2 361.3,277.2 Q192.3,277.8 23.3,277.2 Q14.3,277.2 14.3,268.2 Q14.2,230.9 14.3,193.6 Q14.3,184.6 23.3,184.6'/>
-        <path class='box' d='M24.2,184.7 Q192.9,184.5 361.6,184.7 Q370.6,184.7 370.6,193.7 Q370.6,230.8 370.6,268.0 Q370.6,277.0 361.6,277.0 Q192.9,277.9 24.2,277.0 Q15.2,277.0 15.2,268.0 Q15.2,230.8 15.2,193.7 Q15.2,184.7 24.2,184.7'/>
-        <text class='yr' x='29.0' y='203.5'>2016</text>
-        <text class='stage' x='29.0' y='221.5'>LayerNorm</text>
-        <circle class='bul' cx='33.0' cy='236.5' r='2'/>
-        <text class='body' x='42.0' y='240.5'>normalize each example across its own features</text>
-        <circle class='bul' cx='33.0' cy='252.0' r='2'/>
-        <text class='body' x='42.0' y='256.0'>no batch dependence, no train/test gap</text>
+        <rect class='hit' x='15.0' y='226.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M286.4,226.4 Q287.1,199.1 287.0,171.8'/>
+        <circle class='dot' cx='286.5' cy='172.0' r='5'/>
+        <path class='box' d='M23.3,226.1 Q192.3,226.4 361.3,226.1 Q370.3,226.1 370.3,235.1 Q371.0,285.2 370.3,335.2 Q370.3,344.2 361.3,344.2 Q192.3,344.8 23.3,344.2 Q14.3,344.2 14.3,335.2 Q14.2,285.2 14.3,235.1 Q14.3,226.1 23.3,226.1'/>
+        <path class='box' d='M24.2,226.2 Q192.9,226.0 361.6,226.2 Q370.6,226.2 370.6,235.2 Q370.6,285.1 370.6,335.0 Q370.6,344.0 361.6,344.0 Q192.9,344.9 24.2,344.0 Q15.2,344.0 15.2,335.0 Q15.2,285.1 15.2,235.2 Q15.2,226.2 24.2,226.2'/>
+        <text class='yr' x='29.0' y='245.0'>2016</text>
+        <text class='stage' x='29.0' y='263.0'>LayerNorm</text>
+        <circle class='bul' cx='33.0' cy='278.0' r='2'/>
+        <text class='body' x='42.0' y='282.0'>normalize each example across its own</text>
+        <text class='body' x='42.0' y='300.0'>features</text>
+        <circle class='bul' cx='33.0' cy='314.0' r='2'/>
+        <text class='body' x='42.0' y='318.0'>no batch dependence, no train/test gap</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='0.0' width='356.0' height='92.5'/>
-        <path class='stem' d='M473.9,93.0 Q473.2,115.5 472.8,137.9'/>
-        <circle class='dot' cx='473.5' cy='138.5' r='5'/>
-        <path class='box' d='M397.4,-0.0 Q567.0,0.1 736.6,-0.0 Q745.6,-0.0 745.6,9.0 Q746.5,46.2 745.6,83.3 Q745.6,92.3 736.6,92.3 Q567.0,92.5 397.4,92.3 Q388.4,92.3 388.4,83.3 Q387.8,46.2 388.4,9.0 Q388.4,-0.0 397.4,-0.0'/>
-        <path class='box' d='M397.8,-0.3 Q567.1,0.2 736.5,-0.3 Q745.5,-0.3 745.5,8.7 Q745.8,46.1 745.5,83.5 Q745.5,92.5 736.5,92.5 Q567.1,92.4 397.8,92.5 Q388.8,92.5 388.8,83.5 Q389.2,46.1 388.8,8.7 Q388.8,-0.3 397.8,-0.3'/>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M473.9,118.5 Q473.2,145.0 472.8,171.4'/>
+        <circle class='dot' cx='473.5' cy='172.0' r='5'/>
+        <path class='box' d='M397.4,-0.0 Q567.0,0.1 736.6,-0.0 Q745.6,-0.0 745.6,9.0 Q746.5,58.9 745.6,108.8 Q745.6,117.8 736.6,117.8 Q567.0,118.0 397.4,117.8 Q388.4,117.8 388.4,108.8 Q387.8,58.9 388.4,9.0 Q388.4,-0.0 397.4,-0.0'/>
+        <path class='box' d='M397.8,-0.3 Q567.1,0.2 736.5,-0.3 Q745.5,-0.3 745.5,8.7 Q745.8,58.9 745.5,109.0 Q745.5,118.0 736.5,118.0 Q567.1,117.9 397.8,118.0 Q388.8,118.0 388.8,109.0 Q389.2,58.9 388.8,8.7 Q388.8,-0.3 397.8,-0.3'/>
         <text class='yr' x='403.0' y='19.0'>2019</text>
         <text class='stage' x='403.0' y='37.0'>RMSNorm</text>
         <circle class='bul' cx='407.0' cy='52.0' r='2'/>
-        <text class='body' x='416.0' y='56.0'>Zhang and Sennrich drop the mean subtraction</text>
-        <circle class='bul' cx='407.0' cy='67.5' r='2'/>
-        <text class='body' x='416.0' y='71.5'>only the division survives</text>
-        <circle class='bul' cx='407.0' cy='83.0' r='2'/>
-        <text class='body' x='416.0' y='87.0'>7 to 64% less running time</text>
+        <text class='body' x='416.0' y='56.0'>Zhang and Sennrich drop the mean</text>
+        <text class='body' x='416.0' y='74.0'>subtraction</text>
+        <circle class='bul' cx='407.0' cy='88.0' r='2'/>
+        <text class='body' x='416.0' y='92.0'>only the division survives</text>
+        <circle class='bul' cx='407.0' cy='106.0' r='2'/>
+        <text class='body' x='416.0' y='110.0'>7 to 64% less running time</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='184.5' width='356.0' height='92.5'/>
-        <path class='stem' d='M660.3,183.9 Q660.1,161.4 659.8,138.9'/>
-        <circle class='dot' cx='660.5' cy='138.5' r='5'/>
-        <path class='box' d='M397.8,184.1 Q566.8,184.6 735.8,184.1 Q744.8,184.1 744.8,193.1 Q744.2,230.7 744.8,268.3 Q744.8,277.3 735.8,277.3 Q566.8,277.8 397.8,277.3 Q388.8,277.3 388.8,268.3 Q387.9,230.7 388.8,193.1 Q388.8,184.1 397.8,184.1'/>
-        <path class='box' d='M398.1,185.1 Q567.4,184.2 736.7,185.1 Q745.7,185.1 745.7,194.1 Q744.8,231.3 745.7,268.6 Q745.7,277.6 736.7,277.6 Q567.4,278.3 398.1,277.6 Q389.1,277.6 389.1,268.6 Q389.3,231.3 389.1,194.1 Q389.1,185.1 398.1,185.1'/>
-        <text class='yr' x='403.0' y='203.5'>2023-</text>
-        <text class='stage' x='403.0' y='221.5'>the default</text>
-        <circle class='bul' cx='407.0' cy='236.5' r='2'/>
-        <text class='body' x='416.0' y='240.5'>LLaMA ships it; Mistral, Qwen, Gemma follow</text>
-        <circle class='bul' cx='407.0' cy='252.0' r='2'/>
-        <text class='body' x='416.0' y='256.0'>LayerNorm becomes the exception</text>
+        <rect class='hit' x='389.0' y='226.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M660.3,225.4 Q660.1,198.9 659.8,172.4'/>
+        <circle class='dot' cx='660.5' cy='172.0' r='5'/>
+        <path class='box' d='M397.8,225.6 Q566.8,226.1 735.8,225.6 Q744.8,225.6 744.8,234.6 Q744.2,284.9 744.8,335.3 Q744.8,344.3 735.8,344.3 Q566.8,344.8 397.8,344.3 Q388.8,344.3 388.8,335.3 Q387.9,284.9 388.8,234.6 Q388.8,225.6 397.8,225.6'/>
+        <path class='box' d='M398.1,226.6 Q567.4,225.7 736.7,226.6 Q745.7,226.6 745.7,235.6 Q744.8,285.6 745.7,335.6 Q745.7,344.6 736.7,344.6 Q567.4,345.3 398.1,344.6 Q389.1,344.6 389.1,335.6 Q389.3,285.6 389.1,235.6 Q389.1,226.6 398.1,226.6'/>
+        <text class='yr' x='403.0' y='245.0'>2023-</text>
+        <text class='stage' x='403.0' y='263.0'>the default</text>
+        <circle class='bul' cx='407.0' cy='278.0' r='2'/>
+        <text class='body' x='416.0' y='282.0'>LLaMA ships it; Mistral, Qwen, Gemma follow</text>
+        <circle class='bul' cx='407.0' cy='296.0' r='2'/>
+        <text class='body' x='416.0' y='300.0'>LayerNorm becomes the exception</text>
       </g>
     </svg>
 </div>

@@ -25,13 +25,15 @@ BULLET_INSET = 21       # where bullet text starts inside a card
 SPINE_Y = 40
 BOX_TOP = 56
 TITLE_DY = 21           # first baseline below the box top
-LINE_H = 15.5
-BODY_SIZE = 12.5
+LINE_H = 18
+WHY_LINE = 17           # leading for the reason above each arrow
+BODY_SIZE = 14.5
 
-# Mean advance width of the body font. Deliberately generous: erring high
-# only wraps a word early, whereas erring low pushes a centred line out past
-# the rounded rect it is supposed to sit inside.
-CHAR_EM = 0.52
+# Mean advance width of the body font, measured in the browser for Excalifont
+# at the size above (0.506) and rounded up. Deliberately generous: erring high
+# only wraps a word early, whereas erring low pushes a line out past the card
+# it is supposed to sit inside.
+CHAR_EM = 0.525
 
 
 def wrap(text, width_px):
@@ -79,7 +81,7 @@ def roadmap(stops, arrows, label):
 
     gap = (W - 2 * PAD) / n - 16
     why = [wrap(r, gap) for r in arrows]
-    whyh = 13 * max([len(w) for w in why] or [1])
+    whyh = WHY_LINE * max([len(w) for w in why] or [1])
 
     band = whyh + 20                 # clear air between a card and the spine
     spine_y = cardh + band
@@ -99,7 +101,8 @@ def roadmap(stops, arrows, label):
         # The labels live in the clear band, never in a card's row.
         for j, line in enumerate(why[i]):
             out.append("  <text class='why' x='%.1f' y='%.1f'>%s</text>"
-                       % (mid, spine_y - 11 - (len(why[i]) - 1 - j) * 13, line))
+                       % (mid, spine_y - 11 - (len(why[i]) - 1 - j) * WHY_LINE,
+                          line))
 
     for i, (year, title, _b) in enumerate(stops):
         x, cw = slots[i]

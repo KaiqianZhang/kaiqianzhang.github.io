@@ -91,7 +91,7 @@ print('overall spread of the logits              : %.3e' % np.ptp(logits))
 
 fig1.tight_layout(pad=1.2)
 os.makedirs(OUT, exist_ok=True)
-fig1.savefig(os.path.join(OUT, 'rope-invariance.png'), dpi=130,
+fig1.savefig(os.path.join(OUT, 'rope-invariance.png'), dpi=220,
              facecolor='white')
 print('wrote rope-invariance.png')
 
@@ -134,7 +134,7 @@ ax2.set_axisbelow(True)
 ax2.legend(frameon=False, loc='upper left', fontsize=9)
 
 fig2.tight_layout(pad=1.2)
-fig2.savefig(os.path.join(OUT, 'rope-wavelengths.png'), dpi=130,
+fig2.savefig(os.path.join(OUT, 'rope-wavelengths.png'), dpi=220,
              facecolor='white')
 print('wrote rope-wavelengths.png')
 
@@ -190,7 +190,7 @@ ax3.set_axisbelow(True)
 ax3.legend(frameon=False, loc='lower left', fontsize=9)
 
 fig3.tight_layout(pad=1.2)
-fig3.savefig(os.path.join(OUT, 'rope-decay-test.png'), dpi=130,
+fig3.savefig(os.path.join(OUT, 'rope-decay-test.png'), dpi=220,
              facecolor='white')
 print('wrote rope-decay-test.png')
 print('bound at t=250 relative to t=10 : %.3f' % (bound[-7] / bound[0]))

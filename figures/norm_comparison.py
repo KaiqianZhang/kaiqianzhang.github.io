@@ -130,7 +130,7 @@ ax2.annotate('RMSNorm: output rotates away', xy=(2.3, 0.40), xytext=(1.6, 0.55),
 
 fig.tight_layout(pad=1.4)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
-fig.savefig(OUT, dpi=130, facecolor='white')
+fig.savefig(OUT, dpi=220, facecolor='white')
 print('wrote', OUT)
 
 # Numbers quoted in the post.

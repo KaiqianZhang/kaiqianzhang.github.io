@@ -219,6 +219,9 @@ lo, hi = rgb('#F4F1F8'), rgb('#5B4A80')          # low weight -> high weight
 v = (lum[y0:y1, x0:x1] / 255.0)[..., None]        # 0 = black = low attention
 a[y0:y1, x0:x1] = lo + v * (hi - lo)
 im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+# The original carries wide empty margins; trimming them lets the figure fill
+# its box instead of being a small plot floating in white.
+im = trim(im, pad=12)
 im.save(os.path.join(OUT, 'attention-alignment.png'))
 print('      %d x %d' % (im.width, im.height))
 

@@ -1,3 +1,16 @@
+
+/* Excalifont, the hand-drawn face Excalidraw uses, self-hosted so the figures
+   look the same on every machine rather than falling through to whatever
+   handwriting font a reader happens to own. SIL Open Font License 1.1; the
+   licence travels with it in static/fonts/. The arrow glyph is not in the
+   subset, so the fallbacks below still matter for those. */
+@font-face {
+  font-family: 'Excalifont';
+  src: url('/fonts/Excalifont-Regular.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
 html {
   font-family: -apple-system, Helvetica, arial, sans-serif;
   color: rgba(0, 0, 0, 0.8);
@@ -166,6 +179,14 @@ table td {
 /* For a supporting figure that does not need the full column width. */
 .article .figure.narrow img {
   max-width: 430px;
+  margin: 0 auto;
+  display: block;
+}
+/* For a reproduced figure that is nearly square: full width would tower over
+   the page, but 430px makes it read as a thumbnail beside the 700px figures
+   around it. */
+.article .figure.medium img {
+  max-width: 560px;
   margin: 0 auto;
   display: block;
 }
@@ -428,7 +449,7 @@ table td {
   stroke-width: 1;
 }
 .article .knob .tick {
-  font: 400 11px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 12.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #8C8C8C;
 }
 /* A second row of controls, for widgets with more than one slider. The rule
@@ -468,7 +489,7 @@ table td {
 }
 
 .article .knob .axlabel {
-  font: 400 12px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 13.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #6E6E6E;
 }
 .article .knob .trace {
@@ -504,11 +525,10 @@ table td {
   display: block;
 }
 .article .roadmap text {
-  font-family: 'Bradley Hand', 'Chalkboard SE', 'Segoe Print', 'Comic Sans MS',
-               'Comic Neue', cursive;
+  font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
 }
 .article .roadmap .stage {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
   fill: #3F3F3F;
 }
@@ -531,7 +551,7 @@ table td {
   letter-spacing: 0.06em;
 }
 .article .roadmap .why {
-  font-size: 12.5px;
+  font-size: 14px;
   fill: #8C77BC;
   text-anchor: middle;
 }
@@ -560,12 +580,12 @@ table td {
   stroke-linejoin: round;
 }
 .article .roadmap .yr {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   fill: #C48BAC;
 }
 .article .roadmap .body {
-  font-size: 12.5px;
+  font-size: 14.5px;
   fill: #5E5E5E;
 }
 /* Hover a milestone and the whole group lifts: dot, box and text together.
@@ -1268,23 +1288,23 @@ table td {
   fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
 }
 .article .knob .num {
-  font: 500 9px ui-monospace, Menlo, monospace;
+  font: 500 10.5px ui-monospace, Menlo, monospace;
   fill: #3F3F3F;
 }
 .article .knob .tk {
-  font: 500 11px -apple-system, Helvetica, arial, sans-serif;
+  font: 500 13px -apple-system, Helvetica, arial, sans-serif;
   fill: #3F3F3F;
 }
 .article .knob .tk.off { fill: #C9C3BC; }
 .article .knob .gl {
-  font: 600 11.5px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 600 13px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
 }
 .article .knob .hd {
-  font: 600 12px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
+  font: 600 13.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
 }
 .article .knob .wbar { fill: #8C77BC; fill-opacity: 0.75; }
 .article .knob .wnum {
-  font: 500 11px ui-monospace, Menlo, monospace; fill: #3F3F3F;
+  font: 500 12.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
 }
 .article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
 @media (prefers-color-scheme: dark) {
@@ -1416,19 +1436,17 @@ table td {
 .article .sketch .sk-att   { stroke: #8C77BC; stroke-width: 1.3; stroke-opacity: 0.5; }
 .article .sketch .sk-thin  { stroke: #6E6E6E; stroke-width: 1.2; }
 .article .sketch .sk-faint { stroke: #C9C3BC; stroke-width: 1.1; }
-/* A handwriting face, from whatever the reader's machine already has. */
 .article .sketch text {
-  font-family: 'Bradley Hand', 'Chalkboard SE', 'Segoe Print', 'Comic Sans MS',
-               'Comic Neue', cursive;
+  font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
 }
-.article .sketch .sk-t   { font-size: 15px; fill: #3F3F3F; }
-.article .sketch .sk-sub { font-size: 12px; fill: #6E6E6E; }
-.article .sketch .sk-lbl { font-size: 13px; fill: #6E6E6E; }
+.article .sketch .sk-t   { font-size: 17.5px; fill: #3F3F3F; }
+.article .sketch .sk-sub { font-size: 14px; fill: #6E6E6E; }
+.article .sketch .sk-lbl { font-size: 15px; fill: #6E6E6E; }
 /* No text-anchor here: CSS beats the per-element attribute, so setting it in
    the class silently re-centres labels that were placed with anchor='start'
    and pushes them off the edge of the viewBox. */
-.article .sketch .sk-note { font-size: 12.5px; fill: #8C77BC; }
-.article .sketch .sk-in { font-size: 12px; fill: #FFFFFF; }
+.article .sketch .sk-note { font-size: 14.5px; fill: #8C77BC; }
+.article .sketch .sk-in { font-size: 14px; fill: #FFFFFF; }
 @media (prefers-color-scheme: dark) {
   .article .sketch .sk-t { fill: #D8D4CE; }
   .article .sketch .sk-sub, .article .sketch .sk-lbl { fill: #9A948C; }

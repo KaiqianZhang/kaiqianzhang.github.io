@@ -133,83 +133,86 @@ $$
 <h2 id='1-four-ways-to-fight-the-same-number'>1. Four Ways to Fight the Same Number</h2>
 <p>The story of the last few years is a sequence of attempts to make that number smaller, or at least cheaper to live with.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 277' role='img' aria-label='Roadmap of the fight against the cost of the KV cache: multi-query attention in 2019, grouped-query in 2023, paging in 2023, and latent compression in 2024.'>
-      <path class='spine' d='M99.4,137.9 Q379.8,138.3 660.2,138.4'/>
-      <path class='head' d='M179.8,138.8 Q193.0,138.9 206.3,138.3'/>
-      <path class='head' d='M180.5,138.1 Q193.4,139.0 206.2,139.1'/>
-      <path class='head' d='M206.0,138.5 Q203.8,140.3 201.3,141.7'/>
-      <path class='head' d='M206.0,138.8 Q203.8,136.8 201.2,135.3'/>
-      <text class='why' x='193.0' y='114.5'>one shared head was too</text>
-      <text class='why' x='193.0' y='127.5'>few</text>
-      <path class='head' d='M367.3,138.6 Q379.9,139.3 392.5,139.2'/>
-      <path class='head' d='M366.9,139.0 Q380.2,139.1 393.5,139.1'/>
-      <path class='head' d='M392.8,138.2 Q390.3,139.5 387.8,141.0'/>
-      <path class='head' d='M392.9,138.2 Q390.6,137.0 388.5,135.4'/>
-      <text class='why' x='380.0' y='114.5'>a smaller cache, still</text>
-      <text class='why' x='380.0' y='127.5'>allocated badly</text>
-      <path class='head' d='M554.2,138.4 Q567.4,138.5 580.6,137.9'/>
-      <path class='head' d='M554.5,138.7 Q567.0,138.9 579.5,138.0'/>
-      <path class='head' d='M580.5,139.1 Q577.7,139.8 575.0,141.1'/>
-      <path class='head' d='M580.0,138.8 Q577.5,137.3 575.4,135.3'/>
-      <text class='why' x='567.0' y='114.5'>better layout, but the</text>
-      <text class='why' x='567.0' y='127.5'>tensor was still large</text>
+    <svg viewBox='0 0 760 344' role='img' aria-label='Roadmap of the fight against the cost of the KV cache: multi-query attention in 2019, grouped-query in 2023, paging in 2023, and latent compression in 2024.'>
+      <path class='spine' d='M99.4,171.4 Q379.8,171.8 660.2,171.9'/>
+      <path class='head' d='M179.8,172.3 Q193.0,172.4 206.3,171.8'/>
+      <path class='head' d='M180.5,171.6 Q193.4,172.5 206.2,172.6'/>
+      <path class='head' d='M206.0,172.0 Q203.8,173.8 201.3,175.2'/>
+      <path class='head' d='M206.0,172.3 Q203.8,170.3 201.2,168.8'/>
+      <text class='why' x='193.0' y='144.0'>one shared head was</text>
+      <text class='why' x='193.0' y='161.0'>too few</text>
+      <path class='head' d='M367.3,172.1 Q379.9,172.8 392.5,172.7'/>
+      <path class='head' d='M366.9,172.5 Q380.2,172.6 393.5,172.6'/>
+      <path class='head' d='M392.8,171.7 Q390.3,173.0 387.8,174.5'/>
+      <path class='head' d='M392.9,171.7 Q390.6,170.5 388.5,168.9'/>
+      <text class='why' x='380.0' y='144.0'>a smaller cache, still</text>
+      <text class='why' x='380.0' y='161.0'>allocated badly</text>
+      <path class='head' d='M554.2,171.9 Q567.4,172.0 580.6,171.4'/>
+      <path class='head' d='M554.5,172.2 Q567.0,172.4 579.5,171.5'/>
+      <path class='head' d='M580.5,172.6 Q577.7,173.3 575.0,174.6'/>
+      <path class='head' d='M580.0,172.3 Q577.5,170.8 575.4,168.8'/>
+      <text class='why' x='567.0' y='144.0'>better layout, but the</text>
+      <text class='why' x='567.0' y='161.0'>tensor was still large</text>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='0.0' width='356.0' height='92.5'/>
-        <path class='stem' d='M100.1,92.1 Q99.2,115.2 99.1,138.3'/>
-        <circle class='dot' cx='99.5' cy='138.5' r='5'/>
-        <path class='box' d='M24.2,-0.3 Q193.2,0.6 362.2,-0.3 Q371.2,-0.3 371.2,8.7 Q372.1,46.4 371.2,84.2 Q371.2,93.2 362.2,93.2 Q193.2,93.2 24.2,93.2 Q15.2,93.2 15.2,84.2 Q14.6,46.4 15.2,8.7 Q15.2,-0.3 24.2,-0.3'/>
-        <path class='box' d='M23.7,0.2 Q193.0,0.9 362.3,0.2 Q371.3,0.2 371.3,9.2 Q371.5,46.5 371.3,83.9 Q371.3,92.9 362.3,92.9 Q193.0,92.5 23.7,92.9 Q14.7,92.9 14.7,83.9 Q15.1,46.5 14.7,9.2 Q14.7,0.2 23.7,0.2'/>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M100.1,117.6 Q99.2,144.7 99.1,171.8'/>
+        <circle class='dot' cx='99.5' cy='172.0' r='5'/>
+        <path class='box' d='M24.2,-0.3 Q193.2,0.6 362.2,-0.3 Q371.2,-0.3 371.2,8.7 Q372.1,59.2 371.2,109.7 Q371.2,118.7 362.2,118.7 Q193.2,118.7 24.2,118.7 Q15.2,118.7 15.2,109.7 Q14.6,59.2 15.2,8.7 Q15.2,-0.3 24.2,-0.3'/>
+        <path class='box' d='M23.7,0.2 Q193.0,0.9 362.3,0.2 Q371.3,0.2 371.3,9.2 Q371.5,59.3 371.3,109.4 Q371.3,118.4 362.3,118.4 Q193.0,118.0 23.7,118.4 Q14.7,118.4 14.7,109.4 Q15.1,59.3 14.7,9.2 Q14.7,0.2 23.7,0.2'/>
         <text class='yr' x='29.0' y='19.0'>2019</text>
         <text class='stage' x='29.0' y='37.0'>share one head</text>
         <circle class='bul' cx='33.0' cy='52.0' r='2'/>
-        <text class='body' x='42.0' y='56.0'>every query head gets the same keys and values</text>
-        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
-        <text class='body' x='42.0' y='71.5'>the cache divides by the head count</text>
-        <circle class='bul' cx='33.0' cy='83.0' r='2'/>
-        <text class='body' x='42.0' y='87.0'>quality slips</text>
+        <text class='body' x='42.0' y='56.0'>every query head gets the same keys and</text>
+        <text class='body' x='42.0' y='74.0'>values</text>
+        <circle class='bul' cx='33.0' cy='88.0' r='2'/>
+        <text class='body' x='42.0' y='92.0'>the cache divides by the head count</text>
+        <circle class='bul' cx='33.0' cy='106.0' r='2'/>
+        <text class='body' x='42.0' y='110.0'>quality slips</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='184.5' width='356.0' height='92.5'/>
-        <path class='stem' d='M285.9,184.0 Q286.5,161.0 287.1,138.0'/>
-        <circle class='dot' cx='286.5' cy='138.5' r='5'/>
-        <path class='box' d='M24.1,184.2 Q192.7,183.3 361.3,184.2 Q370.3,184.2 370.3,193.2 Q369.6,230.3 370.3,267.4 Q370.3,276.4 361.3,276.4 Q192.7,276.7 24.1,276.4 Q15.1,276.4 15.1,267.4 Q15.9,230.3 15.1,193.2 Q15.1,184.2 24.1,184.2'/>
-        <path class='box' d='M23.7,184.3 Q192.8,184.8 361.9,184.3 Q370.9,184.3 370.9,193.3 Q370.2,230.7 370.9,268.2 Q370.9,277.2 361.9,277.2 Q192.8,276.4 23.7,277.2 Q14.7,277.2 14.7,268.2 Q15.2,230.7 14.7,193.3 Q14.7,184.3 23.7,184.3'/>
-        <text class='yr' x='29.0' y='203.5'>2023</text>
-        <text class='stage' x='29.0' y='221.5'>share a few</text>
-        <circle class='bul' cx='33.0' cy='236.5' r='2'/>
-        <text class='body' x='42.0' y='240.5'>one key-value head per group of query heads</text>
-        <circle class='bul' cx='33.0' cy='252.0' r='2'/>
-        <text class='body' x='42.0' y='256.0'>uptrained with 5% of pretraining compute</text>
-        <circle class='bul' cx='33.0' cy='267.5' r='2'/>
-        <text class='body' x='42.0' y='271.5'>Llama 3 and Mistral ship it</text>
+        <rect class='hit' x='15.0' y='226.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M285.9,225.5 Q286.5,198.5 287.1,171.5'/>
+        <circle class='dot' cx='286.5' cy='172.0' r='5'/>
+        <path class='box' d='M24.1,225.7 Q192.7,224.8 361.3,225.7 Q370.3,225.7 370.3,234.7 Q369.6,284.5 370.3,334.4 Q370.3,343.4 361.3,343.4 Q192.7,343.7 24.1,343.4 Q15.1,343.4 15.1,334.4 Q15.9,284.5 15.1,234.7 Q15.1,225.7 24.1,225.7'/>
+        <path class='box' d='M23.7,225.8 Q192.8,226.3 361.9,225.8 Q370.9,225.8 370.9,234.8 Q370.2,285.0 370.9,335.2 Q370.9,344.2 361.9,344.2 Q192.8,343.4 23.7,344.2 Q14.7,344.2 14.7,335.2 Q15.2,285.0 14.7,234.8 Q14.7,225.8 23.7,225.8'/>
+        <text class='yr' x='29.0' y='245.0'>2023</text>
+        <text class='stage' x='29.0' y='263.0'>share a few</text>
+        <circle class='bul' cx='33.0' cy='278.0' r='2'/>
+        <text class='body' x='42.0' y='282.0'>one key-value head per group of query heads</text>
+        <circle class='bul' cx='33.0' cy='296.0' r='2'/>
+        <text class='body' x='42.0' y='300.0'>uptrained with 5% of pretraining compute</text>
+        <circle class='bul' cx='33.0' cy='314.0' r='2'/>
+        <text class='body' x='42.0' y='318.0'>Llama 3 and Mistral ship it</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='0.0' width='356.0' height='92.5'/>
-        <path class='stem' d='M473.1,92.0 Q473.4,115.2 474.0,138.4'/>
-        <circle class='dot' cx='473.5' cy='138.5' r='5'/>
-        <path class='box' d='M397.4,0.2 Q566.4,-0.2 735.3,0.2 Q744.3,0.2 744.3,9.2 Q744.2,46.6 744.3,84.1 Q744.3,93.1 735.3,93.1 Q566.4,92.8 397.4,93.1 Q388.4,93.1 388.4,84.1 Q387.6,46.6 388.4,9.2 Q388.4,0.2 397.4,0.2'/>
-        <path class='box' d='M398.6,-0.5 Q567.7,-0.8 736.7,-0.5 Q745.7,-0.5 745.7,8.5 Q745.5,46.3 745.7,84.0 Q745.7,93.0 736.7,93.0 Q567.7,92.7 398.6,93.0 Q389.6,93.0 389.6,84.0 Q388.8,46.3 389.6,8.5 Q389.6,-0.5 398.6,-0.5'/>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M473.1,117.5 Q473.4,144.7 474.0,171.9'/>
+        <circle class='dot' cx='473.5' cy='172.0' r='5'/>
+        <path class='box' d='M397.4,0.2 Q566.4,-0.2 735.3,0.2 Q744.3,0.2 744.3,9.2 Q744.2,59.4 744.3,109.6 Q744.3,118.6 735.3,118.6 Q566.4,118.3 397.4,118.6 Q388.4,118.6 388.4,109.6 Q387.6,59.4 388.4,9.2 Q388.4,0.2 397.4,0.2'/>
+        <path class='box' d='M398.6,-0.5 Q567.7,-0.8 736.7,-0.5 Q745.7,-0.5 745.7,8.5 Q745.5,59.0 745.7,109.5 Q745.7,118.5 736.7,118.5 Q567.7,118.2 398.6,118.5 Q389.6,118.5 389.6,109.5 Q388.8,59.0 389.6,8.5 Q389.6,-0.5 398.6,-0.5'/>
         <text class='yr' x='403.0' y='19.0'>2023</text>
         <text class='stage' x='403.0' y='37.0'>stop reserving it</text>
         <circle class='bul' cx='407.0' cy='52.0' r='2'/>
-        <text class='body' x='416.0' y='56.0'>hand the cache out in small blocks on demand</text>
-        <circle class='bul' cx='407.0' cy='67.5' r='2'/>
-        <text class='body' x='416.0' y='71.5'>the way an operating system pages memory</text>
-        <circle class='bul' cx='407.0' cy='83.0' r='2'/>
-        <text class='body' x='416.0' y='87.0'>nothing gets smaller</text>
+        <text class='body' x='416.0' y='56.0'>hand the cache out in small blocks on</text>
+        <text class='body' x='416.0' y='74.0'>demand</text>
+        <circle class='bul' cx='407.0' cy='88.0' r='2'/>
+        <text class='body' x='416.0' y='92.0'>the way an operating system pages memory</text>
+        <circle class='bul' cx='407.0' cy='106.0' r='2'/>
+        <text class='body' x='416.0' y='110.0'>nothing gets smaller</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='184.5' width='356.0' height='92.5'/>
-        <path class='stem' d='M660.8,185.2 Q661.1,161.6 660.4,137.9'/>
-        <circle class='dot' cx='660.5' cy='138.5' r='5'/>
-        <path class='box' d='M398.6,185.4 Q567.0,184.6 735.3,185.4 Q744.3,185.4 744.3,194.4 Q743.7,231.2 744.3,268.0 Q744.3,277.0 735.3,277.0 Q567.0,277.3 398.6,277.0 Q389.6,277.0 389.6,268.0 Q389.8,231.2 389.6,194.4 Q389.6,185.4 398.6,185.4'/>
-        <path class='box' d='M398.3,184.8 Q567.5,184.6 736.8,184.8 Q745.8,184.8 745.8,193.8 Q745.7,230.9 745.8,268.0 Q745.8,277.0 736.8,277.0 Q567.5,277.8 398.3,277.0 Q389.3,277.0 389.3,268.0 Q389.2,230.9 389.3,193.8 Q389.3,184.8 398.3,184.8'/>
-        <text class='yr' x='403.0' y='203.5'>2024</text>
-        <text class='stage' x='403.0' y='221.5'>compress it</text>
-        <circle class='bul' cx='407.0' cy='236.5' r='2'/>
-        <text class='body' x='416.0' y='240.5'>squeeze a token's keys and values into one latent</text>
-        <circle class='bul' cx='407.0' cy='252.0' r='2'/>
-        <text class='body' x='416.0' y='256.0'>reconstruct them on the way in</text>
+        <rect class='hit' x='389.0' y='226.0' width='356.0' height='118.0'/>
+        <path class='stem' d='M660.8,226.7 Q661.1,199.1 660.4,171.4'/>
+        <circle class='dot' cx='660.5' cy='172.0' r='5'/>
+        <path class='box' d='M398.6,226.9 Q567.0,226.1 735.3,226.9 Q744.3,226.9 744.3,235.9 Q743.7,285.5 744.3,335.0 Q744.3,344.0 735.3,344.0 Q567.0,344.3 398.6,344.0 Q389.6,344.0 389.6,335.0 Q389.8,285.5 389.6,235.9 Q389.6,226.9 398.6,226.9'/>
+        <path class='box' d='M398.3,226.3 Q567.5,226.1 736.8,226.3 Q745.8,226.3 745.8,235.3 Q745.7,285.2 745.8,335.0 Q745.8,344.0 736.8,344.0 Q567.5,344.8 398.3,344.0 Q389.3,344.0 389.3,335.0 Q389.2,285.2 389.3,235.3 Q389.3,226.3 398.3,226.3'/>
+        <text class='yr' x='403.0' y='245.0'>2024</text>
+        <text class='stage' x='403.0' y='263.0'>compress it</text>
+        <circle class='bul' cx='407.0' cy='278.0' r='2'/>
+        <text class='body' x='416.0' y='282.0'>squeeze a token's keys and values into one</text>
+        <text class='body' x='416.0' y='300.0'>latent</text>
+        <circle class='bul' cx='407.0' cy='314.0' r='2'/>
+        <text class='body' x='416.0' y='318.0'>reconstruct them on the way in</text>
       </g>
     </svg>
 </div>

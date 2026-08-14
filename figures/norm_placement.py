@@ -175,7 +175,7 @@ ax2.legend(frameon=False, loc='lower left', fontsize=9)
 
 fig.tight_layout(pad=1.4)
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
-fig.savefig(OUT, dpi=130, facecolor='white')
+fig.savefig(OUT, dpi=220, facecolor='white')
 print('wrote', OUT)
 
 # Numbers quoted in the post. These are read off the same averaged arrays

@@ -187,77 +187,80 @@
 <h2 id='1-a-trick-nobody-published-and-the-name-that-took-five-years'>1. A Trick Nobody Published, and the Name That Took Five Years</h2>
 <p>Before we go inside, here is the shape of the story, because it is a slightly unusual one for a technical idea.</p>
 <div class='roadmap'>
-    <svg viewBox='0 0 760 246' role='img' aria-label='Roadmap of the KV cache: an unpublished trick in 2017, diagnosed as a bandwidth cost in 2019, named in 2022, and the thing serving systems are built around by 2023.'>
-      <path class='spine' d='M99.4,123.4 Q380.1,124.2 660.8,123.3'/>
-      <path class='head' d='M179.8,122.5 Q192.5,122.4 205.3,122.9'/>
-      <path class='head' d='M180.0,123.3 Q193.0,123.4 206.0,123.0'/>
-      <path class='head' d='M205.7,123.3 Q203.7,125.1 201.5,126.8'/>
-      <path class='head' d='M205.4,122.6 Q202.9,121.4 200.3,120.6'/>
-      <text class='why' x='193.0' y='99.0'>it worked, so nobody asked</text>
-      <text class='why' x='193.0' y='112.0'>what it cost</text>
-      <path class='head' d='M366.6,122.9 Q379.7,123.2 392.7,122.9'/>
-      <path class='head' d='M366.4,122.5 Q379.7,123.2 393.0,123.4'/>
-      <path class='head' d='M393.3,122.5 Q390.2,123.9 387.3,125.8'/>
-      <path class='head' d='M392.7,122.9 Q390.1,122.0 387.8,120.5'/>
-      <text class='why' x='380.0' y='99.0'>a bottleneck with no name</text>
-      <text class='why' x='380.0' y='112.0'>is hard to discuss</text>
-      <path class='head' d='M554.2,123.1 Q567.4,123.2 580.5,123.0'/>
-      <path class='head' d='M553.8,123.1 Q566.9,122.8 580.1,122.9'/>
-      <path class='head' d='M579.5,123.2 Q576.7,124.3 574.4,126.2'/>
-      <path class='head' d='M580.2,122.6 Q578.0,121.1 575.4,120.2'/>
-      <text class='why' x='567.0' y='99.0'>and then everything was</text>
-      <text class='why' x='567.0' y='112.0'>designed around it</text>
+    <svg viewBox='0 0 760 342' role='img' aria-label='Roadmap of the KV cache: an unpublished trick in 2017, diagnosed as a bandwidth cost in 2019, named in 2022, and the thing serving systems are built around by 2023.'>
+      <path class='spine' d='M99.4,171.4 Q380.1,172.2 660.8,171.3'/>
+      <path class='head' d='M179.8,170.5 Q192.5,170.4 205.3,170.9'/>
+      <path class='head' d='M180.0,171.3 Q193.0,171.4 206.0,171.0'/>
+      <path class='head' d='M205.7,171.3 Q203.7,173.1 201.5,174.8'/>
+      <path class='head' d='M205.4,170.6 Q202.9,169.4 200.3,168.6'/>
+      <text class='why' x='193.0' y='143.0'>it worked, so nobody</text>
+      <text class='why' x='193.0' y='160.0'>asked what it cost</text>
+      <path class='head' d='M366.6,170.9 Q379.7,171.2 392.7,170.9'/>
+      <path class='head' d='M366.4,170.5 Q379.7,171.2 393.0,171.4'/>
+      <path class='head' d='M393.3,170.5 Q390.2,171.9 387.3,173.8'/>
+      <path class='head' d='M392.7,170.9 Q390.1,170.0 387.8,168.5'/>
+      <text class='why' x='380.0' y='126.0'>a bottleneck with no</text>
+      <text class='why' x='380.0' y='143.0'>name is hard to</text>
+      <text class='why' x='380.0' y='160.0'>discuss</text>
+      <path class='head' d='M554.2,171.1 Q567.4,171.2 580.5,171.0'/>
+      <path class='head' d='M553.8,171.1 Q566.9,170.8 580.1,170.9'/>
+      <path class='head' d='M579.5,171.2 Q576.7,172.3 574.4,174.2'/>
+      <path class='head' d='M580.2,170.6 Q578.0,169.1 575.4,168.2'/>
+      <text class='why' x='567.0' y='143.0'>and then everything</text>
+      <text class='why' x='567.0' y='160.0'>was designed around it</text>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='0.0' width='356.0' height='77.0'/>
-        <path class='stem' d='M99.0,76.4 Q99.4,99.7 98.9,123.1'/>
-        <circle class='dot' cx='99.5' cy='123.0' r='5'/>
-        <path class='box' d='M23.1,-0.1 Q192.5,-1.0 361.9,-0.1 Q370.9,-0.1 370.9,8.9 Q370.8,38.2 370.9,67.5 Q370.9,76.5 361.9,76.5 Q192.5,75.9 23.1,76.5 Q14.1,76.5 14.1,67.5 Q13.2,38.2 14.1,8.9 Q14.1,-0.1 23.1,-0.1'/>
-        <path class='box' d='M23.8,-0.5 Q193.1,0.2 362.4,-0.5 Q371.4,-0.5 371.4,8.5 Q371.8,38.1 371.4,67.8 Q371.4,76.8 362.4,76.8 Q193.1,76.6 23.8,76.8 Q14.8,76.8 14.8,67.8 Q14.3,38.1 14.8,8.5 Q14.8,-0.5 23.8,-0.5'/>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='100.0'/>
+        <path class='stem' d='M99.0,99.4 Q99.4,135.2 98.9,171.1'/>
+        <circle class='dot' cx='99.5' cy='171.0' r='5'/>
+        <path class='box' d='M23.1,-0.1 Q192.5,-1.0 361.9,-0.1 Q370.9,-0.1 370.9,8.9 Q370.8,49.7 370.9,90.5 Q370.9,99.5 361.9,99.5 Q192.5,98.9 23.1,99.5 Q14.1,99.5 14.1,90.5 Q13.2,49.7 14.1,8.9 Q14.1,-0.1 23.1,-0.1'/>
+        <path class='box' d='M23.8,-0.5 Q193.1,0.2 362.4,-0.5 Q371.4,-0.5 371.4,8.5 Q371.8,49.6 371.4,90.8 Q371.4,99.8 362.4,99.8 Q193.1,99.6 23.8,99.8 Q14.8,99.8 14.8,90.8 Q14.3,49.6 14.8,8.5 Q14.8,-0.5 23.8,-0.5'/>
         <text class='yr' x='29.0' y='19.0'>2017-</text>
         <text class='stage' x='29.0' y='37.0'>a trick, not a paper</text>
         <circle class='bul' cx='33.0' cy='52.0' r='2'/>
-        <text class='body' x='42.0' y='56.0'>keep past keys and values instead of redoing them</text>
-        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
-        <text class='body' x='42.0' y='71.5'>no paper claims it as a contribution</text>
+        <text class='body' x='42.0' y='56.0'>keep past keys and values instead of</text>
+        <text class='body' x='42.0' y='74.0'>redoing them</text>
+        <circle class='bul' cx='33.0' cy='88.0' r='2'/>
+        <text class='body' x='42.0' y='92.0'>no paper claims it as a contribution</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='169.0' width='356.0' height='77.0'/>
-        <path class='stem' d='M286.0,168.3 Q286.0,145.7 286.9,123.0'/>
-        <circle class='dot' cx='286.5' cy='123.0' r='5'/>
-        <path class='box' d='M24.7,169.7 Q193.3,170.0 361.9,169.7 Q370.9,169.7 370.9,178.7 Q370.3,208.0 370.9,237.2 Q370.9,246.2 361.9,246.2 Q193.3,245.9 24.7,246.2 Q15.7,246.2 15.7,237.2 Q16.1,208.0 15.7,178.7 Q15.7,169.7 24.7,169.7'/>
-        <path class='box' d='M23.3,168.8 Q192.7,169.0 362.1,168.8 Q371.1,168.8 371.1,177.8 Q370.3,207.7 371.1,237.7 Q371.1,246.7 362.1,246.7 Q192.7,245.8 23.3,246.7 Q14.3,246.7 14.3,237.7 Q14.0,207.7 14.3,177.8 Q14.3,168.8 23.3,168.8'/>
-        <text class='yr' x='29.0' y='188.0'>2019</text>
-        <text class='stage' x='29.0' y='206.0'>Shazeer names the cost</text>
-        <circle class='bul' cx='33.0' cy='221.0' r='2'/>
-        <text class='body' x='42.0' y='225.0'>decoding is limited by reloading K and V</text>
-        <circle class='bul' cx='33.0' cy='236.5' r='2'/>
-        <text class='body' x='42.0' y='240.5'>not by the arithmetic at all</text>
+        <rect class='hit' x='15.0' y='242.0' width='356.0' height='100.0'/>
+        <path class='stem' d='M286.0,241.3 Q286.0,206.2 286.9,171.0'/>
+        <circle class='dot' cx='286.5' cy='171.0' r='5'/>
+        <path class='box' d='M24.7,242.7 Q193.3,243.0 361.9,242.7 Q370.9,242.7 370.9,251.7 Q370.3,292.5 370.9,333.2 Q370.9,342.2 361.9,342.2 Q193.3,341.9 24.7,342.2 Q15.7,342.2 15.7,333.2 Q16.1,292.5 15.7,251.7 Q15.7,242.7 24.7,242.7'/>
+        <path class='box' d='M23.3,241.8 Q192.7,242.0 362.1,241.8 Q371.1,241.8 371.1,250.8 Q370.3,292.2 371.1,333.7 Q371.1,342.7 362.1,342.7 Q192.7,341.8 23.3,342.7 Q14.3,342.7 14.3,333.7 Q14.0,292.2 14.3,250.8 Q14.3,241.8 23.3,241.8'/>
+        <text class='yr' x='29.0' y='261.0'>2019</text>
+        <text class='stage' x='29.0' y='279.0'>Shazeer names the cost</text>
+        <circle class='bul' cx='33.0' cy='294.0' r='2'/>
+        <text class='body' x='42.0' y='298.0'>decoding is limited by reloading K and V</text>
+        <circle class='bul' cx='33.0' cy='312.0' r='2'/>
+        <text class='body' x='42.0' y='316.0'>not by the arithmetic at all</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='0.0' width='356.0' height='77.0'/>
-        <path class='stem' d='M473.1,77.6 Q473.9,100.5 474.1,123.4'/>
-        <circle class='dot' cx='473.5' cy='123.0' r='5'/>
-        <path class='box' d='M397.4,-0.7 Q566.7,0.1 736.1,-0.7 Q745.1,-0.7 745.1,8.3 Q745.7,38.4 745.1,68.4 Q745.1,77.4 736.1,77.4 Q566.7,77.3 397.4,77.4 Q388.4,77.4 388.4,68.4 Q388.2,38.4 388.4,8.3 Q388.4,-0.7 397.4,-0.7'/>
-        <path class='box' d='M397.8,0.1 Q566.8,0.2 735.8,0.1 Q744.8,0.1 744.8,9.1 Q744.2,39.0 744.8,68.9 Q744.8,77.9 735.8,77.9 Q566.8,77.7 397.8,77.9 Q388.8,77.9 388.8,68.9 Q388.6,39.0 388.8,9.1 Q388.8,0.1 397.8,0.1'/>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='100.0'/>
+        <path class='stem' d='M473.1,100.6 Q473.9,136.0 474.1,171.4'/>
+        <circle class='dot' cx='473.5' cy='171.0' r='5'/>
+        <path class='box' d='M397.4,-0.7 Q566.7,0.1 736.1,-0.7 Q745.1,-0.7 745.1,8.3 Q745.7,49.9 745.1,91.4 Q745.1,100.4 736.1,100.4 Q566.7,100.3 397.4,100.4 Q388.4,100.4 388.4,91.4 Q388.2,49.9 388.4,8.3 Q388.4,-0.7 397.4,-0.7'/>
+        <path class='box' d='M397.8,0.1 Q566.8,0.2 735.8,0.1 Q744.8,0.1 744.8,9.1 Q744.2,50.5 744.8,91.9 Q744.8,100.9 735.8,100.9 Q566.8,100.7 397.8,100.9 Q388.8,100.9 388.8,91.9 Q388.6,50.5 388.8,9.1 Q388.8,0.1 397.8,0.1'/>
         <text class='yr' x='403.0' y='19.0'>2022</text>
         <text class='stage' x='403.0' y='37.0'>it gets its name</text>
         <circle class='bul' cx='407.0' cy='52.0' r='2'/>
-        <text class='body' x='416.0' y='56.0'>Pope et al. write "the KV cache" as a defined term</text>
-        <circle class='bul' cx='407.0' cy='67.5' r='2'/>
-        <text class='body' x='416.0' y='71.5'>the name sticks</text>
+        <text class='body' x='416.0' y='56.0'>Pope et al. write "the KV cache" as a</text>
+        <text class='body' x='416.0' y='74.0'>defined term</text>
+        <circle class='bul' cx='407.0' cy='88.0' r='2'/>
+        <text class='body' x='416.0' y='92.0'>the name sticks</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='169.0' width='356.0' height='77.0'/>
-        <path class='stem' d='M660.7,168.8 Q660.4,146.2 660.4,123.6'/>
-        <circle class='dot' cx='660.5' cy='123.0' r='5'/>
-        <path class='box' d='M397.2,169.1 Q566.8,168.8 736.4,169.1 Q745.4,169.1 745.4,178.1 Q745.5,207.3 745.4,236.5 Q745.4,245.5 736.4,245.5 Q566.8,244.8 397.2,245.5 Q388.2,245.5 388.2,236.5 Q387.9,207.3 388.2,178.1 Q388.2,169.1 397.2,169.1'/>
-        <path class='box' d='M398.5,169.9 Q566.9,169.4 735.3,169.9 Q744.3,169.9 744.3,178.9 Q744.3,208.1 744.3,237.3 Q744.3,246.3 735.3,246.3 Q566.9,246.0 398.5,246.3 Q389.5,246.3 389.5,237.3 Q389.9,208.1 389.5,178.9 Q389.5,169.9 398.5,169.9'/>
-        <text class='yr' x='403.0' y='188.0'>2023-</text>
-        <text class='stage' x='403.0' y='206.0'>the centre of serving</text>
-        <circle class='bul' cx='407.0' cy='221.0' r='2'/>
-        <text class='body' x='416.0' y='225.0'>vLLM is organised around managing it</text>
-        <circle class='bul' cx='407.0' cy='236.5' r='2'/>
-        <text class='body' x='416.0' y='240.5'>it stops being an implementation detail</text>
+        <rect class='hit' x='389.0' y='242.0' width='356.0' height='100.0'/>
+        <path class='stem' d='M660.7,241.8 Q660.4,206.7 660.4,171.6'/>
+        <circle class='dot' cx='660.5' cy='171.0' r='5'/>
+        <path class='box' d='M397.2,242.1 Q566.8,241.8 736.4,242.1 Q745.4,242.1 745.4,251.1 Q745.5,291.8 745.4,332.5 Q745.4,341.5 736.4,341.5 Q566.8,340.8 397.2,341.5 Q388.2,341.5 388.2,332.5 Q387.9,291.8 388.2,251.1 Q388.2,242.1 397.2,242.1'/>
+        <path class='box' d='M398.5,242.9 Q566.9,242.4 735.3,242.9 Q744.3,242.9 744.3,251.9 Q744.3,292.6 744.3,333.3 Q744.3,342.3 735.3,342.3 Q566.9,342.0 398.5,342.3 Q389.5,342.3 389.5,333.3 Q389.9,292.6 389.5,251.9 Q389.5,242.9 398.5,242.9'/>
+        <text class='yr' x='403.0' y='261.0'>2023-</text>
+        <text class='stage' x='403.0' y='279.0'>the centre of serving</text>
+        <circle class='bul' cx='407.0' cy='294.0' r='2'/>
+        <text class='body' x='416.0' y='298.0'>vLLM is organised around managing it</text>
+        <circle class='bul' cx='407.0' cy='312.0' r='2'/>
+        <text class='body' x='416.0' y='316.0'>it stops being an implementation detail</text>
       </g>
     </svg>
 </div>

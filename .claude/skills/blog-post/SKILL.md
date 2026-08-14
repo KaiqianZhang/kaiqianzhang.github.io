@@ -552,11 +552,35 @@ and asserts every pair is at least dE 26; check any new colour against it
 before using one. Hold colour semantics constant across every figure in a
 post — if a method is lavender in one it is lavender in all of them.
 
-Recolour reproduced paper figures with `figures/recolor_paper_figs.py`. Add
-the original to `figures/originals/` first so it stays reproducible, and note
-the recolouring in the caption. Check the output by eye: coloured fills with
-black text need the black-blend model, and near-grey gridlines must not be
-tinted.
+Recolour reproduced paper figures with `figures/recolor_paper_figs.py`.
+Add the original to `figures/originals/` first so it stays reproducible, and
+note the recolouring in the caption. Check the output by eye: coloured fills
+with black text need the black-blend model, and near-grey gridlines must not
+be tinted. A greyscale heatmap is a special case — there the grey *is* the
+data, so remap the whole luminance ramp into a palette hue rather than
+swapping colours, restrict the remap to the plotted rectangle so the axis
+labels survive, and say in the caption if you inverted the scale.
+
+**Three things to check on every reproduced figure**, because a paper figure
+dropped into a post looks foreign in ways that are easy to miss:
+
+1. **Size.** It should sit at roughly the same width as the post's own
+   figures, which are 700px. Use `<div class='figure medium'>` (560px) for
+   anything nearly square, since full width would tower over the page, and
+   `narrow` (430px) only for something genuinely small. A reproduced figure
+   at half the width of its neighbours reads as a thumbnail.
+2. **Resolution.** Render from the arXiv source PDF at 300–450 dpi, not from
+   a screenshot, and check the displayed density is at least 2× — measure it
+   as `naturalWidth / getBoundingClientRect().width` in the browser. Trim the
+   original's dead margins with `trim()` so the content fills its box rather
+   than floating in white.
+3. **Palette.** Every data colour must come from `figures/palette.py`, and the
+   semantics must match the rest of the post: if the cache is lavender in your
+   own figures, it is lavender in the borrowed one too.
+
+What you cannot make consistent is the typography — a reproduced figure keeps
+the paper's own fonts, because redrawing its labels would misrepresent it.
+That is the correct place to stop.
 
 ## Rigour
 
