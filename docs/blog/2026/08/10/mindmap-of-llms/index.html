@@ -71,7 +71,7 @@
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
-                    <p>20 min read</p>
+                    <p>26 min read</p>
                 </div>
                 <div class='byline'>
                     <h3>Tags</h3>
@@ -81,8 +81,9 @@
             <div class='clear'></div>
         </div>
         <div class='article'>
-<p>I keep a mindmap of how language models got here. It starts at counting words and ends at a single node reading <em>Transformer</em>, and the useful thing about having it on one page is that the arrows between branches turn out to matter more than the branches.</p>
-<p>Each idea in the chain answers a specific, nameable failure in the one before it. This post walks that chain, with the map's own structure as the outline. The whole of it fits on one line:</p>
+<p>I keep a mindmap of how language models got to where they are. It starts at counting words and ends at a single node reading <em>Transformer</em>, and the useful thing about having the whole thing on one page is that the arrows between the branches turn out to matter more than the branches do.</p>
+<p>That is really the argument of this post. Each idea in the chain is not a new invention that happened to arrive; it is an answer to a specific, nameable thing the previous idea could not do. If you know what each one could not do, the chain becomes almost inevitable, and I think that is a far better thing to carry around than a list of names and dates.</p>
+<p>I am going to walk that chain, using my map's own structure as the outline, and I will assume you know nothing about any of it. I will also stop periodically to correct my own map, because a few of the notes on it turned out to be wrong when I went back to the papers. The whole of it fits on one line:</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 384' role='img' aria-label='Roadmap of language modelling: counting in the 1990s, embeddings in 2013, recurrence, and attention from 2017.'>
       <path class='spine' d='M99.4,192.6 Q380.1,193.3 660.9,192.3'/>
@@ -183,22 +184,26 @@
 <p>The labels above the arrows are the load-bearing part: each names what was still missing at that point, and the stage to its right is the answer.</p>
 <p>One warning before the dates mislead you. <strong>This ordering is conceptual, not chronological</strong> — read the years and the line stops being a timeline. LSTM predates Word2Vec by sixteen years, and ELMo appeared four months <em>after</em> the transformer, so the transformer cannot be a repair of ELMo and recurrence was not invented because word vectors lacked order. The arrows mean "this is what that could not do", not "this came next".</p>
 <h2 id='1-when-a-word-was-just-a-count'>1. When a Word Was Just a Count</h2>
-<p>Begin where the field began. A language model assigns probability to text, and the chain rule says you can build that probability one word at a time:</p>
+<p>Let me start with what a language model <em>is</em>, because everything downstream is a different answer to the same question.</p>
+<p>A language model assigns a probability to a piece of text. That is the whole definition. Given "the cat sat on the", a language model tells you how likely each possible next word is — "mat" high, "thermodynamics" low — and given a whole sentence it tells you how likely that sentence is to be something somebody would say. Everything a modern chatbot does is built on top of this one capability, applied over and over.</p>
+<p>The convenient thing is that a probability over a whole sentence can be built one word at a time. The chain rule of probability says the probability of a sequence is the probability of its first word, times the probability of the second given the first, times the probability of the third given the first two, and so on:</p>
 $$
 P(w_1 w_2 \ldots w_T) = P(w_1)\,P(w_2 \mid w_1)\,P(w_3 \mid w_1 w_2)\cdots
 $$
-<p>The <strong>statistical language model</strong> estimates each factor by counting. Since conditioning on all of history is hopeless, an <strong>n-gram</strong> model truncates it: use the previous $n-1$ words to predict the $n$th, and estimate that probability by counting how often the combination appeared.</p>
-<p>The failure is immediate and arithmetic. A vocabulary of $V$ words has $V^n$ possible $n$-grams, and $V^n$ grows faster than any corpus.</p>
+<p>So the problem reduces to estimating one factor: given everything so far, how likely is each next word?</p>
+<p>The <strong>statistical language model</strong> estimates that by counting, which is the most natural thing anybody could try. How often, in a large pile of text, is "the cat sat on the" followed by "mat"? Divide by how often "the cat sat on the" appears at all, and you have your probability.</p>
+<p>Conditioning on <em>all</em> of history is hopeless — no corpus contains your exact sentence — so an <strong>n-gram</strong> model truncates it. Use only the previous $n-1$ words to predict the $n$th, and estimate that from counts. A five-gram model looks back four words and no further.</p>
+<p>The failure is immediate and it is arithmetic rather than linguistic. A vocabulary of $V$ words has $V^n$ possible $n$-grams, and $V^n$ grows faster than any pile of text you can assemble. The figure below counts this on the text of this very blog, which is small enough that I can show you every number.</p>
 <div class='figure'>
     <img src='/images/mindmap-sparsity.png'
          alt='Log-scale plot of possible n-grams against n-grams ever observed, for n from 1 to 5. The possible count rises steeply; the observed count is nearly flat.'>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Measured on this blog's own other posts — 16,754 words, 2,244 of them
+        Measured on this blog's own other posts — 23,198 words, 2,530 of them
         distinct. At $n = 1$ every word in the space is observed by
-        definition. By $n = 5$ there are $5.7 \times 10^{16}$ possible
-        five-word sequences and exactly 16,183 ever occur, which is
-        $3\times10^{-13}$ of the space. Worse, <b>97.3%</b> of those 16,183
+        definition. By $n = 5$ there are $1.0 \times 10^{17}$ possible
+        five-word sequences and exactly 22,477 ever occur, which is
+        $2\times10^{-13}$ of the space. Worse, <b>97.6%</b> of those 22,477
         occur exactly once, so almost every count the model would rely on is
         the number 1. A bigger corpus moves these numbers and does not change
         their shape.
@@ -206,10 +211,13 @@ $$
 </div>
 <p>One caveat about that figure: a corpus of $N$ tokens holds at most $N$ five-gram positions, so the flat line is pinned by arithmetic as much as by language. What it really shows is $V^n$ outrunning any corpus at all.</p>
 <p>Everything unseen gets probability zero, which the chain rule propagates to the whole sentence. Smoothing and backoff repair that better than this framing usually admits — modified Kneser-Ney five-grams held the state of the art for roughly two decades and were still a serious baseline in 2013, the year word2vec appeared. What they cannot supply is any notion that two words are <em>similar</em>. To a counter, "cat" and "dog" are as unrelated as "cat" and "thermodynamics".</p>
-<p><strong>NNLM</strong>, the neural language model, was the first <em>neural</em> attempt at that — latent semantic analysis and Brown clustering had been deriving similarity from counts since the early 1990s. Its input is <strong>one-hot</strong>, and my map's note is the whole complaint: <em>lose the word meaning, dimension is horribly large</em>. Two one-hot vectors are orthogonal, so similarity is not merely unmeasured at the input; it is unrepresentable.</p>
+<p>That last point is the one that opens the rest of the story, so let me put it plainly. To a counter, words are atoms with no interior. "Cat" and "dog" are two different symbols, exactly as unrelated as "cat" and "thermodynamics", and seeing a thousand sentences about cats teaches such a model nothing whatsoever about dogs. Every human intuition about language says this is the wrong representation.</p>
+<p><strong>NNLM</strong>, Bengio's neural language model, was the first <em>neural</em> attempt at fixing it — though not the first attempt at all, since latent semantic analysis and Brown clustering had been deriving similarity from counts since the early 1990s. Its input is <strong>one-hot</strong>, which means a word is represented as a list of $V$ numbers that are all zero except for a single 1 in the slot belonging to that word. My map's note on this node is the whole complaint: <em>lose the word meaning, dimension is horribly large</em>. Any two one-hot vectors point in perpendicular directions, so at the input, similarity between words is not merely unmeasured. It is unrepresentable.</p>
 <p>That is a correction to my own map, because NNLM <em>already fixes it</em>. Between the one-hot input and the hidden layer sits a shared matrix $C$ whose rows are word vectors — learning a distributed representation is what Bengio's paper is <em>for</em>, and the one-hot is an indexing convention, not a theory of meaning. So the next arrow is not "Word2Vec invented embeddings" but something narrower: NNLM's came attached to an expensive model, and Word2Vec got them cheap.</p>
 <h2 id='2-when-a-word-became-a-direction'>2. When a Word Became a Direction</h2>
-<p><strong>Word2Vec</strong>'s goal, in the map's words: generate word embeddings. The insight is to get them cheaply, as a side effect — set up a fake prediction task, train a shallow network, and keep the input-side weight matrix. Those rows are the embeddings, though the model learns two and which you keep is a convention.</p>
+<p><strong>Word2Vec</strong>'s goal, in my map's words, is to generate word embeddings — and I should say what one is, because it is the idea the whole field is built on.</p>
+<p>An <strong>embedding</strong> is a list of a few hundred numbers standing for a word, in which the numbers themselves are learned rather than assigned. Because they are learned from how words are used, words used in similar ways end up with similar lists, and "similar" now means something arithmetic: the two lists point in nearly the same direction. A word has stopped being a symbol and become a <em>direction</em> in a space, which is where the section title comes from. Once that is true you can ask which words are near which others, and get a sensible answer, which a counter could never give you.</p>
+<p>The insight in Word2Vec is not the embedding but how to get one cheaply — as a side effect of something else. Set up a prediction task nobody actually cares about, train a deliberately shallow network on it, and then throw the task away and keep the weight matrix from the input side. Its rows are your embeddings. (The model learns two such matrices, and which one you keep is a convention rather than a result.)</p>
 <p>Mikolov et al. remove NNLM's nonlinear hidden layer, and the paper is explicit that this is a <em>compute</em> argument: without it they could train on 1.6 billion words. Collobert and Weston had already got embeddings as a by-product in 2008; the 2013 contribution is that it became cheap enough for everyone.</p>
 <p>There are two ways to arrange that task, and they are mirror images.</p>
 <div class='figure-pair w2v-anim'>
@@ -296,7 +304,8 @@ $$
 </div>
 <p>Which you want depends on the corpus, and my map is blunt: <strong>CBOW is quick</strong>, for large-scale text like news; <strong>Skip-gram is precise</strong>, for low-frequency words. That framing comes from word2vec's documentation rather than either paper — the 2013 paper reports a different axis, CBOW better on syntactic analogies, Skip-gram on semantic ones, and CBOW about three times faster. The mechanism usually offered concerns a word's role as <em>context</em>: Skip-gram factors each window into $2c$ pairs, so a rare context word gets its own gradient, while CBOW averages it in with $2c-1$ neighbours and dilutes it.</p>
 <h3 id='the-bill-at-the-output-layer'>The bill at the output layer</h3>
-<p>Both models end in a softmax over the whole vocabulary — $O(V)$ work per training example, which with $V = 50{,}000$ and billions of examples is the entire cost of training. Word2Vec ships two ways out, both in the map.</p>
+<p>Both arrangements have the same problem at the far end, and it is worth following because the two escapes from it are still in use.</p>
+<p>Whichever way round you set the task, the model finishes by producing a score for every word in the vocabulary and turning those scores into probabilities — a <strong>softmax</strong> over the whole vocabulary. That is $O(V)$ work for every single training example, and with $V = 50{,}000$ and billions of examples it is not a part of the cost of training. It <em>is</em> the cost of training. Word2Vec ships two ways out, and my map has both.</p>
 <p><strong>Negative sampling</strong> stops trying to be a language model at all. Instead of "which of the 50,000 words is it?", ask "is this pair real?" — one true word against $k$ sampled fakes, so the cost falls to $O(k)$ with $k$ around 5. It buys that by giving up normalization: the result is no longer a probability distribution, which is why you cannot read a perplexity off it.</p>
 <p><strong>Hierarchical softmax</strong> keeps the probabilistic framing but arranges the vocabulary as a binary tree, so reaching a word means a sequence of binary decisions rather than scoring every word. That is $O(\log_2 V)$ for a balanced tree; word2vec uses a Huffman tree, which puts frequent words nearer the root and brings the average depth down to about the unigram entropy — better still than the plot below shows.</p>
 <div class='figure'>
@@ -316,7 +325,8 @@ $$
 <p><strong>GloVe</strong> takes what my map calls the <em>global view</em>. Word2Vec learns from one window at a time and never sees the corpus whole; GloVe first builds a co-occurrence matrix $X \in \mathbb{R}^{V \times V}$ and then fits $w_i^\top \tilde{w}_j + b_i + \tilde{b}_j = \log X_{ij}$.</p>
 <p>That form comes from one observation: what carries meaning is not a co-occurrence count but a <em>ratio</em> of them. $P(k \mid \text{ice}) / P(k \mid \text{steam})$ is large for <em>solid</em>, small for <em>gas</em>, about 1 for <em>water</em> — the ratio isolates exactly the dimension along which the two words differ. The matrix is enormous and, as the map notes, sparse, which is the point: only nonzero entries are ever touched.</p>
 <h2 id='3-a-matrix-multiplied-by-itself'>3. A Matrix Multiplied by Itself</h2>
-<p>Word vectors have a hard limit. They are a lookup table: "bank" has one vector whether the sentence is about money or a river, and a bag of context has thrown away order, so "dog bites man" and "man bites dog" are one input.</p>
+<p>Word vectors have a hard limit, and it is the kind of limit that no amount of better training can repair, because it is in the shape of the thing.</p>
+<p>An embedding table is a lookup table. "Bank" has one vector, fixed the moment training ends, whether the sentence around it is about money or about a river. And the context these models consume is a <em>bag</em>: the surrounding words are averaged together, which throws away their order, so "dog bites man" and "man bites dog" arrive as the same input. Two of the most basic facts about language — that words mean different things in different sentences, and that order matters — are outside what this representation can express.</p>
 <p>My map says <em>DNN and MLP cannot deal with time-series data</em>, which needs narrowing — NNLM is feed-forward and works fine, and so is a transformer. The true statement is that a fixed-width network over a <em>bag</em> of context can represent neither variable-length history nor order.</p>
 <p><strong>RNN</strong> answers with a loop. Process the sequence one token at a time, and carry a hidden state forward:</p>
 $$
@@ -512,7 +522,7 @@ $$
 <p>My map writes down the price, and it is worth repeating because the cheerful version of this story omits it: <strong>attention costs $O(T^2)$</strong>, and autoregressive decoding needs a KV cache that grows with the sequence.</p>
 <p>Two qualifications, since that sentence has aged. The quadratic term is <em>compute</em>: attention's memory has been linear in practice since FlashAttention showed the $T \times T$ matrix need never be materialized. And the parallelism is real in training and prefill but not in generation, which emits one token per forward pass and is as sequential as an RNN — which is why the KV cache exists at all.</p>
 <p>That node opens onto three arguments I have written up elsewhere: which normalizer goes inside the block (<a href='/blog/2026/08/11/rmsnorm-vs-layernorm/'>RMSNorm vs. LayerNorm</a>), where in the block it goes (<a href='/blog/2026/08/11/pre-norm-vs-post-norm/'>Pre-Norm vs. Post-Norm</a>), and how position gets into a model that has no sense of order (<a href='/blog/2026/08/11/rope/'>RoPE</a>).</p>
-<p>My map's last side note belongs here. <strong>BatchNorm</strong> normalizes a feature across the samples in a batch; <strong>LayerNorm</strong> across the features within one sample. The map's justification is the sharper half: the same channel of two images is comparable, two channels of one image are not.</p>
+<p>My map's last side note belongs here, and it is about normalization — the operation that keeps the numbers inside a deep network from running away. <strong>BatchNorm</strong> normalizes a feature across the samples in a batch; <strong>LayerNorm</strong> normalizes across the features within one sample. My map's justification is the sharper half of the argument: the same channel of two different images is a comparable quantity, and two different channels of one image are not. Sentences make this worse, because they have different lengths and arrive in batches of wildly varying shape, which is most of why language models normalize within a sample rather than across a batch.</p>
 <h2 id='6-counting-the-doors-still-open'>6. Counting the Doors Still Open</h2>
 <p>The map answers this with one metric: <strong>perplexity</strong>.</p>
 $$
@@ -521,7 +531,7 @@ $$
 <p>the inverse geometric mean of the probability the model assigned to each of the $N$ words it saw. Lower is better. The useful way to read it is as an <strong>effective branching factor</strong>: a model with perplexity 40 is, on average, as uncertain as if it were choosing uniformly among 40 words at every step.</p>
 <p>A model spreading probability uniformly over exactly $k$ words has perplexity exactly $k$ — uniform over 1,000 gives 1000.0000. But that exactness belongs to the uniform case only: in general perplexity is the size of the <em>uniform distribution with the same entropy</em>, so a model at 40 might be choosing between three words most of the time and five thousand occasionally.</p>
 <p>A second distinction the formula hides, which caught me out: the equation above is <strong>held-out</strong> perplexity, measured against unseen text, and it is unbounded above — assign $10^{-9}$ to the word that actually occurred and you score $10^{9}$, far past $V$. What is bounded by $[1, V]$ is the exponentiated entropy of the model's <em>own</em> distribution — its confidence, no data involved. The figure below plots the second.</p>
-<p>Easier to feel than to read. Drag the distribution from peaked to flat and watch the number follow — it runs from 1 to the vocabulary size and no further:</p>
+<p>It is much easier to feel than to read about. Drag the distribution from peaked to flat and watch the number follow — it runs from 1 to the vocabulary size and no further:</p>
 <div class='knob' id='ppl-knob'>
     <div class='controls'>
         <label for='ppl-range'>how sharp the distribution is</label>
@@ -566,8 +576,12 @@ $$
     })();
     </script>
 <p></div></p>
+<h3 id='where-this-sits-now'>Where This Sits Now</h3>
+<p>If you are heading into research, the reason to know this chain is not historical interest. It is that every one of these ideas is still in the building.</p>
+<p>The n-gram's failure is why models learn representations rather than counts, and the way a modern model still fails on rare sequences is a softer version of the same arithmetic. Embeddings are the first and last layers of every transformer, and in the largest vocabularies they are a substantial fraction of the parameters. The vanishing-gradient analysis in section 3 is exactly the analysis behind residual connections and behind where a transformer puts its normalizers. And the sequential-versus-parallel argument that killed recurrence has come back around: the state-space models — Mamba, and the mLSTM of xLSTM — are recurrences that found a way to be parallel in training, which is precisely the property the transformer won on. Whether they displace attention at scale is genuinely open.</p>
+<p>The thing I would take from the shape of the whole chain, though, is that every step was a <em>representation</em> decision rather than an optimization one. What is a word, numerically. The current answer is "a vector whose meaning is computed from everything around it", and it has held for eight years, which is by far the longest any answer has lasted.</p>
 <h2 id='7-chat-this-over-with-friends'>7. Chat This Over With Friends</h2>
-<p>The thing worth saying is that the whole history before transformers is a single question asked over and over: what is a word, numerically? A count, then a direction, then a direction that depends on its neighbours, then one that depends on all of them at once — and each answer exists because the previous one could not do something specific. Counting died of arithmetic, and the numbers are stark enough to quote from memory. With a vocabulary of just 2,244 words there are $10^{16}$ possible five-word sequences; a corpus sees around $10^{-13}$ of them, and almost every one of those exactly once. No quantity of data repairs that, because the space grows faster than any corpus can be made to grow.</p>
+<p>The thing worth saying is that the whole history before transformers is a single question asked over and over: what is a word, numerically? A count, then a direction, then a direction that depends on its neighbours, then one that depends on all of them at once — and each answer exists because the previous one could not do something specific. Counting died of arithmetic, and the numbers are stark enough to quote from memory. With a vocabulary of just 2,530 words there are $10^{17}$ possible five-word sequences; a corpus sees around $10^{-13}$ of them, and almost every one of those exactly once. No quantity of data repairs that, because the space grows faster than any corpus can be made to grow.</p>
 <p>Two things in the popular telling are wrong, and correcting them is the enjoyable part. Word2Vec did not invent word embeddings — Bengio's neural language model was learning them a decade earlier, and learning them is what that paper is <em>for</em>; Word2Vec's contribution was making them cheap enough for everyone. And the lineage people recite is not a chronology at all: LSTM predates Word2Vec by sixteen years, and ELMo appeared four months <em>after</em> the transformer. The arrows in a map like this one mean "here is what that could not do", never "here is what came next". The fair objection to the whole framing is that smoothed n-grams were not the failure it implies — modified Kneser-Ney five-grams held the state of the art for roughly two decades. What counting could never supply is any notion that two words are <em>similar</em>, and that, rather than accuracy, is what the rest of the story is about.</p>
 <h2 id='8-references'>8. References</h2>
 <ol>

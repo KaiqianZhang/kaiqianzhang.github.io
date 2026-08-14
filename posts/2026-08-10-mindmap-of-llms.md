@@ -7,14 +7,22 @@ icon: 🍵
 length: long
 ---
 
-I keep a mindmap of how language models got here. It starts at counting words
-and ends at a single node reading *Transformer*, and the useful thing about
-having it on one page is that the arrows between branches turn out to matter
-more than the branches.
+I keep a mindmap of how language models got to where they are. It starts at
+counting words and ends at a single node reading *Transformer*, and the useful
+thing about having the whole thing on one page is that the arrows between the
+branches turn out to matter more than the branches do.
 
-Each idea in the chain answers a specific, nameable failure in the one before
-it. This post walks that chain, with the map's own structure as the outline.
-The whole of it fits on one line:
+That is really the argument of this post. Each idea in the chain is not a new
+invention that happened to arrive; it is an answer to a specific, nameable
+thing the previous idea could not do. If you know what each one could not do,
+the chain becomes almost inevitable, and I think that is a far better thing to
+carry around than a list of names and dates.
+
+I am going to walk that chain, using my map's own structure as the outline,
+and I will assume you know nothing about any of it. I will also stop
+periodically to correct my own map, because a few of the notes on it turned
+out to be wrong when I went back to the papers. The whole of it fits on one
+line:
 
 <div class='roadmap'>
     <svg viewBox='0 0 760 384' role='img' aria-label='Roadmap of language modelling: counting in the 1990s, embeddings in 2013, recurrence, and attention from 2017.'>
@@ -115,31 +123,55 @@ that could not do", not "this came next".
 
 ## 1. When a Word Was Just a Count
 
-Begin where the field began. A language model assigns probability to text, and
-the chain rule says you can build that probability one word at a time:
+Let me start with what a language model *is*, because everything downstream is
+a different answer to the same question.
+
+A language model assigns a probability to a piece of text. That is the whole
+definition. Given "the cat sat on the", a language model tells you how likely
+each possible next word is — "mat" high, "thermodynamics" low — and given a
+whole sentence it tells you how likely that sentence is to be something
+somebody would say. Everything a modern chatbot does is built on top of this
+one capability, applied over and over.
+
+The convenient thing is that a probability over a whole sentence can be built
+one word at a time. The chain rule of probability says the probability of a
+sequence is the probability of its first word, times the probability of the
+second given the first, times the probability of the third given the first
+two, and so on:
 
 $$
 P(w_1 w_2 \ldots w_T) = P(w_1)\,P(w_2 \mid w_1)\,P(w_3 \mid w_1 w_2)\cdots
 $$
 
-The **statistical language model** estimates each factor by counting. Since
-conditioning on all of history is hopeless, an **n-gram** model truncates it:
-use the previous $n-1$ words to predict the $n$th, and estimate that
-probability by counting how often the combination appeared.
+So the problem reduces to estimating one factor: given everything so far, how
+likely is each next word?
 
-The failure is immediate and arithmetic. A vocabulary of $V$ words has $V^n$
-possible $n$-grams, and $V^n$ grows faster than any corpus.
+The **statistical language model** estimates that by counting, which is the
+most natural thing anybody could try. How often, in a large pile of text, is
+"the cat sat on the" followed by "mat"? Divide by how often "the cat sat on
+the" appears at all, and you have your probability.
+
+Conditioning on *all* of history is hopeless — no corpus contains your exact
+sentence — so an **n-gram** model truncates it. Use only the previous $n-1$
+words to predict the $n$th, and estimate that from counts. A five-gram model
+looks back four words and no further.
+
+The failure is immediate and it is arithmetic rather than linguistic. A
+vocabulary of $V$ words has $V^n$ possible $n$-grams, and $V^n$ grows faster
+than any pile of text you can assemble. The figure below counts this on the
+text of this very blog, which is small enough that I can show you every
+number.
 
 <div class='figure'>
     <img src='/images/mindmap-sparsity.png'
          alt='Log-scale plot of possible n-grams against n-grams ever observed, for n from 1 to 5. The possible count rises steeply; the observed count is nearly flat.'>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Measured on this blog's own other posts — 16,754 words, 2,244 of them
+        Measured on this blog's own other posts — 23,198 words, 2,530 of them
         distinct. At $n = 1$ every word in the space is observed by
-        definition. By $n = 5$ there are $5.7 \times 10^{16}$ possible
-        five-word sequences and exactly 16,183 ever occur, which is
-        $3\times10^{-13}$ of the space. Worse, <b>97.3%</b> of those 16,183
+        definition. By $n = 5$ there are $1.0 \times 10^{17}$ possible
+        five-word sequences and exactly 22,477 ever occur, which is
+        $2\times10^{-13}$ of the space. Worse, <b>97.6%</b> of those 22,477
         occur exactly once, so almost every count the model would rely on is
         the number 1. A bigger corpus moves these numbers and does not change
         their shape.
@@ -158,12 +190,22 @@ word2vec appeared. What they cannot supply is any notion that two words are
 *similar*. To a counter, "cat" and "dog" are as unrelated as "cat" and
 "thermodynamics".
 
-**NNLM**, the neural language model, was the first *neural* attempt at that —
-latent semantic analysis and Brown clustering had been deriving similarity
-from counts since the early 1990s. Its input is **one-hot**, and my map's note
-is the whole complaint: *lose the word meaning, dimension is horribly large*.
-Two one-hot vectors are orthogonal, so similarity is not merely unmeasured at
-the input; it is unrepresentable.
+That last point is the one that opens the rest of the story, so let me put it
+plainly. To a counter, words are atoms with no interior. "Cat" and "dog" are
+two different symbols, exactly as unrelated as "cat" and "thermodynamics", and
+seeing a thousand sentences about cats teaches such a model nothing whatsoever
+about dogs. Every human intuition about language says this is the wrong
+representation.
+
+**NNLM**, Bengio's neural language model, was the first *neural* attempt at
+fixing it — though not the first attempt at all, since latent semantic
+analysis and Brown clustering had been deriving similarity from counts since
+the early 1990s. Its input is **one-hot**, which means a word is represented
+as a list of $V$ numbers that are all zero except for a single 1 in the slot
+belonging to that word. My map's note on this node is the whole complaint:
+*lose the word meaning, dimension is horribly large*. Any two one-hot vectors
+point in perpendicular directions, so at the input, similarity between words
+is not merely unmeasured. It is unrepresentable.
 
 That is a correction to my own map, because NNLM *already fixes it*. Between
 the one-hot input and the hidden layer sits a shared matrix $C$ whose rows are
@@ -174,10 +216,24 @@ NNLM's came attached to an expensive model, and Word2Vec got them cheap.
 
 ## 2. When a Word Became a Direction
 
-**Word2Vec**'s goal, in the map's words: generate word embeddings. The insight
-is to get them cheaply, as a side effect — set up a fake prediction task, train
-a shallow network, and keep the input-side weight matrix. Those rows are the
-embeddings, though the model learns two and which you keep is a convention.
+**Word2Vec**'s goal, in my map's words, is to generate word embeddings — and I
+should say what one is, because it is the idea the whole field is built on.
+
+An **embedding** is a list of a few hundred numbers standing for a word, in
+which the numbers themselves are learned rather than assigned. Because they
+are learned from how words are used, words used in similar ways end up with
+similar lists, and "similar" now means something arithmetic: the two lists
+point in nearly the same direction. A word has stopped being a symbol and
+become a *direction* in a space, which is where the section title comes from.
+Once that is true you can ask which words are near which others, and get a
+sensible answer, which a counter could never give you.
+
+The insight in Word2Vec is not the embedding but how to get one cheaply — as a
+side effect of something else. Set up a prediction task nobody actually cares
+about, train a deliberately shallow network on it, and then throw the task
+away and keep the weight matrix from the input side. Its rows are your
+embeddings. (The model learns two such matrices, and which one you keep is a
+convention rather than a result.)
 
 Mikolov et al. remove NNLM's nonlinear hidden layer, and the paper is explicit
 that this is a *compute* argument: without it they could train on 1.6 billion
@@ -282,9 +338,15 @@ gradient, while CBOW averages it in with $2c-1$ neighbours and dilutes it.
 
 ### The bill at the output layer
 
-Both models end in a softmax over the whole vocabulary — $O(V)$ work per
-training example, which with $V = 50{,}000$ and billions of examples is the
-entire cost of training. Word2Vec ships two ways out, both in the map.
+Both arrangements have the same problem at the far end, and it is worth
+following because the two escapes from it are still in use.
+
+Whichever way round you set the task, the model finishes by producing a score
+for every word in the vocabulary and turning those scores into probabilities —
+a **softmax** over the whole vocabulary. That is $O(V)$ work for every single
+training example, and with $V = 50{,}000$ and billions of examples it is not a
+part of the cost of training. It *is* the cost of training. Word2Vec ships two
+ways out, and my map has both.
 
 **Negative sampling** stops trying to be a language model at all. Instead of
 "which of the 50,000 words is it?", ask "is this pair real?" — one true word
@@ -328,9 +390,16 @@ point: only nonzero entries are ever touched.
 
 ## 3. A Matrix Multiplied by Itself
 
-Word vectors have a hard limit. They are a lookup table: "bank" has one
-vector whether the sentence is about money or a river, and a bag of context
-has thrown away order, so "dog bites man" and "man bites dog" are one input.
+Word vectors have a hard limit, and it is the kind of limit that no amount of
+better training can repair, because it is in the shape of the thing.
+
+An embedding table is a lookup table. "Bank" has one vector, fixed the moment
+training ends, whether the sentence around it is about money or about a river.
+And the context these models consume is a *bag*: the surrounding words are
+averaged together, which throws away their order, so "dog bites man" and "man
+bites dog" arrive as the same input. Two of the most basic facts about
+language — that words mean different things in different sentences, and that
+order matters — are outside what this representation can express.
 
 My map says *DNN and MLP cannot deal with time-series data*, which needs
 narrowing — NNLM is feed-forward and works fine, and so is a transformer. The
@@ -622,10 +691,15 @@ the block it goes
 position gets into a model that has no sense of order
 ([RoPE](/blog/2026/08/11/rope/)).
 
-My map's last side note belongs here. **BatchNorm** normalizes a feature
-across the samples in a batch; **LayerNorm** across the features within one
-sample. The map's justification is the sharper half: the same channel of two
-images is comparable, two channels of one image are not.
+My map's last side note belongs here, and it is about normalization — the
+operation that keeps the numbers inside a deep network from running away.
+**BatchNorm** normalizes a feature across the samples in a batch;
+**LayerNorm** normalizes across the features within one sample. My map's
+justification is the sharper half of the argument: the same channel of two
+different images is a comparable quantity, and two different channels of one
+image are not. Sentences make this worse, because they have different lengths
+and arrive in batches of wildly varying shape, which is most of why language
+models normalize within a sample rather than across a batch.
 
 ## 6. Counting the Doors Still Open
 
@@ -653,9 +727,9 @@ score $10^{9}$, far past $V$. What is bounded by $[1, V]$ is the exponentiated
 entropy of the model's *own* distribution — its confidence, no data involved.
 The figure below plots the second.
 
-Easier to feel than to read. Drag the distribution from peaked to flat and
-watch the number follow — it runs from 1 to the vocabulary size and no
-further:
+It is much easier to feel than to read about. Drag the distribution from
+peaked to flat and watch the number follow — it runs from 1 to the vocabulary
+size and no further:
 
 <div class='knob' id='ppl-knob'>
     <div class='controls'>
@@ -702,6 +776,30 @@ further:
     </script>
 </div>
 
+### Where This Sits Now
+
+If you are heading into research, the reason to know this chain is not
+historical interest. It is that every one of these ideas is still in the
+building.
+
+The n-gram's failure is why models learn representations rather than counts,
+and the way a modern model still fails on rare sequences is a softer version
+of the same arithmetic. Embeddings are the first and last layers of every
+transformer, and in the largest vocabularies they are a substantial fraction
+of the parameters. The vanishing-gradient analysis in section 3 is exactly the
+analysis behind residual connections and behind where a transformer puts its
+normalizers. And the sequential-versus-parallel argument that killed
+recurrence has come back around: the state-space models — Mamba, and the mLSTM
+of xLSTM — are recurrences that found a way to be parallel in training, which
+is precisely the property the transformer won on. Whether they displace
+attention at scale is genuinely open.
+
+The thing I would take from the shape of the whole chain, though, is that
+every step was a *representation* decision rather than an optimization one.
+What is a word, numerically. The current answer is "a vector whose meaning is
+computed from everything around it", and it has held for eight years, which is
+by far the longest any answer has lasted.
+
 ## 7. Chat This Over With Friends
 
 The thing worth saying is that the whole history before transformers is a
@@ -710,7 +808,7 @@ then a direction, then a direction that depends on its neighbours, then one
 that depends on all of them at once — and each answer exists because the
 previous one could not do something specific. Counting died of arithmetic, and
 the numbers are stark enough to quote from memory. With a vocabulary of just
-2,244 words there are $10^{16}$ possible five-word sequences; a corpus sees
+2,530 words there are $10^{17}$ possible five-word sequences; a corpus sees
 around $10^{-13}$ of them, and almost every one of those exactly once. No
 quantity of data repairs that, because the space grows faster than any corpus
 can be made to grow.

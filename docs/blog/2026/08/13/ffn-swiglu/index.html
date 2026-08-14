@@ -71,7 +71,7 @@
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
-                    <p>8 min read</p>
+                    <p>15 min read</p>
                 </div>
                 <div class='byline'>
                     <h3>Tags</h3>
@@ -81,7 +81,10 @@
             <div class='clear'></div>
         </div>
         <div class='article'>
-<p>Attention gets the attention. But most of a transformer's parameters are not in attention at all — they sit in the feed-forward network that follows it, and for years its shape never changed: two matrices with a nonlinearity wedged between them. Then Noam Shazeer put a gate inside it. The change was designed to cost nothing, and the paper introducing it declines to say why it works.</p>
+<p>Attention gets the attention. It is the part of a transformer with the famous paper and the famous name, and if you have read one explanation of these models it was probably about that.</p>
+<p>So I want to write about the other part — the one that holds most of the parameters. After attention has run, every layer contains a second block, and in a modern model something like two thirds of the weights are in it. For years its design did not change at all: two matrices with a nonlinearity wedged between them, the same arrangement neural networks have used since the 1980s.</p>
+<p>Then in 2020 Noam Shazeer put a gate inside it, in a way carefully arranged to cost nothing, and essentially every model released since has copied him. What I find wonderful about this is the paper's own conclusion, which I will quote in full later: it declines to explain why the change works. It is still unexplained. It is also in the model you used this morning.</p>
+<p>I am going to assume no background at all, so we start with what this block is and where it sits.</p>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
@@ -95,7 +98,10 @@
     </ul>
 </nav>
 <h2 id='the-widest-place-a-token-ever-goes'>The Widest Place a Token Ever Goes</h2>
-<p>Attention mixes information <em>between</em> positions. The feed-forward network does the opposite: the same weights applied to each token alone, expanding its vector into a wider space, doing something nonlinear there, and projecting it back. Watch the shapes; they are the argument.</p>
+<p>A transformer is a stack of identical layers, and each layer does two things in turn.</p>
+<p>The first is <strong>attention</strong>, which moves information <em>between</em> words: it lets each word look at the others and take something from them. The second is the <strong>feed-forward network</strong>, which does the opposite. It never looks sideways at all. It takes each word's vector on its own, entirely ignorant of the rest of the sentence, and puts it through the same small network every other word goes through.</p>
+<p>That small network has a distinctive shape, and the shape is the whole subject of this post. It takes the word's vector — 4,096 numbers, in the model I will use throughout — and multiplies it by a matrix that expands it to something much wider, typically four times as wide. It does something nonlinear in that wide space. Then it multiplies by a second matrix that brings it back down to 4,096 and adds the result to what was already there.</p>
+<p>Two questions are worth holding while you look at the picture below. Why expand at all, if you are only going to come back down? And what is the nonlinear thing in the middle actually for? The answer to the first is that a matrix on its own can only mix a word's numbers together in fixed proportions; the interesting behaviour lives in the nonlinear step, and the expansion gives that step more room to work in. The answer to the second is the rest of this post — because in 2020 the field changed its mind about what that middle step is for, and demoted it from the thing doing the work to something more like a tap.</p>
 <div class='ffn-anim'>
     <svg viewBox='0 0 720 268' role='img'
          aria-label='A feed-forward layer. One token vector of width 4096 enters, is projected by two separate matrices into width 11008, one branch is passed through Swish and multiplied elementwise into the other, and a third matrix projects the result back to width 4096.'>
@@ -143,7 +149,7 @@
     </div>
 </div>
 <h2 id='1-when-the-gate-arrived-before-the-door-it-would-open'>1. When the Gate Arrived Before the Door It Would Open</h2>
-<p>The pieces were lying around before anyone assembled them, and not in the order the story implies.</p>
+<p>The pieces were lying around for years before anybody assembled them, and not in the order the usual telling implies.</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 459' role='img' aria-label='Roadmap of the feed-forward layer: a gate arrives in 2016, the Transformer ships a plain two-matrix FFN in 2017, Shazeer puts the gate inside it in 2020, and LLaMA makes that the default.'>
       <path class='spine' d='M99.5,230.0 Q380.0,229.3 660.5,229.6'/>
@@ -228,25 +234,29 @@
       </g>
     </svg>
 </div>
-<p>The middle arrow needs care. People <em>did</em> revisit the activation — BERT and GPT put GELU where the ReLU had been, and Shazeer's introduction says so. What went unrevisited was the <em>shape</em>, which holds about two thirds of the non-embedding parameters in a decoder-only model: 66.8% in LLaMA 7B, though only 57% in the 2017 encoder-decoder, which also carries cross-attention.</p>
+<p>The middle arrow needs care, because it would be easy to read it as saying nobody thought about this block for three years. People <em>did</em> revisit the activation: BERT and GPT both put GELU where the original ReLU had been, and Shazeer's introduction says so plainly. What went unrevisited was the <em>shape</em> — one matrix up, one activation, one matrix down.</p>
+<p>It is worth pausing on how much was riding on that unexamined shape. The feed-forward block holds about two thirds of the non-embedding parameters in a decoder-only model: 66.8% of them in LLaMA 7B. (The figure was only 57% in the 2017 encoder-decoder, which spends parameters on cross-attention that a modern decoder does not have.) The most-copied design decision in the architecture was also one of the least examined ones.</p>
 <h2 id='2-a-third-matrix-paid-for-in-width'>2. A Third Matrix, Paid For in Width</h2>
-<p>The original layer is two matrices with a rectifier between them, written without biases as T5 does:</p>
+<p>The original layer is two matrices with a rectifier between them. Written without biases, as T5 does:</p>
 $$
 \text{FFN}_{\text{ReLU}}(x, W_1, W_2) = \max(xW_1,\, 0)\,W_2 .
 $$
-<p>A <strong>gated linear unit</strong> replaces that single expansion with two and uses one to modulate the other. Shazeer's version puts Swish on the gate:</p>
+<p>Read that as: expand, then set every negative entry to zero, then bring it back down. The $\max(\cdot, 0)$ is the nonlinear step, and it is a blunt one — each of the wide layer's units either passes its value along or is switched off.</p>
+<p>A <strong>gated linear unit</strong> replaces the single expansion with two, and uses one of them to modulate the other. Shazeer's version puts Swish on the gate:</p>
 $$
 \text{FFN}_{\text{SwiGLU}}(x, W, V, W_2) = \big(\text{Swish}_1(xW) \otimes xV\big)\,W_2,
 \qquad \text{Swish}_\beta(x) = x\,\sigma(\beta x),
 $$
-<p>where $\otimes$ is elementwise multiplication. That is the whole definition. The activation has not been <em>replaced</em> so much as demoted: it no longer stands between two matrices, it decides how much of a third gets through.</p>
+<p>where $\otimes$ means multiplying entry by entry. That is the whole definition, and it is worth reading twice, because the same input $x$ now goes up two separate routes. One route, through $W$, gets squashed by Swish. The other, through $V$, is left alone. Then the two wide vectors are multiplied together entry by entry, and the result goes down through $W_2$.</p>
+<p>The activation has not been <em>replaced</em> so much as demoted. It used to stand between the two matrices, and everything had to pass through it. Now it stands to one side and decides, unit by unit, how much of a third matrix's output gets through. A squashed value near zero closes that unit; a value near one lets it pass unchanged. It has stopped being the thing that computes and become the thing that permits.</p>
 <h3 id='why-the-width-falls-to-exactly-two-thirds'>Why the width falls to exactly two thirds</h3>
-<p>Here is the step worth doing slowly, because it is why the change is free. The ReLU layer holds two matrices, so $2\,d\,d_{ff}$ parameters; the gated layer holds three at some new width $d_{ff}'$, so $3\,d\,d_{ff}'$. Setting them equal,</p>
+<p>Here is the step I would do slowly, because it is the reason the change could be adopted at all.</p>
+<p>Adding a third matrix to a block that holds two thirds of the model's parameters should be unaffordable — it is half again as many weights in the largest part of the model. Shazeer's move is to refuse to pay, and to take the cost out of the <em>width</em> instead. The ReLU layer holds two matrices, so $2\,d\,d_{ff}$ parameters; the gated layer holds three at some new width $d_{ff}'$, so $3\,d\,d_{ff}'$. Set them equal:</p>
 $$
 3\,d\,d_{ff}' = 2\,d\,d_{ff} \quad\Longrightarrow\quad d_{ff}' = \tfrac{2}{3}\,d_{ff}.
 $$
-<p>The $d$ cancels, so the rule holds at every model size. With the customary $d_{ff} = 4d$ that is $\tfrac{8}{3}d$: one extra matrix, paid for in width.</p>
-<p>Watch it land in LLaMA 7B, where $d = 4096$. Two thirds of $4d$ is $10{,}922.67$, not a width you can allocate, so it rounds up to the next multiple of 256: <strong>11,008</strong>, the number on Figure 1 — leaving the layer 0.78% larger than the ReLU version, the detail lost whenever the swap is called exactly free.</p>
+<p>Notice that $d$ cancels. The rule is not a tuned constant that happens to work at one scale; it holds at every model size there will ever be, which is why it survived the jump from a 2020 experiment to models a thousand times larger. With the customary $d_{ff} = 4d$, the new width is $\tfrac{8}{3}d$. One extra matrix, paid for entirely in width, at identical parameter count and very nearly identical arithmetic.</p>
+<p>Watch the rule land in a real model. LLaMA 7B has $d = 4096$, so two thirds of $4d$ is $10{,}922.67$ — not a width anybody can allocate, and not a shape the hardware would like even if you could. It rounds up to the next multiple of 256, giving <strong>11,008</strong>, which is the number written on Figure 1. That rounding leaves the layer 0.78% larger than the ReLU version it replaced, which is the detail that quietly disappears whenever somebody calls the swap exactly free.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 210' id='par-svg' role='img'
          aria-label='Two stacked bars comparing the parameter count of a ReLU feed-forward layer against a SwiGLU one, as the hidden width is changed.'>
@@ -319,7 +329,7 @@ $$
 })();
 </script>
 <h2 id='3-four-curves-and-the-units-they-silence'>3. Four Curves, and the Units They Silence</h2>
-<p>The gate needs something to squash it, and the candidates form a family:</p>
+<p>The gate needs something to squash it, and the candidates form a family worth knowing, because the difference between them is the difference between the named variants people argue about.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 300' id='act-svg' role='img'
          aria-label='Four activation functions plotted together: ReLU, GELU, Swish, and the sigmoid used by the original gated linear unit.'>
@@ -420,8 +430,9 @@ $$
   draw();
 })();
 </script>
-<p>Two things there. The dip is real: GELU and Swish are <strong>not monotonic</strong>, going negative for small negative inputs before returning towards zero. And $\beta$ is not really a hyperparameter — since $\text{Swish}_\beta(xW) = \tfrac{1}{\beta}\text{Swish}_1(x\beta W)$, any $\beta$ is absorbed by rescaling $W$ and $W_2$, which is why Shazeer fixes it at 1 without comment.</p>
-<p>That is one number at a time. What the gate does to a whole layer:</p>
+<p>Two things are worth taking from that figure. The first is that the dip is real rather than a drawing artefact: GELU and Swish are <strong>not monotonic</strong>. They dip below zero for small negative inputs before coming back up towards it, which means a slightly negative input produces a slightly negative gate — a unit that does not merely close but briefly reverses.</p>
+<p>The second is that $\beta$ is not really a hyperparameter at all. Because $\text{Swish}_\beta(xW) = \tfrac{1}{\beta}\text{Swish}_1(x\beta W)$, any value of $\beta$ can be absorbed by rescaling $W$ and $W_2$ — and those are learned, so the model can do the rescaling itself during training. That is why Shazeer fixes it at 1 without comment, and it is a good example of a knob that looks like a choice and is not.</p>
+<p>All of that is one number at a time. What I actually want you to see is what the gate does to a whole layer of them at once:</p>
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='gat-svg' role='img'
          aria-label='Twenty-four hidden units. The top row is the gate after Swish, the middle row is the value branch, and the bottom row is their elementwise product, which is what leaves the layer.'>
@@ -505,15 +516,20 @@ $$
 })();
 </script>
 <h2 id='4-the-variant-that-won-and-the-one-that-was-better'>4. The Variant That Won, and the One That Was Better</h2>
-<p>The paper has four tables and not one figure — which is why Figure 1 is drawn rather than reproduced, and why it is worth reading all four. No variant wins them. On pretraining perplexity <strong>GEGLU</strong>, the same construction with GELU on the gate, edges SwiGLU 1.633 to 1.636; but GLUE goes to ReGLU, SuperGLUE to SwiGLU, and SQuAD to Bilinear, which has no gate nonlinearity at all. Four tables, four winners. And the margins are thin: Shazeer measures run-to-run variability only in the short column, where the GEGLU–SwiGLU gap of 0.002 sits against standard deviations of 0.004 and 0.010. The fully-trained column is a single run each with no spread reported at all. The paper establishes a gap between gated and ungated, and a tie inside the gated family.</p>
+<p>Now the evidence, and I should say first that this paper has four tables and not a single figure — which is why Figure 1 in this post is drawn rather than reproduced from it. It also means the argument is only visible if you read all four tables, and the interesting thing about them is that no variant wins them. On pretraining perplexity <strong>GEGLU</strong>, the same construction with GELU on the gate, edges SwiGLU 1.633 to 1.636; but GLUE goes to ReGLU, SuperGLUE to SwiGLU, and SQuAD to Bilinear, which has no gate nonlinearity at all. Four tables, four winners. And the margins are thin: Shazeer measures run-to-run variability only in the short column, where the GEGLU–SwiGLU gap of 0.002 sits against standard deviations of 0.004 and 0.010. The fully-trained column is a single run each with no spread reported at all. The paper establishes a gap between gated and ungated, and a tie inside the gated family.</p>
 <p>Which makes adoption the question, and the usual telling is wrong. It was not Meta choosing and everyone copying: <strong>PaLM used SwiGLU in April 2022</strong>, a year before LLaMA, at 540B, and it was Google's — while Google's Gemma ships <strong>GEGLU</strong> to this day. The split runs inside labs, not between them. LLaMA's choice mattered because its weights were public, so Mistral, Qwen, DeepSeek and Phi inherited a recipe, not a measurement.</p>
-<p>His conclusion:</p>
+<p>Which brings me to my favourite last line in the literature. Having introduced a change that is now in almost every language model in production, Shazeer closes the paper like this:</p>
 <blockquote>
 <p>We offer no explanation as to why these architectures seem to work; we attribute their success, as all else, to divine benevolence.</p>
 </blockquote>
-<p>People have tried since. The usual story is that a product of two projections is quadratic where a ReLU layer is piecewise linear, so one gated layer expresses multiplicative interactions a plain one cannot — exactly true of the <em>Bilinear</em> variant, and only near the origin once Swish sits on the gate. Note the weaker word: a deep ReLU stack <em>approximates</em> products perfectly well, so what is at stake is one layer at fixed parameter count. No account has won consensus.</p>
+<p>I do not think that is false modesty, and people have tried to fill the gap since. The usual story is that multiplying two projections together makes the layer <em>quadratic</em> in its input where a ReLU layer is piecewise linear, so one gated layer can express multiplicative interactions between features that a plain one cannot. That is exactly true of the <strong>Bilinear</strong> variant, which has no gate nonlinearity at all, and only true near the origin once Swish is sitting on the gate.</p>
+<p>Note the weight the argument has to carry, though. A deep stack of ReLU layers <em>approximates</em> products perfectly well — that is what depth is for. So what is actually at stake is what a single layer can do at a fixed parameter count, which is a much narrower claim than "gating adds expressiveness". No account of this has won consensus, and I would treat anybody who states one confidently with mild suspicion.</p>
+<h3 id='where-this-sits-now'>Where This Sits Now</h3>
+<p>If you are heading into research, this is the clearest example I know of something that is universal, load-bearing, and unexplained.</p>
+<p>The mechanism itself is settled: every open model of the last three years uses some member of this family, and nobody is arguing about whether to gate. What is unsettled is why it helps, and that matters more than it sounds, because the same block is where two of the field's most active lines of work are happening. Mixture-of-experts models make this block sparse — many feed-forward blocks, only a couple of which run for any given token — which is how the largest models are built now, and every one of those experts is a SwiGLU. And interpretability research keeps finding that individual facts and concepts are stored in this block's wide middle layer rather than in attention. Both lines are building on a component whose own paper attributes its success to divine benevolence.</p>
+<p>There is also a lesson in the accounting. The reason this change spread is not that it was better; the tables above barely support that. It is that Shazeer worked out how to make it <em>free</em>, and a free change with a plausible upside faces almost no resistance. When you propose something, the parameter-matched version of it is a different proposal from the one that costs more, and only one of the two will be adopted.</p>
 <h2 id='5-chat-this-over-with-friends'>5. Chat This Over With Friends</h2>
-<p>The part of a transformer nobody talks about is where most of its parameters are. Attention mixes tokens together; the feed-forward layer after it works on each token alone and holds roughly two thirds of the non-embedding weights in a modern model. In 2020 Noam Shazeer changed one thing: instead of one wide matrix and a ReLU, use <em>two</em> wide matrices, squash one, and multiply them entry by entry. The elegant part is the accounting: three matrices where there were two would cost half again as much, so you shrink the hidden width to exactly two thirds, and the model width cancels, so the rule holds at every scale. In LLaMA 7B that is 4,096 going up to 11,008 rather than 16,384 — the same budget, spent differently.</p>
+<p>The part of a transformer nobody talks about is where most of its parameters are. Attention mixes words together; the feed-forward layer that follows it works on each word alone, and holds roughly two thirds of the non-embedding weights in a modern model. In 2020 Noam Shazeer changed one thing about it. Instead of one wide matrix and a squashing function, use <em>two</em> wide matrices, squash one of them, and multiply the two together entry by entry — so the squashing function stops being the thing that computes and becomes a tap that decides how much of the other matrix gets through. The elegant part is the accounting. Three matrices where there were two would cost half again as much, so you shrink the wide middle to exactly two thirds of its old width, and because the model width cancels out of that calculation the rule holds at every scale. In LLaMA 7B it means going up to 11,008 instead of 16,384: the same budget, spent differently.</p>
 <p>What most people get wrong is that a winner was ever established. GEGLU edges SwiGLU on pretraining perplexity by 0.003, a margin the paper never shows to be real, and the three downstream tables go to ReGLU, SwiGLU and Bilinear, one each. Nor was this Meta choosing and the field copying: Google's PaLM shipped SwiGLU a year before LLaMA, while Google's Gemma ships GEGLU to this day. The best part is the paper's last line, where Shazeer declines to explain the result and attributes it "to divine benevolence." People have tried since; no account has won. A great deal of what runs in production is there because it works and nobody quite knows why.</p>
 <h2 id='6-references'>6. References</h2>
 <ol>

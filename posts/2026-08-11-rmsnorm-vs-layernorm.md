@@ -4,20 +4,48 @@ subtitle: Modern language models deleted one step from the operation that normal
 date: 2026-08-11
 tags: llm
 icon: 🍵
+length: long
 ---
 
-Every transformer normalizes: between attention and the feed-forward block,
-each token's hidden vector is rescaled so its entries have a controlled size.
-For seven years that meant **layer normalization**. Today almost every large
-language model uses **root mean square layer normalization** — LayerNorm with
-one step deleted. This post is about why deleting it was worth doing.
+I want to tell you about a change that almost every large language model has
+made, and that is easy to miss, because it consists of deleting one line of
+arithmetic.
+
+Somewhere inside a transformer there is an operation that runs on every word,
+in every layer, and does nothing more dramatic than rescale a list of numbers
+so that they are neither too large nor too small. For seven years that
+operation was **layer normalization**. Today it is **root mean square layer
+normalization**, which is layer normalization with one step taken out. Nothing
+else about the models changed.
+
+I think this is worth a whole post for two reasons. The first is that the
+deleted step turns out to have been doing very nearly nothing, and I can tell
+you *exactly* how nearly: there is a clean formula for how far the two
+operations disagree, and it shrinks as models get wider. The second is that
+the paper making the case is one of the more honest I have read, and the
+figure carrying its argument does not contain the proposed method at all.
+
+I am going to assume you know nothing at all about how a language model works
+on the inside, so we will start with where this thing sits.
 
 [TOC]
 
 ## Two Small Rooms in Every Layer
 
-RMSNorm is a drop-in replacement, not a rearrangement: both occupy the same
-two slots.
+A transformer is a stack of identical layers. GPT-2 has twelve of them; Llama
+3 70B has eighty. Each layer does two things to the sentence in turn. First it
+runs **attention**, which lets every word look at the other words and take
+something from them. Then it runs a **feed-forward block**, which is a small
+network applied to each word on its own. Around each of those two operations
+there is a **residual connection**, which means that whatever comes out is
+added back onto whatever went in — the layer edits the representation rather
+than replacing it.
+
+Normalization lives at those two joints. Twice per layer, in every layer, each
+word's vector of numbers is handed to a normalizer, which rescales it and
+passes it on. In a seven-billion-parameter model that is sixty-four of these
+operations between the text arriving and a word coming out, and the whole of
+this post takes place inside one of them.
 
 <div class='figure-pair tall'>
     <div class='panels'>
@@ -63,8 +91,10 @@ two slots.
 
 ## 1. Seven Years of Subtracting a Ghost
 
-Each attempt charged something. The labels above the arrows name what the
-step to their left was still paying.
+The history here is short, and it is entirely a history of prices. Each method
+below exists because the one before it was charging something its users had
+grown tired of paying, and the labels above the arrows are what was being
+charged.
 
 <div class='roadmap'>
     <svg viewBox='0 0 760 384' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
@@ -148,20 +178,68 @@ step to their left was still paying.
     </svg>
 </div>
 
-The motivation was **cost, not quality**, and they said plainly what they
-thought was load-bearing:
+I would stop on the third box, because the motivation there was **cost, not
+quality**, and Zhang and Sennrich were unusually direct about what they
+believed was actually doing the work:
 
 > In this paper, we hypothesize that the re-scaling invariance is the reason
 > for success of LayerNorm, rather than re-centering invariance.
 
-The interesting part is not that a faster method won, but that the standard
-explanation for *why* LayerNorm worked was half wrong, and nobody checked for
-three years.
+That sentence is a claim about somebody else's method. LayerNorm had been
+standard for three years by then, and the accepted account of why it worked
+had two parts to it. This paper says that one of the two parts is not the
+reason, removes it, and shows that nothing breaks.
 
-## 2. The Arithmetic of an Absence
+What I find striking is not that a cheaper method won. It is that the standard
+explanation for the expensive method was half wrong, in print, for three
+years, and that it took somebody trying to make it *faster* to notice. That is
+worth remembering as a general shape: an optimization is sometimes the only
+thing that ever tests an explanation, because it is the only work that has a
+reason to ask which part is load-bearing.
 
-Both take a token's hidden vector $x \in \mathbb{R}^d$ and return one of the
-same shape. **LayerNorm** computes two statistics across the $d$ entries:
+## 2. The Size of Things, and Why It Runs Away
+
+Before we can compare two normalizers I owe you an account of what either of
+them is for, because "rescale the numbers" is not a reason on its own.
+
+A word arriving at the model is turned into a **vector**: a list of numbers,
+all of which the model learned. GPT-2 uses lists of 768 numbers, Llama 2 7B
+uses 4096. Nothing about any single entry means anything you could name; what
+carries meaning is the whole list, and the model's job is to keep editing that
+list until it is a good enough description of the word in its context to
+predict what comes next.
+
+The editing is where the trouble starts. Because of those residual
+connections, every layer *adds* to the list rather than replacing it, and
+sixty-four rounds of addition is a lot of opportunity for the numbers to grow.
+If they grow, the next layer receives inputs it was never trained to handle;
+the exponentials inside attention saturate, so a word puts essentially all its
+attention on one other word and there is no gradient left to learn from; and
+in the sixteen-bit arithmetic these models actually run in, large enough
+numbers stop being representable at all. If instead they shrink, the signal
+fades and the layer has nothing to work with. Neither failure announces
+itself. Both simply produce a model that will not train.
+
+A normalizer is the fix, and it is blunt. Take the token's list, measure how
+big it is, and divide by that measurement. Whatever came in, what leaves has a
+known size, so the next layer always receives its input on the same footing.
+Because dividing everything by one number also throws away a degree of freedom
+the model might want, each normalizer carries a small set of learned weights —
+one per entry, written $g$ — that it multiplies back in afterwards. The model
+can therefore restore any scale it turns out to need. What it cannot do is
+drift.
+
+I should say plainly that nobody in this story is arguing about whether to
+normalize. Section 4 has the measurement of what happens without it, and it is
+not close. The entire argument is about *how you measure how big a list is* —
+and there are two obvious answers to that, which differ by one step.
+
+## 3. The Arithmetic of an Absence
+
+Both normalizers take a token's hidden vector $x \in \mathbb{R}^d$ and hand
+back one of the same shape, and both are two lines of arithmetic. **LayerNorm**
+computes two statistics across the $d$ entries — their average, and how far
+they typically sit from it:
 
 $$
 \mu = \frac{1}{d}\sum_i x_i, \quad
@@ -176,8 +254,19 @@ $$
 \text{RMSNorm}(x)_i = g_i \frac{x_i}{\text{RMS}(x)} .
 $$
 
-That is the whole difference: no $\mu$, no subtraction, and originally no
-bias.
+That is the whole difference. LayerNorm centres the numbers first — it works
+out their average, subtracts it from every entry, and only then divides by
+their spread. RMSNorm skips the centring: it divides by the size of the list
+as it stands. No $\mu$, no subtraction, and in the original proposal no bias
+$b$ either.
+
+It is worth being clear about why anyone cared, because one subtraction does
+not sound like an expense. It is not the arithmetic. Computing $\mu$ means
+reading all $d$ entries and adding them up before anything else can begin, and
+only then can the second pass over the same entries start. On the hardware
+these models run on, that serial dependency is worth more than the additions
+it contains, and it happens sixty-four times per token per layer stack. The
+question is whether the answer changes.
 
 <div class='pipe-anim'>
     <div class='panels'>
@@ -237,8 +326,9 @@ bias.
 
 ### Why RMS stands in for $\sigma$
 
-The two statistics are closer than they look, and everything else follows
-from the relationship. Expand the sum of squares around the mean:
+The two measurements are closer than they look, and once you have seen the
+relationship between them everything else in this post follows from it. Expand
+the sum of squares around the mean:
 
 $$
 \frac{1}{d}\sum_i x_i^2
@@ -248,9 +338,14 @@ $$
 \qquad\text{so}\qquad \text{RMS}^2 = \sigma^2 + \mu^2 .
 $$
 
-The middle term vanishes because deviations from the mean sum to zero. So
-**the RMS is the standard deviation plus whatever the mean contributes** — and
-the real question is how big $\mu$ is next to $\sigma$.
+The middle term disappears because deviations from a mean sum to zero, by the
+definition of the mean. What is left says that **the RMS is the standard
+deviation plus whatever the mean contributes**, combined the way the sides of
+a right-angled triangle combine. So the two normalizers are measuring the same
+thing plus a correction, and the whole question — the entire question, for the
+rest of this post — is how big $\mu$ is next to $\sigma$.
+
+If that is Pythagoras, it should be drawable, and it is.
 
 <div class='knob'>
     <svg viewBox='0 0 720 300' id='geo-svg' role='img'
@@ -348,6 +443,10 @@ the real question is how big $\mu$ is next to $\sigma$.
 
 ### Exactly how far apart are they
 
+Knowing the two measurements are related is not the same as knowing how much
+the two *outputs* differ, so let me do that properly, because the answer is
+exact and I have never seen it stated in a way that felt like a real bound.
+
 Set $g = 1$, $b = 0$. Each method returns a positive multiple of a vector —
 LayerNorm of $x - \mu\mathbf{1}$, RMSNorm of $x$ — and scale is irrelevant to
 both, so the entire disagreement is the angle $\theta$ between those
@@ -359,31 +458,47 @@ $$
 = \sqrt{1 - \frac{\mu^2}{\text{RMS}(x)^2}} = \frac{\sigma}{\text{RMS}(x)} .
 $$
 
-**The agreement is exactly $\sigma/\text{RMS}$** — no approximation, no
-assumption about the distribution of $x$.
+**The agreement between the two normalizers is exactly $\sigma/\text{RMS}$.**
+There is no approximation in that line and no assumption about how the entries
+of $x$ are distributed. It is true of every vector. If the mean is zero the two
+outputs are identical; the further the mean is from zero relative to the
+spread, the further apart they point.
 
-Now add the assumption real networks satisfy: $d$ is large. If the entries of
-$x$ are independent with mean zero and variance one, $\mu$ has variance $1/d$,
-and expanding the square root gives
+Now bring in the one fact about real networks that makes this a small number.
+The vectors are wide. If the $d$ entries are independent with mean zero and
+variance one — which is what initialization arranges for and what training
+roughly maintains — then $\mu$ is an average of $d$ such things and has
+variance $1/d$. Expanding the square root gives
 
 $$
 \mathbb{E}\!\left[1 - \cos\theta\right] \approx \frac{1}{2d} .
 $$
 
-**The disagreement shrinks like $1/d$** — about $0.00065$ at GPT-2's
-$d = 768$, and $0.00012$ at Llama 2 7B's $d = 4096$. Section 4 checks it.
+**The disagreement shrinks like $1/d$.** At GPT-2's width of 768 that is about
+$0.00065$; at Llama 2 7B's width of 4096 it is about $0.00012$. Those are not
+"small differences in the loss" or "differences within noise". They are how
+far the two outputs are from being the same vector, and they get smaller every
+time the field builds a wider model. Section 5 measures it rather than taking
+my word for it.
 
 ### The invariance left behind
 
-Both are invariant to **re-scaling**, since
+I do not want to leave you thinking that nothing was given up, because
+something was, and it is the honest half of the story.
+
+Both normalizers are invariant to **re-scaling**, since
 $\text{RMS}(\alpha x) = \alpha\,\text{RMS}(x)$ cancels. Only LayerNorm is
 invariant to **re-centering**: add $c$ to every entry and each deviation
 $x_i - \mu$ is unchanged, so its output is identical. RMSNorm sees a different
 vector.
 
-That is the real trade, stated without spin: RMSNorm gives up a genuine
-mathematical property, and the claim — supported then by experiments and since
-by the field — is that this property was not the one carrying the load.
+So here is the trade, stated without spin. RMSNorm gives up a real
+mathematical property. Feed it a vector and feed it that same vector with a
+constant added to every entry, and it will hand back two different answers,
+where LayerNorm would hand back the same one twice. The claim — supported at
+the time by experiments, and since by every large model that has been trained
+this way — is that this property was never the one carrying the load. It is a
+bet, not a theorem, and the widget below is the bet drawn to scale.
 
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='inv-svg' role='img'
@@ -485,11 +600,16 @@ by the field — is that this property was not the one carrying the load.
 })();
 </script>
 
-## 3. What the Clock Knew and the Counter Did Not
+## 4. What the Clock Knew and the Counter Did Not
 
-Every paper has one figure carrying its argument, and RMSNorm's contains no
-RMSNorm at all: one translation model with and without LayerNorm, plotted
-against steps and then against seconds.
+Every paper has one figure that carries its argument, and I find the choice in
+this one delightful, because the figure that carries the RMSNorm paper's
+argument contains no RMSNorm at all.
+
+It is a single translation model trained twice, with and without LayerNorm,
+and the same two runs are plotted against two different horizontal axes. On
+the left, the number of training steps taken. On the right, the number of
+seconds spent. Watch what happens to the gap.
 
 <div class='figure-pair'>
     <div class='panels'>
@@ -525,9 +645,23 @@ against steps and then against seconds.
     </div>
 </div>
 
-## 4. Watching a Difference Vanish into Width
+That is the entire case, and notice how little of it is about RMSNorm. The
+argument runs: normalization is clearly worth having, since the model without
+it is nowhere; but a third of what it wins per step is handed straight back
+per second, because the normalizer itself is slow; therefore the prize is not
+a better normalizer but a cheaper one that ties. Everything else in the paper
+is the demonstration that removing the mean does tie.
 
-Both are checkable, and each normalizer is two lines:
+I would hold on to the shape of that argument even if you never think about
+normalization again. When a technique is winning on one axis and losing on
+another, the useful question is rarely "can we win more" — it is "which axis
+is the one we are actually billed on".
+
+## 5. Watching a Difference Vanish into Width
+
+I have claimed a formula and quoted two numbers from it, so let me show you
+both being checked, on vectors drawn fresh in your browser while you watch.
+Each normalizer is two lines of arithmetic:
 
 ```python
 def layernorm(x):
@@ -630,33 +764,60 @@ The widget runs it live, on fresh draws.
 })();
 </script>
 
-Both hold — and hold them together: at realistic widths the two do nearly the
-same thing, which is why the swap is safe, while the property RMSNorm sold is
-real, which is why it was a bet.[^shift]
+Both things hold at once, and I would ask you to hold them together, because
+each on its own is misleading. At the widths real models use, the two
+normalizers do so nearly the same thing that the difference is in the fourth
+decimal place — which is why the swap was safe. And the property RMSNorm gave
+up is completely real, and the second slider makes it appear on demand — which
+is why it was a bet rather than a free lunch.[^shift] What decided the bet was
+not the mathematics. It was that the activations of a trained network happen
+to sit near zero mean, and nobody has a proof that they must.
 
-## 5. Chat This Over With Friends
+### Where This Sits Now
+
+If you are heading into research, the thing to take from this is not the
+formula. It is that a component everyone treated as settled had an explanation
+attached to it that nobody had tested, and testing it was worth more than
+improving it.
+
+The specific result is now everywhere: RMSNorm is in LLaMA, Mistral, Qwen,
+Gemma and essentially every open model released since 2023, and the ordinary
+implementation fuses it into a single kernel so the division costs almost
+nothing. That makes it a closed question in practice. The open part is what
+sits next to it. Normalization is one of the few operations in a transformer
+that is not a matrix multiply, which means it is one of the few places where
+the model is limited by moving numbers around rather than by arithmetic — the
+same problem that dominates the KV cache. Work on removing normalizers
+entirely, or on folding them into the operations around them, is live for
+exactly that reason, and the argument in Figure 5 is the argument it makes.
+
+## 6. Chat This Over With Friends
 
 The story worth telling is that every large language model of the last few
 years quietly deleted a step from the operation that normalizes it, and
-nothing broke. LayerNorm subtracts the mean of a token's features before
-dividing by their spread; RMSNorm simply does not subtract. What lifts this
-above a micro-optimization is that you can say exactly how much was given up:
-the cosine between the two outputs is $\sigma/\text{RMS}$, exactly, which at
-GPT-2's width puts them about seven parts in ten thousand apart and closing as
-$1/2d$. The mean LayerNorm spent seven years subtracting was, in a network
+nothing broke. Normalizing means measuring how big a token's list of numbers
+has grown and dividing it back down, which has to happen twice a layer or the
+numbers run away. The old method subtracted the average of the list before
+dividing; the new one does not bother subtracting. What lifts this above a
+micro-optimization is that you can say exactly how much was given up: the
+agreement between the two outputs is the ratio $\sigma/\text{RMS}$, exactly,
+with no approximation anywhere, and at GPT-2's width that puts them about
+seven parts in ten thousand apart, closing as one over twice the width. The
+average that the old method spent seven years subtracting was, in a network
 that wide, very nearly not there at all.
 
 Where the usual telling goes wrong is the moral. "RMSNorm is faster" is true
-and is not the finding; the finding is that it *ties*, and the tie is the
+and is not the finding — the finding is that it *ties*, and the tie is the
 whole argument, because when two methods reach the same quality the one doing
-less work should win. Something real was sold, though: LayerNorm is invariant to adding a constant
-to every feature and RMSNorm is not, and the field's position is a bet that
-this invariance was never doing the work. Seven years of models suggest it was
-right. The part worth raising is that this is a *negative* result — somebody
-removed a step, showed nothing broke, and it mattered more than most additions
-do.
+less work should win. The fair objection is that something real was sold:
+LayerNorm gives the same answer if you add a constant to every feature and
+RMSNorm does not, so the field's position is a bet that this invariance was
+never doing the work. Seven years of models suggest the bet was right, and
+nobody has proved it. What I like most is that this is a *negative* result.
+Somebody removed a step, showed nothing broke, and it has mattered more than
+most additions do.
 
-## 6. References
+## 7. References
 
 1. Ba, J. L., Kiros, J. R., & Hinton, G. E. (2016). Layer Normalization.
    [arXiv:1607.06450](https://arxiv.org/abs/1607.06450)
