@@ -178,6 +178,48 @@ So the rule splits by what the figure is:
   paper figure — keeps clean lines and the normal type. Sketching a
   measurement would be a lie about its provenance.
 
+## Figure type sizes, which are settled
+
+These were arrived at by being told three times that the figures were too
+small, so **treat them as the floor, not a starting point**. If you add a new
+figure class, size it against this table rather than against what looks right
+in your editor.
+
+| Where | Class | Size |
+|---|---|---|
+| Sketch, label in a box | `.sk-t` | 17.5px |
+| Sketch, second line | `.sk-sub` | 14px |
+| Sketch, section label | `.sk-lbl` | 15px |
+| Sketch, annotation | `.sk-note` | 14.5px |
+| Sketch, label inside a fill | `.sk-in` | 14px |
+| Roadmap, milestone title | `.stage` | 18.5px |
+| Roadmap, bullet | `.body` | 15.5px |
+| Roadmap, arrow reason | `.why` | 15px |
+| Roadmap, year | `.yr` | 14.5px |
+| Widget, token or row label | `.tk` | 15.5px |
+| Widget, axis label | `.axlabel` | 15.5px |
+| Widget, heading | `.hd` | 15.5px |
+| Widget, group label | `.gl` | 15px |
+| Widget, tick | `.tick` | 14.5px |
+| Widget, numeric readout | `.wnum` | 14.5px mono |
+| Widget, number in a cell | `.num` | 12.5px mono |
+| Matplotlib, 11in figure | `font.size` | 16pt, titles 17, legends 14 |
+
+Three things travel with those numbers:
+
+- **Generator constants must follow the CSS**, or wrapped text stops fitting
+  its box. `figures/roadmap.py` holds `BODY_SIZE = 15.5`, `LINE_H = 19.5`,
+  `WHY_LINE = 18`, `CHAR_EM = 0.525`; `figures/sketch.py` holds `SK_T = 17.5`,
+  `SK_SUB = 14`, `CHAR_EM = 0.53`. Change a size in one place and you must
+  change it in the other.
+- **Raising type breaks layouts, every time.** Cells stop fitting their
+  numbers, stacked labels start overlapping, and long strings overflow the
+  viewBox *horizontally* — which is the one people forget. Budget for a
+  round of geometry fixes after any size change, and run the sweep.
+- **Trim the viewBox to the content.** A widget carrying 100px of empty
+  viewBox reads as a hole in the page. Measure the drawn extent and set the
+  height to match, remembering that the extent moves as sliders move.
+
 Two mechanical traps, both of which have bitten:
 
 1. **Never leave a blank line inside a raw HTML block.** The Markdown parser
