@@ -10,6 +10,33 @@ The blog lives at `~/Desktop/blog` and publishes to
 `README.md` before starting — it documents the generator, front matter, and
 figure pipeline.
 
+## Who these posts are for, which decides everything else
+
+**The reader is training to become an LLM researcher.** Not a user of models,
+not an engineer integrating one — somebody who intends to do research on them
+and needs the field's big picture assembled correctly in their head.
+
+That single fact settles most editorial questions, so apply it before any
+other rule in this file:
+
+- **Big picture over completeness.** The reader should finish knowing where
+  this idea sits among the others, what it is for, and what it costs. They
+  should *not* finish with every detail of it. A post that teaches one
+  mechanism exhaustively and leaves the reader unable to place it has failed
+  at the actual job.
+- **Frontier over history.** History earns its place only where it explains
+  why the current design is what it is. A milestone that led nowhere, or a
+  detail of an approach nobody uses now, is a distraction however charming.
+  Where a topic connects to what people are working on *this year*, say so —
+  that is the part a future researcher most needs.
+- **Essence over coverage.** For every section ask: does this change how the
+  reader would think about language models in general? If the honest answer
+  is no, it does not belong, however correct it is.
+- **Open questions are content, not decoration.** What is unsettled, what the
+  field believes without evidence, and what nobody has checked are the most
+  valuable things you can hand a prospective researcher. They are where the
+  work is.
+
 ## Two checkpoints, then run
 
 Do not write the post in one shot. There are exactly two places to stop.
@@ -50,8 +77,13 @@ Get the plan agreed, then run to completion: write, generate figures, build, ver
 ## Deciding the sections
 
 A dropped section is always better than a padded one. Never write a section
-to satisfy the template. Apply these tests at checkpoint 2 and bring the
-verdicts to the user — propose, do not decide alone.
+to satisfy the template.
+
+**Apply the relevance test first** — does this section change how the reader
+thinks about language models in general, or connect to current research? — and
+only then the per-section tests below. A section can be interesting, true and
+well-sourced and still fail, in which case it goes. Bring every verdict to the
+user at checkpoint 2 and propose; do not decide alone.
 
 | Section | Include only if | Typical reason to drop |
 |---|---|---|
@@ -415,9 +447,29 @@ captions. Every sentence should survive being said out loud.
 **Subtitle.** Exactly one short sentence. Eye-catching, and it must summarize
 the whole post.
 
-**Length.** **There is no time limit, and you should not impose one.** A post
-is finished when a reader with no background could follow it from the first
-sentence to the last, and not before. Read time is reported in the byline at
+**Length.** Two rules that sound opposed and are not. **Cut hard at the level
+of sections and topics; never cut at the level of sentences.**
+
+A post gets shorter by *containing fewer things*, each still explained
+properly. It does not get shorter by explaining the same number of things in
+tighter prose — that is how the first version of the KV cache post ended up
+reading like documentation, and it is why the sentence-level rules above exist.
+
+So there is no word budget, and you should not invent one. What there is
+instead is a **relevance test, applied to every section before you write it**:
+
+> Does this change how the reader would think about language models in
+> general, or connect to what people are researching now?
+
+If no, cut the section. Not compress it — remove it, and say in the report
+that you did and why. A post of five sections that all pass this test is far
+better than eight sections where three are merely true. Be suspicious of any
+section that exists because the subject has it, rather than because the reader
+needs it.
+
+Within a section that survives, spend the words. A post is finished when a
+reader with no background could follow it from the first sentence to the last,
+and not before. Read time is reported in the byline at
 180 words per minute (`WORDS_PER_MINUTE` in `build.py`) as information for the
 reader, not as a budget for you:
 

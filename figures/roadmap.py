@@ -25,9 +25,9 @@ BULLET_INSET = 21       # where bullet text starts inside a card
 SPINE_Y = 40
 BOX_TOP = 56
 TITLE_DY = 21           # first baseline below the box top
-LINE_H = 18
-WHY_LINE = 17           # leading for the reason above each arrow
-BODY_SIZE = 14.5
+LINE_H = 19.5
+WHY_LINE = 18           # leading for the reason above each arrow
+BODY_SIZE = 15.5
 
 # Mean advance width of the body font, measured in the browser for Excalifont
 # at the size above (0.506) and rounded up. Deliberately generous: erring high
@@ -77,7 +77,7 @@ def roadmap(stops, arrows, label):
     wrapped = [[wrap(b, slots[i][1] - 26) for b in stops[i][2]]
                for i in range(n)]
     rows = [sum(len(w) for w in bs) for bs in wrapped]
-    cardh = 36 + LINE_H * max(rows) + 10
+    cardh = 46 + LINE_H * max(rows) + 12
 
     gap = (W - 2 * PAD) / n - 16
     why = [wrap(r, gap) for r in arrows]
@@ -122,13 +122,13 @@ def roadmap(stops, arrows, label):
         out += ['    ' + l for l in rough_rect(x, y, cw, cardh, pen, 'box',
                                                r=9)]
         out.append("    <text class='yr' x='%.1f' y='%.1f'>%s</text>"
-                   % (x + 14, y + 19, year))
+                   % (x + 14, y + 21, year))
         out.append("    <text class='stage' x='%.1f' y='%.1f'>%s</text>"
-                   % (x + 14, y + 37, title))
+                   % (x + 14, y + 45, title))
         k = 0
         for bullet in wrapped[i]:
             for j, line in enumerate(bullet):
-                yy = y + 37 + 19 + k * LINE_H
+                yy = y + 45 + 22 + k * LINE_H
                 if j == 0:
                     out.append("    <circle class='bul' cx='%.1f' cy='%.1f' "
                                "r='2'/>" % (x + 18, yy - 4))

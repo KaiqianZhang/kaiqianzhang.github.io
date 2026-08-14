@@ -449,7 +449,7 @@ table td {
   stroke-width: 1;
 }
 .article .knob .tick {
-  font: 400 12.5px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 14.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #8C8C8C;
 }
 /* A second row of controls, for widgets with more than one slider. The rule
@@ -489,7 +489,7 @@ table td {
 }
 
 .article .knob .axlabel {
-  font: 400 13.5px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 15.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #6E6E6E;
 }
 .article .knob .trace {
@@ -528,7 +528,7 @@ table td {
   font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
 }
 .article .roadmap .stage {
-  font-size: 17px;
+  font-size: 18.5px;
   font-weight: 700;
   fill: #3F3F3F;
 }
@@ -551,7 +551,7 @@ table td {
   letter-spacing: 0.06em;
 }
 .article .roadmap .why {
-  font-size: 14px;
+  font-size: 15px;
   fill: #8C77BC;
   text-anchor: middle;
 }
@@ -580,12 +580,12 @@ table td {
   stroke-linejoin: round;
 }
 .article .roadmap .yr {
-  font-size: 13.5px;
+  font-size: 14.5px;
   font-weight: 700;
   fill: #C48BAC;
 }
 .article .roadmap .body {
-  font-size: 14.5px;
+  font-size: 15.5px;
   fill: #5E5E5E;
 }
 /* Hover a milestone and the whole group lifts: dot, box and text together.
@@ -1288,23 +1288,23 @@ table td {
   fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
 }
 .article .knob .num {
-  font: 500 10.5px ui-monospace, Menlo, monospace;
+  font: 500 12.5px ui-monospace, Menlo, monospace;
   fill: #3F3F3F;
 }
 .article .knob .tk {
-  font: 500 13px -apple-system, Helvetica, arial, sans-serif;
+  font: 500 15.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #3F3F3F;
 }
 .article .knob .tk.off { fill: #C9C3BC; }
 .article .knob .gl {
-  font: 600 13px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 600 15px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
 }
 .article .knob .hd {
-  font: 600 13.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
+  font: 600 15.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
 }
 .article .knob .wbar { fill: #8C77BC; fill-opacity: 0.75; }
 .article .knob .wnum {
-  font: 500 12.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
+  font: 500 14.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
 }
 .article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
 @media (prefers-color-scheme: dark) {
