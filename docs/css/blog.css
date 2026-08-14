@@ -864,7 +864,9 @@ table td {
 }
 .applause-btn .hearts {
   display: inline-flex;
-  gap: 5px;
+  /* 5px was right for static hearts; at the top of the beat each one grows
+     2.9px on each side and they would touch. */
+  gap: 9px;
   font-size: 19px;
   line-height: 1;
 }
@@ -896,31 +898,29 @@ table td {
   fill: #8C7BA6;
   stroke: #8C7BA6;
 }
-/* All three hearts breathe together, so the button reads as alive before
-   anybody touches it. The scale is on the <path> rather than on the <svg>,
-   because the <svg> already carries the hover lift and a transform on the
-   element would fight the animation. transform-box: fill-box makes the scale
-   happen about each heart's own centre instead of the SVG origin.
+/* All three hearts beat together, so the button reads as alive before anybody
+   touches it.
 
-   An <svg> clips to its viewport, so a path scaled past 19px is cut off at
-   the edge. overflow: visible on the svg is what lets the beat show. */
+   The scale is on the <svg> and not on the <path> inside it. Scaling the path
+   was the obvious thing and it clips: an <svg> is a viewport, the heart's
+   stroke already reaches the edge of its 24-unit box, and anything past that
+   gets sliced no matter what overflow says. Scaling the <svg> element instead
+   means the whole heart grows as one object in normal flow, where nothing can
+   clip it.
+
+   That costs the per-heart hover lift, since one element cannot carry two
+   transforms, so the hover now lifts the row as a whole. */
 @keyframes applause-breathe {
   0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.26); }
+  50%      { transform: scale(1.3); }
 }
-.applause-btn .h { overflow: visible; }
-.applause-btn .h path {
-  transform-box: fill-box;
+.applause-btn .h {
+  overflow: visible;
   transform-origin: center;
   animation: applause-breathe 2.4s ease-in-out infinite;
 }
-/* While the tap animation runs, the hearts are already scaling; two scales at
-   once would multiply into a jump. */
-.applause-btn.is-popping .h path { animation: none; }
-
-.applause-btn:hover .h1 { transform: translateY(-2px); }
-.applause-btn:hover .h2 { transform: translateY(-3px); }
-.applause-btn:hover .h3 { transform: translateY(-2px); }
+.applause-btn .hearts { transition: transform 0.18s ease; }
+.applause-btn:hover .hearts { transform: translateY(-2px); }
 .applause-btn.is-popping .h {
   animation: applause-beat 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

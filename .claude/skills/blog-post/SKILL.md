@@ -640,14 +640,19 @@ when the palette is revised. A palette sweep recoloured them to rose once and
 the change was immediately noticed. If you are doing a global colour pass,
 exclude these two.
 
-**Like button.** All three hearts breathe together — a scale from 1 to 1.26 and
+**Like button.** All three hearts beat together — a scale from 1 to 1.3 and
 back over 2.4 seconds — so the button reads as alive before anybody touches it.
-Three details make it work: the scale sits on the `<path>` rather than the
-`<svg>`, because the `<svg>` already carries the hover lift and two transforms
-on one element fight; the `<svg>` needs `overflow: visible`, because an SVG
-clips to its viewport and an enlarged heart is otherwise sliced off at 19px;
-and the tap animation suspends the breathing so two scales cannot multiply into
-a jump. `prefers-reduced-motion` stops it. Every post ends with one, emitted
+
+**Scale the `<svg>`, not the `<path>` inside it.** Scaling the path is the
+obvious move and it clips: an `<svg>` is a viewport, the heart's stroke already
+reaches the edge of its 24-unit box, and anything past that is sliced whatever
+`overflow` says. Scaling the `<svg>` element makes the whole heart grow as one
+object in normal flow, where nothing can clip it. That costs the per-heart
+hover lift, because one element cannot carry two transforms, so the hover lifts
+the row as a whole instead. Two more details: the flex `gap` has to allow for
+the growth or the hearts collide at the top of the beat, and the tap animation
+must win by specificity so two scales never multiply into a jump.
+`prefers-reduced-motion` stops it. Every post ends with one, emitted
 by `templates/post.html` —
 do **not** add the markup to a post's Markdown, and do not remove it. Three
 drawn hearts (white, lavender, white) over a lowercase "like"; tapping turns
