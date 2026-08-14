@@ -46,93 +46,80 @@ draw on, and by how much. And we want it to learn how to make that decision
 from data, rather than being told. That is what attention does.
 
 <div class='sketch'>
-    <svg viewBox='0 0 720 208' role='img' aria-label='Two ways to translate. On the left four source words funnel into a single vector and the output is written from that alone. On the right every output word is joined directly to every source word.'>
-      <text class='sk-lbl' x='12.0' y='22.0' text-anchor='start'>before 2014</text>
-      <path class='sk-s2' d='M21.5,38.7 Q52.9,37.8 84.2,38.7 Q92.2,38.7 92.2,46.7 Q92.9,51.8 92.2,56.8 Q92.2,64.8 84.2,64.8 Q52.9,64.5 21.5,64.8 Q13.5,64.8 13.5,56.8 Q12.6,51.8 13.5,46.7 Q13.5,38.7 21.5,38.7'/>
-      <path class='sk-s2' d='M21.2,38.9 Q53.0,38.8 84.9,38.9 Q92.9,38.9 92.9,46.9 Q92.9,51.5 92.9,56.1 Q92.9,64.1 84.9,64.1 Q53.0,64.3 21.2,64.1 Q13.2,64.1 13.2,56.1 Q13.8,51.5 13.2,46.9 Q13.2,38.9 21.2,38.9'/>
-      <text class='sk-t' x='53.0' y='56.0' text-anchor='middle'>L'accord</text>
-      <path class='sk-thin' d='M92.4,50.9 Q122.4,75.4 152.0,100.5'/>
-      <path class='sk-thin' d='M92.0,50.4 Q122.4,75.2 152.3,100.5'/>
-      <path class='sk-s2' d='M21.4,72.9 Q52.4,72.8 83.3,72.9 Q91.3,72.9 91.3,80.9 Q90.5,85.4 91.3,89.9 Q91.3,97.9 83.3,97.9 Q52.4,97.1 21.4,97.9 Q13.4,97.9 13.4,89.9 Q13.7,85.4 13.4,80.9 Q13.4,72.9 21.4,72.9'/>
-      <path class='sk-s2' d='M22.5,71.3 Q53.3,70.8 84.2,71.3 Q92.2,71.3 92.2,79.3 Q92.4,85.0 92.2,90.8 Q92.2,98.8 84.2,98.8 Q53.3,98.5 22.5,98.8 Q14.5,98.8 14.5,90.8 Q14.1,85.0 14.5,79.3 Q14.5,71.3 22.5,71.3'/>
-      <text class='sk-t' x='53.0' y='90.0' text-anchor='middle'>sur</text>
-      <path class='sk-thin' d='M92.0,85.3 Q121.7,93.3 151.7,99.5'/>
-      <path class='sk-thin' d='M92.2,84.8 Q122.6,91.7 152.7,100.0'/>
-      <path class='sk-s2' d='M21.6,106.8 Q52.9,106.1 84.2,106.8 Q92.2,106.8 92.2,114.8 Q92.0,119.4 92.2,124.0 Q92.2,132.0 84.2,132.0 Q52.9,131.3 21.6,132.0 Q13.6,132.0 13.6,124.0 Q12.6,119.4 13.6,114.8 Q13.6,106.8 21.6,106.8'/>
-      <path class='sk-s2' d='M22.3,106.5 Q52.9,107.0 83.4,106.5 Q91.4,106.5 91.4,114.5 Q92.1,119.3 91.4,124.1 Q91.4,132.1 83.4,132.1 Q52.9,131.8 22.3,132.1 Q14.3,132.1 14.3,124.1 Q14.2,119.3 14.3,114.5 Q14.3,106.5 22.3,106.5'/>
-      <text class='sk-t' x='53.0' y='124.0' text-anchor='middle'>la</text>
-      <path class='sk-thin' d='M92.2,119.5 Q122.3,110.4 152.0,100.0'/>
-      <path class='sk-thin' d='M92.6,118.8 Q122.4,108.7 152.5,99.6'/>
-      <path class='sk-s2' d='M22.8,140.4 Q53.1,140.0 83.5,140.4 Q91.5,140.4 91.5,148.4 Q92.1,152.8 91.5,157.2 Q91.5,165.2 83.5,165.2 Q53.1,165.7 22.8,165.2 Q14.8,165.2 14.8,157.2 Q14.2,152.8 14.8,148.4 Q14.8,140.4 22.8,140.4'/>
-      <path class='sk-s2' d='M22.0,140.5 Q52.9,140.2 83.9,140.5 Q91.9,140.5 91.9,148.5 Q91.3,153.1 91.9,157.7 Q91.9,165.7 83.9,165.7 Q52.9,166.4 22.0,165.7 Q14.0,165.7 14.0,157.7 Q13.4,153.1 14.0,148.5 Q14.0,140.5 22.0,140.5'/>
-      <text class='sk-t' x='53.0' y='158.0' text-anchor='middle'>zone</text>
-      <path class='sk-thin' d='M92.3,153.3 Q122.1,126.5 151.9,99.7'/>
-      <path class='sk-thin' d='M91.8,152.4 Q122.2,126.6 151.8,100.0'/>
-      <path class='sk-mark' d='M160.7,86.5 Q190.1,86.7 219.5,86.5 Q227.5,86.5 227.5,94.5 Q226.7,100.4 227.5,106.3 Q227.5,114.3 219.5,114.3 Q190.1,114.8 160.7,114.3 Q152.7,114.3 152.7,106.3 Q153.3,100.4 152.7,94.5 Q152.7,86.5 160.7,86.5'/>
-      <path class='sk-mark' d='M160.1,86.6 Q189.7,86.5 219.2,86.6 Q227.2,86.6 227.2,94.6 Q228.2,100.5 227.2,106.4 Q227.2,114.4 219.2,114.4 Q189.7,115.3 160.1,114.4 Q152.1,114.4 152.1,106.4 Q151.5,100.5 152.1,94.6 Q152.1,86.6 160.1,86.6'/>
-      <text class='sk-t' x='190.0' y='105.0' text-anchor='middle'>one vector</text>
-      <path class='sk-thin' d='M227.7,100.5 Q245.7,88.5 262.4,74.7'/>
-      <path class='sk-thin' d='M227.3,100.5 Q244.1,87.1 261.6,74.7'/>
-      <path class='sk-thin' d='M262.6,74.5 Q261.2,77.6 259.6,80.6'/>
-      <path class='sk-thin' d='M261.6,73.3 Q257.9,73.5 254.4,74.3'/>
-      <path class='sk-thin' d='M227.4,99.8 Q245.2,112.7 262.0,126.7'/>
-      <path class='sk-thin' d='M228.1,100.0 Q245.6,112.2 261.9,126.1'/>
-      <path class='sk-thin' d='M262.2,125.6 Q258.6,125.0 255.0,124.8'/>
-      <path class='sk-thin' d='M262.3,125.9 Q260.3,123.2 258.9,120.1'/>
-      <path class='sk-s3' d='M270.2,59.4 Q304.4,59.7 338.6,59.4 Q346.6,59.4 346.6,67.4 Q346.5,73.6 346.6,79.8 Q346.6,87.8 338.6,87.8 Q304.4,87.3 270.2,87.8 Q262.2,87.8 262.2,79.8 Q261.8,73.6 262.2,67.4 Q262.2,59.4 270.2,59.4'/>
-      <path class='sk-s3' d='M270.3,59.6 Q303.7,59.8 337.1,59.6 Q345.1,59.6 345.1,67.6 Q345.3,74.1 345.1,80.5 Q345.1,88.5 337.1,88.5 Q303.7,89.0 270.3,88.5 Q262.3,88.5 262.3,80.5 Q262.4,74.1 262.3,67.6 Q262.3,59.6 270.3,59.6'/>
-      <text class='sk-t' x='304.0' y='79.0' text-anchor='middle'>The</text>
-      <path class='sk-s3' d='M269.6,111.5 Q304.2,110.5 338.8,111.5 Q346.8,111.5 346.8,119.5 Q346.5,126.0 346.8,132.5 Q346.8,140.5 338.8,140.5 Q304.2,140.6 269.6,140.5 Q261.6,140.5 261.6,132.5 Q260.7,126.0 261.6,119.5 Q261.6,111.5 269.6,111.5'/>
-      <path class='sk-s3' d='M270.0,112.7 Q304.0,111.8 337.9,112.7 Q345.9,112.7 345.9,120.7 Q346.8,126.7 345.9,132.8 Q345.9,140.8 337.9,140.8 Q304.0,140.2 270.0,140.8 Q262.0,140.8 262.0,132.8 Q261.9,126.7 262.0,120.7 Q262.0,112.7 270.0,112.7'/>
-      <text class='sk-t' x='304.0' y='131.0' text-anchor='middle'>agreement</text>
-      <text class='sk-note' x='180.0' y='188.0' text-anchor='middle'>the whole sentence, through one gap</text>
-      <path class='sk-faint' d='M372.6,25.6 Q372.5,111.1 371.5,196.6'/>
-      <text class='sk-lbl' x='396.0' y='22.0' text-anchor='start'>after 2014</text>
-      <path class='sk-s2' d='M405.7,37.2 Q436.9,37.5 468.1,37.2 Q476.1,37.2 476.1,45.2 Q476.9,50.3 476.1,55.4 Q476.1,63.4 468.1,63.4 Q436.9,63.3 405.7,63.4 Q397.7,63.4 397.7,55.4 Q396.8,50.3 397.7,45.2 Q397.7,37.2 405.7,37.2'/>
-      <path class='sk-s2' d='M406.7,37.9 Q436.9,38.4 467.1,37.9 Q475.1,37.9 475.1,45.9 Q474.7,51.0 475.1,56.0 Q475.1,64.0 467.1,64.0 Q436.9,63.8 406.7,64.0 Q398.7,64.0 398.7,56.0 Q398.8,51.0 398.7,45.9 Q398.7,37.9 406.7,37.9'/>
-      <text class='sk-t' x='437.0' y='56.0' text-anchor='middle'>L'accord</text>
-      <path class='sk-s2' d='M406.7,72.9 Q437.4,71.9 468.2,72.9 Q476.2,72.9 476.2,80.9 Q475.6,85.1 476.2,89.3 Q476.2,97.3 468.2,97.3 Q437.4,98.2 406.7,97.3 Q398.7,97.3 398.7,89.3 Q398.8,85.1 398.7,80.9 Q398.7,72.9 406.7,72.9'/>
-      <path class='sk-s2' d='M406.6,72.3 Q437.5,72.7 468.4,72.3 Q476.4,72.3 476.4,80.3 Q475.9,84.9 476.4,89.4 Q476.4,97.4 468.4,97.4 Q437.5,96.5 406.6,97.4 Q398.6,97.4 398.6,89.4 Q399.4,84.9 398.6,80.3 Q398.6,72.3 406.6,72.3'/>
-      <text class='sk-t' x='437.0' y='90.0' text-anchor='middle'>sur</text>
-      <path class='sk-s2' d='M406.1,105.8 Q437.4,105.9 468.7,105.8 Q476.7,105.8 476.7,113.8 Q475.7,119.2 476.7,124.6 Q476.7,132.6 468.7,132.6 Q437.4,132.4 406.1,132.6 Q398.1,132.6 398.1,124.6 Q398.8,119.2 398.1,113.8 Q398.1,105.8 406.1,105.8'/>
-      <path class='sk-s2' d='M406.7,106.5 Q437.2,105.5 467.6,106.5 Q475.6,106.5 475.6,114.5 Q476.6,119.7 475.6,124.9 Q475.6,132.9 467.6,132.9 Q437.2,132.3 406.7,132.9 Q398.7,132.9 398.7,124.9 Q398.8,119.7 398.7,114.5 Q398.7,106.5 406.7,106.5'/>
-      <text class='sk-t' x='437.0' y='124.0' text-anchor='middle'>la</text>
-      <path class='sk-s2' d='M406.7,139.8 Q437.5,140.5 468.3,139.8 Q476.3,139.8 476.3,147.8 Q476.2,153.1 476.3,158.4 Q476.3,166.4 468.3,166.4 Q437.5,165.9 406.7,166.4 Q398.7,166.4 398.7,158.4 Q398.2,153.1 398.7,147.8 Q398.7,139.8 406.7,139.8'/>
-      <path class='sk-s2' d='M405.8,139.8 Q437.1,139.6 468.4,139.8 Q476.4,139.8 476.4,147.8 Q475.6,153.2 476.4,158.6 Q476.4,166.6 468.4,166.6 Q437.1,167.1 405.8,166.6 Q397.8,166.6 397.8,158.6 Q397.6,153.2 397.8,147.8 Q397.8,139.8 405.8,139.8'/>
-      <text class='sk-t' x='437.0' y='158.0' text-anchor='middle'>zone</text>
-      <path class='sk-att' d='M476.2,51.4 Q535.8,63.6 595.5,74.5'/>
-      <path class='sk-att' d='M476.0,50.9 Q535.9,61.7 595.8,73.4'/>
-      <path class='sk-att' d='M475.9,50.6 Q535.7,88.7 596.3,125.4'/>
-      <path class='sk-att' d='M476.7,51.3 Q535.5,89.5 595.3,126.2'/>
-      <path class='sk-att' d='M475.5,85.4 Q535.6,78.8 595.8,73.8'/>
-      <path class='sk-att' d='M476.4,84.8 Q535.9,79.1 595.3,73.9'/>
-      <path class='sk-att' d='M476.0,85.5 Q536.2,104.9 595.7,126.3'/>
-      <path class='sk-att' d='M476.1,85.0 Q536.3,104.7 596.1,125.6'/>
-      <path class='sk-att' d='M475.9,119.6 Q536.2,96.5 596.5,73.7'/>
-      <path class='sk-att' d='M475.6,118.6 Q536.2,97.4 596.3,74.5'/>
-      <path class='sk-att' d='M476.4,119.7 Q535.9,123.5 595.5,126.3'/>
-      <path class='sk-att' d='M475.8,118.6 Q536.1,121.8 596.3,126.6'/>
-      <path class='sk-att' d='M476.0,152.6 Q535.7,112.6 595.9,73.4'/>
-      <path class='sk-att' d='M475.7,153.6 Q535.9,114.2 595.3,73.7'/>
-      <path class='sk-att' d='M476.0,152.8 Q535.9,138.9 596.1,126.4'/>
-      <path class='sk-att' d='M476.2,153.3 Q535.9,138.5 596.0,125.3'/>
-      <path class='sk-s3' d='M604.8,60.4 Q650.1,60.0 695.3,60.4 Q703.3,60.4 703.3,68.4 Q704.0,74.1 703.3,79.9 Q703.3,87.9 695.3,87.9 Q650.1,88.5 604.8,87.9 Q596.8,87.9 596.8,79.9 Q595.8,74.1 596.8,68.4 Q596.8,60.4 604.8,60.4'/>
-      <path class='sk-s3' d='M603.6,59.6 Q650.2,59.2 696.8,59.6 Q704.8,59.6 704.8,67.6 Q704.5,73.6 704.8,79.6 Q704.8,87.6 696.8,87.6 Q650.2,86.7 603.6,87.6 Q595.6,87.6 595.6,79.6 Q595.8,73.6 595.6,67.6 Q595.6,59.6 603.6,59.6'/>
-      <text class='sk-t' x='650.0' y='79.0' text-anchor='middle'>The</text>
-      <path class='sk-s3' d='M604.2,111.9 Q650.5,111.3 696.9,111.9 Q704.9,111.9 704.9,119.9 Q704.7,125.9 704.9,131.8 Q704.9,139.8 696.9,139.8 Q650.5,138.9 604.2,139.8 Q596.2,139.8 596.2,131.8 Q597.0,125.9 596.2,119.9 Q596.2,111.9 604.2,111.9'/>
-      <path class='sk-s3' d='M604.7,112.0 Q650.2,112.9 695.7,112.0 Q703.7,112.0 703.7,120.0 Q704.4,125.7 703.7,131.4 Q703.7,139.4 695.7,139.4 Q650.2,138.9 604.7,139.4 Q596.7,139.4 596.7,131.4 Q596.6,125.7 596.7,120.0 Q596.7,112.0 604.7,112.0'/>
-      <text class='sk-t' x='650.0' y='131.0' text-anchor='middle'>agreement</text>
-      <text class='sk-note' x='556.0' y='188.0' text-anchor='middle'>each word picks its own blend</text>
+    <svg viewBox='0 0 720 380' role='img' aria-label='Two ways to translate. Above, three source words funnel into a single vector and the output is written from that alone. Below, every output word is joined directly to every source word.'>
+      <text class='sk-lbl' x='12.0' y='24.0' text-anchor='start'>before 2014</text>
+      <path class='sk-s2' d='M21.5,36.7 Q69.0,35.8 116.4,36.7 Q124.4,36.7 124.4,44.7 Q125.1,51.8 124.4,58.8 Q124.4,66.8 116.4,66.8 Q69.0,66.5 21.5,66.8 Q13.5,66.8 13.5,58.8 Q12.6,51.8 13.5,44.7 Q13.5,36.7 21.5,36.7'/>
+      <path class='sk-s2' d='M21.2,36.9 Q69.1,36.8 117.1,36.9 Q125.1,36.9 125.1,44.9 Q125.1,51.5 125.1,58.1 Q125.1,66.1 117.1,66.1 Q69.1,66.3 21.2,66.1 Q13.2,66.1 13.2,58.1 Q13.8,51.5 13.2,44.9 Q13.2,36.9 21.2,36.9'/>
+      <text class='sk-t' x='69.1' y='56.0' text-anchor='middle'>L'accord</text>
+      <path class='sk-s2' d='M22.5,71.9 Q69.3,71.6 116.2,71.9 Q124.2,71.9 124.2,79.9 Q124.1,87.2 124.2,94.6 Q124.2,102.6 116.2,102.6 Q69.3,101.8 22.5,102.6 Q14.5,102.6 14.5,94.6 Q15.0,87.2 14.5,79.9 Q14.5,71.9 22.5,71.9'/>
+      <path class='sk-s2' d='M22.6,71.7 Q69.1,71.0 115.6,71.7 Q123.6,71.7 123.6,79.7 Q123.5,87.3 123.6,94.9 Q123.6,102.9 115.6,102.9 Q69.1,102.8 22.6,102.9 Q14.6,102.9 14.6,94.9 Q13.8,87.3 14.6,79.7 Q14.6,71.7 22.6,71.7'/>
+      <text class='sk-t' x='69.1' y='92.0' text-anchor='middle'>sur</text>
+      <path class='sk-s2' d='M21.3,108.2 Q69.0,108.4 116.7,108.2 Q124.7,108.2 124.7,116.2 Q125.5,122.7 124.7,129.3 Q124.7,137.3 116.7,137.3 Q69.0,136.8 21.3,137.3 Q13.3,137.3 13.3,129.3 Q13.5,122.7 13.3,116.2 Q13.3,108.2 21.3,108.2'/>
+      <path class='sk-s2' d='M21.7,107.7 Q69.0,107.3 116.2,107.7 Q124.2,107.7 124.2,115.7 Q123.5,123.0 124.2,130.4 Q124.2,138.4 116.2,138.4 Q69.0,139.1 21.7,138.4 Q13.7,138.4 13.7,130.4 Q14.0,123.0 13.7,115.7 Q13.7,107.7 21.7,107.7'/>
+      <text class='sk-t' x='69.1' y='128.0' text-anchor='middle'>la</text>
+      <path class='sk-thin' d='M124.0,51.7 Q205.1,68.0 286.0,85.5'/>
+      <path class='sk-thin' d='M124.8,51.1 Q205.4,68.2 286.0,85.5'/>
+      <path class='sk-thin' d='M123.7,86.3 Q205.0,85.5 286.3,86.4'/>
+      <path class='sk-thin' d='M124.3,87.3 Q205.4,86.4 286.5,85.8'/>
+      <path class='sk-thin' d='M124.4,123.5 Q205.4,105.4 286.0,86.0'/>
+      <path class='sk-thin' d='M124.8,122.8 Q205.6,103.7 286.5,85.6'/>
+      <path class='sk-mark' d='M294.8,70.4 Q350.5,70.0 406.2,70.4 Q414.2,70.4 414.2,78.4 Q414.9,85.8 414.2,93.2 Q414.2,101.2 406.2,101.2 Q350.5,101.7 294.8,101.2 Q286.8,101.2 286.8,93.2 Q286.2,85.8 286.8,78.4 Q286.8,70.4 294.8,70.4'/>
+      <path class='sk-mark' d='M294.0,70.5 Q350.3,70.2 406.6,70.5 Q414.6,70.5 414.6,78.5 Q414.0,86.1 414.6,93.7 Q414.6,101.7 406.6,101.7 Q350.3,102.4 294.0,101.7 Q286.0,101.7 286.0,93.7 Q285.4,86.1 286.0,78.5 Q286.0,70.5 294.0,70.5'/>
+      <text class='sk-t' x='350.4' y='91.0' text-anchor='middle'>one vector</text>
+      <path class='sk-thin' d='M415.0,86.3 Q455.5,74.0 495.9,61.7'/>
+      <path class='sk-thin' d='M414.5,85.4 Q455.3,74.3 495.8,62.0'/>
+      <path class='sk-thin' d='M496.5,62.4 Q493.6,64.8 490.9,67.4'/>
+      <path class='sk-thin' d='M495.4,62.3 Q492.7,61.0 489.7,60.3'/>
+      <path class='sk-thin' d='M414.1,86.3 Q454.7,99.5 495.9,110.7'/>
+      <path class='sk-thin' d='M414.3,85.7 Q455.1,99.2 496.5,110.4'/>
+      <path class='sk-thin' d='M496.6,109.3 Q493.1,109.9 489.8,111.4'/>
+      <path class='sk-thin' d='M495.6,110.6 Q493.7,107.8 491.7,105.0'/>
+      <path class='sk-s3' d='M503.8,45.4 Q555.2,44.7 606.6,45.4 Q614.6,45.4 614.6,53.4 Q615.2,61.3 614.6,69.1 Q614.6,77.1 606.6,77.1 Q555.2,76.3 503.8,77.1 Q495.8,77.1 495.8,69.1 Q495.5,61.3 495.8,53.4 Q495.8,45.4 503.8,45.4'/>
+      <path class='sk-s3' d='M504.0,46.9 Q555.4,46.9 606.9,46.9 Q614.9,46.9 614.9,54.9 Q614.7,62.5 614.9,70.1 Q614.9,78.1 606.9,78.1 Q555.4,78.2 504.0,78.1 Q496.0,78.1 496.0,70.1 Q495.1,62.5 496.0,54.9 Q496.0,46.9 504.0,46.9'/>
+      <text class='sk-t' x='555.7' y='67.0' text-anchor='middle'>The</text>
+      <path class='sk-s3' d='M504.3,93.5 Q555.8,94.0 607.4,93.5 Q615.4,93.5 615.4,101.5 Q615.9,109.5 615.4,117.4 Q615.4,125.4 607.4,125.4 Q555.8,125.3 504.3,125.4 Q496.3,125.4 496.3,117.4 Q495.6,109.5 496.3,101.5 Q496.3,93.5 504.3,93.5'/>
+      <path class='sk-s3' d='M504.7,93.3 Q556.2,93.9 607.6,93.3 Q615.6,93.3 615.6,101.3 Q615.4,109.3 615.6,117.4 Q615.6,125.4 607.6,125.4 Q556.2,125.7 504.7,125.4 Q496.7,125.4 496.7,117.4 Q496.7,109.3 496.7,101.3 Q496.7,93.3 504.7,93.3'/>
+      <text class='sk-t' x='555.7' y='115.0' text-anchor='middle'>agreement</text>
+      <text class='sk-note' x='300.0' y='168.0' text-anchor='middle'>the whole sentence, squeezed through one gap</text>
+      <path class='sk-faint' d='M11.7,191.8 Q360.0,191.3 708.3,191.7'/>
+      <text class='sk-lbl' x='12.0' y='222.0' text-anchor='start'>after 2014</text>
+      <path class='sk-s2' d='M22.5,234.1 Q69.4,234.2 116.4,234.1 Q124.4,234.1 124.4,242.1 Q124.0,249.3 124.4,256.5 Q124.4,264.5 116.4,264.5 Q69.4,263.9 22.5,264.5 Q14.5,264.5 14.5,256.5 Q15.4,249.3 14.5,242.1 Q14.5,234.1 22.5,234.1'/>
+      <path class='sk-s2' d='M22.5,233.2 Q69.2,232.3 115.9,233.2 Q123.9,233.2 123.9,241.2 Q123.9,248.6 123.9,256.0 Q123.9,264.0 115.9,264.0 Q69.2,264.9 22.5,264.0 Q14.5,264.0 14.5,256.0 Q14.4,248.6 14.5,241.2 Q14.5,233.2 22.5,233.2'/>
+      <text class='sk-t' x='69.1' y='254.0' text-anchor='middle'>L'accord</text>
+      <path class='sk-s2' d='M22.8,269.1 Q69.9,269.0 117.1,269.1 Q125.1,269.1 125.1,277.1 Q126.0,284.3 125.1,291.5 Q125.1,299.5 117.1,299.5 Q69.9,299.0 22.8,299.5 Q14.8,299.5 14.8,291.5 Q14.0,284.3 14.8,277.1 Q14.8,269.1 22.8,269.1'/>
+      <path class='sk-s2' d='M22.8,269.3 Q69.3,269.4 115.9,269.3 Q123.9,269.3 123.9,277.3 Q123.3,284.3 123.9,291.2 Q123.9,299.2 115.9,299.2 Q69.3,299.5 22.8,299.2 Q14.8,299.2 14.8,291.2 Q15.7,284.3 14.8,277.3 Q14.8,269.3 22.8,269.3'/>
+      <text class='sk-t' x='69.1' y='290.0' text-anchor='middle'>sur</text>
+      <path class='sk-s2' d='M21.9,305.2 Q69.4,304.2 116.9,305.2 Q124.9,305.2 124.9,313.2 Q124.9,320.6 124.9,327.9 Q124.9,335.9 116.9,335.9 Q69.4,336.4 21.9,335.9 Q13.9,335.9 13.9,327.9 Q13.5,320.6 13.9,313.2 Q13.9,305.2 21.9,305.2'/>
+      <path class='sk-s2' d='M21.8,306.1 Q69.3,306.4 116.9,306.1 Q124.9,306.1 124.9,314.1 Q124.1,321.5 124.9,328.9 Q124.9,336.9 116.9,336.9 Q69.3,335.9 21.8,336.9 Q13.8,336.9 13.8,328.9 Q13.2,321.5 13.8,314.1 Q13.8,306.1 21.8,306.1'/>
+      <text class='sk-t' x='69.1' y='326.0' text-anchor='middle'>la</text>
+      <path class='sk-att' d='M124.8,249.1 Q310.6,255.3 496.4,260.3'/>
+      <path class='sk-att' d='M123.7,249.2 Q309.6,255.3 495.6,259.4'/>
+      <path class='sk-att' d='M124.3,248.8 Q310.4,278.8 496.5,308.5'/>
+      <path class='sk-att' d='M123.5,248.9 Q309.9,279.4 496.5,308.6'/>
+      <path class='sk-att' d='M123.9,285.7 Q309.6,272.5 495.3,260.7'/>
+      <path class='sk-att' d='M124.2,285.5 Q310.1,273.4 495.9,260.2'/>
+      <path class='sk-att' d='M124.7,285.0 Q310.2,296.0 495.7,307.7'/>
+      <path class='sk-att' d='M124.0,285.3 Q310.3,295.7 496.5,307.9'/>
+      <path class='sk-att' d='M124.5,320.9 Q310.2,289.9 496.2,260.4'/>
+      <path class='sk-att' d='M124.7,321.4 Q310.3,290.2 496.0,259.9'/>
+      <path class='sk-att' d='M123.6,320.7 Q309.8,314.6 495.9,307.6'/>
+      <path class='sk-att' d='M123.6,321.5 Q310.1,313.8 496.7,308.3'/>
+      <path class='sk-s3' d='M504.2,244.7 Q555.5,244.4 606.9,244.7 Q614.9,244.7 614.9,252.7 Q614.6,260.6 614.9,268.5 Q614.9,276.5 606.9,276.5 Q555.5,275.8 504.2,276.5 Q496.2,276.5 496.2,268.5 Q496.8,260.6 496.2,252.7 Q496.2,244.7 504.2,244.7'/>
+      <path class='sk-s3' d='M503.8,243.1 Q555.5,243.1 607.3,243.1 Q615.3,243.1 615.3,251.1 Q616.0,259.5 615.3,267.8 Q615.3,275.8 607.3,275.8 Q555.5,275.5 503.8,275.8 Q495.8,275.8 495.8,267.8 Q496.2,259.5 495.8,251.1 Q495.8,243.1 503.8,243.1'/>
+      <text class='sk-t' x='555.7' y='265.0' text-anchor='middle'>The</text>
+      <path class='sk-s3' d='M503.2,292.1 Q555.3,291.5 607.4,292.1 Q615.4,292.1 615.4,300.1 Q614.9,308.1 615.4,316.2 Q615.4,324.2 607.4,324.2 Q555.3,324.1 503.2,324.2 Q495.2,324.2 495.2,316.2 Q496.1,308.1 495.2,300.1 Q495.2,292.1 503.2,292.1'/>
+      <path class='sk-s3' d='M504.7,291.6 Q556.0,291.1 607.4,291.6 Q615.4,291.6 615.4,299.6 Q615.7,307.5 615.4,315.4 Q615.4,323.4 607.4,323.4 Q556.0,324.1 504.7,323.4 Q496.7,323.4 496.7,315.4 Q497.4,307.5 496.7,299.6 Q496.7,291.6 504.7,291.6'/>
+      <text class='sk-t' x='555.7' y='313.0' text-anchor='middle'>agreement</text>
+      <text class='sk-note' x='300.0' y='366.0' text-anchor='middle'>each output word picks its own blend, every time</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        The change that started all of this. On the left, a translator
-        squeezes the whole source sentence through one fixed vector and writes
-        its output from that alone, which is why long sentences went so badly.
-        On the right, each output word reaches back to every source word and
-        takes its own weighted blend of them. I have drawn only four source
-        words here; imagine forty, and you can feel the left-hand design
-        straining.
+        The change that started all of this. Above, a translator squeezes
+        the whole source sentence through one fixed vector and writes its
+        output from that alone, which is why long sentences went so badly.
+        Below, each output word reaches back to every source word and takes
+        its own weighted blend of them. I have drawn only three source words
+        here; imagine forty, and you can feel the upper design straining.
     </div>
 </div>
 
@@ -327,7 +314,7 @@ weighted average. The $\sqrt{d}$ in the denominator is the one thing I have not
 explained, and section 4 is entirely about it.
 
 <div class='knob'>
-    <svg viewBox='0 0 720 258' id='qkv-svg' role='img'
+    <svg viewBox='0 0 720 246' id='qkv-svg' role='img'
          aria-label='An interactive sentence. Choosing one word as the query shows the dot product it forms with every other word, and the attention weights that come out of the softmax.'>
         <g id='qkv-scene'></g>
     </svg>
@@ -349,8 +336,10 @@ explained, and section 4 is entirely about it.
     <span style='color:#8C77BC'><b>attention weights</b></span> that word puts
     on each of the others, and I have computed them here in your browser from
     the little query and key vectors drawn underneath — this is the real
-    arithmetic, not a mock-up. Slide the second control to see the softmax
-    change its mind about how decisive to be.
+    arithmetic, not a mock-up. The percentages are the true weights; the bar
+    heights are scaled so the largest always fills the row, which is what
+    makes the shape of the distribution visible. Slide the second control and
+    watch the softmax change its mind about how decisive to be.
 </div>
 
 <script>
@@ -371,7 +360,7 @@ explained, and section 4 is entirely about it.
            [0.0, 0.1, 0.6, 0.1], [0.4, 0.3, 0.2, 0.1], [0.2, 0.1, 0.1, 0.3],
            [0.2, 0.1, 0.0, 0.1], [0.3, 0.3, 0.1, 0.2], [0.1, 0.2, 0.2, 0.4],
            [0.95, 0.85, -0.1, 0.15]];
-  var N = W.length, X0 = 26, CW = 67, TOP = 40, BASE = 88, MAXH = 110;
+  var N = W.length, X0 = 26, CW = 67, TOP = 40, BASE = 88, MAXH = 96;
 
   function draw() {
     var qi = +qR.value, sharp = +tR.value / 100, s = '', i, j;
@@ -384,6 +373,7 @@ explained, and section 4 is entirely about it.
     var m = Math.max.apply(null, scores);
     for (i = 0; i < N; i++) { p.push(Math.exp(scores[i] - m)); sum += p[i]; }
     for (i = 0; i < N; i++) { p[i] /= sum; }
+    var pmax = Math.max.apply(null, p);
 
     s += "<text class='gl' x='" + X0 + "' y='22'>the sentence, one word per column</text>";
     for (i = 0; i < N; i++) {
@@ -392,8 +382,10 @@ explained, and section 4 is entirely about it.
            "' width='" + (CW - 7) + "' height='26' rx='3'/>";
       s += "<text class='tk' text-anchor='middle' x='" + (x + (CW - 7) / 2) + "' y='" +
            (TOP + 18) + "'>" + W[i] + "</text>";
-      // The weight hangs down from a fixed line, so short bars leave no void.
-      var bh = p[i] * MAXH;
+      // Scaled to the largest weight in this distribution, so the tallest bar
+      // always fills the space. On an absolute scale a set of ten weights
+      // near 10% each left two thirds of the figure empty.
+      var bh = (p[i] / pmax) * MAXH;
       s += "<rect x='" + (x + 7) + "' y='" + BASE + "' width='" + (CW - 21) +
            "' height='" + bh.toFixed(1) + "' rx='2' fill='#8C77BC' fill-opacity='0.85'/>";
       s += "<text class='wnum' text-anchor='middle' x='" + (x + (CW - 7) / 2) + "' y='" +
@@ -401,14 +393,15 @@ explained, and section 4 is entirely about it.
       // key vector, four small bars about a midline
       for (j = 0; j < 4; j++) {
         var v = K[i][j], h = Math.abs(v) * 20;
-        s += "<rect x='" + (x + 8 + j * 12) + "' y='" + (232 - (v > 0 ? h : 0)).toFixed(1) +
+        s += "<rect x='" + (x + 8 + j * 12) + "' y='" + (218 - (v > 0 ? h : 0)).toFixed(1) +
              "' width='9' height='" + h.toFixed(1) + "' rx='1' fill='#3E6491' fill-opacity='0.6'/>";
       }
     }
     s += "<line class='sep' x1='" + X0 + "' y1='" + BASE + "' x2='" + (X0 + N * CW - 7) +
          "' y2='" + BASE + "'/>";
-    s += "<line class='sep' x1='" + X0 + "' y1='232' x2='" + (X0 + N * CW - 7) + "' y2='232'/>";
-    s += "<text class='gl' x='" + X0 + "' y='250'>each word's key vector, four numbers</text>";
+    s += "<line class='sep' x1='" + X0 + "' y1='218' x2='" + (X0 + N * CW - 7) + "' y2='218'/>";
+    s += "<text class='gl' x='" + X0 + "' y='236'>each word's key vector \u2014 these belong to " +
+         "the words, so they do not change when you pick a different asker</text>";
     s += "<text class='gl' x='" + X0 + "' y='" + (BASE - 8) + "'>attention weight from &#8220;" +
          W[qi] + "&#8221;, hanging down</text>";
     scene.innerHTML = s;

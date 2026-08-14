@@ -41,7 +41,7 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 plt.rcParams.update({
     'font.family': 'sans-serif',
     'font.sans-serif': ['Helvetica', 'Arial', 'DejaVu Sans'],
-    'font.size': 10,
+    'font.size': 16,
     'axes.edgecolor': AXIS,
     'axes.labelcolor': TEXT,
     'text.color': TEXT,
@@ -129,29 +129,31 @@ rate = float(np.sum(np.concatenate([flops_cached, flops_recomp])
                     * np.concatenate([t_cached, t_recomp]))
              / np.sum(np.concatenate([t_cached, t_recomp]) ** 2))
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 5.0))
 
-ax1.plot(ts, t_recomp, lw=0, marker='o', ms=2.6, color=BLUE, alpha=.55,
-         label='measured: no cache')
-ax1.plot(ts, flops_recomp / rate, lw=1.9, color=BLUE,
-         label=r'$8td^2 + 4t^2d$')
-ax1.plot(ts, t_cached, lw=0, marker='o', ms=2.6, color=LAVENDER, alpha=.55,
-         label='measured: with cache')
-ax1.plot(ts, flops_cached / rate, lw=1.9, color=LAVENDER,
-         label=r'$8d^2 + 4td$')
+ax1.plot(ts, t_recomp, lw=0, marker='o', ms=3.0, color=BLUE, alpha=.55)
+ax1.plot(ts, flops_recomp / rate, lw=1.9, color=BLUE)
+ax1.plot(ts, t_cached, lw=0, marker='o', ms=3.0, color=LAVENDER, alpha=.55)
+ax1.plot(ts, flops_cached / rate, lw=1.9, color=LAVENDER)
 ax1.set_yscale('log')
+# Labelled on the curves rather than in a legend box: at this size a legend
+# large enough to read is a legend large enough to cover the data.
+ax1.text(300, 13, 'no cache', color=BLUE, fontsize=15, ha='right', va='bottom')
+ax1.text(300, 0.95, r'$8td^2 + 4t^2d$', color=BLUE, fontsize=13, ha='right')
+ax1.text(300, 0.42, 'with cache', color=LAVENDER, fontsize=15, ha='right',
+         va='top')
+ax1.text(300, 0.033, r'$8d^2 + 4td$', color=LAVENDER, fontsize=13, ha='right')
 ax1.set_xlabel('$t$, tokens already generated')
-ax1.set_ylabel('time for the next token (ms), log scale')
-ax1.set_title('(a) one step', loc='left', fontsize=11)
-ax1.legend(frameon=False, fontsize=8.5, loc='lower right')
+ax1.set_ylabel('time per token (ms), log')
+ax1.set_title('(a) one step', loc='left', fontsize=17)
 # The cached measurement sits well above its own FLOP prediction and stays
 # flat. That gap is not an error in the prediction; it is the fixed cost of
 # issuing the call at all, and it is the whole reason decoding is not
 # compute-bound in practice. Label it rather than hide it.
 mid = len(ts) // 2
 ax1.annotate('one token cannot fill the machine:\nfixed overhead, not arithmetic',
-             xy=(ts[mid], t_cached[mid] * 0.92), xytext=(28, 0.075),
-             fontsize=8.5, color=MARKER, ha='left', va='center',
+             xy=(ts[mid], t_cached[mid] * 0.92), xytext=(20, 0.11),
+             fontsize=13, color=MARKER, ha='left', va='center',
              arrowprops=dict(arrowstyle='-', color=MARKER, lw=.9,
                              connectionstyle='arc3,rad=0.12'))
 ax1.grid(color=GRID, lw=.7)
@@ -164,11 +166,11 @@ ax2.fill_between(ts, cum_c, cum_r, color=BLUE, alpha=.10, lw=0)
 ax2.annotate('%.0f$\\times$ less work\nby token %d' % (cum_r[-1] / cum_c[-1], N),
              xy=(ts[-1], (cum_r[-1] + cum_c[-1]) / 2), xytext=(-14, 0),
              textcoords='offset points', ha='right', va='center',
-             fontsize=9.5, color=MARKER)
+             fontsize=15, color=MARKER)
 ax2.set_xlabel('tokens generated')
 ax2.set_ylabel('cumulative time (ms)')
-ax2.set_title('(b) the whole sequence', loc='left', fontsize=11)
-ax2.legend(frameon=False, fontsize=9, loc='upper left')
+ax2.set_title('(b) the whole sequence', loc='left', fontsize=17)
+ax2.legend(frameon=False, fontsize=14, loc='upper left')
 ax2.grid(color=GRID, lw=.7)
 ax2.set_axisbelow(True)
 

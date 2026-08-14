@@ -169,7 +169,7 @@
       <path class='sk-mark' d='M491.7,157.2 Q513.0,156.9 534.4,157.2 Q542.4,157.2 542.4,165.2 Q541.8,170.1 542.4,175.1 Q542.4,183.1 534.4,183.1 Q513.0,183.8 491.7,183.1 Q483.7,183.1 483.7,175.1 Q483.0,170.1 483.7,165.2 Q483.7,157.2 491.7,157.2'/>
       <path class='sk-mark' d='M491.8,158.9 Q512.8,158.7 533.8,158.9 Q541.8,158.9 541.8,166.9 Q542.1,171.1 541.8,175.4 Q541.8,183.4 533.8,183.4 Q512.8,183.4 491.8,183.4 Q483.8,183.4 483.8,175.4 Q483.6,171.1 483.8,166.9 Q483.8,158.9 491.8,158.9'/>
       <text class='sk-t' x='513.0' y='176.0' text-anchor='middle'>.</text>
-      <text class='sk-note' x='600.0' y='108.0' text-anchor='middle'>every call is handed</text>
+      <text class='sk-note' x='600.0' y='104.0' text-anchor='middle'>every call is handed</text>
       <text class='sk-note' x='600.0' y='124.0' text-anchor='middle'>all of it again</text>
     </svg>
     <div class='caption'>
@@ -277,9 +277,9 @@ $$
 <p>A note on symbols, since I am about to use two that look alike. I write $d_h$ for the width of one head's vectors — how many numbers are in a single key — and plain $d$ for the full width of the model, all the heads laid end to end. In Llama 3 8B, $d_h$ is 128 and $d$ is 4,096. Section 5 is where $d$ turns up.</p>
 <p>Now here is the one thing I would ask you to carry forward, because everything else in this post follows from it. A token's key and value are computed from that token and the ones before it, and nothing arriving later can alter them. Its query is different in kind: it is the question this token is asking at this moment, it is used once, and it is never wanted again. Two of the three vectors last, and one does not.</p>
 <div class='sketch'>
-    <svg viewBox='0 0 720 242' role='img' aria-label='One attention layer as a new token arrives. It is projected into a query, a key and a value. The key and value are appended to two growing stores; the query is used once and discarded.'>
-      <text class='sk-note' x='12.0' y='100.0' text-anchor='start'>one new</text>
-      <text class='sk-note' x='12.0' y='115.0' text-anchor='start'>token</text>
+    <svg viewBox='0 0 720 244' role='img' aria-label='One attention layer as a new token arrives. It is projected into a query, a key and a value. The key and value are appended to two growing stores; the query is used once and discarded.'>
+      <text class='sk-note' x='12.0' y='96.0' text-anchor='start'>one new</text>
+      <text class='sk-note' x='12.0' y='116.0' text-anchor='start'>token</text>
       <path class='sk-thin' d='M61.6,103.8 Q79.3,79.2 96.1,54.0'/>
       <path class='sk-thin' d='M62.4,103.7 Q80.2,79.2 96.3,53.6'/>
       <path class='sk-s3' d='M103.5,40.0 Q132.4,39.5 161.2,40.0 Q169.2,40.0 169.2,48.0 Q168.7,54.2 169.2,60.5 Q169.2,68.5 161.2,68.5 Q132.4,68.0 103.5,68.5 Q95.5,68.5 95.5,60.5 Q95.8,54.2 95.5,48.0 Q95.5,40.0 103.5,40.0'/>
@@ -295,8 +295,8 @@ $$
       <path class='sk-s2' d='M103.3,151.2 Q133.1,152.1 162.8,151.2 Q170.8,151.2 170.8,159.2 Q169.9,165.5 170.8,171.8 Q170.8,179.8 162.8,179.8 Q133.1,178.9 103.3,179.8 Q95.3,179.8 95.3,171.8 Q95.5,165.5 95.3,159.2 Q95.3,151.2 103.3,151.2'/>
       <path class='sk-s2' d='M103.6,152.4 Q132.7,152.5 161.9,152.4 Q169.9,152.4 169.9,160.4 Q170.7,166.3 169.9,172.2 Q169.9,180.2 161.9,180.2 Q132.7,180.5 103.6,180.2 Q95.6,180.2 95.6,172.2 Q96.6,166.3 95.6,160.4 Q95.6,152.4 103.6,152.4'/>
       <text class='sk-t' x='133.0' y='171.0' text-anchor='middle'>value</text>
-      <text class='sk-note' x='133.0' y='208.0' text-anchor='middle'>used once,</text>
-      <text class='sk-note' x='133.0' y='223.0' text-anchor='middle'>then thrown away</text>
+      <text class='sk-note' x='133.0' y='210.0' text-anchor='middle'>used once,</text>
+      <text class='sk-note' x='133.0' y='230.0' text-anchor='middle'>then thrown away</text>
       <path class='sk-thin' d='M169.4,110.6 Q202.6,109.7 235.9,109.7'/>
       <path class='sk-thin' d='M170.5,110.7 Q203.1,110.6 235.7,110.2'/>
       <path class='sk-thin' d='M235.5,109.5 Q233.5,111.9 230.9,113.7'/>
@@ -307,12 +307,12 @@ $$
       <path class='sk-thin' d='M236.5,166.6 Q233.9,164.7 231.0,163.1'/>
       <path class='sk-s' d='M243.1,84.6 Q319.5,85.2 395.9,84.6 Q403.9,84.6 403.9,92.6 Q403.7,110.3 403.9,127.9 Q403.9,135.9 395.9,135.9 Q319.5,135.9 243.1,135.9 Q235.1,135.9 235.1,127.9 Q235.3,110.3 235.1,92.6 Q235.1,84.6 243.1,84.6'/>
       <path class='sk-s' d='M243.2,84.6 Q319.9,85.3 396.5,84.6 Q404.5,84.6 404.5,92.6 Q404.6,110.7 404.5,128.8 Q404.5,136.8 396.5,136.8 Q319.9,137.1 243.2,136.8 Q235.2,136.8 235.2,128.8 Q236.1,110.7 235.2,92.6 Q235.2,84.6 243.2,84.6'/>
-      <text class='sk-t' x='320.0' y='108.0' text-anchor='middle'>key cache</text>
-      <text class='sk-sub' x='320.0' y='123.0' text-anchor='middle'>one row per token</text>
+      <text class='sk-t' x='320.0' y='104.0' text-anchor='middle'>key cache</text>
+      <text class='sk-sub' x='320.0' y='126.0' text-anchor='middle'>one row per token</text>
       <path class='sk-s' d='M244.0,139.8 Q319.9,140.6 395.8,139.8 Q403.8,139.8 403.8,147.8 Q404.4,165.9 403.8,184.1 Q403.8,192.1 395.8,192.1 Q319.9,192.6 244.0,192.1 Q236.0,192.1 236.0,184.1 Q236.1,165.9 236.0,147.8 Q236.0,139.8 244.0,139.8'/>
       <path class='sk-s' d='M243.2,139.8 Q319.6,139.8 396.0,139.8 Q404.0,139.8 404.0,147.8 Q403.6,165.8 404.0,183.7 Q404.0,191.7 396.0,191.7 Q319.6,190.8 243.2,191.7 Q235.2,191.7 235.2,183.7 Q235.5,165.8 235.2,147.8 Q235.2,139.8 243.2,139.8'/>
-      <text class='sk-t' x='320.0' y='164.0' text-anchor='middle'>value cache</text>
-      <text class='sk-sub' x='320.0' y='179.0' text-anchor='middle'>one row per token</text>
+      <text class='sk-t' x='320.0' y='160.0' text-anchor='middle'>value cache</text>
+      <text class='sk-sub' x='320.0' y='182.0' text-anchor='middle'>one row per token</text>
       <path class='sk-thin' d='M403.4,109.7 Q437.0,88.3 470.3,66.4'/>
       <path class='sk-thin' d='M403.6,110.6 Q436.5,87.0 470.5,65.4'/>
       <path class='sk-thin' d='M404.2,165.4 Q436.6,115.6 469.8,66.3'/>
@@ -327,8 +327,8 @@ $$
       <path class='sk-thin' d='M626.3,61.4 Q623.4,63.2 620.3,64.5'/>
       <path class='sk-thin' d='M625.6,61.8 Q623.0,60.3 620.2,59.0'/>
       <text class='sk-lbl' x='660.0' y='67.0' text-anchor='middle'>out</text>
-      <text class='sk-note' x='480.0' y='216.0' text-anchor='middle'>kept for the whole conversation,</text>
-      <text class='sk-note' x='480.0' y='231.0' text-anchor='middle'>and read in full at every step</text>
+      <text class='sk-note' x='480.0' y='210.0' text-anchor='middle'>kept for the whole conversation,</text>
+      <text class='sk-note' x='480.0' y='230.0' text-anchor='middle'>and read in full at every step</text>
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
@@ -351,7 +351,7 @@ $$
 <p>where $n_{kv}$ is the number of heads that keep keys and values, $t$ is the number of tokens seen so far, and $d_h$ is the length of each vector. I find it easiest to read that as a stack of rows: one row per token, for each head, in each of the two tensors. Every new token adds exactly one row to each. There is one of these pairs in every layer, and one for every conversation being served.</p>
 <p>Let me show you it filling up. Below is a walkthrough of four tokens, with two heads and vectors of length four — absurdly small compared to a real model, which is the point, because you can see every number. The first two tokens are the prompt and the last two are generated. Step through it and watch the rows accumulate.</p>
 <div class='knob'>
-    <svg viewBox='0 0 720 330' id='kv-svg' role='img'
+    <svg viewBox='0 0 720 326' id='kv-svg' role='img'
          aria-label='An interactive walkthrough of two prefill steps followed by two decode steps, showing the key cache and value cache for two heads gaining one row per token, and the attention weights the current query places on each cached row.'>
         <g id='kv-scene'></g>
     </svg>
@@ -397,7 +397,7 @@ $$
             [-0.1, 0.6, 0.9, 0.4], [ 0.7,-0.2, 0.5, 0.8]],
            [[ 0.4,-0.3, 0.8, 0.2], [-0.2, 0.7, 0.1, 0.9],
             [ 0.9, 0.4, 0.2,-0.5], [ 0.3, 0.8,-0.4, 0.6]]];
-  var CELL = 15, GAP = 2, X_K = 96, X_V = 250, X_W = 404, ROW = [42, 182];
+  var CELL = 22, GAP = 2, X_K = 96, X_V = 246, X_W = 396, ROW = [42, 214];
 
   function weights(h, t) {                 // softmax(q . k / sqrt(d_h))
     var z = [], i, j, s = 0;
@@ -453,7 +453,7 @@ $$
         }
       }
     }
-    s += "<line class='sep' x1='6' y1='166' x2='714' y2='166'/>";
+    s += "<line class='sep' x1='6' y1='176' x2='714' y2='176'/>";
     scene.innerHTML = s;
     tOut.textContent = t <= PROMPT ? 'prefill, token ' + t : 'decode, token ' + t;
     // Rows projected so far. With a cache, one per token. Without, the prompt

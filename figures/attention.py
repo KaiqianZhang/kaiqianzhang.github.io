@@ -39,7 +39,7 @@ OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
 plt.rcParams.update({
     'font.family': 'sans-serif',
     'font.sans-serif': ['Helvetica', 'Arial', 'DejaVu Sans'],
-    'font.size': 10,
+    'font.size': 16,
     'axes.edgecolor': AXIS,
     'axes.labelcolor': TEXT,
     'text.color': TEXT,
@@ -78,7 +78,7 @@ for d in DIMS:
     a, b = summarise(scores / np.sqrt(d))
     top_scaled.append(a); ent_scaled.append(b)
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 5.0))
 
 ax1.plot(DIMS, DIMS, lw=1.9, color=BLUE, label=r'predicted:  $\mathrm{Var}(q\cdot k) = d$')
 ax1.plot(DIMS, meas_var, lw=0, marker='o', ms=6, color=LAVENDER,
@@ -86,9 +86,9 @@ ax1.plot(DIMS, meas_var, lw=0, marker='o', ms=6, color=LAVENDER,
          label='measured, %s samples each' % f'{TRIALS:,}')
 ax1.set_xscale('log', base=2); ax1.set_yscale('log', base=2)
 ax1.set_xlabel('$d$, numbers in each vector')
-ax1.set_ylabel('variance of the raw score $q\\cdot k$')
-ax1.set_title('(a) the scores grow with width', loc='left', fontsize=11)
-ax1.legend(frameon=False, fontsize=9, loc='upper left')
+ax1.set_ylabel('variance of $q\\cdot k$')
+ax1.set_title('(a) the scores grow with width', loc='left', fontsize=17)
+ax1.legend(frameon=False, fontsize=14, loc='upper left')
 ax1.grid(color=GRID, lw=.7); ax1.set_axisbelow(True)
 
 ax2.plot(DIMS, top_unscaled, lw=2.2, marker='o', ms=4.5, color=CLAY,
@@ -97,13 +97,13 @@ ax2.plot(DIMS, top_scaled, lw=2.2, marker='o', ms=4.5, color=LAVENDER,
          label=r'divided by $\sqrt{d}$')
 ax2.axhline(1 / KEYS, lw=1.2, ls='--', color=MARKER)
 ax2.text(DIMS[0], 1 / KEYS * 1.25, 'a flat average over %d keys' % KEYS,
-         fontsize=8.5, color=MARKER)
+         fontsize=13, color=MARKER)
 ax2.set_xscale('log', base=2)
 ax2.set_ylim(0, 1.05)
 ax2.set_xlabel('$d$, numbers in each vector')
-ax2.set_ylabel('weight landing on the single largest key')
-ax2.set_title('(b) what that does to the softmax', loc='left', fontsize=11)
-ax2.legend(frameon=False, fontsize=9, loc='center right')
+ax2.set_ylabel('weight on the largest key')
+ax2.set_title('(b) what that does to the softmax', loc='left', fontsize=17)
+ax2.legend(frameon=False, fontsize=14, loc='center right')
 ax2.grid(color=GRID, lw=.7); ax2.set_axisbelow(True)
 
 fig.tight_layout()
