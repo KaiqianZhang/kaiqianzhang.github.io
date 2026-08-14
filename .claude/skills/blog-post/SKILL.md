@@ -623,6 +623,16 @@ when the point is *measured* data rather than a formula.
 
 **Table of contents.** Put `[TOC]` on its own line after the intro.
 
+**There is no dark mode, so do not write for one.** The page background is
+light whatever the reader's system is set to. A `prefers-color-scheme: dark`
+block therefore never makes the page dark — it only fires for a reader whose
+OS is dark and repaints figure labels near-white *on a white page*. Eight such
+blocks had accumulated, some inherited with the template and some added by me
+following the pattern, and between them they made the labels in most figures
+invisible to anyone browsing with a dark system theme. They are removed. If a
+real dark mode is ever wanted, it has to begin with the page itself, not with
+the figures.
+
 **Chrome is not data, and `#8C7BA6` is fixed.** The like button's middle heart
 and the slider accent are furniture: they must look identical on every post,
 forever, so they do **not** come from `figures/palette.py` and do not move
@@ -630,12 +640,14 @@ when the palette is revised. A palette sweep recoloured them to rose once and
 the change was immediately noticed. If you are doing a global colour pass,
 exclude these two.
 
-**Like button.** The middle heart breathes — a slow scale from 1 to 1.12 and
-back over three seconds — so the button reads as alive before anybody touches
-it. The scale sits on the `<path>` rather than the `<svg>`, because the `<svg>`
-already carries the hover lift and two transforms on one element fight; the tap
-animation suspends the breathing so the two scales cannot multiply into a
-jump; and `prefers-reduced-motion` stops it. Every post ends with one, emitted
+**Like button.** All three hearts breathe together — a scale from 1 to 1.26 and
+back over 2.4 seconds — so the button reads as alive before anybody touches it.
+Three details make it work: the scale sits on the `<path>` rather than the
+`<svg>`, because the `<svg>` already carries the hover lift and two transforms
+on one element fight; the `<svg>` needs `overflow: visible`, because an SVG
+clips to its viewport and an enlarged heart is otherwise sliced off at 19px;
+and the tap animation suspends the breathing so two scales cannot multiply into
+a jump. `prefers-reduced-motion` stops it. Every post ends with one, emitted
 by `templates/post.html` —
 do **not** add the markup to a post's Markdown, and do not remove it. Three
 drawn hearts (white, lavender, white) over a lowercase "like"; tapping turns

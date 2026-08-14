@@ -477,16 +477,6 @@ table td {
 .article .knob .vec  { stroke-width: 2.4; fill: none; stroke-linecap: round; }
 .article .knob .ghost { stroke-width: 1.2; stroke-dasharray: 4 3; fill: none; }
 .article .knob .node { stroke: #FFFFFF; stroke-width: 1.5; }
-@media (prefers-color-scheme: dark) {
-  .article .knob input[type='range']::-webkit-slider-runnable-track { background: #4A4640; }
-  .article .knob input[type='range']::-moz-range-track { background: #4A4640; }
-  .article .knob input[type='range']::-webkit-slider-thumb { border-color: #1B1B1B; }
-  .article .knob input[type='range']::-moz-range-thumb { border-color: #1B1B1B; }
-  .article .knob .controls .note { color: rgba(255, 255, 255, 0.5); }
-  .article .knob .face { fill: rgba(168, 150, 208, 0.14); stroke: #6B5F86; }
-  .article .knob .edge { stroke: #4A4640; }
-  .article .knob .node { stroke: #1B1B1B; }
-}
 
 .article .knob .axlabel {
   font: 400 15.5px -apple-system, Helvetica, arial, sans-serif;
@@ -625,25 +615,10 @@ table td {
 .article .roadmap svg:hover .stop:not(:hover) .box {
   fill: #FBFAF8;
 }
-@media (prefers-color-scheme: dark) {
-  .article .roadmap .stop:hover .box {
-    fill: rgba(140, 119, 188, 0.16);
-    stroke: #A896D0;
-  }
-  .article .roadmap .stop:hover .dot { fill: #A896D0; }
-  .article .roadmap .stop:hover .stage { fill: #D8CEEA; }
-  .article .roadmap svg:hover .stop:not(:hover) .box {
-    fill: rgba(255, 255, 255, 0.02);
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   /* Keep the highlight, drop the movement. */
   .article .roadmap .stop,
   .article .roadmap .stop:hover { transform: none; transition: none; }
-}
-@media (prefers-color-scheme: dark) {
-  .article .roadmap .box { fill: rgba(255, 255, 255, 0.035); stroke: rgba(255, 255, 255, 0.12); }
-  .article .roadmap .body { fill: #A9A29A; }
 }
 
 /* Sliding-window animation for CBOW and Skip-gram. Same technique as the
@@ -921,26 +896,27 @@ table td {
   fill: #8C7BA6;
   stroke: #8C7BA6;
 }
-/* The middle heart breathes on its own, so the button reads as alive before
+/* All three hearts breathe together, so the button reads as alive before
    anybody touches it. The scale is on the <path> rather than on the <svg>,
    because the <svg> already carries the hover lift and a transform on the
    element would fight the animation. transform-box: fill-box makes the scale
-   happen about the heart's own centre instead of the SVG origin.
+   happen about each heart's own centre instead of the SVG origin.
 
-   Kept small on purpose: 1.0 to 1.12 over three seconds reads as a pulse
-   rather than a throb, and this sits at the end of every post. */
+   An <svg> clips to its viewport, so a path scaled past 19px is cut off at
+   the edge. overflow: visible on the svg is what lets the beat show. */
 @keyframes applause-breathe {
   0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.12); }
+  50%      { transform: scale(1.26); }
 }
-.applause-btn .h2 path {
+.applause-btn .h { overflow: visible; }
+.applause-btn .h path {
   transform-box: fill-box;
   transform-origin: center;
-  animation: applause-breathe 3s ease-in-out infinite;
+  animation: applause-breathe 2.4s ease-in-out infinite;
 }
-/* While the tap animation runs, the heart is already scaling; two scales at
+/* While the tap animation runs, the hearts are already scaling; two scales at
    once would multiply into a jump. */
-.applause-btn.is-popping .h2 path { animation: none; }
+.applause-btn.is-popping .h path { animation: none; }
 
 .applause-btn:hover .h1 { transform: translateY(-2px); }
 .applause-btn:hover .h2 { transform: translateY(-3px); }
@@ -979,7 +955,7 @@ table td {
 @media (prefers-reduced-motion: reduce) {
   .applause-btn .h,
   .applause-btn.is-popping .h,
-  .applause-btn .h2 path {
+  .applause-btn .h path {
     animation: none;
     transition: none;
   }
@@ -1223,10 +1199,6 @@ table td {
   .article .ffn-anim .tok-v { animation: none; transform: translate(300px, 184px); }
   .article .ffn-anim .tok-o { animation: none; transform: translate(524px, 128px); }
 }
-@media (prefers-color-scheme: dark) {
-  .article .ffn-anim .wire { stroke: #4A4640; }
-  .article .ffn-anim .lbl { fill: #D8D4CE; }
-}
 
 /* --------------------------------------------------------------------------
    The KV cache post. One static schematic of where the cache sits, plus four
@@ -1283,11 +1255,6 @@ table td {
   font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
   fill: #8C77BC; text-anchor: middle;
 }
-@media (prefers-color-scheme: dark) {
-  .article .kv-anim .wire { stroke: #4A4640; }
-  .article .kv-anim .lbl { fill: #D8D4CE; }
-  .article .kv-anim .clbl { fill: #B7A7D6; }
-}
 
 /* Shared by the stepper, the mask grid and the allocation strip. */
 .article .knob .btn {
@@ -1329,13 +1296,6 @@ table td {
   font: 500 14.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
 }
 .article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
-@media (prefers-color-scheme: dark) {
-  .article .knob .num, .article .knob .tk, .article .knob .wnum { fill: #D8D4CE; }
-  .article .knob .cell.empty, .article .knob .mcell.off {
-    fill: #1B1B1B; stroke: #4A4640;
-  }
-  .article .knob .sep { stroke: #4A4640; }
-}
 
 /* The generation loop that opens the KV cache post: four rows, each one token
    longer than the last, fading in one after another so the repetition is the
@@ -1375,10 +1335,6 @@ table td {
 .article .loop-anim .r4 { animation-delay: 1.5s; }
 @media (prefers-reduced-motion: reduce) {
   .article .loop-anim .row { animation: none; opacity: 1; }
-}
-@media (prefers-color-scheme: dark) {
-  .article .loop-anim .tk { fill: #D8D4CE; }
-  .article .loop-anim .arrow { fill: #4A4640; }
 }
 
 /* The bottleneck-versus-attention figure that opens the attention post. The
@@ -1469,10 +1425,10 @@ table td {
    and pushes them off the edge of the viewBox. */
 .article .sketch .sk-note { font-size: 14.5px; fill: #8C77BC; }
 .article .sketch .sk-in { font-size: 14px; fill: #FFFFFF; }
-@media (prefers-color-scheme: dark) {
-  .article .sketch .sk-t { fill: #D8D4CE; }
-  .article .sketch .sk-sub, .article .sketch .sk-lbl { fill: #9A948C; }
-  .article .sketch .sk-thin { stroke: #7A756E; }
-  .article .sketch .sk-faint { stroke: #4A4640; }
-  .article .sketch .sk-s3 { stroke: #A9A3D6; }
-}
+
+/* There is deliberately no dark mode on this site. Do not add
+   `prefers-color-scheme: dark` blocks for figures: the page background stays
+   light regardless of the reader's system setting, so a dark block only fires
+   for a dark-OS reader and repaints figure labels near-white on a white page,
+   which is how eight of them ended up invisible. If a real dark mode is ever
+   wanted it has to start with the page itself. */
