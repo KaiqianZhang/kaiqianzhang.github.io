@@ -67,70 +67,78 @@ Each attempt charged something. The labels above the arrows name what the
 step to their left was still paying.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 166' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
-      <path class='spine' d='M94.2,39.5 Q379.9,40.1 665.6,39.3'/>
-      <path class='head' d='M179.0,39.9 Q189.8,39.5 200.5,39.7'/>
-      <path class='head' d='M178.3,39.8 Q189.7,39.9 201.0,39.8'/>
-      <path class='head' d='M201.0,40.6 Q198.4,42.0 195.6,43.2'/>
-      <path class='head' d='M200.7,39.4 Q197.7,38.2 194.7,37.2'/>
-      <text class='why' x='189.5' y='27.0'>statistics depend on the batch</text>
-      <path class='head' d='M368.7,40.2 Q379.8,40.5 391.0,40.5'/>
-      <path class='head' d='M369.0,39.8 Q379.8,40.2 390.6,40.5'/>
-      <path class='head' d='M390.5,40.3 Q388.2,41.8 385.5,42.6'/>
-      <path class='head' d='M390.4,39.8 Q387.9,38.9 385.7,37.5'/>
-      <text class='why' x='380.0' y='27.0'>is the mean doing any work?</text>
-      <path class='head' d='M559.7,39.9 Q570.6,39.5 581.5,39.5'/>
-      <path class='head' d='M560.1,39.4 Q570.9,39.1 581.7,39.8'/>
-      <path class='head' d='M581.8,39.7 Q579.5,41.2 577.0,42.5'/>
-      <path class='head' d='M580.8,39.5 Q578.6,38.9 576.9,37.5'/>
-      <text class='why' x='570.5' y='27.0'>same quality, less time</text>
+    <svg viewBox='0 0 760 277' role='img' aria-label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, RMSNorm 2019, the default from 2023. Each step is forced by a cost of the one before it.'>
+      <path class='spine' d='M99.4,138.0 Q379.9,138.8 660.4,137.8'/>
+      <path class='head' d='M180.5,138.4 Q193.3,137.9 206.0,138.2'/>
+      <path class='head' d='M179.8,138.3 Q193.2,138.4 206.5,138.3'/>
+      <path class='head' d='M206.5,139.1 Q203.9,140.5 201.1,141.7'/>
+      <path class='head' d='M206.2,137.9 Q203.2,136.7 200.2,135.7'/>
+      <text class='why' x='193.0' y='114.5'>statistics depend on the</text>
+      <text class='why' x='193.0' y='127.5'>batch</text>
+      <path class='head' d='M366.7,138.7 Q379.8,139.0 393.0,139.0'/>
+      <path class='head' d='M367.0,138.3 Q379.8,138.7 392.6,139.0'/>
+      <path class='head' d='M392.5,138.8 Q390.2,140.3 387.5,141.1'/>
+      <path class='head' d='M392.4,138.3 Q389.9,137.4 387.7,136.0'/>
+      <text class='why' x='380.0' y='114.5'>is the mean doing any</text>
+      <text class='why' x='380.0' y='127.5'>work?</text>
+      <path class='head' d='M554.2,138.4 Q567.1,137.9 580.0,138.0'/>
+      <path class='head' d='M554.6,137.9 Q567.4,137.5 580.2,138.3'/>
+      <path class='head' d='M580.3,138.2 Q578.0,139.7 575.5,141.0'/>
+      <path class='head' d='M579.3,138.0 Q577.1,137.4 575.4,136.0'/>
+      <text class='why' x='567.0' y='127.5'>same quality, less time</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30.0' width='176.5' height='125.5'/>
-        <circle class='dot' cx='94.2' cy='40.0' r='4.5'/>
-        <path class='box' d='M12.7,56.8 Q94.5,56.0 176.3,56.8 Q183.3,56.8 183.3,63.8 Q184.0,107.3 183.3,150.7 Q183.3,157.7 176.3,157.7 Q94.5,157.1 12.7,157.7 Q5.7,157.7 5.7,150.7 Q4.9,107.3 5.7,63.8 Q5.7,56.8 12.7,56.8'/>
-        <path class='box' d='M12.5,55.6 Q93.8,55.9 175.1,55.6 Q182.1,55.6 182.1,62.6 Q181.6,106.9 182.1,151.1 Q182.1,158.1 175.1,158.1 Q93.8,157.7 12.5,158.1 Q5.5,158.1 5.5,151.1 Q4.6,106.9 5.5,62.6 Q5.5,55.6 12.5,55.6'/>
-        <text class='yr' x='94.2' y='65.0'>2015</text>
-        <text class='stage' x='94.2' y='79.0'>BatchNorm</text>
-        <text class='body' x='94.2' y='97.0'>Standardize each feature</text>
-        <text class='body' x='94.2' y='111.5'>across the mini-batch. Deep</text>
-        <text class='body' x='94.2' y='126.0'>networks become trainable.</text>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='92.5'/>
+        <path class='stem' d='M99.2,93.2 Q100.2,115.9 100.1,138.7'/>
+        <circle class='dot' cx='99.5' cy='138.5' r='5'/>
+        <path class='box' d='M24.7,-0.6 Q193.0,-1.0 361.3,-0.6 Q370.3,-0.6 370.3,8.4 Q369.8,45.7 370.3,83.0 Q370.3,92.0 361.3,92.0 Q193.0,92.7 24.7,92.0 Q15.7,92.0 15.7,83.0 Q16.0,45.7 15.7,8.4 Q15.7,-0.6 24.7,-0.6'/>
+        <path class='box' d='M23.6,-0.3 Q192.4,-0.1 361.1,-0.3 Q370.1,-0.3 370.1,8.7 Q369.8,46.5 370.1,84.3 Q370.1,93.3 361.1,93.3 Q192.4,93.1 23.6,93.3 Q14.6,93.3 14.6,84.3 Q14.1,46.5 14.6,8.7 Q14.6,-0.3 23.6,-0.3'/>
+        <text class='yr' x='29.0' y='19.0'>2015</text>
+        <text class='stage' x='29.0' y='37.0'>BatchNorm</text>
+        <circle class='bul' cx='33.0' cy='52.0' r='2'/>
+        <text class='body' x='42.0' y='56.0'>standardize each feature across the mini-batch</text>
+        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
+        <text class='body' x='42.0' y='71.5'>deep networks become trainable</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='30.0' width='176.5' height='125.5'/>
-        <circle class='dot' cx='284.8' cy='40.0' r='4.5'/>
-        <path class='box' d='M204.3,56.2 Q285.0,55.8 365.7,56.2 Q372.7,56.2 372.7,63.2 Q372.6,106.8 372.7,150.3 Q372.7,157.3 365.7,157.3 Q285.0,157.9 204.3,157.3 Q197.3,157.3 197.3,150.3 Q198.0,106.8 197.3,63.2 Q197.3,56.2 204.3,56.2'/>
-        <path class='box' d='M203.3,56.5 Q284.3,55.8 365.3,56.5 Q372.3,56.5 372.3,63.5 Q372.6,107.1 372.3,150.6 Q372.3,157.6 365.3,157.6 Q284.3,157.9 203.3,157.6 Q196.3,157.6 196.3,150.6 Q197.0,107.1 196.3,63.5 Q196.3,56.5 203.3,56.5'/>
-        <text class='yr' x='284.8' y='65.0'>2016</text>
-        <text class='stage' x='284.8' y='79.0'>LayerNorm</text>
-        <text class='body' x='284.8' y='97.0'>Normalize each example</text>
-        <text class='body' x='284.8' y='111.5'>across its own features</text>
-        <text class='body' x='284.8' y='126.0'>instead. No batch</text>
-        <text class='body' x='284.8' y='140.5'>dependence, no train/test</text>
-        <text class='body' x='284.8' y='155.0'>gap.</text>
+        <rect class='hit' x='15.0' y='184.5' width='356.0' height='92.5'/>
+        <path class='stem' d='M286.4,184.9 Q287.1,161.6 287.0,138.3'/>
+        <circle class='dot' cx='286.5' cy='138.5' r='5'/>
+        <path class='box' d='M23.3,184.6 Q192.3,184.9 361.3,184.6 Q370.3,184.6 370.3,193.6 Q371.0,230.9 370.3,268.2 Q370.3,277.2 361.3,277.2 Q192.3,277.8 23.3,277.2 Q14.3,277.2 14.3,268.2 Q14.2,230.9 14.3,193.6 Q14.3,184.6 23.3,184.6'/>
+        <path class='box' d='M24.2,184.7 Q192.9,184.5 361.6,184.7 Q370.6,184.7 370.6,193.7 Q370.6,230.8 370.6,268.0 Q370.6,277.0 361.6,277.0 Q192.9,277.9 24.2,277.0 Q15.2,277.0 15.2,268.0 Q15.2,230.8 15.2,193.7 Q15.2,184.7 24.2,184.7'/>
+        <text class='yr' x='29.0' y='203.5'>2016</text>
+        <text class='stage' x='29.0' y='221.5'>LayerNorm</text>
+        <circle class='bul' cx='33.0' cy='236.5' r='2'/>
+        <text class='body' x='42.0' y='240.5'>normalize each example across its own features</text>
+        <circle class='bul' cx='33.0' cy='252.0' r='2'/>
+        <text class='body' x='42.0' y='256.0'>no batch dependence, no train/test gap</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='30.0' width='176.5' height='125.5'/>
-        <circle class='dot' cx='475.2' cy='40.0' r='4.5'/>
-        <path class='box' d='M394.5,55.9 Q475.6,55.4 556.7,55.9 Q563.7,55.9 563.7,62.9 Q563.6,106.8 563.7,150.7 Q563.7,157.7 556.7,157.7 Q475.6,157.5 394.5,157.7 Q387.5,157.7 387.5,150.7 Q387.5,106.8 387.5,62.9 Q387.5,55.9 394.5,55.9'/>
-        <path class='box' d='M394.9,56.0 Q475.9,55.1 557.0,56.0 Q564.0,56.0 564.0,63.0 Q563.1,107.1 564.0,151.2 Q564.0,158.2 557.0,158.2 Q475.9,158.4 394.9,158.2 Q387.9,158.2 387.9,151.2 Q387.3,107.1 387.9,63.0 Q387.9,56.0 394.9,56.0'/>
-        <text class='yr' x='475.2' y='65.0'>2019</text>
-        <text class='stage' x='475.2' y='79.0'>RMSNorm</text>
-        <text class='body' x='475.2' y='97.0'>Zhang and Sennrich drop the</text>
-        <text class='body' x='475.2' y='111.5'>mean subtraction, keeping</text>
-        <text class='body' x='475.2' y='126.0'>only the division. 7 to 64%</text>
-        <text class='body' x='475.2' y='140.5'>less running time.</text>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='92.5'/>
+        <path class='stem' d='M473.9,93.0 Q473.2,115.5 472.8,137.9'/>
+        <circle class='dot' cx='473.5' cy='138.5' r='5'/>
+        <path class='box' d='M397.4,-0.0 Q567.0,0.1 736.6,-0.0 Q745.6,-0.0 745.6,9.0 Q746.5,46.2 745.6,83.3 Q745.6,92.3 736.6,92.3 Q567.0,92.5 397.4,92.3 Q388.4,92.3 388.4,83.3 Q387.8,46.2 388.4,9.0 Q388.4,-0.0 397.4,-0.0'/>
+        <path class='box' d='M397.8,-0.3 Q567.1,0.2 736.5,-0.3 Q745.5,-0.3 745.5,8.7 Q745.8,46.1 745.5,83.5 Q745.5,92.5 736.5,92.5 Q567.1,92.4 397.8,92.5 Q388.8,92.5 388.8,83.5 Q389.2,46.1 388.8,8.7 Q388.8,-0.3 397.8,-0.3'/>
+        <text class='yr' x='403.0' y='19.0'>2019</text>
+        <text class='stage' x='403.0' y='37.0'>RMSNorm</text>
+        <circle class='bul' cx='407.0' cy='52.0' r='2'/>
+        <text class='body' x='416.0' y='56.0'>Zhang and Sennrich drop the mean subtraction</text>
+        <circle class='bul' cx='407.0' cy='67.5' r='2'/>
+        <text class='body' x='416.0' y='71.5'>only the division survives</text>
+        <circle class='bul' cx='407.0' cy='83.0' r='2'/>
+        <text class='body' x='416.0' y='87.0'>7 to 64% less running time</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='30.0' width='176.5' height='125.5'/>
-        <circle class='dot' cx='665.8' cy='40.0' r='4.5'/>
-        <path class='box' d='M584.5,56.6 Q665.7,57.5 746.8,56.6 Q753.8,56.6 753.8,63.6 Q754.0,107.1 753.8,150.6 Q753.8,157.6 746.8,157.6 Q665.7,156.9 584.5,157.6 Q577.5,157.6 577.5,150.6 Q577.2,107.1 577.5,63.6 Q577.5,56.6 584.5,56.6'/>
-        <path class='box' d='M584.2,56.5 Q665.6,56.8 747.0,56.5 Q754.0,56.5 754.0,63.5 Q753.9,107.2 754.0,150.9 Q754.0,157.9 747.0,157.9 Q665.6,158.4 584.2,157.9 Q577.2,157.9 577.2,150.9 Q577.0,107.2 577.2,63.5 Q577.2,56.5 584.2,56.5'/>
-        <text class='yr' x='665.8' y='65.0'>2023-</text>
-        <text class='stage' x='665.8' y='79.0'>the default</text>
-        <text class='body' x='665.8' y='97.0'>LLaMA ships it; Mistral,</text>
-        <text class='body' x='665.8' y='111.5'>Qwen, Gemma, DeepSeek</text>
-        <text class='body' x='665.8' y='126.0'>follow. LayerNorm becomes</text>
-        <text class='body' x='665.8' y='140.5'>the exception.</text>
+        <rect class='hit' x='389.0' y='184.5' width='356.0' height='92.5'/>
+        <path class='stem' d='M660.3,183.9 Q660.1,161.4 659.8,138.9'/>
+        <circle class='dot' cx='660.5' cy='138.5' r='5'/>
+        <path class='box' d='M397.8,184.1 Q566.8,184.6 735.8,184.1 Q744.8,184.1 744.8,193.1 Q744.2,230.7 744.8,268.3 Q744.8,277.3 735.8,277.3 Q566.8,277.8 397.8,277.3 Q388.8,277.3 388.8,268.3 Q387.9,230.7 388.8,193.1 Q388.8,184.1 397.8,184.1'/>
+        <path class='box' d='M398.1,185.1 Q567.4,184.2 736.7,185.1 Q745.7,185.1 745.7,194.1 Q744.8,231.3 745.7,268.6 Q745.7,277.6 736.7,277.6 Q567.4,278.3 398.1,277.6 Q389.1,277.6 389.1,268.6 Q389.3,231.3 389.1,194.1 Q389.1,185.1 398.1,185.1'/>
+        <text class='yr' x='403.0' y='203.5'>2023-</text>
+        <text class='stage' x='403.0' y='221.5'>the default</text>
+        <circle class='bul' cx='407.0' cy='236.5' r='2'/>
+        <text class='body' x='416.0' y='240.5'>LLaMA ships it; Mistral, Qwen, Gemma follow</text>
+        <circle class='bul' cx='407.0' cy='252.0' r='2'/>
+        <text class='body' x='416.0' y='256.0'>LayerNorm becomes the exception</text>
       </g>
     </svg>
 </div>

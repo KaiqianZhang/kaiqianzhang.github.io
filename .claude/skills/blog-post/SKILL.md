@@ -428,27 +428,32 @@ does this) moves when other posts change length. Re-run it and update the
 numbers quoted in the prose and captions.
 
 **The history roadmap.** Section 1 is not paragraphs of dates. It is a
-horizontal spine of four milestones, each in a rounded box holding two or
-three sentences, with **the reason the next milestone had to happen written
-above the arrow between them**. Those arrow labels are the load-bearing part:
-a history that only lists dates has explained nothing.
+timeline of four milestones drawn XMind-fashion: a spine across the middle,
+with cards alternating above and below it, each card holding a year, a short
+title and **two or three bullets**. The reason the next milestone had to
+happen is written above the arrow between them, and those arrow labels are the
+load-bearing part — a history that only lists dates has explained nothing.
 
-Generate it, do not hand-write the SVG — the body text has to be wrapped and
-centred inside each box, and doing that by hand is how tspan positions end up
-wrong:
+Two things about that shape are deliberate. Alternating above and below means
+each card gets about half the width of the figure rather than a quarter, which
+is what stops the text becoming a wall. And bullets rather than prose means the
+card can be *scanned*; if you find yourself writing a sentence with a
+subordinate clause into a bullet, it belongs in the prose underneath instead.
+
+Generate it, do not hand-write the SVG — the text has to be wrapped and placed
+inside each card, and doing that by hand is how tspan positions end up wrong:
 
 ```sh
 python3 figures/roadmap.py <name>     # add the spec to ROADMAPS first
 ```
 
-Paste the output inside a `<div class='roadmap'>`. Keep to four stops; five
-leaves boxes too narrow to hold a sentence. After the roadmap, write only the
-prose the boxes cannot carry — a quoted hypothesis, a correction, a pointer
-forward. Two or three short paragraphs, not a section.
+A spec is `stops=[(year, title, [bullet, bullet, ...]), ...]` plus the `arrows`
+between them. Paste the output inside a `<div class='roadmap'>`. Keep to four
+stops. The boxes and arrows are drawn with the sketch primitives, so a roadmap
+matches the hand-drawn schematics elsewhere in the post.
 
-Verify in a browser before committing: load the page and check that no
-`text` element overflows its `rect.box` and no arrow label is wider than the
-gap between two dots.
+Verify in a browser before committing: no card overlapping another, no arrow
+label touching a card, and no text escaping the card it belongs to.
 
 **Motion and interaction.** Every post carries **at least five** animated or
 interactive pieces. This is a floor, not a target, and they must earn their

@@ -428,7 +428,7 @@ table td {
   stroke-width: 1;
 }
 .article .knob .tick {
-  font: 400 9.5px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 11px -apple-system, Helvetica, arial, sans-serif;
   fill: #8C8C8C;
 }
 /* A second row of controls, for widgets with more than one slider. The rule
@@ -468,7 +468,7 @@ table td {
 }
 
 .article .knob .axlabel {
-  font: 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  font: 400 12px -apple-system, Helvetica, arial, sans-serif;
   fill: #6E6E6E;
 }
 .article .knob .trace {
@@ -503,11 +503,22 @@ table td {
   height: auto;
   display: block;
 }
-.article .roadmap .stage {
-  font: 600 13px -apple-system, Helvetica, arial, sans-serif;
-  fill: #3F3F3F;
-  text-anchor: middle;
+.article .roadmap text {
+  font-family: 'Bradley Hand', 'Chalkboard SE', 'Segoe Print', 'Comic Sans MS',
+               'Comic Neue', cursive;
 }
+.article .roadmap .stage {
+  font-size: 15px;
+  font-weight: 700;
+  fill: #3F3F3F;
+}
+.article .roadmap .stem {
+  fill: none;
+  stroke: #C9C3BC;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+}
+.article .roadmap .bul { fill: #8C77BC; }
 .article .roadmap .models {
   font: 400 11px -apple-system, Helvetica, arial, sans-serif;
   fill: #7A7A7A;
@@ -520,7 +531,7 @@ table td {
   letter-spacing: 0.06em;
 }
 .article .roadmap .why {
-  font: italic 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  font-size: 12.5px;
   fill: #8C77BC;
   text-anchor: middle;
 }
@@ -549,15 +560,13 @@ table td {
   stroke-linejoin: round;
 }
 .article .roadmap .yr {
-  font: 600 10px -apple-system, Helvetica, arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
   fill: #C48BAC;
-  text-anchor: middle;
-  letter-spacing: 0.08em;
 }
 .article .roadmap .body {
-  font: 400 10.5px -apple-system, Helvetica, arial, sans-serif;
+  font-size: 12.5px;
   fill: #5E5E5E;
-  text-anchor: middle;
 }
 /* Hover a milestone and the whole group lifts: dot, box and text together.
    transform-box: fill-box makes the scale happen about the group's own centre
@@ -1259,23 +1268,23 @@ table td {
   fill: #A8443E; fill-opacity: 0.30; stroke: #A8443E; stroke-opacity: 0.7;
 }
 .article .knob .num {
-  font: 500 7.5px ui-monospace, Menlo, monospace;
-  fill: #3F3F3F; text-anchor: middle;
+  font: 500 9px ui-monospace, Menlo, monospace;
+  fill: #3F3F3F;
 }
 .article .knob .tk {
-  font: 500 9.5px -apple-system, Helvetica, arial, sans-serif;
-  fill: #3F3F3F; text-anchor: end;
+  font: 500 11px -apple-system, Helvetica, arial, sans-serif;
+  fill: #3F3F3F;
 }
 .article .knob .tk.off { fill: #C9C3BC; }
 .article .knob .gl {
-  font: 600 10px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
+  font: 600 11.5px -apple-system, Helvetica, arial, sans-serif; fill: #6E6E6E;
 }
 .article .knob .hd {
-  font: 600 10.5px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
+  font: 600 12px -apple-system, Helvetica, arial, sans-serif; fill: #8C77BC;
 }
 .article .knob .wbar { fill: #8C77BC; fill-opacity: 0.75; }
 .article .knob .wnum {
-  font: 500 9.5px ui-monospace, Menlo, monospace; fill: #3F3F3F;
+  font: 500 11px ui-monospace, Menlo, monospace; fill: #3F3F3F;
 }
 .article .knob .sep { stroke: #DEDAD4; stroke-width: 1; }
 @media (prefers-color-scheme: dark) {
@@ -1412,14 +1421,14 @@ table td {
   font-family: 'Bradley Hand', 'Chalkboard SE', 'Segoe Print', 'Comic Sans MS',
                'Comic Neue', cursive;
 }
-.article .sketch .sk-t   { font-size: 13px; fill: #3F3F3F; }
-.article .sketch .sk-sub { font-size: 10px; fill: #6E6E6E; }
-.article .sketch .sk-lbl { font-size: 11.5px; fill: #6E6E6E; }
+.article .sketch .sk-t   { font-size: 15px; fill: #3F3F3F; }
+.article .sketch .sk-sub { font-size: 12px; fill: #6E6E6E; }
+.article .sketch .sk-lbl { font-size: 13px; fill: #6E6E6E; }
 /* No text-anchor here: CSS beats the per-element attribute, so setting it in
    the class silently re-centres labels that were placed with anchor='start'
    and pushes them off the edge of the viewBox. */
-.article .sketch .sk-note { font-size: 11px; fill: #8C77BC; }
-.article .sketch .sk-in { font-size: 10.5px; fill: #FFFFFF; }
+.article .sketch .sk-note { font-size: 12.5px; fill: #8C77BC; }
+.article .sketch .sk-in { font-size: 12px; fill: #FFFFFF; }
 @media (prefers-color-scheme: dark) {
   .article .sketch .sk-t { fill: #D8D4CE; }
   .article .sketch .sk-sub, .article .sketch .sk-lbl { fill: #9A948C; }

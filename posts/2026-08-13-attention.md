@@ -142,78 +142,80 @@ The idea arrived in 2014, and not as a grand theory. It was a fix for a
 specific, visible failure.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 192' role='img' aria-label='Roadmap of attention: a fix for a bottleneck in 2014, a simpler score in 2015, the recurrence dropped in 2017, and the transformer everywhere after.'>
-      <path class='spine' d='M94.2,51.8 Q380.2,51.3 666.1,51.4'/>
-      <path class='head' d='M178.3,51.7 Q189.3,51.5 200.3,51.7'/>
-      <path class='head' d='M178.2,52.4 Q189.6,51.6 201.0,51.7'/>
-      <path class='head' d='M200.9,51.6 Q198.5,53.5 195.6,54.7'/>
-      <path class='head' d='M199.8,51.6 Q197.6,50.2 195.2,49.4'/>
-      <text class='why' x='189.5' y='27.0'>the scoring network was extra</text>
-      <text class='why' x='189.5' y='39.0'>machinery</text>
-      <path class='head' d='M368.5,52.4 Q379.4,52.6 390.4,52.0'/>
-      <path class='head' d='M369.3,52.2 Q379.9,51.7 390.5,51.4'/>
-      <path class='head' d='M391.7,51.9 Q389.1,53.8 386.4,55.7'/>
-      <path class='head' d='M391.1,51.5 Q388.4,49.9 385.8,48.3'/>
-      <text class='why' x='380.0' y='27.0'>attention was fine; the</text>
-      <text class='why' x='380.0' y='39.0'>recurrence was not</text>
-      <path class='head' d='M559.7,51.6 Q570.9,52.4 582.2,52.3'/>
-      <path class='head' d='M559.2,52.4 Q570.5,52.6 581.8,52.6'/>
-      <path class='head' d='M581.6,51.6 Q578.6,53.4 575.8,55.3'/>
-      <path class='head' d='M581.2,51.6 Q579.2,49.9 576.9,48.5'/>
-      <text class='why' x='570.5' y='27.0'>quadratic cost, and a cache to</text>
-      <text class='why' x='570.5' y='39.0'>feed</text>
+    <svg viewBox='0 0 760 308' role='img' aria-label='Roadmap of attention: a fix for a bottleneck in 2014, a simpler score in 2015, the recurrence dropped in 2017, and the transformer everywhere after.'>
+      <path class='spine' d='M99.4,153.8 Q380.2,153.2 660.9,153.4'/>
+      <path class='head' d='M179.8,153.7 Q192.8,153.5 205.8,153.7'/>
+      <path class='head' d='M179.7,154.4 Q193.1,153.5 206.5,153.7'/>
+      <path class='head' d='M206.4,153.6 Q204.0,155.5 201.1,156.7'/>
+      <path class='head' d='M205.3,153.6 Q203.1,152.2 200.7,151.4'/>
+      <text class='why' x='193.0' y='130.0'>the scoring network was</text>
+      <text class='why' x='193.0' y='143.0'>extra machinery</text>
+      <path class='head' d='M366.5,154.4 Q379.4,154.7 392.4,154.0'/>
+      <path class='head' d='M367.3,154.2 Q379.9,153.6 392.5,153.4'/>
+      <path class='head' d='M393.7,153.9 Q391.1,155.8 388.4,157.7'/>
+      <path class='head' d='M393.1,153.5 Q390.4,151.9 387.8,150.3'/>
+      <text class='why' x='380.0' y='130.0'>attention was fine; the</text>
+      <text class='why' x='380.0' y='143.0'>recurrence was not</text>
+      <path class='head' d='M554.2,153.6 Q567.4,154.5 580.7,154.3'/>
+      <path class='head' d='M553.7,154.4 Q567.0,154.6 580.3,154.6'/>
+      <path class='head' d='M580.1,153.6 Q577.1,155.4 574.3,157.3'/>
+      <path class='head' d='M579.7,153.6 Q577.7,151.9 575.4,150.5'/>
+      <text class='why' x='567.0' y='130.0'>quadratic cost, and a</text>
+      <text class='why' x='567.0' y='143.0'>cache to feed</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='42.0' width='176.5' height='140.0'/>
-        <circle class='dot' cx='94.2' cy='52.0' r='4.5'/>
-        <path class='box' d='M13.2,67.9 Q94.3,67.7 175.3,67.9 Q182.3,67.9 182.3,74.9 Q181.7,125.6 182.3,176.4 Q182.3,183.4 175.3,183.4 Q94.3,182.8 13.2,183.4 Q6.2,183.4 6.2,176.4 Q6.8,125.6 6.2,74.9 Q6.2,67.9 13.2,67.9'/>
-        <path class='box' d='M13.1,68.6 Q94.2,68.3 175.3,68.6 Q182.3,68.6 182.3,75.6 Q181.9,126.5 182.3,177.5 Q182.3,184.5 175.3,184.5 Q94.2,185.4 13.1,184.5 Q6.1,184.5 6.1,177.5 Q6.2,126.5 6.1,75.6 Q6.1,68.6 13.1,68.6'/>
-        <text class='yr' x='94.2' y='77.0'>2014</text>
-        <text class='stage' x='94.2' y='91.0'>a fix for a bottleneck</text>
-        <text class='body' x='94.2' y='109.0'>Bahdanau et al. let a</text>
-        <text class='body' x='94.2' y='123.5'>translator look back at</text>
-        <text class='body' x='94.2' y='138.0'>every source word instead</text>
-        <text class='body' x='94.2' y='152.5'>of squeezing the sentence</text>
-        <text class='body' x='94.2' y='167.0'>into one vector.</text>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='108.0'/>
+        <path class='stem' d='M99.7,107.9 Q99.6,130.7 99.3,153.6'/>
+        <circle class='dot' cx='99.5' cy='154.0' r='5'/>
+        <path class='box' d='M23.5,-0.5 Q193.0,0.1 362.6,-0.5 Q371.6,-0.5 371.6,8.5 Q371.4,53.8 371.6,99.1 Q371.6,108.1 362.6,108.1 Q193.0,108.6 23.5,108.1 Q14.5,108.1 14.5,99.1 Q14.2,53.8 14.5,8.5 Q14.5,-0.5 23.5,-0.5'/>
+        <path class='box' d='M23.6,0.8 Q192.8,1.6 362.1,0.8 Q371.1,0.8 371.1,9.8 Q371.3,54.1 371.1,98.3 Q371.1,107.3 362.1,107.3 Q192.8,106.6 23.6,107.3 Q14.6,107.3 14.6,98.3 Q13.9,54.1 14.6,9.8 Q14.6,0.8 23.6,0.8'/>
+        <text class='yr' x='29.0' y='19.0'>2014</text>
+        <text class='stage' x='29.0' y='37.0'>a fix for a bottleneck</text>
+        <circle class='bul' cx='33.0' cy='52.0' r='2'/>
+        <text class='body' x='42.0' y='56.0'>one fixed vector could not hold a long sentence</text>
+        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
+        <text class='body' x='42.0' y='71.5'>let the decoder look back at every source word</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='196.5' y='42.0' width='176.5' height='140.0'/>
-        <circle class='dot' cx='284.8' cy='52.0' r='4.5'/>
-        <path class='box' d='M202.8,68.6 Q284.5,68.0 366.2,68.6 Q373.2,68.6 373.2,75.6 Q374.1,126.0 373.2,176.4 Q373.2,183.4 366.2,183.4 Q284.5,182.9 202.8,183.4 Q195.8,183.4 195.8,176.4 Q194.9,126.0 195.8,75.6 Q195.8,68.6 202.8,68.6'/>
-        <path class='box' d='M203.9,68.8 Q284.7,69.2 365.5,68.8 Q372.5,68.8 372.5,75.8 Q373.0,126.6 372.5,177.4 Q372.5,184.4 365.5,184.4 Q284.7,184.4 203.9,184.4 Q196.9,184.4 196.9,177.4 Q196.1,126.6 196.9,75.8 Q196.9,68.8 203.9,68.8'/>
-        <text class='yr' x='284.8' y='77.0'>2015</text>
-        <text class='stage' x='284.8' y='91.0'>the score gets simpler</text>
-        <text class='body' x='284.8' y='109.0'>Luong et al. replace the</text>
-        <text class='body' x='284.8' y='123.5'>small alignment network</text>
-        <text class='body' x='284.8' y='138.0'>with a plain dot product.</text>
-        <text class='body' x='284.8' y='152.5'>Cheaper, and the form still</text>
-        <text class='body' x='284.8' y='167.0'>used today.</text>
+        <rect class='hit' x='15.0' y='200.0' width='356.0' height='108.0'/>
+        <path class='stem' d='M287.2,199.6 Q287.0,177.0 285.9,154.3'/>
+        <circle class='dot' cx='286.5' cy='154.0' r='5'/>
+        <path class='box' d='M23.5,200.4 Q192.9,200.4 362.4,200.4 Q371.4,200.4 371.4,209.4 Q370.6,254.4 371.4,299.4 Q371.4,308.4 362.4,308.4 Q192.9,309.4 23.5,308.4 Q14.5,308.4 14.5,299.4 Q13.7,254.4 14.5,209.4 Q14.5,200.4 23.5,200.4'/>
+        <path class='box' d='M24.1,199.8 Q192.8,200.5 361.6,199.8 Q370.6,199.8 370.6,208.8 Q370.1,253.7 370.6,298.7 Q370.6,307.7 361.6,307.7 Q192.8,307.1 24.1,307.7 Q15.1,307.7 15.1,298.7 Q14.4,253.7 15.1,208.8 Q15.1,199.8 24.1,199.8'/>
+        <text class='yr' x='29.0' y='219.0'>2015</text>
+        <text class='stage' x='29.0' y='237.0'>the score gets simpler</text>
+        <circle class='bul' cx='33.0' cy='252.0' r='2'/>
+        <text class='body' x='42.0' y='256.0'>replace the alignment network with a dot product</text>
+        <circle class='bul' cx='33.0' cy='267.5' r='2'/>
+        <text class='body' x='42.0' y='271.5'>cheaper, and the form still used today</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='387.0' y='42.0' width='176.5' height='140.0'/>
-        <circle class='dot' cx='475.2' cy='52.0' r='4.5'/>
-        <path class='box' d='M394.8,67.3 Q475.7,66.9 556.6,67.3 Q563.6,67.3 563.6,74.3 Q563.2,125.6 563.6,176.8 Q563.6,183.8 556.6,183.8 Q475.7,184.5 394.8,183.8 Q387.8,183.8 387.8,176.8 Q387.3,125.6 387.8,74.3 Q387.8,67.3 394.8,67.3'/>
-        <path class='box' d='M393.5,67.4 Q474.8,68.0 556.1,67.4 Q563.1,67.4 563.1,74.4 Q562.3,125.6 563.1,176.7 Q563.1,183.7 556.1,183.7 Q474.8,182.7 393.5,183.7 Q386.5,183.7 386.5,176.7 Q385.9,125.6 386.5,74.4 Q386.5,67.4 393.5,67.4'/>
-        <text class='yr' x='475.2' y='77.0'>2017</text>
-        <text class='stage' x='475.2' y='91.0'>drop the recurrence</text>
-        <text class='body' x='475.2' y='109.0'>Vaswani et al. keep only</text>
-        <text class='body' x='475.2' y='123.5'>attention, pointed at the</text>
-        <text class='body' x='475.2' y='138.0'>sequence itself. Multiple</text>
-        <text class='body' x='475.2' y='152.5'>heads, and the division by</text>
-        <text class='body' x='475.2' y='167.0'>the square root of the</text>
-        <text class='body' x='475.2' y='181.5'>width.</text>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='108.0'/>
+        <path class='stem' d='M473.2,107.8 Q474.1,130.6 473.9,153.5'/>
+        <circle class='dot' cx='473.5' cy='154.0' r='5'/>
+        <path class='box' d='M397.4,-0.7 Q566.9,-0.3 736.4,-0.7 Q745.4,-0.7 745.4,8.3 Q744.4,54.0 745.4,99.7 Q745.4,108.7 736.4,108.7 Q566.9,108.4 397.4,108.7 Q388.4,108.7 388.4,99.7 Q389.0,54.0 388.4,8.3 Q388.4,-0.7 397.4,-0.7'/>
+        <path class='box' d='M397.6,0.8 Q566.7,-0.1 735.8,0.8 Q744.8,0.8 744.8,9.8 Q745.1,54.4 744.8,99.1 Q744.8,108.1 735.8,108.1 Q566.7,107.6 397.6,108.1 Q388.6,108.1 388.6,99.1 Q389.1,54.4 388.6,9.8 Q388.6,0.8 397.6,0.8'/>
+        <text class='yr' x='403.0' y='19.0'>2017</text>
+        <text class='stage' x='403.0' y='37.0'>drop the recurrence</text>
+        <circle class='bul' cx='407.0' cy='52.0' r='2'/>
+        <text class='body' x='416.0' y='56.0'>keep only attention, pointed at the sequence</text>
+        <text class='body' x='416.0' y='71.5'>itself</text>
+        <circle class='bul' cx='407.0' cy='83.0' r='2'/>
+        <text class='body' x='416.0' y='87.0'>multiple heads, and the square-root scaling</text>
+        <circle class='bul' cx='407.0' cy='98.5' r='2'/>
+        <text class='body' x='416.0' y='102.5'>all positions at once, so training parallelizes</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='577.5' y='42.0' width='176.5' height='140.0'/>
-        <circle class='dot' cx='665.8' cy='52.0' r='4.5'/>
-        <path class='box' d='M583.8,68.4 Q665.8,67.4 747.7,68.4 Q754.7,68.4 754.7,75.4 Q754.4,126.3 754.7,177.3 Q754.7,184.3 747.7,184.3 Q665.8,184.9 583.8,184.3 Q576.8,184.3 576.8,177.3 Q576.3,126.3 576.8,75.4 Q576.8,68.4 583.8,68.4'/>
-        <path class='box' d='M585.3,67.8 Q666.2,68.1 747.1,67.8 Q754.1,67.8 754.1,74.8 Q753.6,125.5 754.1,176.2 Q754.1,183.2 747.1,183.2 Q666.2,183.8 585.3,183.2 Q578.3,183.2 578.3,176.2 Q578.9,125.5 578.3,74.8 Q578.3,67.8 585.3,67.8'/>
-        <text class='yr' x='665.8' y='77.0'>2018-</text>
-        <text class='stage' x='665.8' y='91.0'>everything is a transformer</text>
-        <text class='body' x='665.8' y='109.0'>BERT and GPT build on it.</text>
-        <text class='body' x='665.8' y='123.5'>By the 2020s, hybrids swap</text>
-        <text class='body' x='665.8' y='138.0'>some attention layers out</text>
-        <text class='body' x='665.8' y='152.5'>again to shrink what it</text>
-        <text class='body' x='665.8' y='167.0'>must store.</text>
+        <rect class='hit' x='389.0' y='200.0' width='356.0' height='108.0'/>
+        <path class='stem' d='M661.0,200.2 Q660.6,176.9 660.5,153.6'/>
+        <circle class='dot' cx='660.5' cy='154.0' r='5'/>
+        <path class='box' d='M398.3,199.9 Q567.2,200.5 736.0,199.9 Q745.0,199.9 745.0,208.9 Q745.7,254.2 745.0,299.6 Q745.0,308.6 736.0,308.6 Q567.2,307.9 398.3,308.6 Q389.3,308.6 389.3,299.6 Q389.8,254.2 389.3,208.9 Q389.3,199.9 398.3,199.9'/>
+        <path class='box' d='M398.2,199.8 Q567.3,199.9 736.4,199.8 Q745.4,199.8 745.4,208.8 Q745.4,253.8 745.4,298.7 Q745.4,307.7 736.4,307.7 Q567.3,307.6 398.2,307.7 Q389.2,307.7 389.2,298.7 Q388.5,253.8 389.2,208.8 Q389.2,199.8 398.2,199.8'/>
+        <text class='yr' x='403.0' y='219.0'>2018-</text>
+        <text class='stage' x='403.0' y='237.0'>everything is a transformer</text>
+        <circle class='bul' cx='407.0' cy='252.0' r='2'/>
+        <text class='body' x='416.0' y='256.0'>BERT and GPT build on it</text>
+        <circle class='bul' cx='407.0' cy='267.5' r='2'/>
+        <text class='body' x='416.0' y='271.5'>by the 2020s hybrids swap some attention back out</text>
       </g>
     </svg>
 </div>
@@ -320,7 +322,7 @@ weighted average. The $\sqrt{d}$ in the denominator is the one thing I have not
 explained, and section 4 is entirely about it.
 
 <div class='knob'>
-    <svg viewBox='0 0 720 300' id='qkv-svg' role='img'
+    <svg viewBox='0 0 720 258' id='qkv-svg' role='img'
          aria-label='An interactive sentence. Choosing one word as the query shows the dot product it forms with every other word, and the attention weights that come out of the softmax.'>
         <g id='qkv-scene'></g>
     </svg>
@@ -364,7 +366,7 @@ explained, and section 4 is entirely about it.
            [0.0, 0.1, 0.6, 0.1], [0.4, 0.3, 0.2, 0.1], [0.2, 0.1, 0.1, 0.3],
            [0.2, 0.1, 0.0, 0.1], [0.3, 0.3, 0.1, 0.2], [0.1, 0.2, 0.2, 0.4],
            [0.95, 0.85, -0.1, 0.15]];
-  var N = W.length, X0 = 30, CW = 66;
+  var N = W.length, X0 = 26, CW = 67, TOP = 40, BASE = 88, MAXH = 110;
 
   function draw() {
     var qi = +qR.value, sharp = +tR.value / 100, s = '', i, j;
@@ -378,29 +380,32 @@ explained, and section 4 is entirely about it.
     for (i = 0; i < N; i++) { p.push(Math.exp(scores[i] - m)); sum += p[i]; }
     for (i = 0; i < N; i++) { p[i] /= sum; }
 
-    s += "<text class='gl' x='" + X0 + "' y='22'>the sentence, one column per word</text>";
+    s += "<text class='gl' x='" + X0 + "' y='22'>the sentence, one word per column</text>";
     for (i = 0; i < N; i++) {
       var x = X0 + i * CW, isq = i === qi;
-      s += "<rect class='cell " + (isq ? 'fresh' : 'kept') + "' x='" + x + "' y='32' width='" +
-           (CW - 8) + "' height='24' rx='3'/>";
-      s += "<text class='tk' x='" + (x + (CW - 8) / 2) + "' y='48' text-anchor='middle'>" +
-           W[i] + "</text>";
-      // key vector, drawn small
+      s += "<rect class='cell " + (isq ? 'fresh' : 'kept') + "' x='" + x + "' y='" + TOP +
+           "' width='" + (CW - 7) + "' height='26' rx='3'/>";
+      s += "<text class='tk' text-anchor='middle' x='" + (x + (CW - 7) / 2) + "' y='" +
+           (TOP + 18) + "'>" + W[i] + "</text>";
+      // The weight hangs down from a fixed line, so short bars leave no void.
+      var bh = p[i] * MAXH;
+      s += "<rect x='" + (x + 7) + "' y='" + BASE + "' width='" + (CW - 21) +
+           "' height='" + bh.toFixed(1) + "' rx='2' fill='#8C77BC' fill-opacity='0.85'/>";
+      s += "<text class='wnum' text-anchor='middle' x='" + (x + (CW - 7) / 2) + "' y='" +
+           (BASE + bh + 13).toFixed(1) + "'>" + (p[i] * 100).toFixed(0) + "%</text>";
+      // key vector, four small bars about a midline
       for (j = 0; j < 4; j++) {
-        var v = K[i][j], h = Math.abs(v) * 22;
-        s += "<rect x='" + (x + 4 + j * 12) + "' y='" + (250 - (v > 0 ? h : 0)).toFixed(1) +
+        var v = K[i][j], h = Math.abs(v) * 20;
+        s += "<rect x='" + (x + 8 + j * 12) + "' y='" + (232 - (v > 0 ? h : 0)).toFixed(1) +
              "' width='9' height='" + h.toFixed(1) + "' rx='1' fill='#3E6491' fill-opacity='0.6'/>";
       }
-      // weight bar
-      var bh = p[i] * 150;
-      s += "<rect x='" + (x + 6) + "' y='" + (232 - bh).toFixed(1) + "' width='" + (CW - 20) +
-           "' height='" + bh.toFixed(1) + "' rx='2' fill='#8C77BC' fill-opacity='0.85'/>";
-      s += "<text class='wnum' x='" + (x + (CW - 8) / 2) + "' y='" + (226 - bh).toFixed(1) +
-           "' text-anchor='middle'>" + (p[i] * 100).toFixed(0) + "%</text>";
     }
-    s += "<line class='sep' x1='" + X0 + "' y1='250' x2='" + (X0 + N * CW - 8) + "' y2='250'/>";
-    s += "<text class='gl' x='" + X0 + "' y='268'>each word's key vector, four numbers</text>";
-    s += "<text class='gl' x='" + X0 + "' y='72'>attention weight from &#8220;" + W[qi] + "&#8221;</text>";
+    s += "<line class='sep' x1='" + X0 + "' y1='" + BASE + "' x2='" + (X0 + N * CW - 7) +
+         "' y2='" + BASE + "'/>";
+    s += "<line class='sep' x1='" + X0 + "' y1='232' x2='" + (X0 + N * CW - 7) + "' y2='232'/>";
+    s += "<text class='gl' x='" + X0 + "' y='250'>each word's key vector, four numbers</text>";
+    s += "<text class='gl' x='" + X0 + "' y='" + (BASE - 8) + "'>attention weight from &#8220;" +
+         W[qi] + "&#8221;, hanging down</text>";
     scene.innerHTML = s;
     qOut.textContent = '“' + W[qi] + '”';
     tOut.textContent = '×' + sharp.toFixed(2) + ' on the scores';
@@ -438,7 +443,7 @@ the output of one layer is the input to the next. Llama 3 70B has 80 layers of
 it.
 
 <div class='knob'>
-    <svg viewBox='0 0 720 200' id='hd-svg' role='img'
+    <svg viewBox='0 0 720 186' id='hd-svg' role='img'
          aria-label='A bar representing the full width of a model vector, divided into a chosen number of heads. The total width and the total parameter count stay the same however many heads there are.'>
         <g id='hd-scene'></g>
     </svg>
@@ -470,7 +475,7 @@ it.
       nOut = document.getElementById('hd-n-out'), dOut = document.getElementById('hd-d-out'),
       note = document.getElementById('hd-note');
   var HEADS = [1, 2, 4, 8, 16, 32, 64], DS = [1024, 4096, 8192, 16384];
-  var X0 = 30, X1 = 690, Y = 60, H = 40;
+  var X0 = 30, X1 = 690, Y = 56, H = 40;
   var COLS = ['#8C77BC', '#3E6491', '#C48BAC', '#6E8C66', '#B07E55', '#22253E'];
 
   function draw() {
@@ -485,21 +490,21 @@ it.
              "' text-anchor='middle' fill='#FFFFFF'>" + dh + "</text>";
       }
     }
-    s += "<text class='gl' x='" + X0 + "' y='" + (Y - 10) + "'>one token's vector, " + d +
+    s += "<text class='gl' x='" + X0 + "' y='" + (Y - 12) + "'>one token's vector, " + d +
          " numbers wide, split into " + n + " head" + (n === 1 ? '' : 's') + "</text>";
-    s += "<line class='sep' x1='" + X0 + "' y1='" + (Y + H + 14) + "' x2='" + X1 +
-         "' y2='" + (Y + H + 14) + "'/>";
+    s += "<line class='sep' x1='" + X0 + "' y1='" + (Y + H + 12) + "' x2='" + X1 +
+         "' y2='" + (Y + H + 12) + "'/>";
     // Parameters in the four projection matrices, which do not depend on n.
     var params = 4 * d * d;
-    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + 44) +
+    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + H + 30) +
          "'>each head is " + dh + " numbers wide</text>";
-    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + 66) +
+    s += "<text class='axlabel' x='" + X0 + "' y='" + (Y + H + 54) +
          "'>parameters in this layer's four projection matrices: " +
          (params / 1e6).toFixed(1) + "M</text>";
     var bw = (X1 - X0) * 0.55;
-    s += "<rect x='" + X0 + "' y='" + (Y + 76) + "' width='" + bw.toFixed(1) +
-         "' height='16' rx='3' fill='#8C77BC' fill-opacity='0.5'/>";
-    s += "<text class='wnum' x='" + (X0 + bw + 8).toFixed(1) + "' y='" + (Y + 89) +
+    s += "<rect x='" + X0 + "' y='" + (Y + H + 62) + "' width='" + bw.toFixed(1) +
+         "' height='18' rx='3' fill='#8C77BC' fill-opacity='0.5'/>";
+    s += "<text class='wnum' x='" + (X0 + bw + 10).toFixed(1) + "' y='" + (Y + H + 76) +
          "'>unchanged by the head count</text>";
     scene.innerHTML = s;
     nOut.textContent = n + ' head' + (n === 1 ? '' : 's');
@@ -523,7 +528,7 @@ it was a good idea is what those weights turn out to be, once a model has been
 trained. Bahdanau and colleagues drew them, and I think this is still the most
 persuasive picture in the subject.
 
-<div class='figure'>
+<div class='figure narrow'>
     <img src='/images/attention-alignment.png'
          alt='A grid with English words across the top and their French translation down the side.
               Dark cells mark high attention weight. A strong diagonal runs through it, and the

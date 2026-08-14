@@ -179,8 +179,8 @@ def fig_where():
     for i, (lab, y) in enumerate([('query', 40), ('key', 96), ('value', 152)]):
         b += rough_line(62, 104, 96, y + 14, p, 'sk-thin')
         b += box(96, y, 74, 28, lab, p, 'sk-s2' if i else 'sk-s3')
-    b += text(133, 190, 'used once,', cls='sk-note')
-    b += text(133, 205, 'then thrown away', cls='sk-note')
+    b += text(133, 208, 'used once,', cls='sk-note')
+    b += text(133, 223, 'then thrown away', cls='sk-note')
     b += rough_arrow(170, 110, 236, 110, p, 'sk-thin', head=6)
     b += rough_arrow(170, 166, 236, 166, p, 'sk-thin', head=6)
     b += box(236, 84, 168, 52, 'key cache', p, 'sk-s', sub='one row per token')
@@ -191,9 +191,9 @@ def fig_where():
     b += box(470, 42, 96, 40, 'attention', p, 'sk-mark')
     b += rough_arrow(566, 62, 626, 62, p, 'sk-thin', head=6)
     b += text(660, 67, 'out', cls='sk-lbl')
-    b += text(320, 214, 'kept for the whole conversation, and read in full at every step',
-              cls='sk-note')
-    return svg(720, 230, b,
+    b += text(480, 216, 'kept for the whole conversation,', cls='sk-note')
+    b += text(480, 231, 'and read in full at every step', cls='sk-note')
+    return svg(720, 242, b,
                'One attention layer as a new token arrives. It is projected '
                'into a query, a key and a value. The key and value are '
                'appended to two growing stores; the query is used once and '

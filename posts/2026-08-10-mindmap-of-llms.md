@@ -17,73 +17,78 @@ it. This post walks that chain, with the map's own structure as the outline.
 The whole of it fits on one line:
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 122' role='img' aria-label='Roadmap: counts, then vectors, then memory, then context, then all at once. Each step is forced by a failure in the one before it.'>
-      <path class='spine' d='M75.2,40.5 Q380.1,40.2 685.0,39.5'/>
-      <path class='head' d='M140.3,39.4 Q151.3,39.3 162.3,40.1'/>
-      <path class='head' d='M141.0,40.1 Q152.0,40.4 163.0,39.7'/>
-      <path class='head' d='M162.4,40.6 Q160.0,42.0 157.9,43.8'/>
-      <path class='head' d='M162.2,40.6 Q160.1,38.9 158.0,37.3'/>
-      <text class='why' x='151.4' y='27.0'>no similarity</text>
-      <path class='head' d='M293.2,40.1 Q304.2,39.8 315.1,40.3'/>
-      <path class='head' d='M292.8,40.0 Q303.5,39.8 314.2,39.9'/>
-      <path class='head' d='M314.9,40.0 Q312.0,41.5 309.2,43.1'/>
-      <path class='head' d='M314.6,40.7 Q312.5,38.6 310.3,36.5'/>
-      <text class='why' x='303.8' y='27.0'>no order</text>
-      <path class='head' d='M445.3,39.6 Q456.3,39.6 467.3,39.9'/>
-      <path class='head' d='M444.9,39.5 Q456.3,39.9 467.8,40.4'/>
-      <path class='head' d='M467.5,39.7 Q465.3,41.4 462.7,42.4'/>
-      <path class='head' d='M466.5,40.2 Q464.6,38.2 462.6,36.3'/>
-      <text class='why' x='456.2' y='27.0'>embeddings still static</text>
-      <path class='head' d='M597.3,40.3 Q608.4,39.7 619.5,39.8'/>
-      <path class='head' d='M597.2,40.6 Q608.1,40.8 619.0,40.4'/>
-      <path class='head' d='M619.4,39.8 Q616.7,41.6 614.2,43.7'/>
-      <path class='head' d='M620.0,40.2 Q617.1,38.8 614.2,37.3'/>
-      <text class='why' x='608.6' y='27.0'>sequential</text>
+    <svg viewBox='0 0 760 277' role='img' aria-label='Roadmap of language modelling: counting in the 1990s, embeddings in 2013, recurrence, and attention from 2017.'>
+      <path class='spine' d='M99.4,139.1 Q380.1,139.8 660.9,138.8'/>
+      <path class='head' d='M180.6,139.1 Q193.3,138.7 206.1,139.2'/>
+      <path class='head' d='M179.3,138.8 Q192.8,138.2 206.3,138.0'/>
+      <path class='head' d='M205.4,138.4 Q202.9,140.3 200.3,142.1'/>
+      <path class='head' d='M206.3,139.0 Q203.8,137.0 201.4,134.9'/>
+      <text class='why' x='193.0' y='127.5'>the counts ran out of data</text>
+      <path class='head' d='M366.8,137.9 Q380.2,138.2 393.5,138.8'/>
+      <path class='head' d='M366.8,138.9 Q379.9,138.1 393.0,137.9'/>
+      <path class='head' d='M393.6,139.0 Q390.7,140.2 388.1,142.0'/>
+      <path class='head' d='M393.3,138.3 Q390.4,137.1 387.5,136.0'/>
+      <text class='why' x='380.0' y='127.5'>a word needs its context</text>
+      <path class='head' d='M554.3,138.0 Q567.3,138.2 580.4,138.4'/>
+      <path class='head' d='M554.7,138.0 Q567.6,138.0 580.5,138.1'/>
+      <path class='head' d='M580.6,138.5 Q578.0,140.1 575.1,141.0'/>
+      <path class='head' d='M580.3,137.8 Q577.8,136.6 575.5,135.1'/>
+      <text class='why' x='567.0' y='114.5'>recurrence could not be</text>
+      <text class='why' x='567.0' y='127.5'>parallelized</text>
       <g class='stop'>
-        <rect class='hit' x='6.0' y='30.0' width='138.4' height='82.0'/>
-        <circle class='dot' cx='75.2' cy='40.0' r='4.5'/>
-        <path class='box' d='M12.6,55.3 Q74.9,55.9 137.2,55.3 Q144.2,55.3 144.2,62.3 Q144.3,84.6 144.2,106.9 Q144.2,113.9 137.2,113.9 Q74.9,114.6 12.6,113.9 Q5.6,113.9 5.6,106.9 Q6.2,84.6 5.6,62.3 Q5.6,55.3 12.6,55.3'/>
-        <path class='box' d='M13.5,56.4 Q75.0,56.7 136.6,56.4 Q143.6,56.4 143.6,63.4 Q143.5,85.6 143.6,107.7 Q143.6,114.7 136.6,114.7 Q75.0,114.2 13.5,114.7 Q6.5,114.7 6.5,107.7 Q6.7,85.6 6.5,63.4 Q6.5,56.4 13.5,56.4'/>
-        <text class='yr' x='75.2' y='65.0'>§1</text>
-        <text class='stage' x='75.2' y='79.0'>counts</text>
-        <text class='body' x='75.2' y='97.0'>n-gram, NNLM 2003</text>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='92.5'/>
+        <path class='stem' d='M99.7,92.9 Q99.2,115.9 99.7,138.9'/>
+        <circle class='dot' cx='99.5' cy='138.5' r='5'/>
+        <path class='box' d='M24.2,0.2 Q193.0,0.7 361.9,0.2 Q370.9,0.2 370.9,9.2 Q371.6,46.2 370.9,83.1 Q370.9,92.1 361.9,92.1 Q193.0,91.3 24.2,92.1 Q15.2,92.1 15.2,83.1 Q15.9,46.2 15.2,9.2 Q15.2,0.2 24.2,0.2'/>
+        <path class='box' d='M24.8,0.0 Q193.5,-0.8 362.2,0.0 Q371.2,0.0 371.2,9.0 Q371.6,45.9 371.2,82.8 Q371.2,91.8 362.2,91.8 Q193.5,91.5 24.8,91.8 Q15.8,91.8 15.8,82.8 Q15.7,45.9 15.8,9.0 Q15.8,0.0 24.8,0.0'/>
+        <text class='yr' x='29.0' y='19.0'>1990s</text>
+        <text class='stage' x='29.0' y='37.0'>count the n-grams</text>
+        <circle class='bul' cx='33.0' cy='52.0' r='2'/>
+        <text class='body' x='42.0' y='56.0'>estimate the next word from how often it followed</text>
+        <circle class='bul' cx='33.0' cy='67.5' r='2'/>
+        <text class='body' x='42.0' y='71.5'>the table outgrows any corpus</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='158.4' y='30.0' width='138.4' height='82.0'/>
-        <circle class='dot' cx='227.6' cy='40.0' r='4.5'/>
-        <path class='box' d='M164.9,55.8 Q227.1,55.4 289.3,55.8 Q296.3,55.8 296.3,62.8 Q297.2,84.6 296.3,106.4 Q296.3,113.4 289.3,113.4 Q227.1,113.6 164.9,113.4 Q157.9,113.4 157.9,106.4 Q158.7,84.6 157.9,62.8 Q157.9,55.8 164.9,55.8'/>
-        <path class='box' d='M164.8,56.8 Q227.0,56.8 289.3,56.8 Q296.3,56.8 296.3,63.8 Q297.0,85.8 296.3,107.9 Q296.3,114.9 289.3,114.9 Q227.0,114.7 164.8,114.9 Q157.8,114.9 157.8,107.9 Q157.6,85.8 157.8,63.8 Q157.8,56.8 164.8,56.8'/>
-        <text class='yr' x='227.6' y='65.0'>§2</text>
-        <text class='stage' x='227.6' y='79.0'>vectors</text>
-        <text class='body' x='227.6' y='97.0'>Word2Vec 2013, GloVe</text>
-        <text class='body' x='227.6' y='111.5'>2014</text>
+        <rect class='hit' x='15.0' y='184.5' width='356.0' height='92.5'/>
+        <path class='stem' d='M285.9,184.1 Q285.4,161.0 285.8,137.8'/>
+        <circle class='dot' cx='286.5' cy='138.5' r='5'/>
+        <path class='box' d='M24.1,185.3 Q193.0,185.4 362.0,185.3 Q371.0,185.3 371.0,194.3 Q370.4,231.3 371.0,268.3 Q371.0,277.3 362.0,277.3 Q193.0,277.7 24.1,277.3 Q15.1,277.3 15.1,268.3 Q16.0,231.3 15.1,194.3 Q15.1,185.3 24.1,185.3'/>
+        <path class='box' d='M24.1,183.7 Q193.2,182.7 362.2,183.7 Q371.2,183.7 371.2,192.7 Q370.8,230.5 371.2,268.4 Q371.2,277.4 362.2,277.4 Q193.2,278.0 24.1,277.4 Q15.1,277.4 15.1,268.4 Q15.9,230.5 15.1,192.7 Q15.1,183.7 24.1,183.7'/>
+        <text class='yr' x='29.0' y='203.5'>2013</text>
+        <text class='stage' x='29.0' y='221.5'>learn the words</text>
+        <circle class='bul' cx='33.0' cy='236.5' r='2'/>
+        <text class='body' x='42.0' y='240.5'>word2vec puts words in a vector space</text>
+        <circle class='bul' cx='33.0' cy='252.0' r='2'/>
+        <text class='body' x='42.0' y='256.0'>similar words land near each other</text>
+        <circle class='bul' cx='33.0' cy='267.5' r='2'/>
+        <text class='body' x='42.0' y='271.5'>one vector per word, whatever the sentence</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='310.8' y='30.0' width='138.4' height='82.0'/>
-        <circle class='dot' cx='380.0' cy='40.0' r='4.5'/>
-        <path class='box' d='M318.4,56.8 Q380.7,57.5 443.0,56.8 Q450.0,56.8 450.0,63.8 Q450.6,85.7 450.0,107.6 Q450.0,114.6 443.0,114.6 Q380.7,115.2 318.4,114.6 Q311.4,114.6 311.4,107.6 Q311.6,85.7 311.4,63.8 Q311.4,56.8 318.4,56.8'/>
-        <path class='box' d='M318.4,56.6 Q380.2,55.7 441.9,56.6 Q448.9,56.6 448.9,63.6 Q449.6,85.3 448.9,106.9 Q448.9,113.9 441.9,113.9 Q380.2,113.9 318.4,113.9 Q311.4,113.9 311.4,106.9 Q311.9,85.3 311.4,63.6 Q311.4,56.6 318.4,56.6'/>
-        <text class='yr' x='380.0' y='65.0'>§3</text>
-        <text class='stage' x='380.0' y='79.0'>memory</text>
-        <text class='body' x='380.0' y='97.0'>RNN 1990, LSTM 1997</text>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='92.5'/>
+        <path class='stem' d='M474.1,93.0 Q473.8,115.8 473.1,138.6'/>
+        <circle class='dot' cx='473.5' cy='138.5' r='5'/>
+        <path class='box' d='M397.6,-0.4 Q566.7,0.3 735.8,-0.4 Q744.8,-0.4 744.8,8.6 Q744.4,46.2 744.8,83.9 Q744.8,92.9 735.8,92.9 Q566.7,93.6 397.6,92.9 Q388.6,92.9 388.6,83.9 Q389.0,46.2 388.6,8.6 Q388.6,-0.4 397.6,-0.4'/>
+        <path class='box' d='M397.6,0.9 Q566.9,0.1 736.1,0.9 Q745.1,0.9 745.1,9.9 Q745.4,46.7 745.1,83.6 Q745.1,92.6 736.1,92.6 Q566.9,92.7 397.6,92.6 Q388.6,92.6 388.6,83.6 Q388.4,46.7 388.6,9.9 Q388.6,0.9 397.6,0.9'/>
+        <text class='yr' x='403.0' y='19.0'>2014-16</text>
+        <text class='stage' x='403.0' y='37.0'>read in order</text>
+        <circle class='bul' cx='407.0' cy='52.0' r='2'/>
+        <text class='body' x='416.0' y='56.0'>recurrent networks carry a state along the</text>
+        <text class='body' x='416.0' y='71.5'>sentence</text>
+        <circle class='bul' cx='407.0' cy='83.0' r='2'/>
+        <text class='body' x='416.0' y='87.0'>context at last, but strictly sequential</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='463.2' y='30.0' width='138.4' height='82.0'/>
-        <circle class='dot' cx='532.4' cy='40.0' r='4.5'/>
-        <path class='box' d='M470.9,55.5 Q532.5,54.7 594.1,55.5 Q601.1,55.5 601.1,62.5 Q600.2,84.8 601.1,107.0 Q601.1,114.0 594.1,114.0 Q532.5,114.5 470.9,114.0 Q463.9,114.0 463.9,107.0 Q463.0,84.8 463.9,62.5 Q463.9,55.5 470.9,55.5'/>
-        <path class='box' d='M470.3,56.1 Q532.0,56.3 593.7,56.1 Q600.7,56.1 600.7,63.1 Q600.7,85.2 600.7,107.2 Q600.7,114.2 593.7,114.2 Q532.0,114.1 470.3,114.2 Q463.3,114.2 463.3,107.2 Q463.7,85.2 463.3,63.1 Q463.3,56.1 470.3,56.1'/>
-        <text class='yr' x='532.4' y='65.0'>§4</text>
-        <text class='stage' x='532.4' y='79.0'>context</text>
-        <text class='body' x='532.4' y='97.0'>ELMo 2018</text>
-      </g>
-      <g class='stop'>
-        <rect class='hit' x='615.6' y='30.0' width='138.4' height='82.0'/>
-        <circle class='dot' cx='684.8' cy='40.0' r='4.5'/>
-        <path class='box' d='M622.2,56.8 Q684.5,56.1 746.8,56.8 Q753.8,56.8 753.8,63.8 Q754.7,85.6 753.8,107.4 Q753.8,114.4 746.8,114.4 Q684.5,113.6 622.2,114.4 Q615.2,114.4 615.2,107.4 Q615.0,85.6 615.2,63.8 Q615.2,56.8 622.2,56.8'/>
-        <path class='box' d='M621.9,56.1 Q684.2,55.2 746.6,56.1 Q753.6,56.1 753.6,63.1 Q752.9,85.1 753.6,107.1 Q753.6,114.1 746.6,114.1 Q684.2,113.4 621.9,114.1 Q614.9,114.1 614.9,107.1 Q614.1,85.1 614.9,63.1 Q614.9,56.1 621.9,56.1'/>
-        <text class='yr' x='684.8' y='65.0'>§5</text>
-        <text class='stage' x='684.8' y='79.0'>all at once</text>
-        <text class='body' x='684.8' y='97.0'>Transformer 2017</text>
+        <rect class='hit' x='389.0' y='184.5' width='356.0' height='92.5'/>
+        <path class='stem' d='M661.0,184.4 Q660.8,161.4 660.1,138.4'/>
+        <circle class='dot' cx='660.5' cy='138.5' r='5'/>
+        <path class='box' d='M397.3,185.0 Q566.8,185.1 736.3,185.0 Q745.3,185.0 745.3,194.0 Q745.3,231.0 745.3,268.0 Q745.3,277.0 736.3,277.0 Q566.8,276.1 397.3,277.0 Q388.3,277.0 388.3,268.0 Q387.9,231.0 388.3,194.0 Q388.3,185.0 397.3,185.0'/>
+        <path class='box' d='M397.4,184.6 Q566.7,184.7 735.9,184.6 Q744.9,184.6 744.9,193.6 Q744.2,230.5 744.9,267.4 Q744.9,276.4 735.9,276.4 Q566.7,276.9 397.4,276.4 Q388.4,276.4 388.4,267.4 Q388.1,230.5 388.4,193.6 Q388.4,184.6 397.4,184.6'/>
+        <text class='yr' x='403.0' y='203.5'>2017-</text>
+        <text class='stage' x='403.0' y='221.5'>attend to everything</text>
+        <circle class='bul' cx='407.0' cy='236.5' r='2'/>
+        <text class='body' x='416.0' y='240.5'>the Transformer drops recurrence entirely</text>
+        <circle class='bul' cx='407.0' cy='252.0' r='2'/>
+        <text class='body' x='416.0' y='256.0'>all positions at once, so training parallelizes</text>
       </g>
     </svg>
 </div>
