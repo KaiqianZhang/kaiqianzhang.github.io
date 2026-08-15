@@ -197,15 +197,17 @@ about dogs. Every human intuition about language says this is the wrong
 representation.
 
 **NNLM**, Bengio's neural language model, was the first *neural* attempt at
-fixing it — though not the first attempt at all, since latent semantic
-analysis and Brown clustering had been deriving similarity from counts since
-the early 1990s. Its input is **one-hot**, which means a word is represented
-as a list of $V$ numbers that are all zero except for a single 1 in the slot
-belonging to that word. Two things are wrong with that, and they are the whole
-complaint: it loses the meaning of the word, and its dimension is horribly
-large. Any two one-hot vectors
-point in perpendicular directions, so at the input, similarity between words
-is not merely unmeasured. It is unrepresentable.
+fixing it. Not the first attempt at all — latent semantic analysis and Brown
+clustering had been deriving similarity from counts since the early 1990s.
+
+Its input is **one-hot**: a word is a list of $V$ numbers, all zero except a
+single 1 in the slot belonging to that word. Two things are wrong with that,
+and together they are the whole complaint. It loses the meaning of the word,
+and its dimension is horribly large.
+
+Notice what the first of those costs us. Any two one-hot vectors point in
+perpendicular directions, so at the input, similarity between words is not
+merely unmeasured. It is unrepresentable.
 
 And here is the first thing I had wrong, because NNLM *already fixes it*.
 Between
@@ -225,13 +227,14 @@ in 2013 was not the idea but its price.
 what one is, because it is the idea the whole field is built on.
 
 An **embedding** is a list of a few hundred numbers standing for a word, in
-which the numbers themselves are learned rather than assigned. Because they
-are learned from how words are used, words used in similar ways end up with
-similar lists, and "similar" now means something arithmetic: the two lists
-point in nearly the same direction. A word has stopped being a symbol and
-become a *direction* in a space, which is where the section title comes from.
-Once that is true you can ask which words are near which others, and get a
-sensible answer, which a counter could never give you.
+which the numbers themselves are learned rather than assigned.
+
+Because they are learned from how words are used, words used in similar ways
+end up with similar lists — and "similar" now means something arithmetic: the
+two lists point in nearly the same direction. A word has stopped being a
+symbol and become a *direction* in a space, which is where the section title
+comes from. Once that is true we can ask which words lie near which others and
+get a sensible answer, which a counter could never give us.
 
 The insight in Word2Vec is not the embedding but how to get one cheaply — as a
 side effect of something else. Set up a prediction task nobody actually cares
@@ -337,10 +340,13 @@ The original paper draws the same pair as wiring diagrams:
 
 Which of the two you want depends on the corpus. The short version I carry
 around is that **CBOW is quick**, suiting large-scale text like news, while
-**Skip-gram is precise**, suiting low-frequency words. That framing comes from word2vec's documentation rather than either
-paper — the 2013 paper reports a different axis, CBOW better on syntactic
-analogies, Skip-gram on semantic ones, and CBOW about three times faster. The
-mechanism usually offered concerns a word's role as *context*: Skip-gram
+**Skip-gram is precise**, suiting low-frequency words.
+
+That framing comes from word2vec's documentation rather than from either
+paper. The 2013 paper reports a different axis: CBOW better on syntactic
+analogies, Skip-gram on semantic ones, and CBOW about three times faster.
+
+The mechanism usually offered concerns a word's role as *context*. Skip-gram
 factors each window into $2c$ pairs, so a rare context word gets its own
 gradient, while CBOW averages it in with $2c-1$ neighbours and dilutes it.
 
@@ -545,12 +551,14 @@ product is $\prod_t f_t$ — still a product, but of numbers the model
 *chooses* rather than of a fixed matrix's spectrum.
 
 A reprieve, not a cure. The 1997 original is the cleaner case: its constant
-error carousel has a self-weight of exactly 1.0, making the sage line in
-Figure 5 literal. The forget gate put a learnable $f_t \in (0,1)$ back in the
-path, which decays again — just with a base the model can push toward 1, hence
-the standard advice to initialize its bias high. The figures usually quoted —
-a few hundred steps for an LSTM against a few dozen for an RNN — are rules of
-thumb rather than measurements.
+error carousel has a self-weight of exactly 1.0, which makes the sage line in
+Figure 5 literal.
+
+The forget gate then put a learnable $f_t \in (0,1)$ back in the path, so it
+decays again — just with a base the model can push toward 1, hence the
+standard advice to initialize its bias high. The figures usually quoted, a few
+hundred steps for an LSTM against a few dozen for an RNN, are rules of thumb
+rather than measurements.
 
 One more entry belongs here, though its significance only lands in section 5:
 **xLSTM** (2024) revisits all of this with two variants — sLSTM, which puts
@@ -707,15 +715,17 @@ the block it goes
 position gets into a model that has no sense of order
 ([RoPE](/blog/2026/08/11/rope/)).
 
-One last side note belongs here, and it is about normalization — the
-operation that keeps the numbers inside a deep network from running away.
-**BatchNorm** normalizes a feature across the samples in a batch;
-**LayerNorm** normalizes across the features within one sample. The sharper
-half of the argument for preferring the latter is this: the same channel of
-two different images is a comparable quantity, and two different channels of
-one image are not. Sentences make this worse, because they have different lengths
-and arrive in batches of wildly varying shape, which is most of why language
-models normalize within a sample rather than across a batch.
+One last side note belongs here, about normalization — the operation that
+keeps the numbers inside a deep network from running away. **BatchNorm**
+normalizes a feature across the samples in a batch; **LayerNorm** normalizes
+across the features within one sample.
+
+The sharper half of the argument for preferring the latter is this: the same
+channel of two different images is a comparable quantity, and two different
+channels of one image are not. Sentences make it worse still, since they have
+different lengths and arrive in batches of wildly varying shape. That is most
+of why language models normalize within a sample rather than across a
+batch.
 
 ## 6. Counting the Doors Still Open
 
@@ -805,12 +815,14 @@ and the way a modern model still fails on rare sequences is a softer version
 of the same arithmetic. Embeddings are the first and last layers of every
 transformer, and in the largest vocabularies they are a substantial fraction
 of the parameters. The vanishing-gradient analysis in section 3 is exactly the
-analysis behind residual connections and behind where a transformer puts its
-normalizers. And the sequential-versus-parallel argument that killed
-recurrence has come back around: the state-space models — Mamba, and the mLSTM
-of xLSTM — are recurrences that found a way to be parallel in training, which
-is precisely the property the transformer won on. Whether they displace
-attention at scale is genuinely open.
+analysis behind residual connections, and behind where a transformer puts its
+normalizers.
+
+The sequential-versus-parallel argument has come back around too. The
+state-space models — Mamba, and the mLSTM of xLSTM — are recurrences that
+found a way to be parallel in training, which is precisely the property the
+transformer won on. Whether they displace attention at scale is genuinely
+open.
 
 The thing I would take from the shape of the whole chain, though, is that
 every step was a *representation* decision rather than an optimization one.

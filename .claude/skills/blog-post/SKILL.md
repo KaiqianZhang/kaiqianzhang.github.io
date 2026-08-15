@@ -310,11 +310,33 @@ any drop so the sequence has no gaps.
 
 **Writing style.** Write like a person explaining something to another person,
 in a blog, because that is what this is. The reference for register is
-<https://lsl.zone/blog/2026/a-taxonomy-of-self-evolving-agents/>. Follow John
-Storey (<https://jdstorey.org/fas/stat-overview.html>) for structure — motivate
-before formalizing, bold on first use of a defined term, historical narrative
-with explicit temporal transitions — but take the *sentences* from the first
-reference.
+<https://lsl.zone/blog/2026/a-taxonomy-of-self-evolving-agents/>, and the
+*sentences* come from there.
+
+The reference for structure is John Storey, <https://jdstorey.org/fas/>. Read
+a content chapter, not the overview page — the overview has no mathematics in
+it and is not representative. What his prose actually does:
+
+- **Short paragraphs**, very often one or two sentences. Aim for a median
+  around 50 words and treat anything over 90 as a paragraph that wants
+  splitting. The exception is "Chat This Over With Friends", which is
+  deliberately 120–150.
+- **Name the thing, colon, then the display equation.** "The posterior
+  distribution of $\theta \mid X$ is obtained through Bayes theorem:" and the
+  formula follows. He does not circle a definition before giving it.
+- **"We" as the default voice** — "we will assume", "we will write", "even if
+  we don't explicitly write them". It walks the reader alongside rather than
+  performing for them. Keep "I" for the places you are personally on the hook:
+  what you got wrong, what you carry around, what you find satisfying.
+- **Direct imperatives to the reader**: "Note that", "Always remember that".
+- **No hedging.** Almost none. Audit for *perhaps, arguably, somewhat, tends
+  to, might, in some sense* and delete what is not carrying a real
+  qualification.
+
+Two places this blog departs from him deliberately, so do not "fix" them:
+Storey's sections stand alone with no bridging prose, and this blog does bridge
+them, because a post is read in one sitting and a textbook is not. And he
+favours lists where we prefer paragraphs for argument.
 
 Four rules, and they matter more than anything else in this file, because a
 post that is right and unreadable has failed.
