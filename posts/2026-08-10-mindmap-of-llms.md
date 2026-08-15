@@ -7,22 +7,21 @@ icon: 🍵
 length: long
 ---
 
-I keep a mindmap of how language models got to where they are. It starts at
-counting words and ends at a single node reading *Transformer*, and the useful
-thing about having the whole thing on one page is that the arrows between the
-branches turn out to matter more than the branches do.
+For a while now I have kept a mindmap of how language models got to where they
+are. It begins at counting words and ends at a single node reading
+*Transformer*, and what turned out to be useful about having it all on one
+page was not the branches. It was the arrows between them.
 
-That is really the argument of this post. Each idea in the chain is not a new
-invention that happened to arrive; it is an answer to a specific, nameable
-thing the previous idea could not do. If you know what each one could not do,
-the chain becomes almost inevitable, and I think that is a far better thing to
-carry around than a list of names and dates.
+That is the argument of this post. Each idea in the chain is not an invention
+that happened to arrive; it is an answer to a specific, nameable thing the
+previous idea could not do. Learn what each one could not do and the chain
+starts to feel almost inevitable — which is a far better thing to carry around
+than a list of names and dates.
 
-I am going to walk that chain, using my map's own structure as the outline,
-and I will assume you know nothing about any of it. I will also stop
-periodically to correct my own map, because a few of the notes on it turned
-out to be wrong when I went back to the papers. The whole of it fits on one
-line:
+So I have redrawn it as a single line, and I want to walk that line end to end
+with you, assuming you know none of it. I will stop a few times to correct
+myself along the way: going back to the original papers for this post, several
+things I had written down confidently turned out to be wrong.
 
 <div class='roadmap'>
     <svg viewBox='0 0 760 384' role='img' aria-label='Roadmap of language modelling: counting in the 1990s, embeddings in 2013, recurrence, and attention from 2017.'>
@@ -202,12 +201,14 @@ fixing it — though not the first attempt at all, since latent semantic
 analysis and Brown clustering had been deriving similarity from counts since
 the early 1990s. Its input is **one-hot**, which means a word is represented
 as a list of $V$ numbers that are all zero except for a single 1 in the slot
-belonging to that word. My map's note on this node is the whole complaint:
-*lose the word meaning, dimension is horribly large*. Any two one-hot vectors
+belonging to that word. Two things are wrong with that, and they are the whole
+complaint: it loses the meaning of the word, and its dimension is horribly
+large. Any two one-hot vectors
 point in perpendicular directions, so at the input, similarity between words
 is not merely unmeasured. It is unrepresentable.
 
-That is a correction to my own map, because NNLM *already fixes it*. Between
+And here is the first thing I had wrong, because NNLM *already fixes it*.
+Between
 the one-hot input and the hidden layer sits a shared matrix $C$ whose rows are
 word vectors — learning a distributed representation is what Bengio's paper is
 *for*, and the one-hot is an indexing convention, not a theory of meaning. So
@@ -216,8 +217,12 @@ NNLM's came attached to an expensive model, and Word2Vec got them cheap.
 
 ## 2. When a Word Became a Direction
 
-**Word2Vec**'s goal, in my map's words, is to generate word embeddings — and I
-should say what one is, because it is the idea the whole field is built on.
+Bengio had shown that a network could learn word vectors. The problem was that
+his network was expensive, and for a decade almost nobody used it. What changed
+in 2013 was not the idea but its price.
+
+**Word2Vec**'s goal is to generate word embeddings, and I should say plainly
+what one is, because it is the idea the whole field is built on.
 
 An **embedding** is a list of a few hundred numbers standing for a word, in
 which the numbers themselves are learned rather than assigned. Because they
@@ -245,56 +250,59 @@ There are two ways to arrange that task, and they are mirror images.
 <div class='figure-pair w2v-anim'>
     <div class='panels'>
         <div class='panel' style='flex: 1 1 100%'>
-            <svg viewBox='0 0 460 250' role='img'
-                 aria-label='A window slides along the sentence "the cat sat on the warm mat". In the upper row, labelled CBOW, arrows point inward from the four context words to the centre word. In the lower row, labelled Skip-gram, arrows point outward from the centre word to the four context words.'>
-                <g class='cbow'>
-                    <text class='rowlabel' x='6' y='24'>CBOW</text>
-                    <g class='slide' transform='translate(170 0)'>
-                        <rect class='frame' x='-152' y='34' width='304' height='58' rx='9'/>
-                        <rect class='centre' x='-26' y='40' width='52' height='30' rx='6'/>
-                        <g class='arrow'>
-                            <line x1='-134' y1='82' x2='-108' y2='82'/><polygon points='-100,82 -110,77 -110,87'/>
-                            <line x1='-74' y1='82' x2='-48' y2='82'/><polygon points='-40,82 -50,77 -50,87'/>
-                            <line x1='74' y1='82' x2='48' y2='82'/><polygon points='40,82 50,77 50,87'/>
-                            <line x1='134' y1='82' x2='108' y2='82'/><polygon points='100,82 110,77 110,87'/>
-                        </g>
+            <svg viewBox='0 0 460 284' role='img' aria-label='A window slides along the sentence "the cat sat on the warm mat". In the upper row, labelled CBOW, four arcs run inward from the neighbouring words to the centre word. In the lower row, labelled Skip-gram, the same four arcs run outward from the centre word to its neighbours.'>
+                  <g class='cbow'>
+                    <text class='rowlabel' x='6' y='14'>CBOW</text>
+                    <g class='slide'>
+                      <rect class='frame' x='-152' y='26' width='304' height='104' rx='9'/>
+                      <rect class='centre' x='-26' y='34' width='52' height='30' rx='6'/>
+                      <path class='arc' d='M -120.0 72.0 Q -66.5 118.0 -13.0 72.0'/>
+                      <polygon class='head' points='-8.1,67.8 -14.4,78.3 -19.5,72.4'/>
+                      <path class='arc' d='M -60.0 72.0 Q -32.5 102.0 -5.0 72.0'/>
+                      <polygon class='head' points='-0.6,67.2 -5.7,78.5 -11.4,73.2'/>
+                      <path class='arc' d='M 60.0 72.0 Q 32.5 102.0 5.0 72.0'/>
+                      <polygon class='head' points='0.6,67.2 11.4,73.2 5.7,78.5'/>
+                      <path class='arc' d='M 120.0 72.0 Q 66.5 118.0 13.0 72.0'/>
+                      <polygon class='head' points='8.1,67.8 19.5,72.4 14.4,78.3'/>
                     </g>
-                    <text class='word' x='50' y='62'>the</text>
-                    <text class='word' x='110' y='62'>cat</text>
-                    <text class='word' x='170' y='62'>sat</text>
-                    <text class='word' x='230' y='62'>on</text>
-                    <text class='word' x='290' y='62'>the</text>
-                    <text class='word' x='350' y='62'>warm</text>
-                    <text class='word' x='410' y='62'>mat</text>
-                </g>
-                <g class='skip'>
-                    <text class='rowlabel' x='6' y='159'>SKIP-GRAM</text>
-                    <g class='slide' transform='translate(170 0)'>
-                        <rect class='frame' x='-152' y='169' width='304' height='58' rx='9'/>
-                        <rect class='centre' x='-26' y='175' width='52' height='30' rx='6'/>
-                        <g class='arrow'>
-                            <line x1='-108' y1='217' x2='-134' y2='217'/><polygon points='-142,217 -132,212 -132,222'/>
-                            <line x1='-48' y1='217' x2='-74' y2='217'/><polygon points='-82,217 -72,212 -72,222'/>
-                            <line x1='48' y1='217' x2='74' y2='217'/><polygon points='82,217 72,212 72,222'/>
-                            <line x1='108' y1='217' x2='134' y2='217'/><polygon points='142,217 132,212 132,222'/>
-                        </g>
+                    <text class='word' x='50' y='56'>the</text>
+                    <text class='word' x='110' y='56'>cat</text>
+                    <text class='word' x='170' y='56'>sat</text>
+                    <text class='word' x='230' y='56'>on</text>
+                    <text class='word' x='290' y='56'>the</text>
+                    <text class='word' x='350' y='56'>warm</text>
+                    <text class='word' x='410' y='56'>mat</text>
+                  </g>
+                  <g class='skip'>
+                    <text class='rowlabel' x='6' y='154'>SKIP-GRAM</text>
+                    <g class='slide'>
+                      <rect class='frame' x='-152' y='166' width='304' height='104' rx='9'/>
+                      <rect class='centre' x='-26' y='174' width='52' height='30' rx='6'/>
+                      <path class='arc' d='M -13.0 212.0 Q -66.5 258.0 -120.0 212.0'/>
+                      <polygon class='head' points='-124.9,207.8 -113.5,212.4 -118.6,218.3'/>
+                      <path class='arc' d='M -5.0 212.0 Q -32.5 242.0 -60.0 212.0'/>
+                      <polygon class='head' points='-64.4,207.2 -53.6,213.2 -59.3,218.5'/>
+                      <path class='arc' d='M 5.0 212.0 Q 32.5 242.0 60.0 212.0'/>
+                      <polygon class='head' points='64.4,207.2 59.3,218.5 53.6,213.2'/>
+                      <path class='arc' d='M 13.0 212.0 Q 66.5 258.0 120.0 212.0'/>
+                      <polygon class='head' points='124.9,207.8 118.6,218.3 113.5,212.4'/>
                     </g>
-                    <text class='word' x='50' y='197'>the</text>
-                    <text class='word' x='110' y='197'>cat</text>
-                    <text class='word' x='170' y='197'>sat</text>
-                    <text class='word' x='230' y='197'>on</text>
-                    <text class='word' x='290' y='197'>the</text>
-                    <text class='word' x='350' y='197'>warm</text>
-                    <text class='word' x='410' y='197'>mat</text>
-                </g>
-            </svg>
+                    <text class='word' x='50' y='196'>the</text>
+                    <text class='word' x='110' y='196'>cat</text>
+                    <text class='word' x='170' y='196'>sat</text>
+                    <text class='word' x='230' y='196'>on</text>
+                    <text class='word' x='290' y='196'>the</text>
+                    <text class='word' x='350' y='196'>warm</text>
+                    <text class='word' x='410' y='196'>mat</text>
+                  </g>
+                </svg>
             <div class='annot'>
                 <span class='who'>The same window, two directions.</span>
                 <b>CBOW</b> hides the middle word and asks the four
-                neighbours to guess it — a cloze test, in my map's phrasing:
-                given the context, predict the probability of the word in the
-                blank. <b>Skip-gram</b> reverses every arrow: it shows the
-                middle word and asks it to guess each neighbour in turn.
+                neighbours to guess it — a cloze test: given the context,
+                predict the word in the blank. <b>Skip-gram</b> reverses every
+                arrow, showing the middle word and asking it to guess each
+                neighbour in turn.
             </div>
         </div>
     </div>
@@ -327,9 +335,9 @@ The original paper draws the same pair as wiring diagrams:
     </div>
 </div>
 
-Which you want depends on the corpus, and my map is blunt: **CBOW is quick**,
-for large-scale text like news; **Skip-gram is precise**, for low-frequency
-words. That framing comes from word2vec's documentation rather than either
+Which of the two you want depends on the corpus. The short version I carry
+around is that **CBOW is quick**, suiting large-scale text like news, while
+**Skip-gram is precise**, suiting low-frequency words. That framing comes from word2vec's documentation rather than either
 paper — the 2013 paper reports a different axis, CBOW better on syntactic
 analogies, Skip-gram on semantic ones, and CBOW about three times faster. The
 mechanism usually offered concerns a word's role as *context*: Skip-gram
@@ -346,7 +354,7 @@ for every word in the vocabulary and turning those scores into probabilities —
 a **softmax** over the whole vocabulary. That is $O(V)$ work for every single
 training example, and with $V = 50{,}000$ and billions of examples it is not a
 part of the cost of training. It *is* the cost of training. Word2Vec ships two
-ways out, and my map has both.
+ways out of it, and both are still in use.
 
 **Negative sampling** stops trying to be a language model at all. Instead of
 "which of the 50,000 words is it?", ask "is this pair real?" — one true word
@@ -376,7 +384,7 @@ than the plot below shows.
     </div>
 </div>
 
-**GloVe** takes what my map calls the *global view*. Word2Vec learns from one
+**GloVe** takes the opposite view, a global one. Word2Vec learns from one
 window at a time and never sees the corpus whole; GloVe first builds a
 co-occurrence matrix $X \in \mathbb{R}^{V \times V}$ and then fits
 $w_i^\top \tilde{w}_j + b_i + \tilde{b}_j = \log X_{ij}$.
@@ -385,26 +393,28 @@ That form comes from one observation: what carries meaning is not a
 co-occurrence count but a *ratio* of them. $P(k \mid \text{ice}) /
 P(k \mid \text{steam})$ is large for *solid*, small for *gas*, about 1 for
 *water* — the ratio isolates exactly the dimension along which the two words
-differ. The matrix is enormous and, as the map notes, sparse, which is the
+differ. The matrix is enormous and sparse, which is the
 point: only nonzero entries are ever touched.
 
 ## 3. A Matrix Multiplied by Itself
 
-Word vectors have a hard limit, and it is the kind of limit that no amount of
-better training can repair, because it is in the shape of the thing.
+We now have a good answer to "what is a word, numerically": a direction in a
+few hundred dimensions, learned from the company it keeps. The next limit is
+not a matter of training that better. It is in the shape of the thing.
 
 An embedding table is a lookup table. "Bank" has one vector, fixed the moment
 training ends, whether the sentence around it is about money or about a river.
-And the context these models consume is a *bag*: the surrounding words are
+And the context these models consume is a *bag* — the surrounding words are
 averaged together, which throws away their order, so "dog bites man" and "man
 bites dog" arrive as the same input. Two of the most basic facts about
-language — that words mean different things in different sentences, and that
-order matters — are outside what this representation can express.
+language, that words mean different things in different sentences and that
+order matters, are outside what this representation can express.
 
-My map says *DNN and MLP cannot deal with time-series data*, which needs
-narrowing — NNLM is feed-forward and works fine, and so is a transformer. The
-true statement is that a fixed-width network over a *bag* of context can
-represent neither variable-length history nor order.
+It is tempting to blame feed-forward networks for that, and I had it written
+down that way for a long time. Too strong: NNLM is feed-forward and works
+fine, and so, for that matter, is a transformer. The narrower and true
+statement is that a fixed-width network over a *bag* can represent neither
+variable-length history nor order.
 
 **RNN** answers with a loop. Process the sequence one token at a time, and
 carry a hidden state forward:
@@ -503,8 +513,8 @@ the same curve swing between the two failures:
     </script>
 </div>
 
-This is why the map annotates RNN with *short-term dependency (T=50)*. Not a
-hard limit — a practical one.
+This is why RNNs get described as having a short-term memory of roughly fifty
+steps. Not a hard limit — a practical one.
 
 **LSTM** is the architecture that answer required. It carries two states
 rather than one: a hidden state $h_t$ and a **cell state** $c_t$, and it adds
@@ -514,8 +524,8 @@ gates that decide what happens to the cell:
 - the **output gate** — what information to expose
 - the **forget gate** — what information to retain
 
-My map lists three gates, which is the LSTM everyone actually uses, but the
-credit is split: Hochreiter and Schmidhuber's 1997 paper has only the input
+Three gates is the LSTM everyone actually uses, but the credit for them is
+split: Hochreiter and Schmidhuber's 1997 paper has only the input
 and output gates. The forget gate — arguably the most important of the three,
 since without it the cell can only accumulate — arrived in 1999, from Gers,
 Schmidhuber and Cummins, in a paper titled exactly to the point: *Learning to
@@ -538,28 +548,33 @@ A reprieve, not a cure. The 1997 original is the cleaner case: its constant
 error carousel has a self-weight of exactly 1.0, making the sage line in
 Figure 5 literal. The forget gate put a learnable $f_t \in (0,1)$ back in the
 path, which decays again — just with a base the model can push toward 1, hence
-the standard advice to initialize its bias high. My map's *T = 200* against
-*T = 50* are rough marks in my notes, not measurements.
+the standard advice to initialize its bias high. The figures usually quoted —
+a few hundred steps for an LSTM against a few dozen for an RNN — are rules of
+thumb rather than measurements.
 
-One more node from my map, and it matters shortly: **xLSTM** (2024) revisits
-all this with two variants — sLSTM, exponential gating on a scalar memory, and
-mLSTM, which swaps the scalar cell for a matrix and is parallelizable over the
-sequence.
+One more entry belongs here, though its significance only lands in section 5:
+**xLSTM** (2024) revisits all of this with two variants — sLSTM, which puts
+exponential gating on a scalar memory, and mLSTM, which swaps the scalar cell
+for a matrix and, crucially, can be run in parallel across the sequence. Hold
+on to that last property.
 
 ## 4. When Meaning Started to Depend on Neighbours
 
-**ELMo** closes the loop back to section 2. Word2Vec and GloVe give each word
-one vector for all time; ELMo runs a two-layer bidirectional LSTM over the
-whole sentence and takes the vector for a word from *that*. The output is an
-embedding of a word in a sequence, not of a word.
+By now we have both halves of a solution without anyone having put them
+together: section 2 gave us vectors that carry meaning, section 3 a network
+that reads a sentence in order. **ELMo** is what happens when someone combines
+them. Word2Vec and GloVe give each word one vector for all time; ELMo runs a
+two-layer bidirectional LSTM over the whole sentence and takes a word's vector
+from *that*, so the output is an embedding of a word *in a sequence* rather
+than of a word.
 
-Two details my map compresses. The forward and backward LSTMs are
+Two details are worth not compressing. The forward and backward LSTMs are
 **independent**, trained separately and concatenated rather than jointly —
 precisely BERT's later criticism. And the output is a *learned, task-specific
 weighted sum of all layers*: layers encode different things, syntax lower,
 semantics higher.
 
-This is what my map means by fixing the polysemy problem: Word2Vec and GloVe
+This is what fixing the polysemy problem amounts to: Word2Vec and GloVe
 have no way to represent word sense or sentence meaning, and ELMo's "bank"
 differs between the money sentence and the river one because the LSTM read
 the rest of the sentence first.
@@ -568,14 +583,15 @@ ELMo was **feature-based**: its output was concatenated onto whatever
 task-specific embedding you had, and its weights were frozen while the
 downstream model trained. Worth being precise, since this gets flattened into
 "ELMo was never fine-tuned" — the paper *does* fine-tune the language model on
-domain text first and reports that it helps. What stays frozen is the biLM
-during supervised training. Pretraining as a better input, not yet as the
-model itself.
+domain text first and reports that it helps. What stays frozen is the biLM during
+supervised training. Pretraining as a better input, then, but not yet as the
+model itself — that last step is where the chain finally arrives.
 
 ## 5. When Everything Happened At Once
 
-The map's last node in this branch is a single word: *Transformer*. It gets
-one word because everything above explains why it had to exist.
+The chain ends where it began, in a single word: *Transformer*. It needs only
+one word by this point, because everything above has already explained why it
+had to exist.
 
 Both RNN and LSTM share one defect that no amount of gating repaired *at the
 time*: **sequential dependence**. Step $t$ cannot be computed until step $t-1$
@@ -665,15 +681,15 @@ actually incompatible — it simply took a decade.
 })();
 </script>
 
-One link my map omits belongs here: attention was not the transformer's
-invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014,
+One link I had missed entirely belongs here: attention was not the
+transformer's invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014,
 so a decoder could look back at any source position without squeezing through
 a bottleneck state. The transformer deleted the recurrence around it — every
 position against every other in one parallel operation, with reach no longer
 set by how far a gradient survives a matrix product.
 
-My map writes down the price, and it is worth repeating because the cheerful
-version of this story omits it: **attention costs $O(T^2)$**, and
+The price is worth writing down, because the cheerful version of this story
+tends to omit it: **attention costs $O(T^2)$**, and
 autoregressive decoding needs a KV cache that grows with the sequence.
 
 Two qualifications, since that sentence has aged. The quadratic term is
@@ -691,19 +707,21 @@ the block it goes
 position gets into a model that has no sense of order
 ([RoPE](/blog/2026/08/11/rope/)).
 
-My map's last side note belongs here, and it is about normalization — the
+One last side note belongs here, and it is about normalization — the
 operation that keeps the numbers inside a deep network from running away.
 **BatchNorm** normalizes a feature across the samples in a batch;
-**LayerNorm** normalizes across the features within one sample. My map's
-justification is the sharper half of the argument: the same channel of two
-different images is a comparable quantity, and two different channels of one
-image are not. Sentences make this worse, because they have different lengths
+**LayerNorm** normalizes across the features within one sample. The sharper
+half of the argument for preferring the latter is this: the same channel of
+two different images is a comparable quantity, and two different channels of
+one image are not. Sentences make this worse, because they have different lengths
 and arrive in batches of wildly varying shape, which is most of why language
 models normalize within a sample rather than across a batch.
 
 ## 6. Counting the Doors Still Open
 
-The map answers this with one metric: **perplexity**.
+Everything so far has been about representation. It is worth closing with the
+number the whole field used to measure whether any of it was working:
+**perplexity**.
 
 $$
 \text{PPL}(W) = P(W)^{-1/N}
@@ -819,8 +837,8 @@ language model was learning them a decade earlier, and learning them is what
 that paper is *for*; Word2Vec's contribution was making them cheap enough for
 everyone. And the lineage people recite is not a chronology at all: LSTM
 predates Word2Vec by sixteen years, and ELMo appeared four months *after* the
-transformer. The arrows in a map like this one mean "here is what that could
-not do", never "here is what came next". The fair objection to the whole
+transformer. An arrow in a chain like this means "here is what that could not
+do", never "here is what came next". The fair objection to the whole
 framing is that smoothed n-grams were not the failure it implies — modified
 Kneser-Ney five-grams held the state of the art for roughly two decades. What
 counting could never supply is any notion that two words are *similar*, and

@@ -727,14 +727,19 @@ table td {
   height: auto;
   display: block;
 }
+/* Same hand-drawn face as the roadmap directly above it in the post; this
+   figure was the last one still set in the system sans. */
+.article .w2v-anim text {
+  font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
+}
 .article .w2v-anim .word {
-  font: 500 15px -apple-system, Helvetica, arial, sans-serif;
+  font-size: 17.5px;
   fill: var(--fig-strong);
   text-anchor: middle;
 }
 .article .w2v-anim .rowlabel {
-  font: 600 12px -apple-system, Helvetica, arial, sans-serif;
-  letter-spacing: 0.04em;
+  font-size: 13.5px;
+  letter-spacing: 0.03em;
 }
 .article .w2v-anim .cbow .rowlabel { fill: var(--c-blue); }
 .article .w2v-anim .skip .rowlabel { fill: var(--c-lav); }
@@ -747,12 +752,19 @@ table td {
   fill: var(--c-rose);
   fill-opacity: 0.18;
 }
-.article .w2v-anim .arrow {
-  stroke-width: 2;
+/* Arcs, not stubs: each one runs between the centre word and one neighbour,
+   so the picture shows four things pointing at one (CBOW) or one pointing at
+   four (Skip-gram). Depth grows with distance. */
+.article .w2v-anim .arc {
+  fill: none;
+  stroke-width: 1.8;
   stroke-linecap: round;
 }
-.article .w2v-anim .cbow .arrow { stroke: var(--c-blue); fill: var(--c-blue); }
-.article .w2v-anim .skip .arrow { stroke: var(--c-lav); fill: var(--c-lav); }
+.article .w2v-anim .head { stroke: none; }
+.article .w2v-anim .cbow .arc { stroke: var(--c-blue); }
+.article .w2v-anim .cbow .head { fill: var(--c-blue); }
+.article .w2v-anim .skip .arc { stroke: var(--c-lav); }
+.article .w2v-anim .skip .head { fill: var(--c-lav); }
 .article .w2v-anim .slide {
   transform-box: view-box;
   transform-origin: 0 0;
