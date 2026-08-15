@@ -84,7 +84,7 @@
 <p>Attention gets the attention. It is the part of a transformer with the famous paper and the famous name, and if you have read one explanation of these models it was probably about that.</p>
 <p>So I want to write about the other part — the one that holds most of the parameters. After attention has run, every layer contains a second block, and in a modern model something like two thirds of the weights are in it. For years its design did not change at all: two matrices with a nonlinearity wedged between them, the same arrangement neural networks have used since the 1980s.</p>
 <p>Then in 2020 Noam Shazeer put a gate inside it, in a way carefully arranged to cost nothing, and essentially every model released since has copied him. What I find wonderful about this is the paper's own conclusion, which I will quote in full later: it declines to explain why the change works. It is still unexplained. It is also in the model you used this morning.</p>
-<p>I am going to assume no background at all, so we start with what this block is and where it sits.</p>
+<p>I am going to assume no background at all, so I will start with what this block is and where it sits.</p>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>

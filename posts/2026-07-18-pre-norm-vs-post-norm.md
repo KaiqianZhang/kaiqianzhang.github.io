@@ -24,7 +24,7 @@ was performing a ritual at the start of every training run to paper over the
 difference. What I like about this story is that the explanation, when it
 came, was one line of algebra that anybody could have written down.
 
-I will assume no background. We start with the shape of a layer.
+I will assume no background, and start with the shape of a layer.
 
 [TOC]
 
@@ -316,8 +316,7 @@ that was doing.
 
 Now the consequence, which is the part worth carrying. The last thing a pre-
 norm network does, after every layer has written to the road, is normalize.
-Normalizing means dividing by the size of what is there — and we have just
-established that in a deep model, what is there is $\sqrt{L}$ times larger
+Normalizing means dividing by the size of what is there — and I have just shown that in a deep model, what is there is $\sqrt{L}$ times larger
 than it should be.
 
 So that final division is by a large number, and because a gradient travelling

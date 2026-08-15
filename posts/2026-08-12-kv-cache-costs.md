@@ -18,7 +18,7 @@ you everything you need.
 
 [TOC]
 
-## What We Are Talking About
+## What the Cache Actually Is
 
 Let me give you the whole mechanism in a few paragraphs, so that nothing below
 depends on your having read anything else.

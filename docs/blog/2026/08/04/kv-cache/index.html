@@ -82,7 +82,7 @@
         </div>
         <div class='article'>
 <p>I want to explain one of the most consequential ideas in how large language models are actually run. There is no famous paper behind it. Nobody won a prize for it, and as far as I can tell nobody ever claimed it as a contribution. It is in every serious implementation of a language model, it is the reason a chatbot can answer you at a speed you are willing to sit through, and it is also the single largest reason that running these models is expensive and awkward.</p>
-<p>It is called the <strong>KV cache</strong>. By the end of this post I would like you to be able to say exactly what is stored in it, why storing it is allowed at all, how many bytes it takes, and why the people who run language models for a living spend so much of their time worrying about it. I am going to assume you know nothing about how a language model works on the inside, so that is where we will start.</p>
+<p>It is called the <strong>KV cache</strong>. By the end of this post I would like you to be able to say exactly what is stored in it, why storing it is allowed at all, how many bytes it takes, and why the people who run language models for a living spend so much of their time worrying about it. I am going to assume you know nothing about how a language model works on the inside, so that is where I will start.</p>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
@@ -204,9 +204,9 @@
     </div>
 </div>
 <p>I would like you to sit with that picture for a moment, because the whole of the rest of this post falls out of it. Every call receives everything the previous call received, plus one token. By the time the model is writing the thousandth token of an answer, it is being handed a sequence of a thousand tokens and asked to think about all of them, when nine hundred and ninety-nine of them are exactly the same as they were a moment ago.</p>
-<p>The obvious question is whether the model really has to think about all of them again from scratch. The answer is no, and the KV cache is how it avoids doing so. But to see what can be saved and what cannot, we have to look inside one of those calls.</p>
+<p>The obvious question is whether the model really has to think about all of them again from scratch. The answer is no, and the KV cache is how it avoids doing so. But to see what can be saved and what cannot, you have to look inside one of those calls.</p>
 <h2 id='1-a-trick-nobody-published-and-the-name-that-took-five-years'>1. A Trick Nobody Published, and the Name That Took Five Years</h2>
-<p>Before we go inside, here is the shape of the story, because it is a slightly unusual one for a technical idea.</p>
+<p>Before I go inside, here is the shape of the story, because it is a slightly unusual one for a technical idea.</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 381' role='img' aria-label='Roadmap of the KV cache: an unpublished trick in 2017, diagnosed as a bandwidth cost in 2019, named in 2022, and the thing serving systems are built around by 2023.'>
       <path class='spine' d='M99.4,190.9 Q380.1,191.7 660.8,190.8'/>
@@ -288,11 +288,11 @@
 </div>
 <p>The first box is the odd one, and I could not find a citation for it anywhere, because nobody ever claimed it as a contribution. Shazeer's 2019 paper prints the algorithm, but as setup for something else; what it adds is the diagnosis, blaming "the memory-bandwidth cost of repeatedly loading the large &ldquo;keys&rdquo; and &ldquo;values&rdquo; tensors".</p>
 <h2 id='2-three-vectors-and-which-two-of-them-last'>2. Three Vectors, and Which Two of Them Last</h2>
-<p>To see what is worth keeping, we need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>.</p>
+<p>To see what is worth keeping, you need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>.</p>
 <p>I have written a whole post about it — <a href='/blog/2026/06/24/attention/'>Attention</a>, which builds it up from the problem it solves and takes the formula apart term by term — and if you have never met it, that is the one to read. But I am not going to send you away to follow this post, so here is what you need, which is less than you might think.</p>
 <p>The problem attention solves is that the meaning of a word depends on the words around it. In "the cat sat on the mat", the word "sat" means what it does because of "cat". So each token needs some way to look at the others and draw in whatever it needs from them, and that is all I am going to claim for it here.</p>
 <p>Attention does this by turning every token into three lists of numbers rather than one. The first says what that token is looking for. The second advertises what it has to offer. The third is the content it hands over if anything wants it. They are called the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong>.</p>
-<p>To use them, we compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives us one score per token so far, saying how well each one matches. We then turn those scores into proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
+<p>To use them, compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives one score per token so far, saying how well each one matches. Those scores then become proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
 $$
 \text{Attention}(q, K, V) = \text{softmax}\!\left(\frac{q K^{\top}}{\sqrt{d_h}}\right) V .
 $$
@@ -364,10 +364,10 @@ $$
     </div>
 </div>
 <h2 id='3-the-rows-that-never-change-again'>3. The Rows That Never Change Again</h2>
-<p>Now we can see the waste clearly, and it is embarrassing.</p>
+<p>Now you can see the waste clearly, and it is embarrassing.</p>
 <p>Let me take you back to Figure 1, to the call that produces "mat". That call is handed "the cat sat on the", and it computes a query, a key and a value for every one of those five tokens.</p>
 <p>But the call before it was handed "the cat sat on" and computed a query, a key and a value for each of those four. The key for "the", the key for "cat", the key for "sat" — the model computed all of them a moment ago, threw them away, and has just computed them again. The same numbers.</p>
-<p>So keep them. That really is the entire idea, and I remember being faintly disappointed when I first understood it, because something with such large consequences ought to be more complicated than this. After computing the key and value for a token, we put them in a buffer and hold on to them, so that the next call can use them instead of computing them a second time. That buffer is the KV cache.</p>
+<p>So keep them. That really is the entire idea, and I remember being faintly disappointed when I first understood it, because something with such large consequences ought to be more complicated than this. After computing the key and value for a token, the model puts them in a buffer and holds on to them, so that the next call can use them instead of computing them a second time. That buffer is the KV cache.</p>
 <p>Concretely, for a standard attention layer, the cache is two tensors:</p>
 $$
 K_{\text{cache}},\; V_{\text{cache}} \in \mathbb{R}^{\,n_{kv} \times t \times d_h},
@@ -600,17 +600,17 @@ $$
 })();
 </script>
 <h3 id='reading-is-not-writing'>Reading Is Not Writing</h3>
-<p>There is one more distinction I need to give you before we can talk about cost, and I think it explains most of what is strange about running these models.</p>
+<p>There is one more distinction I need to give you before I can talk about cost, and I think it explains most of what is strange about running these models.</p>
 <p>Answering a question happens in two phases that behave nothing alike, and I want to name them both because the difference between them is what makes serving these models strange. The first is <strong>prefill</strong>: the model reads your entire prompt. It can do this in one go, because all of the prompt is available at once and computers are very good at doing the same operation to a thousand things simultaneously. Prefill fills the cache, and it keeps the hardware busy.</p>
 <p>The second is <strong>decode</strong>: the model writes the answer one token at a time, because it cannot begin the second token until it has seen the first. Each step does a very small amount of arithmetic and yet still has to read the entire cache in order to attend over it.</p>
 <p>I would hold those two facts side by side for a moment, because the imbalance between them is what the companion post is about. Prefill is the model reading and decode is the model writing, and writing is far harder to make fast.</p>
 <h3 id='counting-the-rent'>Counting the Rent</h3>
-<p>We can now compute the size of the thing. Multiply out the shapes: for $L$ layers, at $p$ bytes for each number,</p>
+<p>Now for the size of the thing. Multiply out the shapes: for $L$ layers, at $p$ bytes for each number,</p>
 $$
 \text{bytes} \;=\; 2 \, L \, n_{kv} \, d_h \, t \, p .
 $$
-<p>The 2 is because we keep both a key and a value. Everything else is a count of how many numbers there are.</p>
-<p>Let us put real figures in it. Llama 3 8B, one of the smaller open models, has $L = 32$ layers, $n_{kv} = 8$ key-value heads, and $d_h = 128$. Models generally store each number in 16 bits rather than the 32 that used to be standard, because half the precision turns out to be plenty and it halves the memory. Sixteen bits is two bytes, so $p = 2$. Multiplying it out: $2 \times 32 \times 8 \times 128 \times 2 = 131{,}072$ bytes.</p>
+<p>The 2 is because both a key and a value are kept. Everything else is a count of how many numbers there are.</p>
+<p>Let me put real figures in it. Llama 3 8B, one of the smaller open models, has $L = 32$ layers, $n_{kv} = 8$ key-value heads, and $d_h = 128$. Models generally store each number in 16 bits rather than the 32 that used to be standard, because half the precision turns out to be plenty and it halves the memory. Sixteen bits is two bytes, so $p = 2$. Multiplying it out: $2 \times 32 \times 8 \times 128 \times 2 = 131{,}072$ bytes.</p>
 <p>That is 128 KiB. I should explain the unit, since it trips people up: memory is counted in powers of two, so a kibibyte (KiB) is 1,024 bytes rather than 1,000, and 131,072 is exactly $128 \times 1{,}024$. Cache sizes from here on are in those units.</p>
 <p>Confusingly, GPUs are <em>sold</em> in decimal gigabytes — an "80 GB" H100 holds 80 billion bytes, which is about 74.5 GiB — so the calculator just below reports cache sizes in KiB and GiB, while labelling the card it compares them against in decimal GB, which is how you would find it on a price list.</p>
 <p>I want to let that number sit for a second, because it is <em>per token</em>. Every token in the conversation, whether you typed it or the model wrote it, costs 128 KiB of memory that somebody has to hold onto for as long as the conversation lasts. Llama 3 70B, with its 80 layers, costs 320 KiB per token.</p>
@@ -710,12 +710,12 @@ $$
 </script>
 <p>That number is why anybody worries about this at all.</p>
 <h2 id='4-the-bill-which-is-the-other-post'>4. The Bill, Which Is the Other Post</h2>
-<p>Everything so far has been about what the cache is and why it works. What it <em>costs</em> is a large enough subject that I have given it a post of its own — <a href='/blog/2026/08/12/kv-cache-costs/'>What the KV Cache Costs</a> — but the shape of the problem is worth stating here, because it follows directly from the number we just computed.</p>
+<p>Everything so far has been about what the cache is and why it works. What it <em>costs</em> is a large enough subject that I have given it a post of its own — <a href='/blog/2026/08/12/kv-cache-costs/'>What the KV Cache Costs</a> — but the shape of the problem is worth stating here, because it follows directly from the number just computed.</p>
 <p>Here is the shape of it. The weights of a model are shared: every conversation on a server runs through the same ones, so serving many at once spreads their cost across all of them, which is the entire economics of running these things. The cache is the opposite: it belongs to one conversation, nobody else can use it, and it grows for as long as that conversation continues.</p>
 <p>So the one move that makes everything else cheaper — serving more people at once — makes this particular cost worse, because every new person brings another cache to be stored and read on every step. That tension, and what the field has done about it, is what the other post is for.</p>
 <h2 id='5-fifteen-decimal-places-and-a-floor-i-did-not-expect'>5. Fifteen Decimal Places, and a Floor I Did Not Expect</h2>
 <p>I did not want to take either of the two central claims on trust, so I wrote the experiment. It decodes 320 tokens through one real attention layer, twice: once keeping a cache, and once recomputing the whole prefix at every step, the way a model with no cache would have to. Both paths do genuine arithmetic on genuine vectors, and I timed each step of both.</p>
-<p>The first claim to check is that caching does not change the answer. It should not — we argued earlier that the rows are final — but arguing and checking are different activities. Over all 320 steps, the largest disagreement between the cached output and the recomputed one was $2.2 \times 10^{-15}$, which is the noise floor of the arithmetic itself.</p>
+<p>The first claim to check is that caching does not change the answer. It should not — I argued earlier that the rows are final — but arguing and checking are different activities. Over all 320 steps, the largest disagreement between the cached output and the recomputed one was $2.2 \times 10^{-15}$, which is the noise floor of the arithmetic itself.</p>
 <p>The cache is <em>algebraically</em> exact, which is the sense that matters: it changes no term in the definition of attention. (Two different implementations on a real GPU, working in 16-bit arithmetic, will still disagree in the last few bits. That is because floating-point addition is not associative, so adding the same numbers in a different order gives a very slightly different answer. It is a property of the arithmetic rather than of the cache.)</p>
 <p>The second claim is about how much work is saved. Counting multiply-and-adds, a cached step costs $8d^2 + 4td$ and an uncached one costs $8td^2 + 4t^2d$, writing $d$ for the full width of the model. Every term in the second carries exactly one factor of $t$ that its counterpart in the first does not, so the second is $t$ times the first — exactly, not approximately.</p>
 <p>At the 320th token, a model without a cache does three hundred and twenty times the arithmetic to produce the very same row of numbers. (That is against this particular baseline, which recomputes the full square of scores; an implementation exploiting the mask would do about half as much, so call it between $t/2$ and $t$.)</p>

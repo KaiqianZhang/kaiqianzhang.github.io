@@ -26,7 +26,7 @@ the paper making the case is one of the more honest I have read, and the
 figure carrying its argument does not contain the proposed method at all.
 
 I am going to assume you know nothing at all about how a language model works
-on the inside, so we will start with where this thing sits.
+on the inside, so I will start with where this thing sits.
 
 [TOC]
 
@@ -201,7 +201,7 @@ reason to ask which part is load-bearing.
 
 ## 2. The Size of Things, and Why It Runs Away
 
-Before we can compare two normalizers I owe you an account of what either of
+Before I can compare two normalizers I owe you an account of what either of
 them is for, because "rescale the numbers" is not a reason on its own.
 
 A word arriving at the model is turned into a **vector**: a list of numbers,
@@ -660,8 +660,8 @@ is the demonstration that removing the mean does tie.
 
 I would hold on to the shape of that argument even if you never think about
 normalization again. When a technique is winning on one axis and losing on
-another, the useful question is rarely "can we win more" — it is "which axis
-is the one we are actually billed on".
+another, the useful question is rarely whether you can win more. It is which axis you
+are actually billed on.
 
 ## 5. Watching a Difference Vanish into Width
 

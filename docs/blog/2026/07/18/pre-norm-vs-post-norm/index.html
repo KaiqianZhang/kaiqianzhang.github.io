@@ -84,7 +84,7 @@
 <p>I want to write about a decision that looks like nothing at all: which of three operations in a transformer layer happens first.</p>
 <p>A layer has three moving parts. There is a sub-layer that does the actual work — attention, or a small feed-forward network. There is a <strong>residual connection</strong>, which adds that work back onto what came in. And there is a <strong>normalizer</strong>, which rescales the numbers so they cannot run away. There are only a couple of sensible orders to put those in, and choosing between them sounds like the kind of thing you would settle by taste.</p>
 <p>It is not. Moving the normalizer from after the addition to before the sub-layer is most of the reason anyone can train a hundred-layer transformer at all, and for three years before somebody worked out why, the entire field was performing a ritual at the start of every training run to paper over the difference. What I like about this story is that the explanation, when it came, was one line of algebra that anybody could have written down.</p>
-<p>I will assume no background. We start with the shape of a layer.</p>
+<p>I will assume no background, and start with the shape of a layer.</p>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
@@ -310,7 +310,7 @@ $$
 })();
 </script>
 <p>One detail I would not skip: the growth follows from how the weights are initialized, not from the architecture, which is why the second slider can switch it off. GPT-2 cancelled it deliberately, scaling the residual weights by $1/\sqrt{N}$, two years before anybody published an explanation of what that was doing.</p>
-<p>Now the consequence, which is the part worth carrying. The last thing a pre- norm network does, after every layer has written to the road, is normalize. Normalizing means dividing by the size of what is there — and we have just established that in a deep model, what is there is $\sqrt{L}$ times larger than it should be.</p>
+<p>Now the consequence, which is the part worth carrying. The last thing a pre- norm network does, after every layer has written to the road, is normalize. Normalizing means dividing by the size of what is there — and I have just shown that in a deep model, what is there is $\sqrt{L}$ times larger than it should be.</p>
 <p>So that final division is by a large number, and because a gradient travelling backwards has to pass back through it, every gradient in the network is multiplied by roughly $1/\sqrt{L+1}$ on its way out.</p>
 <p><strong>The deeper a pre-norm model is, the harder its own final normalization damps every gradient in it.</strong> Post-norm has no such term, because post-norm never let the road grow in the first place. That is Theorem 1 of Xiong et al. I should add the caveat they add: both sides are <em>upper</em> bounds, so the theorem does not by itself prove a separation. What carries the separation is the measurement in the next section.<sup id='fnref:warmup' class='footnote'><a href='#fn:warmup'>1</a></sup></p>
 <div class='pulse-anim'>

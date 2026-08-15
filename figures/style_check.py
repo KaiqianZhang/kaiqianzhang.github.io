@@ -2,10 +2,11 @@
 
 What is worth copying from him is clarity, not register: short paragraphs, no
 hedging, and a short declarative sentence before the equation rather than
-after it. His "we will assume" is textbook convention and would read as a
-lecture here, so the voice is deliberately not measured.
+after it. His "we will assume" is textbook convention and reads as a lecture,
+so this checks the opposite — that the editorial "we" has stayed out.
 
-This reports the first two. The third is a judgement call and has to be read.
+Paragraph length and hedging are reported; the sentence-before-the-equation
+habit is a judgement call and has to be read.
 
     python3 figures/style_check.py posts/*.md
     python3 figures/style_check.py --paras posts/x.md   # list the long ones
@@ -63,15 +64,21 @@ def report(path, show_paras=False):
                  if len(p.split()) > 90 and not chat]
     text = ' '.join(body)
     hedges = re.findall(HEDGES, text, re.I)
+    # A blog post has one author. Quotations keep their own "we" — Shazeer's
+    # "We offer no explanation", Barbero's "we argue" — so drop quoted spans
+    # before counting, inline ones included, not just blockquotes.
+    unquoted = re.sub(r'[“"][^“”"]{0,400}[”"]', ' ', text)
+    editorial_we = len(re.findall(r'\b(we|us|our)\b', unquoted, re.I))
     name = path.split('/')[-1][11:-3]
     flags = ''.join([
         ' ' if sorted(lens)[len(lens) // 2] <= 60 else '!',
         ' ' if not long_ones else '!',
         ' ' if len(hedges) <= 2 else '!',
+        ' ' if editorial_we == 0 else '!',
     ])
-    print('%-24s median %3d   over-90 %2d   hedges %2d   %s'
+    print('%-24s median %3d   over-90 %2d   hedges %2d   we %2d   %s'
           % (name, sorted(lens)[len(lens) // 2], len(long_ones),
-             len(hedges), flags))
+             len(hedges), editorial_we, flags))
     if show_paras:
         for p, n in long_ones:
             print('    [%d] %s...' % (n, p[:150]))

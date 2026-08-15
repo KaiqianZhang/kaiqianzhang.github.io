@@ -86,7 +86,7 @@
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
-        <li style='border-left-color: #3E6491'><a href='#what-we-are-talking-about'>What We Are Talking About</a></li>
+        <li style='border-left-color: #3E6491'><a href='#what-the-cache-actually-is'>What the Cache Actually Is</a></li>
         <li style='border-left-color: #8C77BC'><a href='#1-four-ways-to-fight-the-same-number'>1. Four Ways to Fight the Same Number</a></li>
         <li style='border-left-color: #6E8C66'><a href='#2-one-room-per-guest-and-the-weights-everyone-shares'>2. One Room per Guest, and the Weights Everyone Shares</a></li>
         <li style='border-left-color: #B07E55'><a href='#3-the-waste-that-had-nothing-to-do-with-size'>3. The Waste That Had Nothing to Do With Size</a></li>
@@ -95,7 +95,7 @@
         <li style='border-left-color: #5F8A8B'><a href='#6-references'>6. References</a></li>
     </ul>
 </nav>
-<h2 id='what-we-are-talking-about'>What We Are Talking About</h2>
+<h2 id='what-the-cache-actually-is'>What the Cache Actually Is</h2>
 <p>Let me give you the whole mechanism in a few paragraphs, so that nothing below depends on your having read anything else.</p>
 <p>A language model writes one <strong>token</strong> at a time — a token being a chunk of text, roughly a word. To choose each one, it looks back over everything written so far, and the looking-back is done by a mechanism called <strong>attention</strong>. Attention turns every token into three lists of numbers.</p>
 <p>The first says what that token is looking for, the second advertises what it has to offer, and the third is the content it hands over. They are called the <strong>query</strong>, the <strong>key</strong> and the <strong>value</strong>. The current token's query is compared against every earlier token's key, and the resulting scores decide how much of each value gets blended into the answer.</p>

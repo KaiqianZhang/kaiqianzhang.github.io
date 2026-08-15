@@ -84,7 +84,7 @@
 <p>I want to tell you about a change that almost every large language model has made, and that is easy to miss, because it consists of deleting one line of arithmetic.</p>
 <p>Somewhere inside a transformer there is an operation that runs on every word, in every layer, and does nothing more dramatic than rescale a list of numbers so that they are neither too large nor too small. For seven years that operation was <strong>layer normalization</strong>. Today it is <strong>root mean square layer normalization</strong>, which is layer normalization with one step taken out. Nothing else about the models changed.</p>
 <p>I think this is worth a whole post for two reasons. The first is that the deleted step turns out to have been doing very nearly nothing, and I can tell you <em>exactly</em> how nearly: there is a clean formula for how far the two operations disagree, and it shrinks as models get wider. The second is that the paper making the case is one of the more honest I have read, and the figure carrying its argument does not contain the proposed method at all.</p>
-<p>I am going to assume you know nothing at all about how a language model works on the inside, so we will start with where this thing sits.</p>
+<p>I am going to assume you know nothing at all about how a language model works on the inside, so I will start with where this thing sits.</p>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
@@ -233,7 +233,7 @@
 <p>That sentence is a claim about somebody else's method. LayerNorm had been standard for three years by then, and the accepted account of why it worked had two parts to it. This paper says that one of the two parts is not the reason, removes it, and shows that nothing breaks.</p>
 <p>What I find striking is not that a cheaper method won. It is that the standard explanation for the expensive method was half wrong, in print, for three years, and that it took somebody trying to make it <em>faster</em> to notice. That is worth remembering as a general shape: an optimization is sometimes the only thing that ever tests an explanation, because it is the only work that has a reason to ask which part is load-bearing.</p>
 <h2 id='2-the-size-of-things-and-why-it-runs-away'>2. The Size of Things, and Why It Runs Away</h2>
-<p>Before we can compare two normalizers I owe you an account of what either of them is for, because "rescale the numbers" is not a reason on its own.</p>
+<p>Before I can compare two normalizers I owe you an account of what either of them is for, because "rescale the numbers" is not a reason on its own.</p>
 <p>A word arriving at the model is turned into a <strong>vector</strong>: a list of numbers, all of which the model learned. GPT-2 uses lists of 768 numbers, Llama 2 7B uses 4096. Nothing about any single entry means anything you could name; what carries meaning is the whole list, and the model's job is to keep editing that list until it is a good enough description of the word in its context to predict what comes next.</p>
 <p>The editing is where the trouble starts. Because of those residual connections, every layer <em>adds</em> to the list rather than replacing it, and sixty-four rounds of addition is a lot of opportunity for the numbers to grow.</p>
 <p>If they grow, the next layer receives inputs it was never trained to handle; the exponentials inside attention saturate, so a word puts essentially all its attention on one other word and there is no gradient left to learn from; and in the sixteen-bit arithmetic these models actually run in, large enough numbers stop being representable at all. If instead they shrink, the signal fades and the layer has nothing to work with. Neither failure announces itself. Both simply produce a model that will not train.</p>
@@ -568,7 +568,7 @@ $$
     </div>
 </div>
 <p>That is the entire case, and notice how little of it is about RMSNorm. The argument runs: normalization is clearly worth having, since the model without it is nowhere; but a third of what it wins per step is handed straight back per second, because the normalizer itself is slow; therefore the prize is not a better normalizer but a cheaper one that ties. Everything else in the paper is the demonstration that removing the mean does tie.</p>
-<p>I would hold on to the shape of that argument even if you never think about normalization again. When a technique is winning on one axis and losing on another, the useful question is rarely "can we win more" — it is "which axis is the one we are actually billed on".</p>
+<p>I would hold on to the shape of that argument even if you never think about normalization again. When a technique is winning on one axis and losing on another, the useful question is rarely whether you can win more. It is which axis you are actually billed on.</p>
 <h2 id='5-watching-a-difference-vanish-into-width'>5. Watching a Difference Vanish into Width</h2>
 <p>I have claimed a formula and quoted two numbers from it, so let me show you both being checked, on vectors drawn fresh in your browser while you watch. Each normalizer is two lines of arithmetic:</p>
 <div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">layernorm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>

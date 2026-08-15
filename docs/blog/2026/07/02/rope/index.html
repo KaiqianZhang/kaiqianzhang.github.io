@@ -197,7 +197,7 @@
 <p>Now look at that procedure and ask where position enters. It does not. The query depends on the word; the key depends on the word; the dot product depends on those two and nothing else. Nowhere in the operation is there a term that knows one word came fourth and the other came ninth. Permute the input and every pairwise comparison is the same comparison it was, so the output is simply permuted along with it. Attention treats a sentence as an unordered collection.</p>
 <p>So position has to be injected, and there are exactly two places to put it. You can put it in the <strong>vectors</strong>, adding something that encodes where the word sits — the 2017 approach, the top-left box of the roadmap. Or you can put it in the <strong>comparison</strong>, changing how a query and a key are combined so that their separation is part of the answer.</p>
 <p>The first is easy and it leaks: the position tag rides along with the vector through the entire network, competing for room with the word's meaning. The second is harder to arrange, and it is where RoPE lives.</p>
-<p>Which brings us back to the question the roadmap ended on, and to what I think is one of the prettiest answers anywhere in the architecture.</p>
+<p>Which brings me back to the question the roadmap ended on, and to what I think is one of the prettiest answers anywhere in the architecture.</p>
 <h2 id='3-the-angle-that-cancels'>3. The Angle That Cancels</h2>
 <p>Start in two dimensions, where a rotation is something you can picture: take an arrow, turn it about the origin by some angle, leave its length alone.</p>
 <p>With $R(\alpha)$ that rotation and $q = W_q x_m$, $k = W_k x_n$ the projected query and key, RoPE sets $q_m = R(m\theta)q$ and $k_n = R(n\theta)k$. Take the dot product, using the two facts that make rotations special — $R(\alpha)^\top = R(-\alpha)$, and that they compose by adding angles:</p>
@@ -473,7 +473,7 @@ $$
     </div>
 </div>
 <p>Read the axis label on that figure before you read anything else about it, because the quantity plotted is an <strong>upper bound</strong> on the inner product, not the inner product. A bound that falls obliges nothing underneath it to fall. The ceiling of a room coming down does not push the furniture through the floor.</p>
-<p>So let us ask what the inner product itself does. For $q$ and $k$ with independent standard-normal entries — which is what they look like at initialization — the cross terms vanish, and the Pythagorean identity for sine and cosine leaves</p>
+<p>So let me ask what the inner product itself does. For $q$ and $k$ with independent standard-normal entries — which is what they look like at initialization — the cross terms vanish, and the Pythagorean identity for sine and cosine leaves</p>
 $$
 \operatorname{Var}\big(q_m^\top k_n\big) = 2 \cdot \tfrac{d}{2} = d
 $$

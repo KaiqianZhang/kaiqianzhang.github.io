@@ -24,8 +24,8 @@ I find wonderful about this is the paper's own conclusion, which I will quote
 in full later: it declines to explain why the change works. It is still
 unexplained. It is also in the model you used this morning.
 
-I am going to assume no background at all, so we start with what this block is
-and where it sits.
+I am going to assume no background at all, so I will start with what this
+block is and where it sits.
 
 [TOC]
 

@@ -42,8 +42,9 @@ at the previous three words, say — but the words that matter are not at a fixe
 distance. In "the trophy did not fit in the suitcase because it was too big",
 the word "it" needs "trophy", which is nine words back.
 
-What we want is for the model to *decide*, for each word, which other words to
-draw on, and by how much. And we want it to learn how to make that decision
+What
+you want is for the model to *decide*, for each word, which other words to
+draw on, and by how much. And you want it to learn how to make that decision
 from data, rather than being told. That is what attention does.
 
 <div class='sketch'>
@@ -266,8 +267,7 @@ coordinates. Nothing in this post depends on how those coordinates are learned.
 part that looks arbitrary when you first meet it, so let me describe what each
 one is for before I give it a name.
 
-The first vector describes what this word is *looking for*. In our trophy
-sentence, the word "it" is looking for something that could plausibly be a
+The first vector describes what this word is *looking for*. In the trophy sentence, the word "it" is looking for something that could plausibly be a
 large object mentioned earlier.
 
 The second vector advertises what this word *has to offer*, so that other words
@@ -290,19 +290,20 @@ query. Where a query matches a notice, the word takes a copy of what is behind
 that notice, which is the value. A word that matches several notices takes some
 of each, in proportion to how well each one matched.
 
-**Step three: score every pair.** To find out how well a query matches a key,
-we take their **dot product**: multiply the two lists together entry by entry
-and add up the results. That gives us one number per pair. It comes out large
+**Step three: score every pair.** To find out how well a query matches a key, take
+their **dot product**: multiply the two lists together entry by entry and add
+up the results. That gives one number per pair. It comes out large
 when the two vectors point in similar directions, and larger still when the
 vectors themselves are long — and I want to flag that second half now, because
 it is the seed of the whole of section 4.
 
-**Step four: turn the scores into weights, and average.** The scores can come
-out any size, positive or negative, and what we need is proportions. So we
-push them through a function called the **softmax**, which raises $e$ to the
+**Step four: turn the scores into weights, and average.** The scores can come out any size, positive or negative, and what
+is needed is proportions. So they go through a function called the
+**softmax**, which raises $e$ to the
 power of each score and then divides by the total. Everything that comes out is positive, and the results add up to
-one, which is precisely what lets us treat them as proportions of a blend. Then
-we use those proportions to average the value vectors together.
+one, which is precisely what lets you
+treat them as proportions of a blend. Those proportions then average the value
+vectors together.
 
 That is the whole mechanism. Written down, with $q$ the current word's query,
 $K$ all the keys stacked up, and $V$ all the values:
@@ -427,7 +428,7 @@ explained, and section 4 is entirely about it.
 
 ### Heads, and the Width They Share Out
 
-Two pieces of structure and we have a real model.
+Two pieces of structure and you have a real model.
 
 The first is that this is not done once across the full width of the vectors.
 The width is *split* into several smaller pieces, and the whole procedure runs
@@ -602,8 +603,7 @@ scores are close together, the weights come out close to even and attention beha
 dominates everything, the weight on it approaches one, and every other weight
 approaches zero. Attention stops averaging and starts picking a single word.
 
-That is bad for two reasons. The obvious one is that a blend is what we
-wanted. The subtler and more serious one is that training a network requires
+That is bad for two reasons. The obvious one is that a blend is the whole point. The subtler and more serious one is that training a network requires
 gradients, which measure how much the output would change if you nudged the
 inputs. When a softmax has collapsed onto one option, nudging the scores
 barely changes anything, so the gradient is nearly zero and the model stops

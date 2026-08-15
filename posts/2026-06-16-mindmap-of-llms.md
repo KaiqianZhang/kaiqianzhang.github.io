@@ -205,7 +205,7 @@ single 1 in the slot belonging to that word. Two things are wrong with that,
 and together they are the whole complaint. It loses the meaning of the word,
 and its dimension is horribly large.
 
-Notice what the first of those costs us. Any two one-hot vectors point in
+Notice what the first of those costs you. Any two one-hot vectors point in
 perpendicular directions, so at the input, similarity between words is not
 merely unmeasured. It is unrepresentable.
 
@@ -233,8 +233,8 @@ Because they are learned from how words are used, words used in similar ways
 end up with similar lists — and "similar" now means something arithmetic: the
 two lists point in nearly the same direction. A word has stopped being a
 symbol and become a *direction* in a space, which is where the section title
-comes from. Once that is true we can ask which words lie near which others and
-get a sensible answer, which a counter could never give us.
+comes from. Once that is true you can ask which words lie near which others and
+get a sensible answer, which a counter could never give you.
 
 The insight in Word2Vec is not the embedding but how to get one cheaply — as a
 side effect of something else. Set up a prediction task nobody actually cares
@@ -404,8 +404,8 @@ point: only nonzero entries are ever touched.
 
 ## 3. A Matrix Multiplied by Itself
 
-We now have a good answer to "what is a word, numerically": a direction in a
-few hundred dimensions, learned from the company it keeps. The next limit is
+That is a good answer to "what is a word, numerically": a direction in a few
+hundred dimensions, learned from the company it keeps. The next limit is
 not a matter of training that better. It is in the shape of the thing.
 
 An embedding table is a lookup table. "Bank" has one vector, fixed the moment
@@ -568,9 +568,9 @@ on to that last property.
 
 ## 4. When Meaning Started to Depend on Neighbours
 
-By now we have both halves of a solution without anyone having put them
-together: section 2 gave us vectors that carry meaning, section 3 a network
-that reads a sentence in order. **ELMo** is what happens when someone combines
+By now both halves of a solution are on the table, without anyone having put
+them together. Section 2 gave you vectors that carry meaning; section 3, a
+network that reads a sentence in order. **ELMo** is what happens when someone combines
 them. Word2Vec and GloVe give each word one vector for all time; ELMo runs a
 two-layer bidirectional LSTM over the whole sentence and takes a word's vector
 from *that*, so the output is an embedding of a word *in a sequence* rather
