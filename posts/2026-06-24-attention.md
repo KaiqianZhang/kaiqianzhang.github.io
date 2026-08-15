@@ -298,12 +298,12 @@ vectors themselves are long — and I want to flag that second half now, because
 it is the seed of the whole of section 4.
 
 **Step four: turn the scores into weights, and average.** The scores can come out any size, positive or negative, and what
-is needed is proportions. So they go through a function called the
+we need is proportions. So we push them through a function called the
 **softmax**, which raises $e$ to the
 power of each score and then divides by the total. Everything that comes out is positive, and the results add up to
 one, which is precisely what lets you
-treat them as proportions of a blend. Those proportions then average the value
-vectors together.
+treat them as proportions of a blend. Then we use those proportions to average
+the value vectors together.
 
 That is the whole mechanism. Written down, with $q$ the current word's query,
 $K$ all the keys stacked up, and $V$ all the values:

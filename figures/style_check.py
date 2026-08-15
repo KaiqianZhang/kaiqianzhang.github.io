@@ -64,21 +64,24 @@ def report(path, show_paras=False):
                  if len(p.split()) > 90 and not chat]
     text = ' '.join(body)
     hedges = re.findall(HEDGES, text, re.I)
-    # A blog post has one author. Quotations keep their own "we" — Shazeer's
-    # "We offer no explanation", Barbero's "we argue" — so drop quoted spans
-    # before counting, inline ones included, not just blockquotes.
+    # "I" is the voice; "we" is allowed for genuinely joint moments and is
+    # better than twisting a sentence into the passive to avoid it. Flag only
+    # when it stops being occasional. Quotations keep their own "we" —
+    # Shazeer's "We offer no explanation", Barbero's "we argue" — so drop
+    # quoted spans first, inline ones included, not just blockquotes.
     unquoted = re.sub(r'[“"][^“”"]{0,400}[”"]', ' ', text)
-    editorial_we = len(re.findall(r'\b(we|us|our)\b', unquoted, re.I))
+    we = len(re.findall(r'\b(we|us|our)\b', unquoted, re.I))
+    i = len(re.findall(r'\bI\b|\bmy\b', unquoted))
     name = path.split('/')[-1][11:-3]
     flags = ''.join([
         ' ' if sorted(lens)[len(lens) // 2] <= 60 else '!',
         ' ' if not long_ones else '!',
         ' ' if len(hedges) <= 2 else '!',
-        ' ' if editorial_we == 0 else '!',
+        ' ' if we <= max(2, i / 6.0) else '!',
     ])
-    print('%-24s median %3d   over-90 %2d   hedges %2d   we %2d   %s'
+    print('%-24s median %3d   over-90 %2d   hedges %2d   we/I %2d/%-3d %s'
           % (name, sorted(lens)[len(lens) // 2], len(long_ones),
-             len(hedges), editorial_we, flags))
+             len(hedges), we, i, flags))
     if show_paras:
         for p, n in long_ones:
             print('    [%d] %s...' % (n, p[:150]))

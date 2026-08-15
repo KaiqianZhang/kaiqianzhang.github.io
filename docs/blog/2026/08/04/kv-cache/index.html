@@ -288,11 +288,11 @@
 </div>
 <p>The first box is the odd one, and I could not find a citation for it anywhere, because nobody ever claimed it as a contribution. Shazeer's 2019 paper prints the algorithm, but as setup for something else; what it adds is the diagnosis, blaming "the memory-bandwidth cost of repeatedly loading the large &ldquo;keys&rdquo; and &ldquo;values&rdquo; tensors".</p>
 <h2 id='2-three-vectors-and-which-two-of-them-last'>2. Three Vectors, and Which Two of Them Last</h2>
-<p>To see what is worth keeping, you need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>.</p>
+<p>To see what is worth keeping, we need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>.</p>
 <p>I have written a whole post about it — <a href='/blog/2026/06/24/attention/'>Attention</a>, which builds it up from the problem it solves and takes the formula apart term by term — and if you have never met it, that is the one to read. But I am not going to send you away to follow this post, so here is what you need, which is less than you might think.</p>
 <p>The problem attention solves is that the meaning of a word depends on the words around it. In "the cat sat on the mat", the word "sat" means what it does because of "cat". So each token needs some way to look at the others and draw in whatever it needs from them, and that is all I am going to claim for it here.</p>
 <p>Attention does this by turning every token into three lists of numbers rather than one. The first says what that token is looking for. The second advertises what it has to offer. The third is the content it hands over if anything wants it. They are called the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong>.</p>
-<p>To use them, compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives one score per token so far, saying how well each one matches. Those scores then become proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
+<p>To use them, compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives one score per token so far, saying how well each one matches. We then turn those scores into proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
 $$
 \text{Attention}(q, K, V) = \text{softmax}\!\left(\frac{q K^{\top}}{\sqrt{d_h}}\right) V .
 $$
@@ -605,11 +605,11 @@ $$
 <p>The second is <strong>decode</strong>: the model writes the answer one token at a time, because it cannot begin the second token until it has seen the first. Each step does a very small amount of arithmetic and yet still has to read the entire cache in order to attend over it.</p>
 <p>I would hold those two facts side by side for a moment, because the imbalance between them is what the companion post is about. Prefill is the model reading and decode is the model writing, and writing is far harder to make fast.</p>
 <h3 id='counting-the-rent'>Counting the Rent</h3>
-<p>Now for the size of the thing. Multiply out the shapes: for $L$ layers, at $p$ bytes for each number,</p>
+<p>Now we can compute the size of the thing. Multiply out the shapes: for $L$ layers, at $p$ bytes for each number,</p>
 $$
 \text{bytes} \;=\; 2 \, L \, n_{kv} \, d_h \, t \, p .
 $$
-<p>The 2 is because both a key and a value are kept. Everything else is a count of how many numbers there are.</p>
+<p>The 2 is because we keep both a key and a value. Everything else is a count of how many numbers there are.</p>
 <p>Let me put real figures in it. Llama 3 8B, one of the smaller open models, has $L = 32$ layers, $n_{kv} = 8$ key-value heads, and $d_h = 128$. Models generally store each number in 16 bits rather than the 32 that used to be standard, because half the precision turns out to be plenty and it halves the memory. Sixteen bits is two bytes, so $p = 2$. Multiplying it out: $2 \times 32 \times 8 \times 128 \times 2 = 131{,}072$ bytes.</p>
 <p>That is 128 KiB. I should explain the unit, since it trips people up: memory is counted in powers of two, so a kibibyte (KiB) is 1,024 bytes rather than 1,000, and 131,072 is exactly $128 \times 1{,}024$. Cache sizes from here on are in those units.</p>
 <p>Confusingly, GPUs are <em>sold</em> in decimal gigabytes — an "80 GB" H100 holds 80 billion bytes, which is about 74.5 GiB — so the calculator just below reports cache sizes in KiB and GiB, while labelling the card it compares them against in decimal GB, which is how you would find it on a price list.</p>

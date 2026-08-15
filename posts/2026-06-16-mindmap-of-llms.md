@@ -568,9 +568,9 @@ on to that last property.
 
 ## 4. When Meaning Started to Depend on Neighbours
 
-By now both halves of a solution are on the table, without anyone having put
-them together. Section 2 gave you vectors that carry meaning; section 3, a
-network that reads a sentence in order. **ELMo** is what happens when someone combines
+By now we have both halves of a solution, without anyone having put them
+together: section 2 gave us vectors that carry meaning, section 3 a network
+that reads a sentence in order. **ELMo** is what happens when someone combines
 them. Word2Vec and GloVe give each word one vector for all time; ELMo runs a
 two-layer bidirectional LSTM over the whole sentence and takes a word's vector
 from *that*, so the output is an embedding of a word *in a sequence* rather

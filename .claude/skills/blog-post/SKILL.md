@@ -326,11 +326,14 @@ not representative. The habits worth copying:
   distribution of $\theta \mid X$ is obtained through Bayes theorem:" and the
   formula follows. He does not circle a definition before giving it.
 - **Do not copy his voice.** His "we will assume", "we will write" is textbook
-  convention and it reads as a lecture. **A blog post has one author: write
-  "I", never the editorial "we".** For a step the reader takes, use "you" or
-  the imperative — "take their dot product", "notice what that costs you" —
-  not "we take". The only "we" that survives is inside a quotation from a
-  paper. Take the *clarity* from Storey, not the register.
+  convention and reads as a lecture. **Write "I" most of the time** — it is a
+  blog post and there is one author. For a step the reader takes, "you" or the
+  imperative is usually better and shorter: "take their dot product" beats "we
+  take their dot product". Keep "we" for the genuinely joint moments —
+  "we need to know what the model computes", "we can now compute the size of
+  the thing" — and reach for it rather than write a passive to avoid it. A
+  rough ratio of one "we" to every ten "I" is about right. Take the *clarity*
+  from Storey, not the register.
 - **Direct imperatives to the reader**: "Note that", "Always remember that".
 - **No hedging.** Almost none. Audit for *perhaps, arguably, somewhat, tends
   to, might, in some sense* and delete what is not carrying a real
@@ -355,7 +358,7 @@ It reports four numbers. The targets, from measuring his chapters:
 | median paragraph | ~50 words | his run one to two sentences |
 | paragraphs over 90 words | 0 | except the two in "Chat This Over With Friends" |
 | hedges | near 0 | keep only the ones carrying a real qualification |
-| editorial "we" | 0 | one author; "you" or the imperative for the reader's step |
+| "we" against "I" | under ~1:10 | "I" is the voice; "we" for joint moments only |
 
 A hedge worth keeping says something true about the evidence — "the paper
 never shows this to be significant". A hedge worth cutting is padding —
