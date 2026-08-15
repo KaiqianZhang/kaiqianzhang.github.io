@@ -1,39 +1,106 @@
----
-title: Pre-Norm vs. Post-Norm
-subtitle: Moving the normalizer off the main path is what made deep transformers trainable, and the argument over where to put it instead is still going.
-date: 2026-08-11
-tags: llm
-icon: 🍵
-length: long
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pre-Norm vs. Post-Norm | Kaiqian Zhang</title>
+    <meta charset='UTF-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
-I want to write about a decision that looks like nothing at all: which of
-three operations in a transformer layer happens first.
+    <meta name='description' content='Moving the normalizer off the main path is what made deep transformers trainable, and the argument over where to put it instead is still going.'>
+    <meta name='keywords' content='natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization'>
+    <meta name='author' content='Kaiqian Zhang'>
 
-A layer has three moving parts. There is a sub-layer that does the actual work
-— attention, or a small feed-forward network. There is a **residual
-connection**, which adds that work back onto what came in. And there is a
-**normalizer**, which rescales the numbers so they cannot run away. There are
-only a couple of sensible orders to put those in, and choosing between them
-sounds like the kind of thing you would settle by taste.
+    <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
+    <link href='/css/blog.css' rel='stylesheet'/>
+    <link href='/css/pygments.css' rel='stylesheet'/>
 
-It is not. Moving the normalizer from after the addition to before the
-sub-layer is most of the reason anyone can train a hundred-layer transformer
-at all, and for three years before somebody worked out why, the entire field
-was performing a ritual at the start of every training run to paper over the
-difference. What I like about this story is that the explanation, when it
-came, was one line of algebra that anybody could have written down.
+    <script>
+    /* Runs before anything is painted: a reader who chose the dark page must
+       not be shown the white one first. Nothing here consults
+       prefers-color-scheme -- the site is light until somebody asks. */
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+    </script>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+    </script>
+    <script id='MathJax-script' async
+            src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+    </script>
 
-I will assume no background. We start with the shape of a layer.
-
-[TOC]
-
-## The Normalizer Steps Aside
-
-Here are the two arrangements, side by side. I would look at them for a
-moment before reading on, because almost everything below is a consequence of
-the difference between these two pictures.
-
+</head>
+<body>
+    <button class='theme-toggle' type='button' aria-pressed='false'
+            aria-label='Switch to dark mode' title='Switch to dark mode'>
+        <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
+            <circle cx='12' cy='12' r='4.6'/>
+            <path d='M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7'/>
+        </svg>
+        <svg class='icon moon' viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z'/>
+        </svg>
+    </button>
+    <div class='nav'>
+    <ul class='wrap'>
+        <li><a href='/'>Home</a></li>
+        <li><a href='/blog/'>Blog</a></li>
+        <li><a href='/feed.xml'>RSS</a></li>
+    </ul>
+</div>
+    <div class='wrap content'>
+        <div class='front-matter'>
+            <h1>Pre-Norm vs. Post-Norm</h1>
+            <h4>Moving the normalizer off the main path is what made deep transformers trainable, and the argument over where to put it instead is still going.</h4>
+            <div class='bylines'>
+                <div class='byline'>
+                    <h3>Published</h3>
+                    <p>18 July 2026</p>
+                </div>
+                <div class='byline'>
+                    <h3>Read time</h3>
+                    <p>16 min read</p>
+                </div>
+                <div class='byline'>
+                    <h3>Tags</h3>
+                    <p><a href='/blog/tags/llm/'>Foundations for LLM</a></p>
+                </div>
+            </div>
+            <div class='clear'></div>
+        </div>
+        <div class='article'>
+<p>I want to write about a decision that looks like nothing at all: which of three operations in a transformer layer happens first.</p>
+<p>A layer has three moving parts. There is a sub-layer that does the actual work — attention, or a small feed-forward network. There is a <strong>residual connection</strong>, which adds that work back onto what came in. And there is a <strong>normalizer</strong>, which rescales the numbers so they cannot run away. There are only a couple of sensible orders to put those in, and choosing between them sounds like the kind of thing you would settle by taste.</p>
+<p>It is not. Moving the normalizer from after the addition to before the sub-layer is most of the reason anyone can train a hundred-layer transformer at all, and for three years before somebody worked out why, the entire field was performing a ritual at the start of every training run to paper over the difference. What I like about this story is that the explanation, when it came, was one line of algebra that anybody could have written down.</p>
+<p>I will assume no background. We start with the shape of a layer.</p>
+<nav class='toc'>
+    <p class='toc-head'>Contents</p>
+    <ul>
+        <li style='border-left-color: #3E6491'><a href='#the-normalizer-steps-aside'>The Normalizer Steps Aside</a></li>
+        <li style='border-left-color: #8C77BC'><a href='#1-the-ritual-nobody-could-explain'>1. The Ritual Nobody Could Explain</a></li>
+        <li style='border-left-color: #6E8C66'><a href='#2-the-one-road-every-layer-writes-to'>2. The One Road Every Layer Writes To</a></li>
+        <li style='border-left-color: #B07E55'><a href='#3-the-stream-that-only-rises'>3. The Stream That Only Rises</a></li>
+        <li style='border-left-color: #7E9EC4'><a href='#4-where-the-gradient-piles-up'>4. Where the Gradient Piles Up</a></li>
+        <li style='border-left-color: #9B7FC4'><a href='#5-the-slow-walk-back'>5. The Slow Walk Back</a></li>
+        <li style='border-left-color: #5F8A8B'><a href='#6-what-a-stack-of-random-matrices-knows'>6. What a Stack of Random Matrices Knows</a></li>
+        <li style='border-left-color: #9C7B62'><a href='#7-chat-this-over-with-friends'>7. Chat This Over With Friends</a></li>
+        <li style='border-left-color: #3E6491'><a href='#8-references'>8. References</a></li>
+    </ul>
+</nav>
+<h2 id='the-normalizer-steps-aside'>The Normalizer Steps Aside</h2>
+<p>Here are the two arrangements, side by side. I would look at them for a moment before reading on, because almost everything below is a consequence of the difference between these two pictures.</p>
 <div class='figure-pair tall'>
     <div class='panels'>
         <div class='panel'>
@@ -66,13 +133,8 @@ the difference between these two pictures.
         Figure 1, Xiong et al. (2020), recoloured.
     </div>
 </div>
-
-## 1. The Ritual Nobody Could Explain
-
-For three years, training a transformer meant performing a ritual that nobody
-could account for. The boxes below are the dates; the labels above the arrows
-are what forced each move.
-
+<h2 id='1-the-ritual-nobody-could-explain'>1. The Ritual Nobody Could Explain</h2>
+<p>For three years, training a transformer meant performing a ritual that nobody could account for. The boxes below are the dates; the labels above the arrows are what forced each move.</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 423' role='img' aria-label='Roadmap of normalizer placement: warm-up appears in 2017, the rearrangement spreads in 2018 to 2019, Xiong et al. explain it in 2020, pre-norm is the default after.'>
       <path class='spine' d='M99.4,211.9 Q380.1,212.7 660.8,211.8'/>
@@ -154,85 +216,26 @@ are what forced each move.
       </g>
     </svg>
 </div>
-
-The ritual is **learning-rate warm-up**, and if you have not met it, it is
-this. Training a network means repeatedly nudging its weights in the direction
-that reduces the error, and the size of the nudge is the learning rate. Warm-up
-means starting that rate at almost zero and raising it over the first few
-thousand steps instead of using the intended value immediately.
-
-It was not optional. Use too few warm-up steps and the optimization simply
-diverges; the final quality is sensitive both to how many steps you use and to
-how high you go. So the field was paying a cost at the start of every run, and
-tuning two interacting knobs to do it, with no account of what either knob was
-for. The two arrangements now have names, from the paper that finally
-explained it: Xiong and colleagues call them **Post-LN** and **Pre-LN**.
-
-## 2. The One Road Every Layer Writes To
-
-Before the algebra I want to give you the picture it is about, because the
-algebra is one line and the picture is the part that stays with you.
-
-Think of a token's vector — its list of numbers — as travelling up through the
-model on a single road. It enters at the bottom, and every layer writes
-something onto it. This road is the **residual stream**, and the reason it
-exists is worth knowing. Early deep networks did not have one: each layer
-replaced its input with something new. Those networks were very hard to train,
-because a training signal has to travel all the way back down from the output
-to the first layer, and passing through fifty replacements leaves it
-unrecognizable. The residual connection fixes this by making every layer
-*additive*. What a layer computes is added to what was already there, so there
-is always a straight, uninterrupted path from the top of the model to the
-bottom, and the training signal can travel down it without being mangled.
-
-Now put the normalizer in. Its job is to stop the numbers on the road growing
-without limit, and it does that by measuring how large they are and dividing
-back down. And here is the whole question of this post: **do you put the
-normalizer in the road, or beside it?**
-
-Post-norm puts it in the road. Each layer takes what is there, adds its
-contribution, then normalizes the total — so the road is interrupted, twice a
-layer, by an operation that rescales everything travelling on it. Pre-norm
-moves it into the branch. Each layer takes a *copy* of what is on the road,
-normalizes the copy, computes with it, and adds the result back to the road,
-which is never touched.
-
-That is the difference. The road is either clear or it is not, and a signal
-travelling back down a clear road arrives in better condition. What took three
-years to notice is that this also has a consequence going *forwards*, and that
-the forwards consequence is what the warm-up was for.
-
-## 3. The Stream That Only Rises
-
-Everything now follows from one line of algebra, and I should say up front
-that all of it is about the network at **initialization** — before any
-training has happened, when the weights are still random. With $F_l$ the
-$l$-th sub-layer and $N$ the normalizer, **post-norm** puts $N$ outside the
-addition and **pre-norm** puts it inside:
-
+<p>The ritual is <strong>learning-rate warm-up</strong>, and if you have not met it, it is this. Training a network means repeatedly nudging its weights in the direction that reduces the error, and the size of the nudge is the learning rate. Warm-up means starting that rate at almost zero and raising it over the first few thousand steps instead of using the intended value immediately.</p>
+<p>It was not optional. Use too few warm-up steps and the optimization simply diverges; the final quality is sensitive both to how many steps you use and to how high you go. So the field was paying a cost at the start of every run, and tuning two interacting knobs to do it, with no account of what either knob was for. The two arrangements now have names, from the paper that finally explained it: Xiong and colleagues call them <strong>Post-LN</strong> and <strong>Pre-LN</strong>.</p>
+<h2 id='2-the-one-road-every-layer-writes-to'>2. The One Road Every Layer Writes To</h2>
+<p>Before the algebra I want to give you the picture it is about, because the algebra is one line and the picture is the part that stays with you.</p>
+<p>Think of a token's vector — its list of numbers — as travelling up through the model on a single road. It enters at the bottom, and every layer writes something onto it. This road is the <strong>residual stream</strong>, and the reason it exists is worth knowing. Early deep networks did not have one: each layer replaced its input with something new. Those networks were very hard to train, because a training signal has to travel all the way back down from the output to the first layer, and passing through fifty replacements leaves it unrecognizable. The residual connection fixes this by making every layer <em>additive</em>. What a layer computes is added to what was already there, so there is always a straight, uninterrupted path from the top of the model to the bottom, and the training signal can travel down it without being mangled.</p>
+<p>Now put the normalizer in. Its job is to stop the numbers on the road growing without limit, and it does that by measuring how large they are and dividing back down. And here is the whole question of this post: <strong>do you put the normalizer in the road, or beside it?</strong></p>
+<p>Post-norm puts it in the road. Each layer takes what is there, adds its contribution, then normalizes the total — so the road is interrupted, twice a layer, by an operation that rescales everything travelling on it. Pre-norm moves it into the branch. Each layer takes a <em>copy</em> of what is on the road, normalizes the copy, computes with it, and adds the result back to the road, which is never touched.</p>
+<p>That is the difference. The road is either clear or it is not, and a signal travelling back down a clear road arrives in better condition. What took three years to notice is that this also has a consequence going <em>forwards</em>, and that the forwards consequence is what the warm-up was for.</p>
+<h2 id='3-the-stream-that-only-rises'>3. The Stream That Only Rises</h2>
+<p>Everything now follows from one line of algebra, and I should say up front that all of it is about the network at <strong>initialization</strong> — before any training has happened, when the weights are still random. With $F_l$ the $l$-th sub-layer and $N$ the normalizer, <strong>post-norm</strong> puts $N$ outside the addition and <strong>pre-norm</strong> puts it inside:</p>
 $$
 x_{l+1} = N\big(x_l + F_l(x_l)\big)
 \qquad\text{versus}\qquad
 x_{l+1} = x_l + F_l\big(N(x_l)\big), \quad x_{\text{out}} = N(x_{L}).
 $$
-
-Now follow the size of what is on the road, written $\|x_l\|$. Under post-norm
-the last operation in every layer is $N$, so the size is reset every layer and
-sits at $\sqrt{d}$ forever. Under pre-norm nothing ever rescales the road, so
-every layer's contribution simply accumulates on it. At initialization those
-contributions are independent of one another, which means they add the way
-independent random vectors add: their *squared* lengths sum.
-
+<p>Now follow the size of what is on the road, written $\|x_l\|$. Under post-norm the last operation in every layer is $N$, so the size is reset every layer and sits at $\sqrt{d}$ forever. Under pre-norm nothing ever rescales the road, so every layer's contribution simply accumulates on it. At initialization those contributions are independent of one another, which means they add the way independent random vectors add: their <em>squared</em> lengths sum.</p>
 $$
 \|x_L\|^2 \;\approx\; \|x_0\|^2 + \sum_{l=0}^{L-1}\|F_l\|^2 \;\approx\; (L+1)\,d .
 $$
-
-**The pre-norm residual stream grows like $\sqrt{L}$.** That is not a subtle
-effect. A 64-layer model makes 128 residual writes — two per layer — and what
-arrives at the top is about eleven times the size of what started at the
-bottom. Nothing is broken by this; the numbers are simply much larger up
-there than down here, and no part of the architecture is trying to stop them.
-
+<p><strong>The pre-norm residual stream grows like $\sqrt{L}$.</strong> That is not a subtle effect. A 64-layer model makes 128 residual writes — two per layer — and what arrives at the top is about eleven times the size of what started at the bottom. Nothing is broken by this; the numbers are simply much larger up there than down here, and no part of the architecture is trying to stop them.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 270' id='str-svg' role='img'
          aria-label='Residual stream size against depth. The pre-norm curve climbs as the square root of depth; the post-norm curve is flat. A second control shrinks the branch weights and flattens the pre-norm curve.'>
@@ -304,29 +307,9 @@ there than down here, and no part of the architecture is trying to stop them.
   draw();
 })();
 </script>
-
-One detail I would not skip: the growth follows from how the weights are
-initialized, not from the architecture, which is why the second slider can
-switch it off. GPT-2 cancelled it deliberately, scaling the residual weights
-by $1/\sqrt{N}$, two years before anybody published an explanation of what
-that was doing.
-
-Now the consequence, which is the part worth carrying. The last thing a
-pre-norm network does, after every layer has written to the road, is
-normalize. Normalizing means dividing by the size of what is there — and we
-have just established that in a deep model, what is there is $\sqrt{L}$ times
-larger than it should be. So that final division is by a large number, and
-because a gradient travelling backwards has to pass back through it, every
-gradient in the network is multiplied by roughly $1/\sqrt{L+1}$ on its way
-out.
-
-**The deeper a pre-norm model is, the harder its own final normalization damps
-every gradient in it.** Post-norm has no such term, because post-norm never
-let the road grow in the first place. That is Theorem 1 of Xiong et al. I
-should add the caveat they add: both sides are *upper* bounds, so the theorem
-does not by itself prove a separation. What carries the separation is the
-measurement in the next section.[^warmup]
-
+<p>One detail I would not skip: the growth follows from how the weights are initialized, not from the architecture, which is why the second slider can switch it off. GPT-2 cancelled it deliberately, scaling the residual weights by $1/\sqrt{N}$, two years before anybody published an explanation of what that was doing.</p>
+<p>Now the consequence, which is the part worth carrying. The last thing a pre-norm network does, after every layer has written to the road, is normalize. Normalizing means dividing by the size of what is there — and we have just established that in a deep model, what is there is $\sqrt{L}$ times larger than it should be. So that final division is by a large number, and because a gradient travelling backwards has to pass back through it, every gradient in the network is multiplied by roughly $1/\sqrt{L+1}$ on its way out.</p>
+<p><strong>The deeper a pre-norm model is, the harder its own final normalization damps every gradient in it.</strong> Post-norm has no such term, because post-norm never let the road grow in the first place. That is Theorem 1 of Xiong et al. I should add the caveat they add: both sides are <em>upper</em> bounds, so the theorem does not by itself prove a separation. What carries the separation is the measurement in the next section.<sup id='fnref:warmup' class='footnote'><a href='#fn:warmup'>1</a></sup></p>
 <div class='pulse-anim'>
     <svg viewBox='0 0 720 250' role='img'
          aria-label='Two stacks of six layers. A gradient pulse travels down the post-norm stack passing through a normalizer at every layer, and down the pre-norm stack along an unbroken residual path.'>
@@ -363,13 +346,8 @@ measurement in the next section.[^warmup]
         intact.
     </div>
 </div>
-
-## 4. Where the Gradient Piles Up
-
-The theorem is about the last layer. What happens across all of them is
-measured rather than derived, and I want to show it to you because it does
-*not* say what section 3 would lead you to expect.
-
+<h2 id='4-where-the-gradient-piles-up'>4. Where the Gradient Piles Up</h2>
+<p>The theorem is about the last layer. What happens across all of them is measured rather than derived, and I want to show it to you because it does <em>not</em> say what section 3 would lead you to expect.</p>
 <div class='figure-pair'>
     <div class='panels'>
         <div class='panel'>
@@ -407,36 +385,11 @@ measured rather than derived, and I want to show it to you because it does
         Figures 3(b) and 4(b), Xiong et al. (2020), recoloured.
     </div>
 </div>
-
-So the honest summary is that the road being clear is the mechanism, and it is
-not a metaphor: the main path in Figure 1(b) really is a sum, with no
-nonlinearity and no rescaling anywhere along it, where post-norm has $L$
-normalizers standing in it. What warm-up was doing was holding the learning
-rate small enough that a post-norm network could survive the early steps in
-which its gradients are wild. Pre-norm does not need that because its
-gradients are not wild — merely, at depth, quiet.
-
-One thing I should not overstate: nobody established that pre-norm is *better*
-in the sense of reaching a better model. Xiong et al. showed it reaching
-comparable results faster, and without the ritual. That is the claim, and it
-is the claim that won.
-
-## 5. The Slow Walk Back
-
-If pre-norm had simply won, this post would end here. Instead the last few
-years have been an effort to recover post-norm's advantages without its
-instability, turning a two-way choice into a four-way one. Swin Transformer V2
-(2021) moved the normalizer to each branch's *output*, bounding what gets
-added to the stream; DeepNet (2022) kept post-norm and fixed the instability
-directly, reaching 1,000 layers; Gemma 2 normalizes *both* ends
-(**Peri-LN**), and OLMo 2 adopted Swin's arrangement as **reordered norm**.
-
-The honest detail: it does not work alone. OLMo 2 pairs it with query and key
-normalization, reporting that "in isolation, neither of these changes yield
-good results, but together they improve both the growth and the spikiness of
-the L2 norm of the gradient." Without the pre-norm, attention sees the raw
-residual stream, so the logits grow with it and something must bound them.
-
+<p>So the honest summary is that the road being clear is the mechanism, and it is not a metaphor: the main path in Figure 1(b) really is a sum, with no nonlinearity and no rescaling anywhere along it, where post-norm has $L$ normalizers standing in it. What warm-up was doing was holding the learning rate small enough that a post-norm network could survive the early steps in which its gradients are wild. Pre-norm does not need that because its gradients are not wild — merely, at depth, quiet.</p>
+<p>One thing I should not overstate: nobody established that pre-norm is <em>better</em> in the sense of reaching a better model. Xiong et al. showed it reaching comparable results faster, and without the ritual. That is the claim, and it is the claim that won.</p>
+<h2 id='5-the-slow-walk-back'>5. The Slow Walk Back</h2>
+<p>If pre-norm had simply won, this post would end here. Instead the last few years have been an effort to recover post-norm's advantages without its instability, turning a two-way choice into a four-way one. Swin Transformer V2 (2021) moved the normalizer to each branch's <em>output</em>, bounding what gets added to the stream; DeepNet (2022) kept post-norm and fixed the instability directly, reaching 1,000 layers; Gemma 2 normalizes <em>both</em> ends (<strong>Peri-LN</strong>), and OLMo 2 adopted Swin's arrangement as <strong>reordered norm</strong>.</p>
+<p>The honest detail: it does not work alone. OLMo 2 pairs it with query and key normalization, reporting that "in isolation, neither of these changes yield good results, but together they improve both the growth and the spikiness of the L2 norm of the gradient." Without the pre-norm, attention sees the raw residual stream, so the logits grow with it and something must bound them.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='arr-svg' role='img'
          aria-label='A transformer sub-layer with the normalizer able to sit in four places: on the main path after the addition, inside the branch before the sub-layer, inside the branch after it, or both.'>
@@ -526,25 +479,15 @@ residual stream, so the logits grow with it and something must bound them.
   draw();
 })();
 </script>
+<p>So "moving it back" needs qualifying. Only DeepNet went back literally; the others leave the residual path clean and move the normalizer <em>within</em> the branch. What was recovered is post-norm's restraint, not its position.</p>
+<h2 id='6-what-a-stack-of-random-matrices-knows'>6. What a Stack of Random Matrices Knows</h2>
+<p>I have made two quantitative claims — that the stream grows like $\sqrt{L}$ and that the final normalization damps gradients by $1/\sqrt{L+1}$ — and both are checkable in something small enough to fit in a paragraph. No attention, no data, no training: just random linear sub-layers, stacked the two ways.</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">pre_norm_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>          <span class="c1"># main path untouched</span>
 
-So "moving it back" needs qualifying. Only DeepNet went back literally; the
-others leave the residual path clean and move the normalizer *within* the
-branch. What was recovered is post-norm's restraint, not its position.
-
-## 6. What a Stack of Random Matrices Knows
-
-I have made two quantitative claims — that the stream grows like $\sqrt{L}$
-and that the final normalization damps gradients by $1/\sqrt{L+1}$ — and both
-are checkable in something small enough to fit in a paragraph. No attention,
-no data, no training: just random linear sub-layers, stacked the two ways.
-
-```python
-def pre_norm_step(x, W):
-    return x + W @ norm(x)          # main path untouched
-
-def post_norm_step(x, W):
-    return norm(x + W @ x)          # main path renormalized
-```
+<span class="k">def</span><span class="w"> </span><span class="nf">post_norm_step</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">W</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">norm</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">W</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span>          <span class="c1"># main path renormalized</span>
+</pre></div>
 
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='stk-svg' role='img'
@@ -664,79 +607,127 @@ def post_norm_step(x, W):
   draw();
 })();
 </script>
+<p>What that shows is the <em>mechanism</em> behind Theorem 1 rather than the theorem itself, and I think the mechanism is the more useful thing to hold. There is no attention here, no nonlinearity, no data and no learning, and the damping appears anyway. It is a property of the arithmetic of stacking, not of anything a transformer does in particular.</p>
+<p>One honesty note, because it cuts the other way. Nothing in this toy is unstable — the post-norm stack sits there perfectly well — so it says nothing at all about why post-norm is hard to train. It demonstrates pre-norm's cost, not post-norm's.</p>
+<h3 id='where-this-sits-now'>Where This Sits Now</h3>
+<p>If you are heading into research, the thing to take from this is that a component's <em>position</em> can matter as much as what it computes, and that the field spent three years treating a symptom of a position choice as a hyper-parameter.</p>
+<p>The specific arrangement is settled at the boundaries and open in the middle. Nobody is putting the normalizer back on the main path — the clean residual stream is now something everything else assumes, including every interpretability method that reads the stream directly. But the question of how to bound what gets <em>written</em> to it is live: Peri-LN, reordered norm, and query-key normalization are all recent attempts, and OLMo 2's finding that theirs only works in combination is the kind of result that suggests nobody has the underlying principle yet. The other reason this stays interesting is depth. Every argument above gets worse as $L$ grows, so if models get much deeper rather than merely wider, this becomes a live problem again rather than a settled one.</p>
+<h2 id='7-chat-this-over-with-friends'>7. Chat This Over With Friends</h2>
+<p>In one sentence: moving the normalizer one step earlier — off the main path and into the side branch — is most of the reason anybody can train a hundred-layer transformer. The mechanism is simple enough to carry around in your head. A token's vector travels up the model on a single road that every layer adds to, and under pre-norm nothing along that road ever rescales it, so it accumulates, growing like the square root of the depth. A 64-layer model arrives at the top carrying something about eleven times larger than what started at the bottom. The last thing the network does is normalize, which means divide by that size — so every gradient in the model is damped by roughly one over the square root of the depth before a single training step has happened. That is the whole of the 2020 theorem, and a stack of random matrices with no data in it reproduces both halves.</p>
+<p>The conclusion people usually draw from this is a little too strong. You will hear that pre-norm let the field delete learning-rate warm-up, and every large model named in this post still warms up; what actually changed is that the warm-up's length and peak stopped being choices that could sink a run. The more interesting thing to raise is that the field has been quietly walking the decision back since about 2022. DeepNet made post-norm trainable at a thousand layers; Gemma 2 normalizes both ends of each branch, and OLMo 2 normalizes after the sub-layer again — while reporting that this only works when paired with normalizing attention's queries and keys, which is not the sound of a solved problem. What nobody has done is put the normalizer back on the main path. The road stays clear. What got recovered was post-norm's restraint, not its position.</p>
+<h2 id='8-references'>8. References</h2>
+<ol>
+  <li>Vaswani, A., et al. (2017). Attention Is All You Need. <a href='https://arxiv.org/abs/1706.03762'>arXiv:1706.03762</a></li>
+  <li>Xiong, R., et al. (2020). On Layer Normalization in the Transformer Architecture. <em>ICML</em>. <a href='https://arxiv.org/abs/2002.04745'>arXiv:2002.04745</a></li>
+  <li>Wang, H., et al. (2022). DeepNet: Scaling Transformers to 1,000 Layers. <a href='https://arxiv.org/abs/2203.00555'>arXiv:2203.00555</a></li>
+  <li>Liu, Z., et al. (2022). Swin Transformer V2. <em>CVPR</em>. <a href='https://arxiv.org/abs/2111.09883'>arXiv:2111.09883</a></li>
+  <li>OLMo Team (2025). 2 OLMo 2 Furious. <a href='https://arxiv.org/abs/2501.00656'>arXiv:2501.00656</a></li>
+</ol>
+<div class='footnotes'>
+  <ol>
+    <li id='fn:warmup'>Warm-up is not <em>only</em> about placement. Liu et al. (2019) argued it compensates for the variance of Adam's adaptive learning rate early on; Xiong et al. note it helps other optimizers too. Both effects are probably real. <a href='#fnref:warmup'>&#8617;</a></li>
+  </ol>
+</div>
+        </div>
+        <div class='applause'>
+            <button class='applause-btn' type='button' aria-pressed='false'
+                    aria-label='Like this post'
+                    title='Kept in your browser. Nothing is sent anywhere.'>
+                <span class='hearts' aria-hidden='true'><svg class='h h1' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h2' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h3' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg></span>
+                <span class='applause-label'>like</span>
+                <span class='applause-count' hidden></span>
+            </button>
+        </div>
+        <div id='more'>
+            <a href='/blog/'>&larr; All posts</a>
+        </div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.applause-btn');
+      if (!btn) return;
+      var label = btn.querySelector('.applause-label');
+      var counter = btn.querySelector('.applause-count');
+      var api = 'https://blog-likes.kaiqianzhang.workers.dev';
+      var slug = 'pre-norm-vs-post-norm';
+      var key = 'liked:' + location.pathname;
+      var count = null;
 
-What that shows is the *mechanism* behind Theorem 1 rather than the theorem
-itself, and I think the mechanism is the more useful thing to hold. There is
-no attention here, no nonlinearity, no data and no learning, and the damping
-appears anyway. It is a property of the arithmetic of stacking, not of
-anything a transformer does in particular.
+      function show() {
+        if (count === null) return;
+        counter.hidden = false;
+        counter.textContent = count;
+      }
+      function paint(on, animate) {
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? 'liked' : 'like';
+        if (on && animate) {
+          btn.classList.remove('is-popping');
+          void btn.offsetWidth;
+          btn.classList.add('is-popping');
+        }
+      }
+      function liked() {
+        try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+      }
 
-One honesty note, because it cuts the other way. Nothing in this toy is
-unstable — the post-norm stack sits there perfectly well — so it says nothing
-at all about why post-norm is hard to train. It demonstrates pre-norm's cost,
-not post-norm's.
+      paint(liked(), false);
 
-### Where This Sits Now
+      if (api) {
+        fetch(api + '/' + slug, {cache: 'no-store'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      }
 
-If you are heading into research, the thing to take from this is that a
-component's *position* can matter as much as what it computes, and that the
-field spent three years treating a symptom of a position choice as a
-hyper-parameter.
+      btn.addEventListener('click', function () {
+        var on = !btn.classList.contains('is-on');
+        try {
+          on ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+        } catch (e) {}
+        paint(on, true);
+        if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
+        if (!api) return;
+        fetch(api + '/' + slug, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({delta: on ? 1 : -1})
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      });
+    })();
+    </script>
 
-The specific arrangement is settled at the boundaries and open in the middle.
-Nobody is putting the normalizer back on the main path — the clean residual
-stream is now something everything else assumes, including every
-interpretability method that reads the stream directly. But the question of
-how to bound what gets *written* to it is live: Peri-LN, reordered norm, and
-query-key normalization are all recent attempts, and OLMo 2's finding that
-theirs only works in combination is the kind of result that suggests nobody
-has the underlying principle yet. The other reason this stays interesting is
-depth. Every argument above gets worse as $L$ grows, so if models get much
-deeper rather than merely wider, this becomes a live problem again rather
-than a settled one.
-
-## 7. Chat This Over With Friends
-
-In one sentence: moving the normalizer one step earlier — off the main path
-and into the side branch — is most of the reason anybody can train a
-hundred-layer transformer. The mechanism is simple enough to carry around in
-your head. A token's vector travels up the model on a single road that every
-layer adds to, and under pre-norm nothing along that road ever rescales it, so
-it accumulates, growing like the square root of the depth. A 64-layer model
-arrives at the top carrying something about eleven times larger than what
-started at the bottom. The last thing the network does is normalize, which
-means divide by that size — so every gradient in the model is damped by
-roughly one over the square root of the depth before a single training step
-has happened. That is the whole of the 2020 theorem, and a stack of random
-matrices with no data in it reproduces both halves.
-
-The conclusion people usually draw from this is a little too strong. You will
-hear that pre-norm let the field delete learning-rate warm-up, and every large
-model named in this post still warms up; what actually changed is that the
-warm-up's length and peak stopped being choices that could sink a run. The
-more interesting thing to raise is that the field has been quietly walking the
-decision back since about 2022. DeepNet made post-norm trainable at a thousand
-layers; Gemma 2 normalizes both ends of each branch, and OLMo 2 normalizes
-after the sub-layer again — while reporting that this only works when paired
-with normalizing attention's queries and keys, which is not the sound of a
-solved problem. What nobody has done is put the normalizer back on the main
-path. The road stays clear. What got recovered was post-norm's restraint, not
-its position.
-
-## 8. References
-
-1. Vaswani, A., et al. (2017). Attention Is All You Need.
-   [arXiv:1706.03762](https://arxiv.org/abs/1706.03762)
-2. Xiong, R., et al. (2020). On Layer Normalization in the Transformer
-   Architecture. *ICML*. [arXiv:2002.04745](https://arxiv.org/abs/2002.04745)
-3. Wang, H., et al. (2022). DeepNet: Scaling Transformers to 1,000 Layers.
-   [arXiv:2203.00555](https://arxiv.org/abs/2203.00555)
-4. Liu, Z., et al. (2022). Swin Transformer V2. *CVPR*.
-   [arXiv:2111.09883](https://arxiv.org/abs/2111.09883)
-5. OLMo Team (2025). 2 OLMo 2 Furious.
-   [arXiv:2501.00656](https://arxiv.org/abs/2501.00656)
-
-[^warmup]: Warm-up is not *only* about placement. Liu et al. (2019) argued it
-    compensates for the variance of Adam's adaptive learning rate early on;
-    Xiong et al. note it helps other optimizers too. Both effects are probably
-    real.
+    <div class='credit'>
+        <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      function paint() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var say = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        btn.setAttribute('aria-label', say);
+        btn.setAttribute('title', say);
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') !== 'dark';
+        if (dark) { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    })();
+    </script>
+</body>
+</html>

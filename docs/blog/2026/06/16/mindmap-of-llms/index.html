@@ -67,7 +67,7 @@
             <div class='bylines'>
                 <div class='byline'>
                     <h3>Published</h3>
-                    <p>10 August 2026</p>
+                    <p>16 June 2026</p>
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
@@ -531,7 +531,7 @@ $$
 <p>One link I had missed entirely belongs here: attention was not the transformer's invention. Bahdanau and colleagues added it to an RNN encoder-decoder in 2014, so a decoder could look back at any source position without squeezing through a bottleneck state. The transformer deleted the recurrence around it — every position against every other in one parallel operation, with reach no longer set by how far a gradient survives a matrix product.</p>
 <p>The price is worth writing down, because the cheerful version of this story tends to omit it: <strong>attention costs $O(T^2)$</strong>, and autoregressive decoding needs a KV cache that grows with the sequence.</p>
 <p>Two qualifications, since that sentence has aged. The quadratic term is <em>compute</em>: attention's memory has been linear in practice since FlashAttention showed the $T \times T$ matrix need never be materialized. And the parallelism is real in training and prefill but not in generation, which emits one token per forward pass and is as sequential as an RNN — which is why the KV cache exists at all.</p>
-<p>That node opens onto three arguments I have written up elsewhere: which normalizer goes inside the block (<a href='/blog/2026/08/11/rmsnorm-vs-layernorm/'>RMSNorm vs. LayerNorm</a>), where in the block it goes (<a href='/blog/2026/08/11/pre-norm-vs-post-norm/'>Pre-Norm vs. Post-Norm</a>), and how position gets into a model that has no sense of order (<a href='/blog/2026/08/11/rope/'>RoPE</a>).</p>
+<p>That node opens onto three arguments I have written up elsewhere: which normalizer goes inside the block (<a href='/blog/2026/07/10/rmsnorm-vs-layernorm/'>RMSNorm vs. LayerNorm</a>), where in the block it goes (<a href='/blog/2026/07/18/pre-norm-vs-post-norm/'>Pre-Norm vs. Post-Norm</a>), and how position gets into a model that has no sense of order (<a href='/blog/2026/07/02/rope/'>RoPE</a>).</p>
 <p>One last side note belongs here, about normalization — the operation that keeps the numbers inside a deep network from running away. <strong>BatchNorm</strong> normalizes a feature across the samples in a batch; <strong>LayerNorm</strong> normalizes across the features within one sample.</p>
 <p>The sharper half of the argument for preferring the latter is this: the same channel of two different images is a comparable quantity, and two different channels of one image are not. Sentences make it worse still, since they have different lengths and arrive in batches of wildly varying shape. That is most of why language models normalize within a sample rather than across a batch.</p>
 <h2 id='6-counting-the-doors-still-open'>6. Counting the Doors Still Open</h2>

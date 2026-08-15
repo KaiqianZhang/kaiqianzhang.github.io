@@ -1,85 +1,112 @@
----
-title: What the KV Cache Costs
-subtitle: The buffer that makes generation affordable is the reason serving a language model is hard.
-date: 2026-08-13
-tags: llm
-icon: 🍵
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>What the KV Cache Costs | Kaiqian Zhang</title>
+    <meta charset='UTF-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
-I wrote a post about [the KV cache](/blog/2026/08/13/kv-cache/), which is the
-buffer that stops a language model from redoing all of its work every time it
-writes a word. That post was about what the cache is and why it is allowed to
-exist. This one is about what it costs, which turns out to be a much stranger
-subject, and the one that actually occupies people who run these models for a
-living.
+    <meta name='description' content='The buffer that makes generation affordable is the reason serving a language model is hard.'>
+    <meta name='keywords' content='natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization'>
+    <meta name='author' content='Kaiqian Zhang'>
 
-I will not assume you have read the other post. The next few paragraphs give
-you everything you need.
+    <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
+    <link href='/css/blog.css' rel='stylesheet'/>
+    <link href='/css/pygments.css' rel='stylesheet'/>
 
-[TOC]
+    <script>
+    /* Runs before anything is painted: a reader who chose the dark page must
+       not be shown the white one first. Nothing here consults
+       prefers-color-scheme -- the site is light until somebody asks. */
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+    </script>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+    </script>
+    <script id='MathJax-script' async
+            src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+    </script>
 
-## What We Are Talking About
-
-Let me give you the whole mechanism in a few paragraphs, so that nothing below
-depends on your having read anything else.
-
-A language model writes one **token** at a time — a token being a chunk of
-text, roughly a word. To choose each one, it looks back over everything
-written so far, and the looking-back is done by a mechanism called
-**attention**. Attention turns every token into three lists of numbers. The
-first says what that token is looking for, the second advertises what it has
-to offer, and the third is the content it hands over. They are called the
-**query**, the **key** and the **value**. The current token's query is
-compared against every earlier token's key, and the resulting scores decide
-how much of each value gets blended into the answer.
-
-Two structural facts, because both show up in the arithmetic below. The model
-does not run one copy of this across the full width of its vectors — it splits
-the width into parallel pieces called **heads**, each with its own learned
-projections. And it repeats the whole arrangement at every **layer**, stacked
-dozens deep. Llama 3 70B has 80 layers. Modern models use fewer heads for keys
-and values than for queries, which is why I will write $n_{kv}$ for the
-key-value head count and mention separately that there are usually four or
-eight times as many query heads.
-
-Now the important part. A token's key and value depend only on that token and
-the ones before it, so once computed they never change. Its query does not
-have that property in any useful sense, because a query is used once, at the
-step it belongs to, and is never wanted again. So there is an obvious saving
-available: store every token's key and value, and reuse them at every later
-step instead of recomputing them. That store is the **KV cache**, and it is
-the difference between generation costing you the square of the answer's
-length and costing you something close to linear in it. I wrote a whole post
-about [what it is and why it works](/blog/2026/08/13/kv-cache/); this one
-takes it as given.
-
-Per layer, per conversation, the cache holds two tensors of shape
-$n_{kv} \times t \times d_h$, where $t$ counts the tokens seen so far and
-$d_h$ is how many numbers are in one key. Read that as a stack of rows, one
-row per token. Multiply it out over $L$ layers, at $p$ bytes a number, and one
-conversation is holding
-
+</head>
+<body>
+    <button class='theme-toggle' type='button' aria-pressed='false'
+            aria-label='Switch to dark mode' title='Switch to dark mode'>
+        <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
+            <circle cx='12' cy='12' r='4.6'/>
+            <path d='M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7'/>
+        </svg>
+        <svg class='icon moon' viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z'/>
+        </svg>
+    </button>
+    <div class='nav'>
+    <ul class='wrap'>
+        <li><a href='/'>Home</a></li>
+        <li><a href='/blog/'>Blog</a></li>
+        <li><a href='/feed.xml'>RSS</a></li>
+    </ul>
+</div>
+    <div class='wrap content'>
+        <div class='front-matter'>
+            <h1>What the KV Cache Costs</h1>
+            <h4>The buffer that makes generation affordable is the reason serving a language model is hard.</h4>
+            <div class='bylines'>
+                <div class='byline'>
+                    <h3>Published</h3>
+                    <p>12 August 2026</p>
+                </div>
+                <div class='byline'>
+                    <h3>Read time</h3>
+                    <p>17 min read</p>
+                </div>
+                <div class='byline'>
+                    <h3>Tags</h3>
+                    <p><a href='/blog/tags/llm/'>Foundations for LLM</a></p>
+                </div>
+            </div>
+            <div class='clear'></div>
+        </div>
+        <div class='article'>
+<p>I wrote a post about <a href='/blog/2026/08/04/kv-cache/'>the KV cache</a>, which is the buffer that stops a language model from redoing all of its work every time it writes a word. That post was about what the cache is and why it is allowed to exist. This one is about what it costs, which turns out to be a much stranger subject, and the one that actually occupies people who run these models for a living.</p>
+<p>I will not assume you have read the other post. The next few paragraphs give you everything you need.</p>
+<nav class='toc'>
+    <p class='toc-head'>Contents</p>
+    <ul>
+        <li style='border-left-color: #3E6491'><a href='#what-we-are-talking-about'>What We Are Talking About</a></li>
+        <li style='border-left-color: #8C77BC'><a href='#1-four-ways-to-fight-the-same-number'>1. Four Ways to Fight the Same Number</a></li>
+        <li style='border-left-color: #6E8C66'><a href='#2-one-room-per-guest-and-the-weights-everyone-shares'>2. One Room per Guest, and the Weights Everyone Shares</a></li>
+        <li style='border-left-color: #B07E55'><a href='#3-the-waste-that-had-nothing-to-do-with-size'>3. The Waste That Had Nothing to Do With Size</a></li>
+        <li style='border-left-color: #7E9EC4'><a href='#4-where-it-stops-being-free'>4. Where It Stops Being Free</a></li>
+        <li style='border-left-color: #9B7FC4'><a href='#5-chat-this-over-with-friends'>5. Chat This Over With Friends</a></li>
+        <li style='border-left-color: #5F8A8B'><a href='#6-references'>6. References</a></li>
+    </ul>
+</nav>
+<h2 id='what-we-are-talking-about'>What We Are Talking About</h2>
+<p>Let me give you the whole mechanism in a few paragraphs, so that nothing below depends on your having read anything else.</p>
+<p>A language model writes one <strong>token</strong> at a time — a token being a chunk of text, roughly a word. To choose each one, it looks back over everything written so far, and the looking-back is done by a mechanism called <strong>attention</strong>. Attention turns every token into three lists of numbers. The first says what that token is looking for, the second advertises what it has to offer, and the third is the content it hands over. They are called the <strong>query</strong>, the <strong>key</strong> and the <strong>value</strong>. The current token's query is compared against every earlier token's key, and the resulting scores decide how much of each value gets blended into the answer.</p>
+<p>Two structural facts, because both show up in the arithmetic below. The model does not run one copy of this across the full width of its vectors — it splits the width into parallel pieces called <strong>heads</strong>, each with its own learned projections. And it repeats the whole arrangement at every <strong>layer</strong>, stacked dozens deep. Llama 3 70B has 80 layers. Modern models use fewer heads for keys and values than for queries, which is why I will write $n_{kv}$ for the key-value head count and mention separately that there are usually four or eight times as many query heads.</p>
+<p>Now the important part. A token's key and value depend only on that token and the ones before it, so once computed they never change. Its query does not have that property in any useful sense, because a query is used once, at the step it belongs to, and is never wanted again. So there is an obvious saving available: store every token's key and value, and reuse them at every later step instead of recomputing them. That store is the <strong>KV cache</strong>, and it is the difference between generation costing you the square of the answer's length and costing you something close to linear in it. I wrote a whole post about <a href='/blog/2026/08/04/kv-cache/'>what it is and why it works</a>; this one takes it as given.</p>
+<p>Per layer, per conversation, the cache holds two tensors of shape $n_{kv} \times t \times d_h$, where $t$ counts the tokens seen so far and $d_h$ is how many numbers are in one key. Read that as a stack of rows, one row per token. Multiply it out over $L$ layers, at $p$ bytes a number, and one conversation is holding</p>
 $$
 2 \, L \, n_{kv} \, d_h \, t \, p \quad \text{bytes.}
 $$
-
-For Llama 3 8B, with 32 layers, 8 key-value heads and 128 numbers per head,
-that comes to 128 KiB for every token. For Llama 3 70B it is 320 KiB, so a
-conversation that fills its 128K-token context window — 131,072 tokens, since
-these are always powers of two — is sitting on exactly 40 GiB. A **context
-window** is just the model's limit on how much text it can consider at once.
-
-Two things about that number matter, and the whole of this post is really
-about the second. The first is that it is large. The second is that it belongs
-to *one conversation*, and nobody else can touch it.
-
-One last piece of vocabulary, since I will lean on it. Answering happens in
-two phases that behave nothing alike. **Prefill** is the model reading your
-prompt, which it can do in one pass because the whole prompt is already there.
-**Decode** is the model writing the answer, one token at a time, because it
-cannot start the second token until it has seen the first. Everything
-expensive in this post happens during decode.
-
+<p>For Llama 3 8B, with 32 layers, 8 key-value heads and 128 numbers per head, that comes to 128 KiB for every token. For Llama 3 70B it is 320 KiB, so a conversation that fills its 128K-token context window — 131,072 tokens, since these are always powers of two — is sitting on exactly 40 GiB. A <strong>context window</strong> is just the model's limit on how much text it can consider at once.</p>
+<p>Two things about that number matter, and the whole of this post is really about the second. The first is that it is large. The second is that it belongs to <em>one conversation</em>, and nobody else can touch it.</p>
+<p>One last piece of vocabulary, since I will lean on it. Answering happens in two phases that behave nothing alike. <strong>Prefill</strong> is the model reading your prompt, which it can do in one pass because the whole prompt is already there. <strong>Decode</strong> is the model writing the answer, one token at a time, because it cannot start the second token until it has seen the first. Everything expensive in this post happens during decode.</p>
 <div class='sketch'>
     <svg viewBox='0 0 720 222' role='img' aria-label='One block of model weights read by every conversation, beside four separate caches of different sizes, one per conversation and usable by nobody else.'>
       <text class='sk-lbl' x='14.0' y='24.0' text-anchor='start'>shared by everyone</text>
@@ -125,12 +152,8 @@ expensive in this post happens during decode.
         has to be read on every step.
     </div>
 </div>
-
-## 1. Four Ways to Fight the Same Number
-
-The story of the last few years is a sequence of attempts to make that number
-smaller, or at least cheaper to live with.
-
+<h2 id='1-four-ways-to-fight-the-same-number'>1. Four Ways to Fight the Same Number</h2>
+<p>The story of the last few years is a sequence of attempts to make that number smaller, or at least cheaper to live with.</p>
 <div class='roadmap'>
     <svg viewBox='0 0 760 420' role='img' aria-label='Roadmap of the fight against the cost of the KV cache: multi-query attention in 2019, grouped-query in 2023, paging in 2023, and latent compression in 2024.'>
       <path class='spine' d='M99.4,209.4 Q379.8,209.8 660.2,209.9'/>
@@ -217,30 +240,11 @@ smaller, or at least cheaper to live with.
       </g>
     </svg>
 </div>
-
-I want to point at the third box, because it is the one that surprised me. The
-first, second and fourth are all attempts to make the cache *smaller* — fewer
-key-value heads, or a compressed stand-in for them. The third makes nothing
-smaller at all. It just stops the memory being reserved wastefully, and it
-turned out to be worth more than either of the shrinking tricks. I will come
-back to it in section 3.
-
-## 2. One Room per Guest, and the Weights Everyone Shares
-
-Let me start with the thing that makes this cost an unusual one.
-
-The **weights** of a model — the numbers it learned during training — are
-shared. Every conversation being served runs through the same weights, so a
-server handling fifty conversations at once reads them once and lets all fifty
-benefit. I would go so far as to say this is why serving models is a business
-at all: the expensive asset gets amortised across everybody using it, and the
-more people show up, the better the economics look.
-
-The cache is the opposite. Each conversation has its own, it cannot be lent to
-anybody else, and it grows for as long as the conversation continues. If the
-weights are a building that all the guests share, the cache is a room per
-guest, and the rooms get bigger the longer people stay.
-
+<p>I want to point at the third box, because it is the one that surprised me. The first, second and fourth are all attempts to make the cache <em>smaller</em> — fewer key-value heads, or a compressed stand-in for them. The third makes nothing smaller at all. It just stops the memory being reserved wastefully, and it turned out to be worth more than either of the shrinking tricks. I will come back to it in section 3.</p>
+<h2 id='2-one-room-per-guest-and-the-weights-everyone-shares'>2. One Room per Guest, and the Weights Everyone Shares</h2>
+<p>Let me start with the thing that makes this cost an unusual one.</p>
+<p>The <strong>weights</strong> of a model — the numbers it learned during training — are shared. Every conversation being served runs through the same weights, so a server handling fifty conversations at once reads them once and lets all fifty benefit. I would go so far as to say this is why serving models is a business at all: the expensive asset gets amortised across everybody using it, and the more people show up, the better the economics look.</p>
+<p>The cache is the opposite. Each conversation has its own, it cannot be lent to anybody else, and it grows for as long as the conversation continues. If the weights are a building that all the guests share, the cache is a room per guest, and the rooms get bigger the longer people stay.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 192' id='bg-svg' role='img'
          aria-label='The 80 gigabytes of one H100, divided into model weights, the key-value caches of however many conversations fit, and whatever is left over. As the context length grows, fewer conversations fit.'>
@@ -267,7 +271,6 @@ guest, and the rooms get bigger the longer people stay.
     would drag the second slider slowly: the weights never move, and the
     number of people the machine can serve falls off a cliff.
 </div>
-
 <script>
 (function () {
   var scene = document.getElementById('bg-scene'),
@@ -342,54 +345,15 @@ guest, and the rooms get bigger the longer people stay.
   draw();
 })();
 </script>
-
-To see why this hurts more than it looks, I need to tell you one fact about
-the hardware. Models are run on **GPUs** — graphics processors, originally built for
-rendering, which happen to be very good at doing the same arithmetic to
-thousands of numbers at once. On a GPU, moving a number out of memory and into
-the part of the chip that does the arithmetic takes time, and it takes far
-more time than the arithmetic itself does. An NVIDIA H100 can perform roughly
-three hundred arithmetic operations in the time it takes to fetch a single
-byte from its memory. The rate at which it can move bytes is called its
-**memory bandwidth**.
-
-This is exactly what Noam Shazeer worked out in 2019. The paper that opens the
-roadmap above is remembered for multi-query attention, which is the fix it
-proposes, but the part I care about here is the diagnosis that comes first. He
-computed the ratio of memory access to arithmetic for one step of decoding,
-and got
-
+<p>To see why this hurts more than it looks, I need to tell you one fact about the hardware. Models are run on <strong>GPUs</strong> — graphics processors, originally built for rendering, which happen to be very good at doing the same arithmetic to thousands of numbers at once. On a GPU, moving a number out of memory and into the part of the chip that does the arithmetic takes time, and it takes far more time than the arithmetic itself does. An NVIDIA H100 can perform roughly three hundred arithmetic operations in the time it takes to fetch a single byte from its memory. The rate at which it can move bytes is called its <strong>memory bandwidth</strong>.</p>
+<p>This is exactly what Noam Shazeer worked out in 2019. The paper that opens the roadmap above is remembered for multi-query attention, which is the fix it proposes, but the part I care about here is the diagnosis that comes first. He computed the ratio of memory access to arithmetic for one step of decoding, and got</p>
 $$
 \Theta\!\left(\frac{n}{d} + \frac{1}{b}\right),
 $$
-
-where $n$ is the length of the conversation, $d$ is the width of the model,
-and $b$ is the number of conversations being served together. (The estimate
-assumes $n \le d$; longer conversations only make the first term worse.)
-
-Now think about what a ratio close to one would mean. The chip would be moving
-one byte out of memory for every single arithmetic operation it performs. That
-is a terrible trade on this hardware. As I said a moment ago, an H100 can do
-about three hundred operations in the time it takes to fetch one byte, so at a
-ratio of one it is spending almost all of its time waiting for memory to
-arrive and almost none of it computing. The machine is idling, and you are
-still paying for it by the hour.
-
-Now I would like you to look at the two terms separately, because they behave
-completely differently, and the difference between them is the whole problem
-this post is about. The $1/b$ term is the
-friendly one: serve more conversations at once and it shrinks, because the
-weights get read once and shared among all of them. This is why servers batch
-requests together, and it is the single most effective thing anybody does. The
-$n/d$ term is not friendly at all. It does not shrink with batching, because
-every conversation drags its own cache along. Adding a fifty-first conversation
-adds a fifty-first cache that has to be read on every step.
-
-You can feel the trade in the figure below. Move the batch size and watch the
-throughput climb as the weights get shared out. Then push the context length
-out and watch the cache take over the bar underneath, until the curve stops
-rising and the machine simply runs out of memory.
-
+<p>where $n$ is the length of the conversation, $d$ is the width of the model, and $b$ is the number of conversations being served together. (The estimate assumes $n \le d$; longer conversations only make the first term worse.)</p>
+<p>Now think about what a ratio close to one would mean. The chip would be moving one byte out of memory for every single arithmetic operation it performs. That is a terrible trade on this hardware. As I said a moment ago, an H100 can do about three hundred operations in the time it takes to fetch one byte, so at a ratio of one it is spending almost all of its time waiting for memory to arrive and almost none of it computing. The machine is idling, and you are still paying for it by the hour.</p>
+<p>Now I would like you to look at the two terms separately, because they behave completely differently, and the difference between them is the whole problem this post is about. The $1/b$ term is the friendly one: serve more conversations at once and it shrinks, because the weights get read once and shared among all of them. This is why servers batch requests together, and it is the single most effective thing anybody does. The $n/d$ term is not friendly at all. It does not shrink with batching, because every conversation drags its own cache along. Adding a fifty-first conversation adds a fifty-first cache that has to be read on every step.</p>
+<p>You can feel the trade in the figure below. Move the batch size and watch the throughput climb as the weights get shared out. Then push the context length out and watch the cache take over the bar underneath, until the curve stops rising and the machine simply runs out of memory.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 290' id='rl-svg' role='img'
          aria-label='Decoding throughput against batch size for a Llama 3 8B shaped model on one H100, with the bytes moved per step split into weights and KV cache.'>
@@ -422,7 +386,6 @@ rising and the machine simply runs out of memory.
     batch, and <span style='color:#8C77BC'><b>cache</b></span>, read once per
     conversation. Nothing anywhere in this range is limited by arithmetic.
 </div>
-
 <script>
 (function () {
   var scene = document.getElementById('rl-scene'),
@@ -518,26 +481,10 @@ rising and the machine simply runs out of memory.
   draw();
 })();
 </script>
-
-## 3. The Waste That Had Nothing to Do With Size
-
-The first answers to all of this were attempts to make the cache smaller, by
-having several query heads share a single key-value head between them. That is
-the story of multi-query and grouped-query attention, boxes one and two of the
-roadmap, and it deserves its own post rather than a paragraph in this one.
-
-But there was a second failure that no amount of shrinking would have fixed,
-and I think it is the more interesting one, because nothing about it is a
-property of the model at all.
-
-The attention **kernels** of the day — a kernel being the small, heavily
-optimised program that actually runs one piece of the model on the GPU —
-required the cache for a single conversation to sit in one unbroken block of
-memory. And nobody knows in advance how long a conversation will run. Put
-those two facts together and you get the only safe thing anyone could do:
-reserve each conversation enough room for the longest answer it might ever
-produce, and hope it uses it.
-
+<h2 id='3-the-waste-that-had-nothing-to-do-with-size'>3. The Waste That Had Nothing to Do With Size</h2>
+<p>The first answers to all of this were attempts to make the cache smaller, by having several query heads share a single key-value head between them. That is the story of multi-query and grouped-query attention, boxes one and two of the roadmap, and it deserves its own post rather than a paragraph in this one.</p>
+<p>But there was a second failure that no amount of shrinking would have fixed, and I think it is the more interesting one, because nothing about it is a property of the model at all.</p>
+<p>The attention <strong>kernels</strong> of the day — a kernel being the small, heavily optimised program that actually runs one piece of the model on the GPU — required the cache for a single conversation to sit in one unbroken block of memory. And nobody knows in advance how long a conversation will run. Put those two facts together and you get the only safe thing anyone could do: reserve each conversation enough room for the longest answer it might ever produce, and hope it uses it.</p>
 <div class='knob'>
     <svg viewBox='0 0 720 198' id='pg-svg' role='img'
          aria-label='A strip of GPU memory filled by four requests, either by reserving each request its maximum length contiguously or by handing out small blocks on demand.'>
@@ -562,7 +509,6 @@ produce, and hope it uses it.
     that has not arrived yet, and I would watch how many of them there are,
     because every one is memory that nobody else is allowed to use.
 </div>
-
 <script>
 (function () {
   var scene = document.getElementById('pg-scene'),
@@ -641,15 +587,7 @@ produce, and hope it uses it.
   draw();
 })();
 </script>
-
-The consequence is that most of the memory set aside for caches was holding
-nothing at all. The waste has a name, or rather two, and they are worth
-knowing because the figure below is labelled with them. **Internal
-fragmentation** is the room reserved inside a conversation's own block that it
-never grows into. **External fragmentation** is the gaps left between blocks,
-each too small for anybody else to move into. In 2023 Kwon and colleagues
-measured both on real traffic, and I still find the result startling.
-
+<p>The consequence is that most of the memory set aside for caches was holding nothing at all. The waste has a name, or rather two, and they are worth knowing because the figure below is labelled with them. <strong>Internal fragmentation</strong> is the room reserved inside a conversation's own block that it never grows into. <strong>External fragmentation</strong> is the gaps left between blocks, each too small for anybody else to move into. In 2023 Kwon and colleagues measured both on real traffic, and I still find the result startling.</p>
 <div class='figure'>
     <img src='/images/kvcache-memory-waste.png'
          alt='Four stacked bars, each the whole KV cache memory of a serving
@@ -668,93 +606,128 @@ measured both on real traffic, and I still find the result startling.
         that no tensor got any smaller here.
     </div>
 </div>
+<p>I find this figure quietly remarkable, and it is the reason I wanted to write this post separately from the other one. The fix was not a better model, a smaller cache, or a cleverer attention formula. It was to stop insisting that the cache be contiguous, and hand it out in small blocks as it is needed, which is exactly what operating systems have done with memory since the 1960s. Nothing got smaller. It was simply put away properly, and the useful fraction went from about a fifth to almost all of it.</p>
+<p>There is a lesson in that which generalises well beyond language models. When something is expensive, the instinct is to make it smaller. It is worth checking first whether you are merely storing it badly.</p>
+<h2 id='4-where-it-stops-being-free'>4. Where It Stops Being Free</h2>
+<p>I have one more thing to say, and it is about a line that gets crossed quietly.</p>
+<p>Everything so far leaves the model's answers exactly as they were. Paging the cache, batching conversations, reading the rows in a different order — none of these changes a single output. The model says precisely what it would have said anyway, and that is what has made all of it free in the sense that matters: you get the speed without giving anything up.</p>
+<p>The techniques that come next are not like that, and I think it is worth knowing where the line is. Throwing away old tokens to make room changes what the model computes, because the tokens it can no longer see are tokens it can no longer use. Storing the cache in four bits instead of sixteen changes it too, in a smaller and subtler way. And sharing key-value heads, which is the first two boxes of the roadmap, is a third case again: it does not approximate an existing model, it produces a <em>different</em> model, one that had to be trained or retrained to work that way.</p>
+<p>All three may well be worth doing, and all three are in production somewhere right now. But they are a different kind of bargain from paging, and when somebody tells you that a serving trick is free, this is the question to ask about it.</p>
+<h3 id='where-this-sits-now'>Where This Sits Now</h3>
+<p>The frontier here has moved past shrinking the cache. Three directions are worth watching. Serving systems are splitting prefill and decode onto separate hardware, because one saturates the arithmetic units and the other cannot. Caches are being shared across requests rather than per conversation, which is what prefix caching does and what makes agent loops replaying a growing transcript affordable. And architectures are being designed so that most layers store nothing that grows with the sequence at all. Each of those gives up something — none is free in the way paging was — and working out what, exactly, is where a lot of the current work is.</p>
+<h2 id='5-chat-this-over-with-friends'>5. Chat This Over With Friends</h2>
+<p>The strange thing about serving a language model is that the expensive part is not the model. Its weights are shared by everybody on the machine, so the more conversations you serve at once, the less each one costs, and that is the entire economics of the business. But every conversation also drags along its own KV cache, which cannot be shared with anybody, and which grows for as long as the conversation lasts. So the one move that makes everything else cheaper — serving more people at once — is the move that makes this particular cost worse. On a single 80 GB card running an 8B model, long conversations run out at about three at a time.</p>
+<p>The received wisdom is that the answer is to make the cache smaller, and there is a serious literature on doing exactly that. What I did not expect is that the biggest win came from somewhere else entirely. When Kwon and colleagues measured real servers in 2023, only <strong>20% to 38%</strong> of the memory reserved for caches was holding anything at all, because systems had to reserve room for the longest answer each conversation might produce. Handing it out in small blocks instead, the way operating systems have paged memory since the 1960s, took that to <strong>96%</strong> without making a single tensor smaller. The fair objection is that this was an unforced error being corrected rather than a deep insight, and that shrinking still matters once contexts get long. What is open is whether anything is left that is free: the remaining moves all change what the model actually says.</p>
+<h2 id='6-references'>6. References</h2>
+<ol>
+  <li>Shazeer, N. (2019). Fast Transformer Decoding: One Write-Head is All You Need. <a href='https://arxiv.org/abs/1911.02150'>arXiv:1911.02150</a></li>
+  <li>Kwon, W., et al. (2023). Efficient Memory Management for LLM Serving with PagedAttention. <em>SOSP</em>. <a href='https://arxiv.org/abs/2309.06180'>arXiv:2309.06180</a></li>
+  <li>Ainslie, J., et al. (2023). GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints. <em>EMNLP</em>. <a href='https://arxiv.org/abs/2305.13245'>arXiv:2305.13245</a></li>
+  <li>Pope, R., et al. (2022). Efficiently Scaling Transformer Inference. <a href='https://arxiv.org/abs/2211.05102'>arXiv:2211.05102</a></li>
+  <li>Grattafiori, A., et al. (2024). The Llama 3 Herd of Models. <a href='https://arxiv.org/abs/2407.21783'>arXiv:2407.21783</a></li>
+  <li>DeepSeek-AI (2024). DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model. <a href='https://arxiv.org/abs/2405.04434'>arXiv:2405.04434</a></li>
+</ol>
 
-I find this figure quietly remarkable, and it is the reason I wanted to write
-this post separately from the other one. The fix was not a better model, a
-smaller cache, or a cleverer attention formula. It was to stop insisting that
-the cache be contiguous, and hand it out in small blocks as it is needed,
-which is exactly what operating systems have done with memory since the
-1960s. Nothing got smaller. It was simply put away properly, and the useful
-fraction went from about a fifth to almost all of it.
+        </div>
+        <div class='applause'>
+            <button class='applause-btn' type='button' aria-pressed='false'
+                    aria-label='Like this post'
+                    title='Kept in your browser. Nothing is sent anywhere.'>
+                <span class='hearts' aria-hidden='true'><svg class='h h1' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h2' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h3' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg></span>
+                <span class='applause-label'>like</span>
+                <span class='applause-count' hidden></span>
+            </button>
+        </div>
+        <div id='more'>
+            <a href='/blog/'>&larr; All posts</a>
+        </div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.applause-btn');
+      if (!btn) return;
+      var label = btn.querySelector('.applause-label');
+      var counter = btn.querySelector('.applause-count');
+      var api = 'https://blog-likes.kaiqianzhang.workers.dev';
+      var slug = 'kv-cache-costs';
+      var key = 'liked:' + location.pathname;
+      var count = null;
 
-There is a lesson in that which generalises well beyond language models. When
-something is expensive, the instinct is to make it smaller. It is worth
-checking first whether you are merely storing it badly.
+      function show() {
+        if (count === null) return;
+        counter.hidden = false;
+        counter.textContent = count;
+      }
+      function paint(on, animate) {
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? 'liked' : 'like';
+        if (on && animate) {
+          btn.classList.remove('is-popping');
+          void btn.offsetWidth;
+          btn.classList.add('is-popping');
+        }
+      }
+      function liked() {
+        try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+      }
 
-## 4. Where It Stops Being Free
+      paint(liked(), false);
 
-I have one more thing to say, and it is about a line that gets crossed
-quietly.
+      if (api) {
+        fetch(api + '/' + slug, {cache: 'no-store'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      }
 
-Everything so far leaves the model's answers exactly as they were.
-Paging the cache, batching conversations, reading the rows in a different
-order — none of these changes a single output. The model says precisely what it
-would have said anyway, and that is what has made all of it free in the sense
-that matters: you get the speed without giving anything up.
+      btn.addEventListener('click', function () {
+        var on = !btn.classList.contains('is-on');
+        try {
+          on ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+        } catch (e) {}
+        paint(on, true);
+        if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
+        if (!api) return;
+        fetch(api + '/' + slug, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({delta: on ? 1 : -1})
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      });
+    })();
+    </script>
 
-The techniques that come next are not like that, and I think it is worth
-knowing where the line is. Throwing away old tokens to make room changes what
-the model computes, because the tokens it can no longer see are tokens it can
-no longer use. Storing the cache in four bits instead of sixteen changes it
-too, in a smaller and subtler way. And sharing key-value heads, which is the
-first two boxes of the roadmap, is a third case again: it does not approximate
-an existing model, it produces a *different* model, one that had to be trained
-or retrained to work that way.
-
-All three may well be worth doing, and all three are in production somewhere
-right now. But they are a different kind of bargain from paging, and when
-somebody tells you that a serving trick is free, this is the question to ask
-about it.
-
-### Where This Sits Now
-
-The frontier here has moved past shrinking the cache. Three directions are
-worth watching. Serving systems are splitting prefill and decode onto separate
-hardware, because one saturates the arithmetic units and the other cannot.
-Caches are being shared across requests rather than per conversation, which is
-what prefix caching does and what makes agent loops replaying a growing
-transcript affordable. And architectures are being designed so that most
-layers store nothing that grows with the sequence at all. Each of those gives
-up something — none is free in the way paging was — and working out what,
-exactly, is where a lot of the current work is.
-
-## 5. Chat This Over With Friends
-
-The strange thing about serving a language model is that the expensive part is
-not the model. Its weights are shared by everybody on the machine, so the more
-conversations you serve at once, the less each one costs, and that is the
-entire economics of the business. But every conversation also drags along its
-own KV cache, which cannot be shared with anybody, and which grows for as long
-as the conversation lasts. So the one move that makes everything else
-cheaper — serving more people at once — is the move that makes this particular
-cost worse. On a single 80 GB card running an 8B model, long conversations run
-out at about three at a time.
-
-The received wisdom is that the answer is to make the cache smaller, and there
-is a serious literature on doing exactly that. What I did not expect is that
-the biggest win came from somewhere else entirely. When Kwon and colleagues
-measured real servers in 2023, only **20% to 38%** of the memory reserved for
-caches was holding anything at all, because systems had to reserve room for
-the longest answer each conversation might produce. Handing it out in small
-blocks instead, the way operating systems have paged memory since the 1960s,
-took that to **96%** without making a single tensor smaller. The fair
-objection is that this was an unforced error being corrected rather than a
-deep insight, and that shrinking still matters once contexts get long. What is
-open is whether anything is left that is free: the remaining moves all change
-what the model actually says.
-
-## 6. References
-
-1. Shazeer, N. (2019). Fast Transformer Decoding: One Write-Head is All You
-   Need. [arXiv:1911.02150](https://arxiv.org/abs/1911.02150)
-2. Kwon, W., et al. (2023). Efficient Memory Management for LLM Serving with
-   PagedAttention. *SOSP*.
-   [arXiv:2309.06180](https://arxiv.org/abs/2309.06180)
-3. Ainslie, J., et al. (2023). GQA: Training Generalized Multi-Query
-   Transformer Models from Multi-Head Checkpoints. *EMNLP*. [arXiv:2305.13245](https://arxiv.org/abs/2305.13245)
-4. Pope, R., et al. (2022). Efficiently Scaling Transformer Inference.
-   [arXiv:2211.05102](https://arxiv.org/abs/2211.05102)
-5. Grattafiori, A., et al. (2024). The Llama 3 Herd of Models.
-   [arXiv:2407.21783](https://arxiv.org/abs/2407.21783)
-6. DeepSeek-AI (2024). DeepSeek-V2: A Strong, Economical, and Efficient
-   Mixture-of-Experts Language Model. [arXiv:2405.04434](https://arxiv.org/abs/2405.04434)
+    <div class='credit'>
+        <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      function paint() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var say = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        btn.setAttribute('aria-label', say);
+        btn.setAttribute('title', say);
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') !== 'dark';
+        if (dark) { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    })();
+    </script>
+</body>
+</html>

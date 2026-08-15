@@ -1,7 +1,7 @@
 ---
 title: "My Mindmap of LLMs: Past Lives and Present"
 subtitle: Every idea a transformer replaced was itself a fix for the thing before it, and the whole chain is one argument about how to represent a word.
-date: 2026-08-10
+date: 2026-06-16
 tags: llm
 icon: 🍵
 length: long
@@ -709,11 +709,11 @@ exists at all.
 
 That node opens onto three arguments I have written up elsewhere: which
 normalizer goes inside the block
-([RMSNorm vs. LayerNorm](/blog/2026/08/11/rmsnorm-vs-layernorm/)), where in
+([RMSNorm vs. LayerNorm](/blog/2026/07/10/rmsnorm-vs-layernorm/)), where in
 the block it goes
-([Pre-Norm vs. Post-Norm](/blog/2026/08/11/pre-norm-vs-post-norm/)), and how
+([Pre-Norm vs. Post-Norm](/blog/2026/07/18/pre-norm-vs-post-norm/)), and how
 position gets into a model that has no sense of order
-([RoPE](/blog/2026/08/11/rope/)).
+([RoPE](/blog/2026/07/02/rope/)).
 
 One last side note belongs here, about normalization — the operation that
 keeps the numbers inside a deep network from running away. **BatchNorm**

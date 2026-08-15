@@ -67,7 +67,7 @@
             <div class='bylines'>
                 <div class='byline'>
                     <h3>Published</h3>
-                    <p>13 August 2026</p>
+                    <p>04 August 2026</p>
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
@@ -287,7 +287,7 @@
 </div>
 <p>The first box is the odd one, and I could not find a citation for it anywhere, because nobody ever claimed it as a contribution. Shazeer's 2019 paper prints the algorithm, but as setup for something else; what it adds is the diagnosis, blaming "the memory-bandwidth cost of repeatedly loading the large &ldquo;keys&rdquo; and &ldquo;values&rdquo; tensors".</p>
 <h2 id='2-three-vectors-and-which-two-of-them-last'>2. Three Vectors, and Which Two of Them Last</h2>
-<p>To see what is worth keeping, we need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>. I have written a whole post about it — <a href='/blog/2026/08/13/attention/'>Attention</a>, which builds it up from the problem it solves and takes the formula apart term by term — and if you have never met it, that is the one to read. But I am not going to send you away to follow this post, so here is what you need, which is less than you might think.</p>
+<p>To see what is worth keeping, we need to know what the model computes when it reads a sequence. The mechanism is called <strong>attention</strong>. I have written a whole post about it — <a href='/blog/2026/06/24/attention/'>Attention</a>, which builds it up from the problem it solves and takes the formula apart term by term — and if you have never met it, that is the one to read. But I am not going to send you away to follow this post, so here is what you need, which is less than you might think.</p>
 <p>The problem attention solves is that the meaning of a word depends on the words around it. In "the cat sat on the mat", the word "sat" means what it does because of "cat". So each token needs some way to look at the others and draw in whatever it needs from them, and that is all I am going to claim for it here. Attention does this by turning every token into three lists of numbers rather than one. The first says what that token is looking for. The second advertises what it has to offer. The third is the content it hands over if anything wants it. They are called the <strong>query</strong>, the <strong>key</strong>, and the <strong>value</strong>.</p>
 <p>To use them, we compare the current token's query against every key by taking a <strong>dot product</strong> — multiply the two lists entry by entry and add the results up — which gives us one score per token so far, saying how well each one matches. We then turn those scores into proportions that add up to one, using a function called the <strong>softmax</strong>, and use the proportions to blend the value vectors together. Written down:</p>
 $$
@@ -702,7 +702,7 @@ $$
 </script>
 <p>That number is why anybody worries about this at all.</p>
 <h2 id='4-the-bill-which-is-the-other-post'>4. The Bill, Which Is the Other Post</h2>
-<p>Everything so far has been about what the cache is and why it works. What it <em>costs</em> is a large enough subject that I have given it a post of its own — <a href='/blog/2026/08/13/kv-cache-costs/'>What the KV Cache Costs</a> — but the shape of the problem is worth stating here, because it follows directly from the number we just computed.</p>
+<p>Everything so far has been about what the cache is and why it works. What it <em>costs</em> is a large enough subject that I have given it a post of its own — <a href='/blog/2026/08/12/kv-cache-costs/'>What the KV Cache Costs</a> — but the shape of the problem is worth stating here, because it follows directly from the number we just computed.</p>
 <p>Here is the shape of it. The weights of a model are shared: every conversation on a server runs through the same ones, so serving many at once spreads their cost across all of them, which is the entire economics of running these things. The cache is the opposite: it belongs to one conversation, nobody else can use it, and it grows for as long as that conversation continues. So the one move that makes everything else cheaper — serving more people at once — makes this particular cost worse, because every new person brings another cache to be stored and read on every step. That tension, and what the field has done about it, is what the other post is for.</p>
 <h2 id='5-fifteen-decimal-places-and-a-floor-i-did-not-expect'>5. Fifteen Decimal Places, and a Floor I Did Not Expect</h2>
 <p>I did not want to take either of the two central claims on trust, so I wrote the experiment. It decodes 320 tokens through one real attention layer, twice: once keeping a cache, and once recomputing the whole prefix at every step, the way a model with no cache would have to. Both paths do genuine arithmetic on genuine vectors, and I timed each step of both.</p>
