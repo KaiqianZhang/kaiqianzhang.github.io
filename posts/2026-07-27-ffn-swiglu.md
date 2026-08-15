@@ -53,10 +53,11 @@ expand at all, if you are only going to come back down? And what is the
 nonlinear thing in the middle actually for? The answer to the first is that a
 matrix on its own can only mix a word's numbers together in fixed proportions;
 the interesting behaviour lives in the nonlinear step, and the expansion gives
-that step more room to work in. The answer to the second is the rest of this
-post — because in 2020 the field changed its mind about what that middle step
-is for, and demoted it from the thing doing the work to something more like a
-tap.
+that step more room to work in.
+
+The answer to the second is the rest of this post — because in 2020 the field
+changed its mind about what that middle step is for, and demoted it from the
+thing doing the work to something more like a tap.
 
 <div class='ffn-anim'>
     <svg viewBox='0 0 720 268' role='img'
@@ -556,18 +557,21 @@ the gate does to a whole layer of them at once:
 
 ## 4. The Variant That Won, and the One That Was Better
 
-Now the evidence, and I should say first that this paper has four tables and
-not a single figure — which is why Figure 1 in this post is drawn rather than
-reproduced from it. It also means the argument is only visible if you read all
-four tables, and the interesting thing about them is that no variant wins
-them. On pretraining perplexity **GEGLU**, the same construction with GELU on
-the gate, edges SwiGLU 1.633 to 1.636; but GLUE goes to ReGLU, SuperGLUE to
-SwiGLU, and SQuAD to Bilinear, which has no gate nonlinearity at all. Four
-tables, four winners. And the margins are thin: Shazeer measures run-to-run
-variability only in the short column, where the GEGLU–SwiGLU gap of 0.002 sits
-against standard deviations of 0.004 and 0.010. The fully-trained column is a
-single run each with no spread reported at all. The paper establishes a gap
-between gated and ungated, and a tie inside the gated family.
+Now the evidence. This paper has four tables and not a single figure, which is
+why Figure 1 in this post is drawn rather than reproduced from it — and it
+means the argument is only visible if you read all four.
+
+The interesting thing about them is that no variant wins. On pretraining
+perplexity **GEGLU**, the same construction with GELU on the gate, edges
+SwiGLU 1.633 to 1.636; but GLUE goes to ReGLU, SuperGLUE to SwiGLU, and SQuAD
+to Bilinear, which has no gate nonlinearity at all. Four tables, four
+winners.
+
+And the margins are thin: Shazeer measures run-to-run variability only in the
+short column, where the GEGLU–SwiGLU gap of 0.002 sits against standard
+deviations of 0.004 and 0.010. The fully-trained column is a single run each
+with no spread reported at all. The paper establishes a gap between gated and
+ungated, and a tie inside the gated family.
 
 Which makes adoption the question, and the usual telling is wrong. It was not
 Meta choosing and everyone copying: **PaLM used SwiGLU in April 2022**, a year
@@ -607,13 +611,15 @@ The mechanism itself is settled: every open model of the last three years uses
 some member of this family, and nobody is arguing about whether to gate. What
 is unsettled is why it helps, and that matters more than it sounds, because
 the same block is where two of the field's most active lines of work are
-happening. Mixture-of-experts models make this block sparse — many
-feed-forward blocks, only a couple of which run for any given token — which is
-how the largest models are built now, and every one of those experts is a
-SwiGLU. And interpretability research keeps finding that individual facts and
-concepts are stored in this block's wide middle layer rather than in
-attention. Both lines are building on a component whose own paper attributes
-its success to divine benevolence.
+happening.
+
+Mixture-of-experts models make this block sparse — many feed-forward blocks,
+only a couple of which run for any given token — which is how the largest
+models are built now, and every one of those experts is a SwiGLU. And
+interpretability research keeps finding that individual facts and concepts are
+stored in this block's wide middle layer rather than in attention. Both lines
+are building on a component whose own paper attributes its success to divine
+benevolence.
 
 There is also a lesson in the accounting. The reason this change spread is not
 that it was better; the tables above barely support that. It is that Shazeer
@@ -646,7 +652,7 @@ SwiGLU a year before LLaMA, while Google's Gemma ships GEGLU to this day. The
 best part is the paper's last line, where Shazeer declines to explain the
 result and attributes it "to divine benevolence." People have tried since;
 no account has won. A great deal of what runs in production is there because
-it works and nobody quite knows why.
+it works and nobody knows why.
 
 ## 6. References
 

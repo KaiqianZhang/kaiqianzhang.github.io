@@ -313,9 +313,10 @@ in a blog, because that is what this is. The reference for register is
 <https://lsl.zone/blog/2026/a-taxonomy-of-self-evolving-agents/>, and the
 *sentences* come from there.
 
-The reference for structure is John Storey, <https://jdstorey.org/fas/>. Read
-a content chapter, not the overview page — the overview has no mathematics in
-it and is not representative. What his prose actually does:
+What to take from John Storey, <https://jdstorey.org/fas/>, is **clarity, not
+register** — he is writing a textbook and this is not one. Read a content
+chapter rather than the overview page, which has no mathematics in it and is
+not representative. The habits worth copying:
 
 - **Short paragraphs**, very often one or two sentences. Aim for a median
   around 50 words and treat anything over 90 as a paragraph that wants
@@ -324,10 +325,10 @@ it and is not representative. What his prose actually does:
 - **Name the thing, colon, then the display equation.** "The posterior
   distribution of $\theta \mid X$ is obtained through Bayes theorem:" and the
   formula follows. He does not circle a definition before giving it.
-- **"We" as the default voice** — "we will assume", "we will write", "even if
-  we don't explicitly write them". It walks the reader alongside rather than
-  performing for them. Keep "I" for the places you are personally on the hook:
-  what you got wrong, what you carry around, what you find satisfying.
+- **Do not copy his voice.** His "we will assume", "we will write" is textbook
+  convention and it reads as a lecture. This blog keeps its own "I" — what I
+  got wrong, what I carry around. Take the *clarity* from him, not the
+  register.
 - **Direct imperatives to the reader**: "Note that", "Always remember that".
 - **No hedging.** Almost none. Audit for *perhaps, arguably, somewhat, tends
   to, might, in some sense* and delete what is not carrying a real
@@ -337,6 +338,25 @@ Two places this blog departs from him deliberately, so do not "fix" them:
 Storey's sections stand alone with no bridging prose, and this blog does bridge
 them, because a post is read in one sitting and a textbook is not. And he
 favours lists where we prefer paragraphs for argument.
+
+**Run this as a check on every post before committing**, because prose drifts
+long and hedged without anyone deciding it should:
+
+```sh
+python3 figures/style_check.py posts/<file>.md
+```
+
+It reports four numbers. The targets, from measuring his chapters:
+
+| | target | why |
+|---|---|---|
+| median paragraph | ~50 words | his run one to two sentences |
+| paragraphs over 90 words | 0 | except the two in "Chat This Over With Friends" |
+| hedges | near 0 | keep only the ones carrying a real qualification |
+
+A hedge worth keeping says something true about the evidence — "the paper
+never shows this to be significant". A hedge worth cutting is padding —
+*somewhat*, *fairly*, *a bit*, *rather*, *quite*, *arguably*, *I think*.
 
 Four rules, and they matter more than anything else in this file, because a
 post that is right and unreadable has failed.

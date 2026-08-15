@@ -5,15 +5,16 @@ date: 2026-06-24
 tags: llm
 icon: 🍵
 ---
-
 I want to explain attention, which is the mechanism that made modern language
 models possible. If you have read anything about how these models work you
 will have seen the word, and probably the formula, and possibly a diagram with
-arrows in it. What I would like to do here is slower than that. I want to
-start from the problem attention was invented to solve, build the mechanism up
-one piece at a time, and finish somewhere you might not expect: with an
-explanation of why there is a square root in the denominator, which I think is
-the most quietly interesting detail in the whole design.
+arrows in it.
+
+What I would like to do here is slower than that. I want to start from the
+problem attention was invented to solve, build the mechanism up one piece at a
+time, and finish somewhere you might not expect: with an explanation of why
+there is a square root in the denominator, which I think is the most quietly
+interesting detail in the whole design.
 
 I am going to assume you know nothing about neural networks. If you know a
 great deal, the first two sections will be familiar and you can skim them.
@@ -217,34 +218,38 @@ specific, visible failure.
 I want to say more about that first box, because the failure is easy to
 picture. Machine translation at the time worked by having one network read the
 source sentence and compress it into a single fixed-length vector, and a
-second network write the translation out of that vector alone. Everything the
-first network understood had to fit through that bottleneck, which worked for
-short sentences and fell apart on long ones — exactly what you would expect if
-you had to summarise a paragraph in a fixed number of syllables and then
-reconstruct it. Bahdanau, Cho and Bengio proposed that the writing network
-look back over *all* the source words instead, taking a weighted blend
-computed fresh at each step. The bottleneck disappears, because no single
-vector has to hold everything any more.
+second network write the translation out of that vector alone.
+
+Everything the first network understood had to fit through that bottleneck,
+which worked for short sentences and fell apart on long ones — exactly what
+you would expect if you had to summarise a paragraph in a fixed number of
+syllables and then reconstruct it. Bahdanau, Cho and Bengio proposed that the
+writing network look back over *all* the source words instead, taking a
+weighted blend computed fresh at each step. The bottleneck disappears, because
+no single vector has to hold everything any more.
 
 There is one thing the third arrow says that I should make good on. It
 mentions "a cache to feed", which is a consequence of dropping the recurrence
 that nobody planned: because attention looks back at every earlier token, a
 model generating text ends up storing the keys and values of everything it has
-already said. That store is the KV cache, and it turns out to be the dominant
-cost of running these models. I have written about
-[what it is](/blog/2026/08/04/kv-cache/) and
-[what it costs](/blog/2026/08/12/kv-cache-costs/) separately, because it is a
-large subject and this post has a different job.
+already said.
+
+That store is the KV cache, and it turns out to be the dominant cost of
+running these models. I have written about [what it is](/blog/2026/08/04/kv-
+cache/) and [what it costs](/blog/2026/08/12/kv-cache-costs/) separately,
+because it is a large subject and this post has a different job.
 
 The step I find most striking is the third one. For three years attention was
 an accessory bolted onto a recurrent network, which read the sentence one word
 at a time. In 2017 Vaswani and colleagues asked what would happen if you
-removed the recurrent network and kept only the attention. The answer was that
-it worked better, and — because attention looks at all positions at once rather
-than walking through them in order — it could be trained on many more words in
-parallel. That is the transformer, and essentially every language model you
-have heard of is built from it, including the recent hybrid designs that
-replace some of its attention layers with cheaper alternatives.
+removed the recurrent network and kept only the attention.
+
+The answer was that it worked better, and — because attention looks at all
+positions at once rather than walking through them in order — it could be
+trained on many more words in parallel. That is the transformer, and
+essentially every language model you have heard of is built from it, including
+the recent hybrid designs that replace some of its attention layers with
+cheaper alternatives.
 
 ## 2. What Each Word Asks, Offers, and Hands Over
 
@@ -253,8 +258,7 @@ the formula until the end.
 
 **Step one: every word becomes a list of numbers.** Before anything else, each
 token — a token is a chunk of text, roughly a word — is turned into a
-**vector**, which is nothing more frightening than an ordered list of numbers,
-perhaps 4,096 of them. You can think
+**vector**, which is nothing more frightening than an ordered list of numbers, 4,096 of them. You can think
 of that list as coordinates: words used in similar ways end up with similar
 coordinates. Nothing in this post depends on how those coordinates are learned.
 
@@ -430,11 +434,12 @@ The width is *split* into several smaller pieces, and the whole procedure runs
 on each piece independently with its own learned matrices. These pieces are
 called **heads**, and the point of them is that a word can look for several
 different things at once — one head might track grammatical subjects while
-another tracks which noun a pronoun refers to. Because the width is divided
-rather than duplicated, thirty-two heads cost about the same as one head using
-the full width. This surprised me when I first worked it out, and it is worth
-knowing if you were about to assume that more heads means proportionally more
-computation.
+another tracks which noun a pronoun refers to.
+
+Because the width is divided rather than duplicated, thirty-two heads cost
+about the same as one head using the full width. This surprised me when I
+first worked it out, and it is worth knowing if you were about to assume that
+more heads means proportionally more computation.
 
 The second is that the whole arrangement repeats. A model stacks this
 structure into **layers**, dozens deep, each with its own learned matrices, and
@@ -593,8 +598,7 @@ type.
 
 Now, why does that matter? Because of what large scores do to the softmax.
 Exponentiating a set of numbers exaggerates the gaps between them. If the
-scores are close together, the weights come out fairly even and attention
-behaves like a blend. If one score is far above the others, its exponential
+scores are close together, the weights come out close to even and attention behaves like a blend. If one score is far above the others, its exponential
 dominates everything, the weight on it approaches one, and every other weight
 approaches zero. Attention stops averaging and starts picking a single word.
 
@@ -645,10 +649,12 @@ Panel (b) is the consequence, and it is the part I would put on a slide. With
 no scaling, the fraction of attention weight landing on the single largest key
 climbs steadily with width: at $d = 1024$ it reaches **94.9%**, meaning the
 softmax is effectively choosing one word out of sixty-four and ignoring the
-rest. Divide by $\sqrt{d}$ and that same number sits at **10.7%**, essentially
+rest.
+
+Divide by $\sqrt{d}$ and that same number sits at **10.7%**, essentially
 unchanged from its value at $d = 2$. One division makes the mechanism behave
-the same way at every width, which is what you want from a component you intend
-to stack eighty of.
+the same way at every width, which is what you want from a component you
+intend to stack eighty of.
 
 <div class='knob'>
     <svg viewBox='0 0 720 280' id='sc-svg' role='img'
@@ -755,13 +761,14 @@ to stack eighty of.
 One thing worth knowing if you are heading into this field. Attention's cost
 grows with the *square* of the sequence length, and that has become the
 binding constraint as context windows have gone from a few thousand tokens to
-hundreds of thousands. So the current wave of designs does not use it
-everywhere. Models like Jamba, Qwen3-Next and Granite 4 keep attention in a
-minority of their layers and give the rest to cheaper recurrent or linear
-alternatives, on the bet that a few layers of real attention are enough to
-carry the long-range work. Whether that bet holds — which layers need it, and
-what is quietly lost — is genuinely open, and it is the most active question
-attached to anything in this post.
+hundreds of thousands.
+
+So the current wave of designs does not use it everywhere. Models like Jamba,
+Qwen3-Next and Granite 4 keep attention in a minority of their layers and give
+the rest to cheaper recurrent or linear alternatives, on the bet that a few
+layers of real attention are enough to carry the long-range work. Whether that
+bet holds — which layers need it, and what is quietly lost — is genuinely
+open, and it is the most active question attached to anything in this post.
 
 ## 5. Chat This Over With Friends
 

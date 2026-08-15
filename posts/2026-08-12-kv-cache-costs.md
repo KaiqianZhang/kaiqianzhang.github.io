@@ -26,9 +26,10 @@ depends on your having read anything else.
 A language model writes one **token** at a time — a token being a chunk of
 text, roughly a word. To choose each one, it looks back over everything
 written so far, and the looking-back is done by a mechanism called
-**attention**. Attention turns every token into three lists of numbers. The
-first says what that token is looking for, the second advertises what it has
-to offer, and the third is the content it hands over. They are called the
+**attention**. Attention turns every token into three lists of numbers.
+
+The first says what that token is looking for, the second advertises what it
+has to offer, and the third is the content it hands over. They are called the
 **query**, the **key** and the **value**. The current token's query is
 compared against every earlier token's key, and the resulting scores decide
 how much of each value gets blended into the answer.
@@ -36,22 +37,25 @@ how much of each value gets blended into the answer.
 Two structural facts, because both show up in the arithmetic below. The model
 does not run one copy of this across the full width of its vectors — it splits
 the width into parallel pieces called **heads**, each with its own learned
-projections. And it repeats the whole arrangement at every **layer**, stacked
-dozens deep. Llama 3 70B has 80 layers. Modern models use fewer heads for keys
-and values than for queries, which is why I will write $n_{kv}$ for the
-key-value head count and mention separately that there are usually four or
-eight times as many query heads.
+projections.
+
+And it repeats the whole arrangement at every **layer**, stacked dozens deep.
+Llama 3 70B has 80 layers. Modern models use fewer heads for keys and values
+than for queries, which is why I will write $n_{kv}$ for the key-value head
+count and mention separately that there are usually four or eight times as
+many query heads.
 
 Now the important part. A token's key and value depend only on that token and
 the ones before it, so once computed they never change. Its query does not
 have that property in any useful sense, because a query is used once, at the
 step it belongs to, and is never wanted again. So there is an obvious saving
 available: store every token's key and value, and reuse them at every later
-step instead of recomputing them. That store is the **KV cache**, and it is
-the difference between generation costing you the square of the answer's
-length and costing you something close to linear in it. I wrote a whole post
-about [what it is and why it works](/blog/2026/08/04/kv-cache/); this one
-takes it as given.
+step instead of recomputing them.
+
+That store is the **KV cache**, and it is the difference between generation
+costing you the square of the answer's length and costing you something close
+to linear in it. I wrote a whole post about [what it is and why it
+works](/blog/2026/08/04/kv-cache/); this one takes it as given.
 
 Per layer, per conversation, the cache holds two tensors of shape
 $n_{kv} \times t \times d_h$, where $t$ counts the tokens seen so far and
@@ -344,14 +348,15 @@ guest, and the rooms get bigger the longer people stay.
 </script>
 
 To see why this hurts more than it looks, I need to tell you one fact about
-the hardware. Models are run on **GPUs** — graphics processors, originally built for
-rendering, which happen to be very good at doing the same arithmetic to
-thousands of numbers at once. On a GPU, moving a number out of memory and into
-the part of the chip that does the arithmetic takes time, and it takes far
-more time than the arithmetic itself does. An NVIDIA H100 can perform roughly
-three hundred arithmetic operations in the time it takes to fetch a single
-byte from its memory. The rate at which it can move bytes is called its
-**memory bandwidth**.
+the hardware. Models are run on **GPUs** — graphics processors, originally
+built for rendering, which happen to be very good at doing the same arithmetic
+to thousands of numbers at once. On a GPU, moving a number out of memory and
+into the part of the chip that does the arithmetic takes time, and it takes
+far more time than the arithmetic itself does.
+
+An NVIDIA H100 can perform roughly three hundred arithmetic operations in the
+time it takes to fetch a single byte from its memory. The rate at which it can
+move bytes is called its **memory bandwidth**.
 
 This is exactly what Noam Shazeer worked out in 2019. The paper that opens the
 roadmap above is remembered for multi-query attention, which is the fix it
@@ -369,21 +374,24 @@ assumes $n \le d$; longer conversations only make the first term worse.)
 
 Now think about what a ratio close to one would mean. The chip would be moving
 one byte out of memory for every single arithmetic operation it performs. That
-is a terrible trade on this hardware. As I said a moment ago, an H100 can do
-about three hundred operations in the time it takes to fetch one byte, so at a
-ratio of one it is spending almost all of its time waiting for memory to
-arrive and almost none of it computing. The machine is idling, and you are
-still paying for it by the hour.
+is a terrible trade on this hardware.
+
+As I said a moment ago, an H100 can do about three hundred operations in the
+time it takes to fetch one byte, so at a ratio of one it is spending almost
+all of its time waiting for memory to arrive and almost none of it computing.
+The machine is idling, and you are still paying for it by the hour.
 
 Now I would like you to look at the two terms separately, because they behave
 completely differently, and the difference between them is the whole problem
-this post is about. The $1/b$ term is the
-friendly one: serve more conversations at once and it shrinks, because the
-weights get read once and shared among all of them. This is why servers batch
-requests together, and it is the single most effective thing anybody does. The
-$n/d$ term is not friendly at all. It does not shrink with batching, because
-every conversation drags its own cache along. Adding a fifty-first conversation
-adds a fifty-first cache that has to be read on every step.
+this post is about. The $1/b$ term is the friendly one: serve more
+conversations at once and it shrinks, because the weights get read once and
+shared among all of them.
+
+This is why servers batch requests together, and it is the single most
+effective thing anybody does. The $n/d$ term is not friendly at all. It does
+not shrink with batching, because every conversation drags its own cache
+along. Adding a fifty-first conversation adds a fifty-first cache that has to
+be read on every step.
 
 You can feel the trade in the figure below. Move the batch size and watch the
 throughput climb as the weights get shared out. Then push the context length
@@ -671,11 +679,12 @@ measured both on real traffic, and I still find the result startling.
 
 I find this figure quietly remarkable, and it is the reason I wanted to write
 this post separately from the other one. The fix was not a better model, a
-smaller cache, or a cleverer attention formula. It was to stop insisting that
-the cache be contiguous, and hand it out in small blocks as it is needed,
-which is exactly what operating systems have done with memory since the
-1960s. Nothing got smaller. It was simply put away properly, and the useful
-fraction went from about a fifth to almost all of it.
+smaller cache, or a cleverer attention formula.
+
+It was to stop insisting that the cache be contiguous, and hand it out in
+small blocks as it is needed, which is exactly what operating systems have
+done with memory since the 1960s. Nothing got smaller. It was simply put away
+properly, and the useful fraction went from about a fifth to almost all of it.
 
 There is a lesson in that which generalises well beyond language models. When
 something is expensive, the instinct is to make it smaller. It is worth
@@ -696,10 +705,11 @@ The techniques that come next are not like that, and I think it is worth
 knowing where the line is. Throwing away old tokens to make room changes what
 the model computes, because the tokens it can no longer see are tokens it can
 no longer use. Storing the cache in four bits instead of sixteen changes it
-too, in a smaller and subtler way. And sharing key-value heads, which is the
-first two boxes of the roadmap, is a third case again: it does not approximate
-an existing model, it produces a *different* model, one that had to be trained
-or retrained to work that way.
+too, in a smaller and subtler way.
+
+And sharing key-value heads, which is the first two boxes of the roadmap, is a
+third case again: it does not approximate an existing model, it produces a
+*different* model, one that had to be trained or retrained to work that way.
 
 All three may well be worth doing, and all three are in production somewhere
 right now. But they are a different kind of bargain from paging, and when
@@ -713,10 +723,12 @@ worth watching. Serving systems are splitting prefill and decode onto separate
 hardware, because one saturates the arithmetic units and the other cannot.
 Caches are being shared across requests rather than per conversation, which is
 what prefix caching does and what makes agent loops replaying a growing
-transcript affordable. And architectures are being designed so that most
-layers store nothing that grows with the sequence at all. Each of those gives
-up something — none is free in the way paging was — and working out what,
-exactly, is where a lot of the current work is.
+transcript affordable.
+
+And architectures are being designed so that most layers store nothing that
+grows with the sequence at all. Each of those gives up something — none is
+free in the way paging was — and working out what, exactly, is where a lot of
+the current work is.
 
 ## 5. Chat This Over With Friends
 

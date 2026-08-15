@@ -35,11 +35,13 @@ on the inside, so we will start with where this thing sits.
 A transformer is a stack of identical layers. GPT-2 has twelve of them; Llama
 3 70B has eighty. Each layer does two things to the sentence in turn. First it
 runs **attention**, which lets every word look at the other words and take
-something from them. Then it runs a **feed-forward block**, which is a small
-network applied to each word on its own. Around each of those two operations
-there is a **residual connection**, which means that whatever comes out is
-added back onto whatever went in — the layer edits the representation rather
-than replacing it.
+something from them.
+
+Then it runs a **feed-forward block**, which is a small network applied to
+each word on its own. Around each of those two operations there is a
+**residual connection**, which means that whatever comes out is added back
+onto whatever went in — the layer edits the representation rather than
+replacing it.
 
 Normalization lives at those two joints. Twice per layer, in every layer, each
 word's vector of numbers is handed to a normalizer, which rescales it and
@@ -212,6 +214,7 @@ predict what comes next.
 The editing is where the trouble starts. Because of those residual
 connections, every layer *adds* to the list rather than replacing it, and
 sixty-four rounds of addition is a lot of opportunity for the numbers to grow.
+
 If they grow, the next layer receives inputs it was never trained to handle;
 the exponentials inside attention saturate, so a word puts essentially all its
 attention on one other word and there is no gradient left to learn from; and
@@ -223,6 +226,7 @@ itself. Both simply produce a model that will not train.
 A normalizer is the fix, and it is blunt. Take the token's list, measure how
 big it is, and divide by that measurement. Whatever came in, what leaves has a
 known size, so the next layer always receives its input on the same footing.
+
 Because dividing everything by one number also throws away a degree of freedom
 the model might want, each normalizer carries a small set of learned weights —
 one per entry, written $g$ — that it multiplies back in afterwards. The model
@@ -495,10 +499,12 @@ vector.
 So here is the trade, stated without spin. RMSNorm gives up a real
 mathematical property. Feed it a vector and feed it that same vector with a
 constant added to every entry, and it will hand back two different answers,
-where LayerNorm would hand back the same one twice. The claim — supported at
-the time by experiments, and since by every large model that has been trained
-this way — is that this property was never the one carrying the load. It is a
-bet, not a theorem, and the widget below is the bet drawn to scale.
+where LayerNorm would hand back the same one twice.
+
+The claim — supported at the time by experiments, and since by every large
+model that has been trained this way — is that this property was never the one
+carrying the load. It is a bet, not a theorem, and the widget below is the bet
+drawn to scale.
 
 <div class='knob'>
     <svg viewBox='0 0 720 250' id='inv-svg' role='img'
@@ -767,11 +773,13 @@ The widget runs it live, on fresh draws.
 Both things hold at once, and I would ask you to hold them together, because
 each on its own is misleading. At the widths real models use, the two
 normalizers do so nearly the same thing that the difference is in the fourth
-decimal place — which is why the swap was safe. And the property RMSNorm gave
-up is completely real, and the second slider makes it appear on demand — which
-is why it was a bet rather than a free lunch.[^shift] What decided the bet was
-not the mathematics. It was that the activations of a trained network happen
-to sit near zero mean, and nobody has a proof that they must.
+decimal place — which is why the swap was safe.
+
+And the property RMSNorm gave up is completely real, and the second slider
+makes it appear on demand — which is why it was a bet rather than a free
+lunch.[^shift] What decided the bet was not the mathematics. It was that the
+activations of a trained network happen to sit near zero mean, and nobody has
+a proof that they must.
 
 ### Where This Sits Now
 
@@ -783,13 +791,15 @@ improving it.
 The specific result is now everywhere: RMSNorm is in LLaMA, Mistral, Qwen,
 Gemma and essentially every open model released since 2023, and the ordinary
 implementation fuses it into a single kernel so the division costs almost
-nothing. That makes it a closed question in practice. The open part is what
-sits next to it. Normalization is one of the few operations in a transformer
-that is not a matrix multiply, which means it is one of the few places where
-the model is limited by moving numbers around rather than by arithmetic — the
-same problem that dominates the KV cache. Work on removing normalizers
-entirely, or on folding them into the operations around them, is live for
-exactly that reason, and the argument in Figure 5 is the argument it makes.
+nothing. That makes it a closed question in practice.
+
+The open part is what sits next to it. Normalization is one of the few
+operations in a transformer that is not a matrix multiply, which means it is
+one of the few places where the model is limited by moving numbers around
+rather than by arithmetic — the same problem that dominates the KV cache. Work
+on removing normalizers entirely, or on folding them into the operations
+around them, is live for exactly that reason, and the argument in Figure 5 is
+the argument it makes.
 
 ## 6. Chat This Over With Friends
 

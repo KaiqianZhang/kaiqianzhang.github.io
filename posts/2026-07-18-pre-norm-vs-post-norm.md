@@ -175,15 +175,18 @@ algebra is one line and the picture is the part that stays with you.
 
 Think of a token's vector — its list of numbers — as travelling up through the
 model on a single road. It enters at the bottom, and every layer writes
-something onto it. This road is the **residual stream**, and the reason it
-exists is worth knowing. Early deep networks did not have one: each layer
-replaced its input with something new. Those networks were very hard to train,
-because a training signal has to travel all the way back down from the output
-to the first layer, and passing through fifty replacements leaves it
-unrecognizable. The residual connection fixes this by making every layer
-*additive*. What a layer computes is added to what was already there, so there
-is always a straight, uninterrupted path from the top of the model to the
-bottom, and the training signal can travel down it without being mangled.
+something onto it. This road is the **residual stream**.
+
+The reason it exists is worth knowing. Early deep networks did not have one:
+each layer replaced its input with something new. Those networks were very
+hard to train, because a training signal has to travel all the way back down
+from the output to the first layer, and passing through fifty replacements
+leaves it unrecognizable.
+
+The residual connection fixes this by making every layer *additive*. What a
+layer computes is added to what was already there, so there is always a
+straight, uninterrupted path from the top of the model to the bottom, and the
+training signal can travel down it without being mangled.
 
 Now put the normalizer in. Its job is to stop the numbers on the road growing
 without limit, and it does that by measuring how large they are and dividing
@@ -311,14 +314,15 @@ switch it off. GPT-2 cancelled it deliberately, scaling the residual weights
 by $1/\sqrt{N}$, two years before anybody published an explanation of what
 that was doing.
 
-Now the consequence, which is the part worth carrying. The last thing a
-pre-norm network does, after every layer has written to the road, is
-normalize. Normalizing means dividing by the size of what is there — and we
-have just established that in a deep model, what is there is $\sqrt{L}$ times
-larger than it should be. So that final division is by a large number, and
-because a gradient travelling backwards has to pass back through it, every
-gradient in the network is multiplied by roughly $1/\sqrt{L+1}$ on its way
-out.
+Now the consequence, which is the part worth carrying. The last thing a pre-
+norm network does, after every layer has written to the road, is normalize.
+Normalizing means dividing by the size of what is there — and we have just
+established that in a deep model, what is there is $\sqrt{L}$ times larger
+than it should be.
+
+So that final division is by a large number, and because a gradient travelling
+backwards has to pass back through it, every gradient in the network is
+multiplied by roughly $1/\sqrt{L+1}$ on its way out.
 
 **The deeper a pre-norm model is, the harder its own final normalization damps
 every gradient in it.** Post-norm has no such term, because post-norm never
@@ -686,14 +690,15 @@ hyper-parameter.
 The specific arrangement is settled at the boundaries and open in the middle.
 Nobody is putting the normalizer back on the main path — the clean residual
 stream is now something everything else assumes, including every
-interpretability method that reads the stream directly. But the question of
-how to bound what gets *written* to it is live: Peri-LN, reordered norm, and
-query-key normalization are all recent attempts, and OLMo 2's finding that
-theirs only works in combination is the kind of result that suggests nobody
-has the underlying principle yet. The other reason this stays interesting is
-depth. Every argument above gets worse as $L$ grows, so if models get much
-deeper rather than merely wider, this becomes a live problem again rather
-than a settled one.
+interpretability method that reads the stream directly.
+
+But the question of how to bound what gets *written* to it is live: Peri-LN,
+reordered norm, and query-key normalization are all recent attempts, and OLMo
+2's finding that theirs only works in combination is the kind of result that
+suggests nobody has the underlying principle yet. The other reason this stays
+interesting is depth. Every argument above gets worse as $L$ grows, so if
+models get much deeper rather than merely wider, this becomes a live problem
+again rather than a settled one.
 
 ## 7. Chat This Over With Friends
 
