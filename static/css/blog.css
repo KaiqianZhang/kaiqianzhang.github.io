@@ -1712,3 +1712,90 @@ table td {
 @media screen and (max-width: 700px) {
   .theme-toggle { top: 8px; right: 8px; }
 }
+
+/* The agentic biolab post. Two of its schematics move: dots carrying signal
+   into the training loop, and one dot walking the experimentalist's cycle.
+   The second is not decoration -- it whips through five stages and then holds
+   on `execute` for seven eighths of every turn, which is the share of the wall
+   clock Qumus reports instrument execution actually taking (34:44 of 39:32). */
+.article .sketch .sig-dot {
+  fill: var(--c-lav);
+  animation-duration: 3.6s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.5, 1);
+  animation-iteration-count: infinite;
+}
+.article .sketch .sig-d1 { animation-name: sig-in-1; }
+.article .sketch .sig-d2 { animation-name: sig-in-2; }
+.article .sketch .sig-d3 { animation-name: sig-in-3; animation-delay: 0.5s; }
+.article .sketch .sig-d2 { animation-delay: 0.25s; }
+.article .sketch .sig-back {
+  fill: var(--fig-mute);
+  animation: sig-return 3.6s linear infinite;
+  animation-delay: 1.4s;
+}
+@keyframes sig-in-1 {
+  0%       { cx: 239.5px; cy: 54px;  opacity: 0; }
+  12%      { opacity: 1; }
+  60%      { cx: 289.5px; cy: 120px; opacity: 1; }
+  70%, 100% { cx: 289.5px; cy: 120px; opacity: 0; }
+}
+@keyframes sig-in-2 {
+  0%       { cx: 239.5px; cy: 120px; opacity: 0; }
+  12%      { opacity: 1; }
+  60%      { cx: 289.5px; cy: 120px; opacity: 1; }
+  70%, 100% { cx: 289.5px; cy: 120px; opacity: 0; }
+}
+@keyframes sig-in-3 {
+  0%       { cx: 239.5px; cy: 186px; opacity: 0; }
+  12%      { opacity: 1; }
+  60%      { cx: 289.5px; cy: 120px; opacity: 1; }
+  70%, 100% { cx: 289.5px; cy: 120px; opacity: 0; }
+}
+@keyframes sig-return {
+  0%       { cx: 636.7px; opacity: 0; }
+  10%      { opacity: 1; }
+  85%      { opacity: 1; }
+  100%     { cx: 124.8px; opacity: 0; }
+}
+.article .sketch .qm-dot {
+  fill: var(--c-marker);
+  animation: qm-walk 12s linear infinite;
+}
+@keyframes qm-walk {
+  0%          { cx: 110px; cy: 190px; }
+  2.5%        { cx: 235px; cy: 77.4px; }
+  5%          { cx: 485px; cy: 77.4px; }
+  7.5%, 95.5% { cx: 610px; cy: 190px; }
+  97%         { cx: 485px; cy: 302.6px; }
+  98.5%       { cx: 235px; cy: 302.6px; }
+  100%        { cx: 110px; cy: 190px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .article .sketch .sig-dot,
+  .article .sketch .qm-dot { animation: none; }
+  .article .sketch .sig-dot { opacity: 1; }
+}
+
+/* Direct curve labels for the ensemble widget in the agentic-biolab post. The
+   two outcomes are labelled at the right end of their own curves rather than
+   in a legend, so the colour has to come from a class: a presentation
+   attribute would lose to the .trace and .gl rules above, and an inline style
+   would win against the dark-theme repaint. */
+.article .knob .trace-good,
+.article .knob .trace-bad,
+.article .knob .trace-present {
+  fill: none;
+  stroke-width: 2.4;
+  stroke-linejoin: round;
+}
+.article .knob .trace-good { stroke: var(--c-lav); }
+.article .knob .trace-bad  { stroke: var(--c-marker); }
+.article .knob .trace-present { stroke: var(--c-blue); }
+.article .knob .lab-good,
+.article .knob .lab-bad,
+.article .knob .lab-present {
+  font: 600 15px -apple-system, Helvetica, arial, sans-serif;
+}
+.article .knob .lab-good { fill: var(--c-lav); }
+.article .knob .lab-bad  { fill: var(--c-marker); }
+.article .knob .lab-present { fill: var(--c-blue); }

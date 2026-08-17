@@ -7,6 +7,14 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>A Day at the Agentic Biolab Workshop</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/17/agentic-biolab-workshop/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/17/agentic-biolab-workshop/</guid>
+        <pubDate>Mon, 17 Aug 2026 00:00:00 +0000</pubDate>
+        <description>The bottleneck in AI for science is not the model but the world you can check it against.</description>
+    </item>
+
+    <item>
         <title>What the KV Cache Costs</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/12/kv-cache-costs/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/12/kv-cache-costs/</guid>

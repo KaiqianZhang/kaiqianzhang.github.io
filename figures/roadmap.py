@@ -143,6 +143,29 @@ def roadmap(stops, arrows, label):
 
 ROADMAPS = {
 
+    'agentic': dict(
+        label='Roadmap of the AI co-scientist: tool-using chemists in 2023, '
+              'domain agents in 2024, benchmarks and generalists in 2025, and '
+              'a robotic body in 2026.',
+        arrows=['a demo is not a protocol',
+                'nobody could score the reasoning',
+                'the answer still has to be made'],
+        stops=[
+            ('2023', 'the tool-using chemist',
+             ['Coscientist wires GPT-4 to search, code and a cloud lab',
+              'it plans and runs real cross-coupling reactions']),
+            ('2024', 'the domain agent',
+             ['CRISPR-GPT decomposes a gene-editing experiment',
+              'guide design, delivery, assay and analysis as one plan']),
+            ('2025', 'benchmarks and generalists',
+             ['Biomni: 150 tools, 105 packages, 59 databases',
+              'Genome-Bench scores answers against 11 years of '
+              'expert argument']),
+            ('2026', 'a body for the agent',
+             ['Qumus puts the whole loop inside a robotic minilab',
+              'the first AI-created graphene, and a working transistor']),
+        ]),
+
     'rmsnorm': dict(
         label='Roadmap of normalization: BatchNorm 2015, LayerNorm 2016, '
               'RMSNorm 2019, the default from 2023. Each step is forced by a '

@@ -266,11 +266,130 @@ def fig_guests():
                'and usable by nobody else.')
 
 
+def fig_signal():
+    """Agentic biolab, Figure 2: three places the training signal came from.
+
+    The three talks that looked least alike were all answering the same
+    question, so the figure puts their sources in one column and lets them
+    converge. The dots are animated in blog.css, and the return arrow along
+    the bottom is the part that makes it a flywheel rather than a pipeline.
+    """
+    p = Pen(3)
+    b = []
+    srcs = [('forum argument', '3,332 questions, 11 years'),
+            ('amateur photographs', 'iNaturalist and Merlin'),
+            ('clinical outcomes', 'read back into the model')]
+    mid_sub = 'what a model is scored on'
+    sw = max(box_width(l, sub=s2) for l, s2 in srcs)
+    # Every width is derived from its own text, including the subtitle: the
+    # middle box carries the longest one, and a hard-coded width put it out
+    # past the arrows the first time.
+    sx = 14
+    mid_w = box_width('a training signal', sub=mid_sub)
+    mx = sx + sw + 60
+    rw = box_width('the model')
+    rx = mx + mid_w + 60
+    b += text(sx, 16, 'where the signal comes from', cls='sk-lbl',
+              anchor='start')
+    for i, (label, sub) in enumerate(srcs):
+        y = 28 + i * 66
+        b += box(sx, y, sw, 52, label, p, 'sk-s2', sub=sub)
+        b += rough_arrow(sx + sw + 4, y + 26, mx - 6, 120, p, 'sk-thin',
+                         head=6)
+    b += box(mx, 94, mid_w, 52, 'a training signal', p, 'sk-s', sub=mid_sub)
+    b += rough_arrow(mx + mid_w + 4, 120, rx - 6, 120, p, 'sk-thin', head=6)
+    b += box(rx, 94, rw, 52, 'the model', p, 'sk-mark')
+    # The return path: what the model says goes back out to the people who
+    # made the signal, and their reaction is the next round of it.
+    b += rough_line(rx + rw / 2, 150, rx + rw / 2, 238, p, 'sk-faint')
+    b += rough_line(rx + rw / 2, 238, sx + sw / 2, 238, p, 'sk-faint')
+    # The arrow comes back up to the *bottom* of the source column rather than
+    # running to its top, which would draw a line straight through all three
+    # boxes on the way.
+    b += rough_arrow(sx + sw / 2, 238, sx + sw / 2, 218, p, 'sk-faint', head=6)
+    b += text(360, 260, 'and what it answers becomes the next thing an '
+                        'expert argues about', cls='sk-note')
+    for i in range(3):
+        y = 54 + i * 66
+        b.append("<circle class='sig-dot sig-d%d' cx='%.1f' cy='%.1f' r='5'/>"
+                 % (i + 1, sx + sw + 4, y))
+    b.append("<circle class='sig-dot sig-back' cx='%.1f' cy='238' r='5'/>"
+             % (rx + rw / 2))
+    return svg(720, 274, b,
+               'Three sources of training signal on the left -- forum '
+               'argument, amateur photographs, clinical outcomes -- feeding '
+               'one training signal, then a model, with a return arrow along '
+               'the bottom back to the sources.')
+
+
+def fig_experimentalist():
+    """Agentic biolab, Figure 4: the loop, and where its time actually goes.
+
+    Redrawn from Qumus Figure 1a in this site's palette. The travelling dot
+    holds on `execute` for seven eighths of every cycle, which is not
+    decoration: the paper's own timing gives instrument execution 34:44 of the
+    39:32 the whole task took.
+
+    The ring is drawn tall rather than wide. A flatter one leaves the diagonal
+    arrows shorter than their own arrowheads, and pushes the annotation into
+    the path of the arrow it is annotating.
+    """
+    import math
+    p = Pen(23)
+    b = []
+    cx, cy, ex, ey = 360.0, 190.0, 250.0, 130.0
+    nodes = [('reason', 180), ('hypothesize', 120), ('plan', 60),
+             ('execute', 0), ('observe', 300), ('report', 240)]
+    pos, half = [], []
+    for label, ang in nodes:
+        a = math.radians(ang)
+        pos.append((cx + ex * math.cos(a), cy - ey * math.sin(a)))
+        half.append(box_width(label) / 2)
+    for i, (label, _ang) in enumerate(nodes):
+        x, y = pos[i]
+        cls = 'sk-mark' if label == 'execute' else 'sk-s2'
+        b += box(x - half[i], y - 17, half[i] * 2, 34, label, p, cls)
+    for i in range(len(nodes)):
+        x0, y0 = pos[i]
+        x1, y1 = pos[(i + 1) % len(nodes)]
+        dx, dy = x1 - x0, y1 - y0
+        d = math.hypot(dx, dy)
+        s0 = half[i] + 13
+        s1 = half[(i + 1) % len(nodes)] + 17
+        b += rough_arrow(x0 + dx / d * s0, y0 + dy / d * s0,
+                         x1 - dx / d * s1, y1 - dy / d * s1, p, 'sk-thin',
+                         bow=2.6, head=7)
+    b += text(cx, cy - 4, 'an AI experimentalist')
+    b += text(cx, cy + 18, 'the loop Qumus closes with nobody in the room',
+              cls='sk-sub')
+    # In and out. Both stop clear of their boxes, and both labels sit where no
+    # arrow passes -- the first version ran the outgoing arrow straight through
+    # two boxes on its way to the right-hand margin.
+    b += rough_arrow(14, cy, cx - ex - half[0] - 13, cy, p, 'sk-thin', head=6)
+    b += text(10, cy - 30, 'a request', cls='sk-lbl', anchor='start')
+    rx, ry = pos[5]
+    b += rough_arrow(rx - 20, ry + 19, rx - 88, ry + 44, p, 'sk-thin', head=6)
+    b += text(rx - 96, ry + 50, 'a result', cls='sk-lbl', anchor='end')
+    b += text(706, 244, 'seven eighths of the', cls='sk-note', anchor='end')
+    b += text(706, 264, 'wall clock is here', cls='sk-note', anchor='end')
+    b += rough_line(694, 230, cx + ex + half[3] - 6, cy + 22, p, 'sk-faint',
+                    bow=0.6, passes=1)
+    b.append("<circle class='qm-dot' cx='%.0f' cy='%.0f' r='6'/>"
+             % (pos[0][0], pos[0][1]))
+    return svg(720, 384, b,
+               'Six stages -- reason, hypothesize, plan, execute, observe, '
+               'report -- arranged in a ring with arrows running clockwise, a '
+               'request entering at the left and a result leaving at the '
+               'bottom left.')
+
+
 FIGURES = {
     'bottleneck': fig_bottleneck,
     'loop': fig_loop,
     'where': fig_where,
     'guests': fig_guests,
+    'signal': fig_signal,
+    'experimentalist': fig_experimentalist,
 }
 
 

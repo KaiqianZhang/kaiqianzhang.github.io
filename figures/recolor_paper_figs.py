@@ -240,4 +240,35 @@ im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
     os.path.join(OUT, 'word2vec-architectures.png'))
 print('      tinted to #3E4560 (%d x %d)' % (im.width, im.height))
 
+# -- Yin et al. (2025), Genome-Bench Figure 2(a) ----------------------------
+# The panel that carries the paper: 21 bars over 16 models, and a 7B open
+# model lifted by RL onto the frontier models' shelf. Semantics are held
+# constant with the rest of the post -- the small model after RL is the
+# lavender hero, its own before-RL bar is rose, frontier commercial models are
+# blue, and the router goes to ink. The router deliberately does *not* get
+# marker red: that colour means "the thing being pointed at" everywhere else in
+# this post, including the wrong-answer curve in the last figure, and a data
+# series must not borrow it.
+print('genomebench-fig2a-accuracy.png')
+im = flatten(os.path.join(SRC, 'genomebench-fig2a-accuracy.png'))
+im = recolour(im, [('#87CEEA', '#3E6491'),   # commercial frontier models
+                   ('#7EB6FF', '#C48BAC'),   # open models, before RL
+                   ('#003F7D', '#8C77BC'),   # open models, after RL
+                   ('#8B0101', '#22253E')],  # the RL-Router
+             tol=55)
+im = trim(im, pad=14)
+im.resize((im.width // 2, im.height // 2), Image.LANCZOS).save(
+    os.path.join(OUT, 'agentic-genomebench-accuracy.png'))
+print('      %d x %d' % (im.width // 2, im.height // 2))
+
+# -- Shi et al. (2026), Qumus Figure 1(d) -----------------------------------
+# A photograph of the robotic minilab. Photographs are not recoloured -- there
+# is no palette to map and repainting a photo would misrepresent it -- so this
+# one is only cropped to the panel and upscaled for display density.
+print('qumus-fig1d-minilab.png')
+im = flatten(os.path.join(SRC, 'qumus-fig1d-minilab.png'))
+im.resize((im.width * 2, im.height * 2), Image.LANCZOS).save(
+    os.path.join(OUT, 'agentic-qumus-minilab.png'))
+print('      %d x %d (not recoloured: photograph)' % (im.width * 2, im.height * 2))
+
 print('done ->', OUT)
