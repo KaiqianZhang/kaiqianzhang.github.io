@@ -8,9 +8,7 @@ icon: 🍵
 
 I spent today at the Agentic Biolab Workshop, run by Princeton's
 Omenn-Darling Bioengineering Institute together with AI², the university's
-*AI for Accelerating Invention* initiative. There was an opening and six
-talks, all in one room, on a subject that does not have a settled name yet.
-Most people in the room called it the AI co-scientist.
+*AI for Accelerating Invention* initiative.
 
 I went in expecting a day of biology I would half understand. I came out with
 something else, which is why I am writing this instead of filing my notes.
