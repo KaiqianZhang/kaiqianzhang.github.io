@@ -158,7 +158,8 @@ ROADMAPS = {
              ['CRISPR-GPT decomposes a gene-editing experiment',
               'guide design, delivery, assay and analysis as one plan']),
             ('2025', 'benchmarks and generalists',
-             ['Biomni: 150 tools, 105 packages, 59 databases',
+             ["Google's AI co-scientist names the field",
+              'Biomni: 150 tools, 105 packages, 59 databases',
               'Genome-Bench scores answers against 11 years of '
               'expert argument']),
             ('2026', 'a body for the agent',

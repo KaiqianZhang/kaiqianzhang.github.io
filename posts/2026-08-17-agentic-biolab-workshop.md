@@ -1,75 +1,56 @@
 ---
 title: A Day at the Agentic Biolab Workshop
-subtitle: The bottleneck in AI for science is not the model but the world you can check it against.
+subtitle: What the frontier of AI for science actually looks like, from one day of talks at Princeton.
 date: 2026-08-17
 tags: uncat
 icon: 🍵
 ---
 
-I spent today at the Agentic Biolab Workshop, run by Princeton's
-Omenn-Darling Bioengineering Institute together with AI², the university's
-*AI for Accelerating Invention* initiative.
+I spent a day at the Agentic Biolab Workshop, run by Princeton's
+Omenn-Darling Bioengineering Institute with AI², the university's *AI for
+Accelerating Invention* initiative. Six talks, on a field moving fast enough
+that almost everything below was published in the last eighteen months.
 
-I went in expecting a day of biology I would half understand. I came out with
-something else, which is why I am writing this instead of filing my notes.
-The talks were about genomes, birds, graphene, neurons and protein cages, and
-underneath they were all about the same problem — a problem I recognise from
-language modelling.
-
-Here is the claim I left with. **The hard part is no longer the model. The
-hard part is building a world the model can be checked against.** Every talk
-was, in its own vocabulary, an answer to that.
-
-Cliff Brangwynne, who directs the institute, opened the day by putting it as a
-change in what thinking is. He described not a faster tool but a different
-arrangement, and he used the word *co-intelligence* for it. The argument was
-that we should envision that arrangement and prepare for it rather than wait
-to be surprised by it. I want to take it seriously enough to ask what would
-have to be true for it to work.
-
-Two things before I start. The talks were not recorded, so every summary of
-one below is my reconstruction and not the speaker's words, and where I
-disagree with somebody I am disagreeing with my own notes of what they said.
-And this post assumes you know nothing about genome editing, protein design or
-two-dimensional materials. I did not know much either. What it does assume is
-an interest in how these systems get built, and in how anybody could tell
-whether they work.
+So this is a map of what is out there, in the order it arrived. The talks were
+not recorded, so every summary is my reconstruction. The claim I left with is
+that the hard part is no longer the model. It is building a world the model
+can be checked against.
 
 [TOC]
 
 ## Three Years From a Prompt to a Pair of Robot Arms
 
-Some ground first. The phrase *AI co-scientist* is about three years old and
-it has already meant four different things. Knowing which one a speaker means
-saves a great deal of confusion.
+The name is younger than the thing. The 2023 system below was called
+Coscientist; the phrase *AI co-scientist* belongs to Google, which gave it to
+a Gemini-based hypothesis generator in February 2025.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 384' role='img' aria-label='Roadmap of the AI co-scientist: tool-using chemists in 2023, domain agents in 2024, benchmarks and generalists in 2025, and a robotic body in 2026.'>
-      <path class='spine' d='M99.4,191.7 Q379.7,191.7 659.9,191.4'/>
-      <path class='head' d='M180.2,192.5 Q193.0,192.1 205.9,192.4'/>
-      <path class='head' d='M180.4,191.4 Q193.5,192.0 206.5,191.8'/>
-      <path class='head' d='M205.8,191.4 Q203.6,193.7 201.1,195.7'/>
-      <path class='head' d='M205.7,192.2 Q203.5,190.6 201.1,189.3'/>
-      <text class='why' x='193.0' y='163.0'>a demo is not a</text>
-      <text class='why' x='193.0' y='181.0'>protocol</text>
-      <path class='head' d='M367.3,191.6 Q380.0,191.7 392.7,192.3'/>
-      <path class='head' d='M366.5,192.0 Q379.5,192.5 392.5,192.0'/>
-      <path class='head' d='M392.4,192.1 Q389.9,193.5 387.3,194.4'/>
-      <path class='head' d='M393.5,191.7 Q391.1,190.0 388.5,188.9'/>
-      <text class='why' x='380.0' y='163.0'>nobody could score</text>
-      <text class='why' x='380.0' y='181.0'>the reasoning</text>
-      <path class='head' d='M554.2,192.5 Q566.9,192.3 579.6,191.9'/>
-      <path class='head' d='M553.4,192.6 Q566.9,192.4 580.3,191.5'/>
-      <path class='head' d='M579.5,191.6 Q576.9,192.9 574.9,194.9'/>
-      <path class='head' d='M580.2,192.3 Q577.7,190.4 575.4,188.3'/>
-      <text class='why' x='567.0' y='163.0'>the answer still has</text>
-      <text class='why' x='567.0' y='181.0'>to be made</text>
+    <svg viewBox='0 0 760 423' role='img' aria-label='Roadmap of the AI co-scientist: tool-using chemists in 2023, domain agents in 2024, benchmarks and generalists in 2025, and a robotic body in 2026.'>
+      <path class='spine' d='M99.4,211.2 Q379.7,211.2 659.9,210.9'/>
+      <path class='head' d='M180.2,212.0 Q193.0,211.6 205.9,211.9'/>
+      <path class='head' d='M180.4,210.9 Q193.5,211.5 206.5,211.3'/>
+      <path class='head' d='M205.8,210.9 Q203.6,213.2 201.1,215.2'/>
+      <path class='head' d='M205.7,211.7 Q203.5,210.1 201.1,208.8'/>
+      <text class='why' x='193.0' y='182.5'>a demo is not a</text>
+      <text class='why' x='193.0' y='200.5'>protocol</text>
+      <path class='head' d='M367.3,211.1 Q380.0,211.2 392.7,211.8'/>
+      <path class='head' d='M366.5,211.5 Q379.5,212.0 392.5,211.5'/>
+      <path class='head' d='M392.4,211.6 Q389.9,213.0 387.3,213.9'/>
+      <path class='head' d='M393.5,211.2 Q391.1,209.5 388.5,208.4'/>
+      <text class='why' x='380.0' y='182.5'>nobody could score</text>
+      <text class='why' x='380.0' y='200.5'>the reasoning</text>
+      <path class='head' d='M554.2,212.0 Q566.9,211.8 579.6,211.4'/>
+      <path class='head' d='M553.4,212.1 Q566.9,211.9 580.3,211.0'/>
+      <path class='head' d='M579.5,211.1 Q576.9,212.4 574.9,214.4'/>
+      <path class='head' d='M580.2,211.8 Q577.7,209.9 575.4,207.8'/>
+      <text class='why' x='567.0' y='182.5'>the answer still has</text>
+      <text class='why' x='567.0' y='200.5'>to be made</text>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='0.0' width='356.0' height='136.0'/>
-        <path class='stem' d='M100.2,136.3 Q99.3,164.1 99.0,191.9'/>
-        <circle class='dot' cx='99.5' cy='192.0' r='5'/>
-        <path class='box' d='M24.1,0.3 Q193.0,0.4 361.9,0.3 Q370.9,0.3 370.9,9.3 Q371.6,68.5 370.9,127.7 Q370.9,136.7 361.9,136.7 Q193.0,136.3 24.1,136.7 Q15.1,136.7 15.1,127.7 Q15.1,68.5 15.1,9.3 Q15.1,0.3 24.1,0.3'/>
-        <path class='box' d='M23.6,-0.7 Q193.0,-0.2 362.5,-0.7 Q371.5,-0.7 371.5,8.3 Q372.5,67.2 371.5,126.1 Q371.5,135.1 362.5,135.1 Q193.0,135.7 23.6,135.1 Q14.6,135.1 14.6,126.1 Q14.0,67.2 14.6,8.3 Q14.6,-0.7 23.6,-0.7'/>
+        <rect class='hit' x='15.0' y='0.0' width='356.0' height='155.5'/>
+        <path class='stem' d='M100.2,155.8 Q99.3,183.6 99.0,211.4'/>
+        <circle class='dot' cx='99.5' cy='211.5' r='5'/>
+        <path class='box' d='M24.1,0.3 Q193.0,0.4 361.9,0.3 Q370.9,0.3 370.9,9.3 Q371.6,78.3 370.9,147.2 Q370.9,156.2 361.9,156.2 Q193.0,155.8 24.1,156.2 Q15.1,156.2 15.1,147.2 Q15.1,78.3 15.1,9.3 Q15.1,0.3 24.1,0.3'/>
+        <path class='box' d='M23.6,-0.7 Q193.0,-0.2 362.5,-0.7 Q371.5,-0.7 371.5,8.3 Q372.5,77.0 371.5,145.6 Q371.5,154.6 362.5,154.6 Q193.0,155.2 23.6,154.6 Q14.6,154.6 14.6,145.6 Q14.0,77.0 14.6,8.3 Q14.6,-0.7 23.6,-0.7'/>
         <text class='yr' x='29.0' y='21.0'>2023</text>
         <text class='stage' x='29.0' y='45.0'>the tool-using chemist</text>
         <circle class='bul' cx='33.0' cy='63.0' r='2'/>
@@ -80,99 +61,77 @@ saves a great deal of confusion.
         <text class='body' x='42.0' y='125.5'>reactions</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='15.0' y='248.0' width='356.0' height='136.0'/>
-        <path class='stem' d='M286.1,248.0 Q286.1,219.7 286.4,191.4'/>
-        <circle class='dot' cx='286.5' cy='192.0' r='5'/>
-        <path class='box' d='M23.4,248.3 Q193.1,248.4 362.8,248.3 Q371.8,248.3 371.8,257.3 Q372.7,315.9 371.8,374.4 Q371.8,383.4 362.8,383.4 Q193.1,383.2 23.4,383.4 Q14.4,383.4 14.4,374.4 Q14.0,315.9 14.4,257.3 Q14.4,248.3 23.4,248.3'/>
-        <path class='box' d='M24.1,248.9 Q193.3,249.2 362.5,248.9 Q371.5,248.9 371.5,257.9 Q371.2,316.8 371.5,375.7 Q371.5,384.7 362.5,384.7 Q193.3,384.9 24.1,384.7 Q15.1,384.7 15.1,375.7 Q15.8,316.8 15.1,257.9 Q15.1,248.9 24.1,248.9'/>
-        <text class='yr' x='29.0' y='269.0'>2024</text>
-        <text class='stage' x='29.0' y='293.0'>the domain agent</text>
-        <circle class='bul' cx='33.0' cy='311.0' r='2'/>
-        <text class='body' x='42.0' y='315.0'>CRISPR-GPT decomposes a gene-editing</text>
-        <text class='body' x='42.0' y='334.5'>experiment</text>
-        <circle class='bul' cx='33.0' cy='350.0' r='2'/>
-        <text class='body' x='42.0' y='354.0'>guide design, delivery, assay and</text>
-        <text class='body' x='42.0' y='373.5'>analysis as one plan</text>
+        <rect class='hit' x='15.0' y='267.5' width='356.0' height='155.5'/>
+        <path class='stem' d='M286.1,267.5 Q286.1,239.2 286.4,210.9'/>
+        <circle class='dot' cx='286.5' cy='211.5' r='5'/>
+        <path class='box' d='M23.4,267.8 Q193.1,267.9 362.8,267.8 Q371.8,267.8 371.8,276.8 Q372.7,345.1 371.8,413.4 Q371.8,422.4 362.8,422.4 Q193.1,422.2 23.4,422.4 Q14.4,422.4 14.4,413.4 Q14.0,345.1 14.4,276.8 Q14.4,267.8 23.4,267.8'/>
+        <path class='box' d='M24.1,268.4 Q193.3,268.7 362.5,268.4 Q371.5,268.4 371.5,277.4 Q371.2,346.1 371.5,414.7 Q371.5,423.7 362.5,423.7 Q193.3,423.9 24.1,423.7 Q15.1,423.7 15.1,414.7 Q15.8,346.1 15.1,277.4 Q15.1,268.4 24.1,268.4'/>
+        <text class='yr' x='29.0' y='288.5'>2024</text>
+        <text class='stage' x='29.0' y='312.5'>the domain agent</text>
+        <circle class='bul' cx='33.0' cy='330.5' r='2'/>
+        <text class='body' x='42.0' y='334.5'>CRISPR-GPT decomposes a gene-editing</text>
+        <text class='body' x='42.0' y='354.0'>experiment</text>
+        <circle class='bul' cx='33.0' cy='369.5' r='2'/>
+        <text class='body' x='42.0' y='373.5'>guide design, delivery, assay and</text>
+        <text class='body' x='42.0' y='393.0'>analysis as one plan</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='0.0' width='356.0' height='136.0'/>
-        <path class='stem' d='M472.8,135.5 Q473.7,163.8 474.1,192.1'/>
-        <circle class='dot' cx='473.5' cy='192.0' r='5'/>
-        <path class='box' d='M397.4,-0.3 Q567.0,-1.1 736.5,-0.3 Q745.5,-0.3 745.5,8.7 Q746.5,67.5 745.5,126.4 Q745.5,135.4 736.5,135.4 Q567.0,136.3 397.4,135.4 Q388.4,135.4 388.4,126.4 Q388.4,67.5 388.4,8.7 Q388.4,-0.3 397.4,-0.3'/>
-        <path class='box' d='M397.7,0.3 Q566.9,0.1 736.2,0.3 Q745.2,0.3 745.2,9.3 Q744.4,68.2 745.2,127.1 Q745.2,136.1 736.2,136.1 Q566.9,135.8 397.7,136.1 Q388.7,136.1 388.7,127.1 Q388.2,68.2 388.7,9.3 Q388.7,0.3 397.7,0.3'/>
+        <rect class='hit' x='389.0' y='0.0' width='356.0' height='155.5'/>
+        <path class='stem' d='M472.8,155.0 Q473.7,183.3 474.1,211.6'/>
+        <circle class='dot' cx='473.5' cy='211.5' r='5'/>
+        <path class='box' d='M397.4,-0.3 Q567.0,-1.1 736.5,-0.3 Q745.5,-0.3 745.5,8.7 Q746.5,77.3 745.5,145.9 Q745.5,154.9 736.5,154.9 Q567.0,155.8 397.4,154.9 Q388.4,154.9 388.4,145.9 Q388.4,77.3 388.4,8.7 Q388.4,-0.3 397.4,-0.3'/>
+        <path class='box' d='M397.7,0.3 Q566.9,0.1 736.2,0.3 Q745.2,0.3 745.2,9.3 Q744.4,77.9 745.2,146.6 Q745.2,155.6 736.2,155.6 Q566.9,155.3 397.7,155.6 Q388.7,155.6 388.7,146.6 Q388.2,77.9 388.7,9.3 Q388.7,0.3 397.7,0.3'/>
         <text class='yr' x='403.0' y='21.0'>2025</text>
         <text class='stage' x='403.0' y='45.0'>benchmarks and generalists</text>
         <circle class='bul' cx='407.0' cy='63.0' r='2'/>
-        <text class='body' x='416.0' y='67.0'>Biomni: 150 tools, 105 packages, 59</text>
-        <text class='body' x='416.0' y='86.5'>databases</text>
-        <circle class='bul' cx='407.0' cy='102.0' r='2'/>
-        <text class='body' x='416.0' y='106.0'>Genome-Bench scores answers against 11</text>
-        <text class='body' x='416.0' y='125.5'>years of expert argument</text>
+        <text class='body' x='416.0' y='67.0'>Google's AI co-scientist names the field</text>
+        <circle class='bul' cx='407.0' cy='82.5' r='2'/>
+        <text class='body' x='416.0' y='86.5'>Biomni: 150 tools, 105 packages, 59</text>
+        <text class='body' x='416.0' y='106.0'>databases</text>
+        <circle class='bul' cx='407.0' cy='121.5' r='2'/>
+        <text class='body' x='416.0' y='125.5'>Genome-Bench scores answers against 11</text>
+        <text class='body' x='416.0' y='145.0'>years of expert argument</text>
       </g>
       <g class='stop'>
-        <rect class='hit' x='389.0' y='248.0' width='356.0' height='136.0'/>
-        <path class='stem' d='M660.6,247.8 Q660.9,219.5 660.1,191.3'/>
-        <circle class='dot' cx='660.5' cy='192.0' r='5'/>
-        <path class='box' d='M398.1,247.8 Q567.4,247.3 736.8,247.8 Q745.8,247.8 745.8,256.8 Q744.8,315.6 745.8,374.5 Q745.8,383.5 736.8,383.5 Q567.4,384.4 398.1,383.5 Q389.1,383.5 389.1,374.5 Q388.8,315.6 389.1,256.8 Q389.1,247.8 398.1,247.8'/>
-        <path class='box' d='M398.1,248.2 Q566.9,248.8 735.7,248.2 Q744.7,248.2 744.7,257.2 Q745.2,315.7 744.7,374.3 Q744.7,383.3 735.7,383.3 Q566.9,383.5 398.1,383.3 Q389.1,383.3 389.1,374.3 Q389.9,315.7 389.1,257.2 Q389.1,248.2 398.1,248.2'/>
-        <text class='yr' x='403.0' y='269.0'>2026</text>
-        <text class='stage' x='403.0' y='293.0'>a body for the agent</text>
-        <circle class='bul' cx='407.0' cy='311.0' r='2'/>
-        <text class='body' x='416.0' y='315.0'>Qumus puts the whole loop inside a</text>
-        <text class='body' x='416.0' y='334.5'>robotic minilab</text>
-        <circle class='bul' cx='407.0' cy='350.0' r='2'/>
-        <text class='body' x='416.0' y='354.0'>the first AI-created graphene, and a</text>
-        <text class='body' x='416.0' y='373.5'>working transistor</text>
+        <rect class='hit' x='389.0' y='267.5' width='356.0' height='155.5'/>
+        <path class='stem' d='M660.6,267.3 Q660.9,239.0 660.1,210.8'/>
+        <circle class='dot' cx='660.5' cy='211.5' r='5'/>
+        <path class='box' d='M398.1,267.3 Q567.4,266.8 736.8,267.3 Q745.8,267.3 745.8,276.3 Q744.8,344.9 745.8,413.5 Q745.8,422.5 736.8,422.5 Q567.4,423.4 398.1,422.5 Q389.1,422.5 389.1,413.5 Q388.8,344.9 389.1,276.3 Q389.1,267.3 398.1,267.3'/>
+        <path class='box' d='M398.1,267.7 Q566.9,268.3 735.7,267.7 Q744.7,267.7 744.7,276.7 Q745.2,345.0 744.7,413.3 Q744.7,422.3 735.7,422.3 Q566.9,422.5 398.1,422.3 Q389.1,422.3 389.1,413.3 Q389.9,345.0 389.1,276.7 Q389.1,267.7 398.1,267.7'/>
+        <text class='yr' x='403.0' y='288.5'>2026</text>
+        <text class='stage' x='403.0' y='312.5'>a body for the agent</text>
+        <circle class='bul' cx='407.0' cy='330.5' r='2'/>
+        <text class='body' x='416.0' y='334.5'>Qumus puts the whole loop inside a</text>
+        <text class='body' x='416.0' y='354.0'>robotic minilab</text>
+        <circle class='bul' cx='407.0' cy='369.5' r='2'/>
+        <text class='body' x='416.0' y='373.5'>the first AI-created graphene, and a</text>
+        <text class='body' x='416.0' y='393.0'>working transistor</text>
       </g>
     </svg>
 </div>
 
-The first step was the easy one to imagine. In 2023 a group at Carnegie Mellon
-wired GPT-4 to a web search, a Python interpreter, and the programming
-interface of a *cloud laboratory* — a facility where robots run your
-experiment for you and you send the protocol over the internet.
+Four systems, four different meanings. Coscientist wired GPT-4 to a web
+search, a Python interpreter and a *cloud laboratory*, where robots run your
+experiment and you send the protocol over the internet. It ran real
+palladium-catalysed cross-coupling reactions.
 
-They called the result Coscientist, and it planned and ran real reactions of
-the kind that join two carbon fragments together using a palladium catalyst.
-That paper landed in *Nature*, and it changed the conversation, because the
-model was no longer only writing about chemistry.
-
-A demonstration is not a protocol, though, and the next step is the one I
-think matters more. It was Le Cong's work at Stanford, and it stopped asking a
-general model to be a scientist. It built an agent that knows one experiment
-deeply instead.
-
-The experiment is gene editing with CRISPR, a system that cuts DNA at a chosen
-place. What tells it where to cut is a short piece of RNA called the guide.
-CRISPR-GPT decomposes such an experiment into its real stages — choosing the
-editing system, designing the guide, choosing how to deliver it into the cell,
-designing the assay that will tell you whether it worked, analysing the result
-— and walks a researcher through all of them. It is now published in *Nature
+CRISPR-GPT, from Le Cong's group at Stanford, went the other way: not a
+general model pretending to be a scientist, but an agent that knows one
+experiment deeply. It decomposes a gene-editing experiment into its real
+stages, from designing the guide RNA that tells the cutter where to cut, to
+the assay that will say whether it worked. It is published in *Nature
 Biomedical Engineering*.
 
 Then came the question nobody could avoid. If you build one of these, how do
-you know it is any good? That is what most of the interesting work in 2025 was
-about, and it is where the day really started.
+you know it works?
 
 ## 1. The Datasets Nobody Meant to Collect
 
-Cong's talk came in two halves. The first was about foundation models for
-engineering genomes and cells. On the genome side that means RNA language
-models — the same next-token machinery as a chatbot, trained on RNA sequence
-instead of English. On the cell side he made a case that cardiovascular
-disease is where the most is at stake, which turns getting mitochondria into
-heart cells into the delivery problem worth solving.
-
-I want to dwell on the second half of the talk, because it asked how you would
-ever evaluate any of this.
-
-Three speakers gave talks that looked nothing like each other. Cong spoke on
-genome engineering, Pietro Perona on identifying species from photographs, and
-Steve Finkbeiner on neurodegeneration. By the afternoon I was convinced they
-had all given the same talk.
-
-The shared question is this: **where does the training signal come from, when
-the thing you want the model to learn is not written down anywhere?**
+Cong spoke on genome engineering, Pietro Perona on identifying species from
+photographs, Steve Finkbeiner on neurodegeneration. By the afternoon I was
+convinced all three were answering one question: **where does the training
+signal come from, when the thing you want the model to learn is not written
+down anywhere?**
 
 <div class='sketch'>
     <svg viewBox='0 0 720 274' role='img' aria-label='Three sources of training signal on the left -- forum argument, amateur photographs, clinical outcomes -- feeding one training signal, then a model, with a return arrow along the bottom back to the sources.'>
@@ -228,181 +187,87 @@ the thing you want the model to learn is not written down anywhere?**
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        Three talks, one shape. Cong takes his signal from eleven years of
-        scientists arguing on a forum, Perona from millions of amateur
-        photographs corrected by a few experts, Finkbeiner from what happened
-        to the patient. None of these existed as a dataset until somebody
-        decided to treat them as one. Watch the arrow along the bottom: what
-        the model answers goes back to the people who made the signal, and
-        their reaction is the next round of it.
+        Cong takes his signal from eleven years of scientists arguing on a
+        forum, Perona from amateur photographs corrected by experts,
+        Finkbeiner from what happened to the patient. None existed as a dataset
+        until somebody decided to treat it as one.
     </div>
 </div>
 
-Take Cong's answer first, because it is the one that made me sit up. His group
-built a benchmark called Genome-Bench, and its source is a genome-engineering
-forum where working scientists argued with each other for eleven years. Not
-textbooks, and not papers, but threads where somebody says their edit did not
-work and five people suggest why.
-
-The pipeline parses those email threads, uses a language model to pull
-question–answer–context triples out of them, and turns each triple into a
-multiple-choice question. The result is 3,332 of them, spanning seven areas
-from guide design to what the paper politely calls practical considerations
-and lab logistics.
-
-I find that choice of source quietly radical. A textbook records what a field
-agreed on. A forum thread records what it was still fighting about, which is
-exactly the part a model cannot get anywhere else.
-
-Then they trained on it with reinforcement learning, which means the model is
-not shown correct answers to copy but is scored on the answers it produces and
-nudged toward whatever scored well. Here is the figure that carries the paper.
+Cong's answer is Genome-Bench. Its source is eleven years of a
+genome-engineering forum where working scientists argued with each other. A
+language model turns those email threads into 3,332 multiple-choice questions,
+and a small open model is then trained on them with reinforcement learning,
+meaning it is scored on the answers it produces rather than shown answers to
+copy.
 
 <div class='figure'>
     <img src='/images/agentic-genomebench-accuracy.png'>
     <div class='caption'>
         <span class='caption-label'>Figure 2.</span>
-        Sixteen models on the same genomics questions, twenty-one bars between
-        them, from Yin et al. (2025), Figure 2(a), recoloured into this site's
-        palette. The <span style='color:#3E6491'><b>blue</b></span> bars are
-        frontier commercial models, evaluated as they come. The
+        From Yin et al. (2025), Figure 2(a), recoloured into this site's
+        palette. <span style='color:#3E6491'><b>Blue</b></span> is frontier
+        commercial models as they come;
         <span style='color:#C48BAC'><b>rose</b></span> and
-        <span style='color:#8C77BC'><b>lavender</b></span> pairs are five small
-        open models before and after reinforcement learning on the forum data,
-        and the <span style='color:#22253E'><b>dark</b></span> bar at the right
-        is a router. The pair I keep looking at is Qwen2.5-7B: 58.85% before,
-        76.85% after, with DeepSeek-R1 at 78.97%. Seven billion parameters,
-        trained on arguments, standing on the same shelf as the frontier.
+        <span style='color:#8C77BC'><b>lavender</b></span> are small open
+        models before and after training on the forum data.
     </div>
 </div>
 
-Read the last few bars and you have the point of the whole exercise. That is
-eighteen points of gain from the forum data alone. The dark bar is a *router*,
-a small model whose only job is to look at a question and hand it to whichever
-of four fine-tuned specialists is likeliest to get it right, and it comes out
-on top at 81.07%.
+Eighteen points, from a mailing list. Two things stop me calling it parity,
+and both come from the paper itself. The test split is 661 questions, so the
+standard error is about 1.6 points and that last gap sits inside the noise.
+And on 35 expert-curated questions, the paper's best system scores 67.6%
+against human experts at 73.3%. The gap to a person is real, and the authors
+report it rather than bury it.
 
-Two cautions before that number is allowed to carry any weight. The test split
-is 661 questions, so the standard error on any of these accuracies is about
-1.6 points — which means the 2.1 points between the fine-tuned 7B and
-DeepSeek-R1 and the 2.1 points between the router and DeepSeek-R1 are both
-inside the noise. I should not call the first gap "as good as" and the second
-"better than", and neither should the chart.
+Perona's answer is a community. iNaturalist and Merlin Bird ID both grew out
+of Visipedia, which he began with Serge Belongie in 2010. The signal is
+millions of amateurs photographing things, a smaller number of experts
+correcting them, and a model in the middle that improves as they converge.
 
-And the comparison is not like for like. The small models were trained on this
-benchmark's own distribution; the frontier models saw it cold. So the honest
-reading is narrower than "scale was never the scarce ingredient". It is that
-**in-domain signal can substitute for scale on the distribution it was trained
-on**, which is an older and smaller claim, and the experiment that would
-settle the bigger one — fine-tune a frontier model too, or test the 7B on
-something else — is not in the paper.
+Finkbeiner's answer is the clinic. He built robotic microscopy that tracks the
+same single cell for days, because watching one cell tells you what killed it,
+while a snapshot of a thousand only tells you what dying looks like. The
+clinical outcome then goes back into the training set.
 
-Even so, look at where the signal came from. Not a dataset somebody
-commissioned. Eleven years of a mailing list that existed for entirely other
-reasons.
-
-Now take Perona, at Caltech. His talk was called *Communities of knowledge and
-scientific consensus in the age of agentic AI*, and the idea I took from it is
-that a model can be the thing a community argues *through* rather than the
-thing that replaces the arguing.
-
-His two examples are apps you can install: iNaturalist, for identifying any
-plant or animal, and Merlin Bird ID, from the Cornell Lab of Ornithology. Both
-grew out of Visipedia, a project he began with Serge Belongie in 2010 on the
-premise that pictures should be first-class citizens alongside text, and that
-experts and algorithms should teach each other.
-
-Look at what the training signal is there. It is not a labelled dataset
-somebody commissioned either. It is millions of amateurs photographing things
-and a smaller number of experts correcting them, with the model in the middle,
-getting better as the community argues its way toward consensus.
-
-Finkbeiner closed the loop from the other end. He is a neurologist at UCSF and
-Gladstone who invented robotic microscopy for longitudinal single-cell
-analysis — automated instruments that track the *same* cell for days or
-months, rather than photographing a population once.
-
-His line that I wrote down twice: progress lies in causal insight extracted
-from good data. Watching one cell over time tells you what killed it. A
-snapshot of a thousand cells tells you what dying cells look like, which is
-not the same thing and is much less useful.
-
-And his pathology work does the thing everybody says and few build. Clinical
-data goes back into the training set, so the model's mistakes in the clinic
-become the next round of supervision.
-
-Three rooms and three vocabularies turned out to share one architecture. The
-model is downstream. The question that decides everything is who or what
-generates the corrections.
+Three rooms, one architecture. The model is downstream; what decides
+everything is who or what generates the corrections.
 
 ## 2. Thirty-Four Minutes of the Thirty-Nine
 
-The second thread of the day was a harder version of the same problem. Arguing
-on a forum is already text, so a model can be scored against it directly. A
-physical experiment is not. How do you turn a laboratory bench into something
-an agent can both act on and be checked against?
+A forum thread is already text, so a model can be scored against it. A bench
+is not. Three answers were on show.
 
-One answer is to make the agent good enough at the computational half of the
-work — the *dry lab*, the analysis and planning you do at a desk — that only
-the bench work, the *wet lab*, is left. That is Biomni, a general-purpose
-biomedical agent built at Stanford, which ships with 150 specialised tools,
-105 software packages and 59 databases and plans across all of them without
-task-specific prompting.
+Biomni, from Stanford, makes the agent good enough at the dry-lab half — 150
+tools, 105 software packages, 59 databases — that only bench work is left.
 
-Cong's group has a second answer, called LabOS, and it is the one I would not
-have predicted. Instead of replacing the human, put the human in
-augmented-reality glasses. The agent sees what the researcher sees, gives
-step-by-step guidance, flags errors as they happen, and takes voice and
-gesture back.
+LabOS, from Cong's group, puts the human in augmented-reality glasses instead.
+The agent sees what the researcher sees and flags errors as they happen, its
+vision trained on over 240 sessions of video shot from researchers' own heads.
+Cong's phrase for the goal is making the lab AI-operable and AI-reproducible,
+and I think *reproducible* is the load-bearing word.
 
-Making that work needed a model that can watch a bench. So they collected over
-240 sessions of video shot from researchers' own heads during real
-experiments, and used them to further train a vision-language model — a model
-that takes an image and text together and answers questions about what it is
-looking at.
-
-The phrase Cong used, and I like it, is making the lab AI-operable and
-AI-reproducible. *Reproducible* is the load-bearing word. If nothing observed
-the bench, nothing can check what happened at it.
-
-Sanfeng Wu's group at Princeton took the other road, and this was the talk
-that made the room go quiet. They built a robotic minilab and put an agent
-inside it.
+Sanfeng Wu's group at Princeton took the third road and built the bench.
 
 <div class='figure'>
     <img src='/images/agentic-qumus-minilab.png'>
     <div class='caption'>
         <span class='caption-label'>Figure 3.</span>
-        The Qumus minilab, reproduced from Shi et al. (2026), Figure 1(d). Two
-        robot arms, a motorised scotch-tape exfoliator, temperature-controlled
-        stages, storage tables and a microscope, on one optical bench. This is
-        a photograph, so it keeps its own colours. The scotch tape is not a
-        joke: peeling graphene off graphite with adhesive tape is how the
-        material is made.
+        The Qumus minilab, from Shi et al. (2026), Figure 1(d). A photograph,
+        so it keeps its own colours. The scotch tape is not a joke: peeling
+        graphene off graphite with adhesive tape is how the material is made.
     </div>
 </div>
 
-The system is called Qumus and it makes two-dimensional materials — sheets one
-atom thick, peeled off a crystal and stacked. It has produced, according to
-the paper, the first AI-created graphene and the first AI-fabricated
-atomically thin transistor.
+Qumus makes two-dimensional materials, sheets one atom thick, and the paper
+reports the first AI-created graphene and the first AI-fabricated transistor.
 
 The detail I enjoyed most is the least glamorous. To let the agent act on the
-bench at all, they trained an off-the-shelf object detector called YOLO on the
-view from two overhead cameras, and then stuck **micro-QR codes on the
-equipment**. They did not build a learned world model of the laboratory. They
-stuck barcodes on it.
-
-That is what defining an environment looks like in practice. The reason a
-language model can be trained at all is that text arrives pre-tokenised by
-writing. A bench does not. Somebody has to decide what the countable objects
-are, and in 2026 the honest answer is a sheet of QR stickers.
-
-Wu also pointed at the general robotics work this borrows from: OpenVLA, the
-open vision-language-action model, and the world-model line of research now
-appearing in open robotics toolkits. My notes have a project name here that I
-have not been able to match to a real paper, so I will leave it as the
-direction rather than invent a citation.
+bench at all, they trained an off-the-shelf object detector on two overhead
+cameras and stuck **micro-QR codes on the equipment**. Text arrives already
+sliced into words for a model to learn from. A bench does not, and in 2026 the
+honest answer to that is a sheet of stickers.
 
 <div class='sketch'>
     <svg viewBox='0 0 720 384' role='img' aria-label='Six stages -- reason, hypothesize, plan, execute, observe, report -- arranged in a ring with arrows running clockwise, a request entering at the left and a result leaving at the bottom left.'>
@@ -467,28 +332,17 @@ direction rather than invent a citation.
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 4.</span>
-        The loop an AI experimentalist closes, redrawn from Qumus Figure 1(a).
-        The travelling dot is not decorating the picture. It whips through five
-        stages and then holds on <b>execute</b> for seven eighths of every
-        turn, in the proportion the paper's own stopwatch reports. The next
-        figure is about what that does and does not cost you.
+        What people mean by an <i>agent</i>: a model given tools and
+        permission to go round this loop on its own, rather than answer once.
+        Redrawn from Qumus Figure 1(a). The dot holds on <b>execute</b> for
+        seven eighths of every turn, the proportion the paper's stopwatch
+        reports.
     </div>
 </div>
 
-Now the number that reframed the day for me. The Qumus paper reports the time
-breakdown for one complete task, which was to fetch the user a graphene flake,
-running on a version of the system driven by Claude Sonnet 4.6. The whole
-thing took 39 minutes and 32 seconds. Of that, the model spent 59 seconds
-reasoning and 3 minutes 49 seconds looking at what it had done. The remaining
-34 minutes and 44 seconds were instruments moving.
-
-The model thinks for **2.5% of the wall clock**. Everything else is a machine
-moving.
-
-The paper says as much in its own discussion: "the primary bottlenecks
-currently constraining our system are instrumental rather than algorithmic."
-I wanted to know what that costs you, so I put their numbers into the oldest
-tool for the question.
+Then the number that reframed the day for me. On one example run — the paper's
+own word — of fetching a graphene flake, the total was 39 minutes 32 seconds:
+59 seconds of reasoning, 34 minutes 44 seconds of instruments moving.
 
 <div class='knob' id='am-knob'>
     <div class='controls'>
@@ -588,448 +442,64 @@ tool for the question.
 </div>
 <div class='caption'>
     <span class='caption-label'>Figure 5.</span>
-    Amdahl's law on a real bench, split into
+    One Qumus run, split into
     <span style='color:#8C77BC'><b>reasoning</b></span>,
     <span style='color:#3E6491'><b>instrument execution</b></span> and
     <span style='color:#C48BAC'><b>observation</b></span>. Drag the first
-    slider all the way and the bar barely moves; drag the second and the whole
-    thing collapses. Every number here is computed from the paper's own
-    seconds. Read it as a bound on one pass through the task, not on what a
-    better model is worth &mdash; that argument is below the figure.
+    slider all the way and the bar barely moves; drag the second and it
+    collapses. Every number is computed from the paper's own seconds.
 </div>
 
-Drag the first slider to the top and watch nothing happen. That is Amdahl's
-law, which says a speed-up applied to part of a job is capped by the part you
-did not speed up, and the arithmetic here is not subtle. If reasoning is 59
-seconds out of 2,372, then a model that thinks instantly still finishes in
-2,313 seconds, which is a speed-up of 1.03×. Making the model a hundred times
-*faster* buys you two and a half percent.
+Drag the first slider and watch almost nothing happen. Reasoning is 2.5% of
+the clock, so a model that thought instantly would finish 1.03 times faster.
 
-Now the objection, which is the one I would raise if somebody showed me this
-slide, and it is serious enough that I want it in the post rather than in a
-footnote. **Amdahl bounds the time per experiment. The thing a better model
-changes is the number of experiments.**
+That claim is the one most easily overstated, so here is its limit. Amdahl's
+law bounds the time *per experiment*, while what a better model buys is *fewer
+experiments*. The same paper shows it: Qumus needed five runs over four hours
+to hit a flake-size target, and a model reaching it in two would beat anything
+the slider can do.
 
-The evidence is in this very paper. Qumus got its flake on the fifth run,
-having revised its parameters after each of the first four. A model that
-guessed better and got there in two runs would cut the wall clock by three
-fifths — a 2.5× win, against the 1.03× that speeding up its thinking can ever
-deliver. Model quality pays in the loop, and the stopwatch is pointed at a
-single pass through it.
+## 3. What the Day Did Not Settle
 
-There is a familiar version of this. The optimizer step is a tiny fraction of
-the wall clock in language-model training, and nobody concludes from that that
-better optimizers are worth two percent. A better optimizer changes how many
-steps you need.
+An audience member asked the best question of the day. Can the model find the
+question, rather than answer it?
 
-Three more things the measurement cannot see. Instrument time parallelises
-across benches and runs overnight, so it is the cheap resource in a lab that
-owns ten of them, while a bad decision costs a day whichever bench it was made
-on. The 2.5% is partly a configuration choice, because a heavier reasoning
-model given a larger thinking budget would spend far longer than 59 seconds.
-And the task was picked for a bounded recipe space, which is exactly the
-regime where there is least to think about.
+Every system above was scored against a target a human chose: a benchmark of
+expert answers, a consensus label, a clinical outcome, a target material. But
+"nobody has done this" would be too strong. The AI Scientist, from Lu and
+colleagues in 2024, generates its own research ideas, runs the experiments and
+writes the paper. What it does not choose is the sandbox, which is a narrow
+corner of machine learning.
 
-So what does the stopwatch actually establish? Only this, and it is still
-worth having. For one pass through one bounded task, on hardware as it exists
-in 2026, no amount of extra thinking *speed* is worth more than three percent.
-Everything else you might want has to come from better decisions or from
-faster machines, and this measurement does not price either of them.
+That is the shape of the whole field right now, and it is why *AI-created
+graphene* is accurate and still makes me flinch. The task was specified, the
+recipe space bounded, the material known. Initiative inside a box somebody
+else drew is the state of the art, and people drew every box here.
 
-## 3. Hypotheses Cheap Enough to Throw Away
-
-The last thread was the most abstract and, I suspect, the most important.
-
-Daniel Acker runs agentic AI at Flagship Pioneering, and his talk was called
-*Scaling Scientific Reasoning*. As I understood it, his argument has four
-moves, and I will give them in his order because the order is the argument.
-Each one needs unpacking, so let me take them one at a time.
-
-**Models are hypotheses written as executable code.** A guess about how a
-disease works can be written down as a small simulation with parameters in it.
-Once it is code, it makes predictions, and predictions can be wrong in public.
-
-**Falsifying them against data shrinks the hypothesis space.** Run the code,
-compare it against a measurement, and the ones that disagree are gone. That is
-the ordinary business of science, except that it now costs a machine's time
-rather than a person's.
-
-**No human can reason across the whole of that space.** A biologist holds two
-or three mechanisms in mind and picks the one that feels most likely. The
-space of mechanisms consistent with the data is far larger than that, and the
-part nobody examined is where the answer often is.
-
-**Language models make biology computable at the scale where you could try.**
-This is the move the other three were building toward. If writing a candidate
-mechanism as code is cheap, you can write hundreds.
-
-So the proposal is to generate a large ensemble of candidate causal models,
-run them all against the data, and keep whatever survives. Not one favoured
-mechanism but many, chosen to be as different from each other as possible.
-Considering the alternatives together, he argued, is what raises conviction,
-and the models that compete with the favourite are the ones pointing past the
-edge of what is currently known.
-
-His summary was that scaled reasoning systematically converts uncertainty into
-risk. That sentence is doing real work. Uncertainty is not knowing what you do
-not know. Risk is a quantity with a number on it. A venture firm cares about
-that distinction more than most.
-
-Shunzhi Wang, at NYU, gave the version of this you can hold. He designs
-protein assemblies — his first-author *Nature* paper this year is on
-quasisymmetric protein cages, shells built from pentagons and hexagons the way
-a virus builds a capsid. He described searching the space of design choices
-with Monte Carlo tree search, which explores a tree of decisions by playing
-many rollouts forward and spending its next try where the results so far look
-most promising. And he described co-designing *with* agents rather than
-dispatching tasks to them.
-
-The idea he described that I keep turning over is a designed particle that
-packages its own genetic blueprint. Directed evolution works by keeping
-whatever performs best and breeding from it, which only works if you can trace
-a good performance back to the instructions that produced it. A particle
-carrying its own instructions gives you exactly that link, so the
-design–test–learn loop closes by itself and you can select rather than
-analyse. That is what could make an ensemble of hypotheses cheap enough to be
-worth generating.
-
-I did not want to take the ensemble argument on faith, so I built the smallest
-model of it I could and ran it.
-
-Suppose an agent proposes $M$ candidate causal models. Each proposal is the
-true mechanism with probability $p$ — call that the generator's **coverage** —
-and a wrong one otherwise. Then you run $E$ falsifying experiments, each of
-which rules out any given wrong model with probability $q$, so a wrong model
-survives all of them with probability $s = (1-q)^E$. The true model is never
-ruled out.
-
-Everything in that setup is independent: the proposals from each other, the
-experiments from each other, and each wrong model's fate from every other
-model's. Those are strong assumptions and they cut both ways, so I will come
-back to them once there is something to say about them.
-
-Three quantities have closed forms, meaning I can write each as a formula
-rather than having to estimate it by running the process. The truth is
-somewhere in the ensemble with probability $1 - (1-p)^M$. You finish with the
-right model and no surviving rivals with probability
-
-$$\left(1 - (1-p)s\right)^M - \left((1-p)(1-s)\right)^M,$$
-
-and you finish *committed to a wrong model* — truth absent, a rival still
-standing — with probability
-
-$$(1-p)^M - \left((1-p)(1-s)\right)^M.$$
-
-The middle expression comes from summing over how many of the $M$ proposals
-happened to be the true one, which is a binomial count. I checked all three
-against a 200,000-trial simulation and the largest disagreement was 0.002.
-
-<div class='knob' id='en-knob'>
-    <div class='controls'>
-        <label for='en-p'>coverage: how often a proposal is the true mechanism</label>
-        <input id='en-p' type='range' min='0' max='10' step='0.5' value='3'>
-        <span class='readout' id='en-p-out'></span>
-    </div>
-    <div class='controls'>
-        <label for='en-e'>falsifying experiments run</label>
-        <input id='en-e' type='range' min='0' max='12' step='1' value='8'>
-        <span class='readout' id='en-e-out'></span>
-    </div>
-    <div class='controls'>
-        <label for='en-m'>models in the ensemble</label>
-        <input id='en-m' type='range' min='1' max='200' step='1' value='60'>
-        <span class='readout' id='en-m-out'></span>
-    </div>
-    <svg viewBox='0 0 720 300' role='img' aria-label='Three curves against ensemble size: the probability the truth is somewhere in the ensemble, the probability it is the only model left standing, and the probability of finishing committed to a wrong one.'>
-        <g id='en-grid'></g>
-        <line class='axis' x1='70' y1='248' x2='560' y2='248'/>
-        <line class='axis' x1='70' y1='30' x2='70' y2='248'/>
-        <polyline class='trace-present' id='en-present' points=''/>
-        <polyline class='trace-good' id='en-clean' points=''/>
-        <polyline class='trace-bad' id='en-wrong' points=''/>
-        <line class='ref' id='en-mark' x1='0' y1='30' x2='0' y2='248'/>
-        <circle id='en-dot-p' cx='0' cy='0' r='4.5' fill='#3E6491'/>
-        <circle id='en-dot-c' cx='0' cy='0' r='4.5' fill='#8C77BC'/>
-        <circle id='en-dot-w' cx='0' cy='0' r='4.5' fill='#A8443E'/>
-        <text class='lab-present' id='en-lab-p' x='572' y='0' text-anchor='start'>truth in hand</text>
-        <text class='lab-good' id='en-lab-c' x='572' y='0' text-anchor='start'>right answer alone</text>
-        <text class='lab-bad' id='en-lab-w' x='572' y='0' text-anchor='start'>wrong answer</text>
-        <g id='en-ticks'></g>
-        <text class='axlabel' x='315' y='292' text-anchor='middle'>models in the ensemble</text>
-        <text class='axlabel' x='18' y='139' text-anchor='middle' transform='rotate(-90 18 139)'>probability</text>
-    </svg>
-    <p class='note' id='en-note'></p>
-    <script>
-    (function () {
-      var X0 = 70, X1 = 560, Y0 = 248, Y1 = 30, MMAX = 200, Q = 0.5;
-      var pIn = document.getElementById('en-p'), eIn = document.getElementById('en-e'),
-          mIn = document.getElementById('en-m');
-      var pOut = document.getElementById('en-p-out'), eOut = document.getElementById('en-e-out'),
-          mOut = document.getElementById('en-m-out');
-      var present = document.getElementById('en-present'),
-          clean = document.getElementById('en-clean'), wrong = document.getElementById('en-wrong'),
-          mark = document.getElementById('en-mark'), dotP = document.getElementById('en-dot-p'),
-          dotC = document.getElementById('en-dot-c'), dotW = document.getElementById('en-dot-w'),
-          grid = document.getElementById('en-grid'), ticks = document.getElementById('en-ticks'),
-          note = document.getElementById('en-note');
-      var labs = [document.getElementById('en-lab-p'), document.getElementById('en-lab-c'),
-                  document.getElementById('en-lab-w')];
-      // The closed forms derived in the post. s is the chance a wrong model
-      // survives every experiment; the true model always survives. `dead` is
-      // the fourth outcome, where every hypothesis is falsified -- which is
-      // the alarm, not a failure, so the note reports it.
-      function probs(M, p, s) {
-        var dead = Math.pow((1 - p) * (1 - s), M);
-        return {present: 1 - Math.pow(1 - p, M),
-                clean: Math.pow(1 - (1 - p) * s, M) - dead,
-                wrong: Math.pow(1 - p, M) - dead,
-                dead: dead};
-      }
-      function px(M) { return X0 + (M - 1) / (MMAX - 1) * (X1 - X0); }
-      function py(v) { return Y0 - v * (Y0 - Y1); }
-      (function () {
-        var s = '', i, y, x;
-        for (i = 0; i <= 4; i++) {
-          y = py(i / 4);
-          s += "<line class='grid' x1='" + X0 + "' y1='" + y.toFixed(1)
-             + "' x2='" + X1 + "' y2='" + y.toFixed(1) + "'/>";
-        }
-        grid.innerHTML = s;
-        s = '';
-        for (i = 0; i <= 4; i++) {
-          y = py(i / 4);
-          s += "<text class='tick' x='60' y='" + (y + 5).toFixed(1)
-             + "' text-anchor='end'>" + (i * 25) + '%' + "</text>";
-        }
-        var xs = [1, 50, 100, 150, 200];
-        for (i = 0; i < xs.length; i++) {
-          x = px(xs[i]);
-          s += "<text class='tick' x='" + x.toFixed(1)
-             + "' y='270' text-anchor='middle'>" + xs[i] + "</text>";
-        }
-        ticks.innerHTML = s;
-      })();
-      // Three labels at the right-hand ends of three curves. They are clamped
-      // inside the plot and then pushed apart, because two of the curves meet
-      // whenever coverage is high and all three meet when it is zero.
-      function place(ys) {
-        var order = [0, 1, 2].sort(function (a, b) { return ys[a] - ys[b]; });
-        var out = [], last = -1e9, i, y;
-        for (i = 0; i < order.length; i++) {
-          y = Math.max(ys[order[i]], Y1 + 6);
-          if (y - last < 18) { y = last + 18; }
-          last = y;
-          out[order[i]] = y;
-        }
-        // Pushing apart can drive the lowest label onto the x-axis ticks when
-        // two curves both end at zero, so shift the whole group back up.
-        var over = last - (Y0 - 6);
-        if (over > 0) { for (i = 0; i < 3; i++) { out[i] -= over; } }
-        return out;
-      }
-      function draw() {
-        var p = +pIn.value / 100, E = +eIn.value, M = +mIn.value;
-        var s = Math.pow(1 - Q, E);
-        var a = '', b = '', c = '', M2, r, best = 1, bestV = -1, i;
-        for (M2 = 1; M2 <= MMAX; M2++) {
-          r = probs(M2, p, s);
-          a += px(M2).toFixed(1) + ',' + py(r.present).toFixed(1) + ' ';
-          b += px(M2).toFixed(1) + ',' + py(r.clean).toFixed(1) + ' ';
-          c += px(M2).toFixed(1) + ',' + py(r.wrong).toFixed(1) + ' ';
-          if (r.clean > bestV) { bestV = r.clean; best = M2; }
-        }
-        present.setAttribute('points', a);
-        clean.setAttribute('points', b);
-        wrong.setAttribute('points', c);
-        var end = probs(MMAX, p, s), cur = probs(M, p, s);
-        var ys = place([py(end.present), py(end.clean), py(end.wrong)]);
-        for (i = 0; i < 3; i++) { labs[i].setAttribute('y', (ys[i] + 5).toFixed(1)); }
-        mark.setAttribute('x1', px(M).toFixed(1));
-        mark.setAttribute('x2', px(M).toFixed(1));
-        dotP.setAttribute('cx', px(M).toFixed(1));
-        dotP.setAttribute('cy', py(cur.present).toFixed(1));
-        dotC.setAttribute('cx', px(M).toFixed(1));
-        dotC.setAttribute('cy', py(cur.clean).toFixed(1));
-        dotW.setAttribute('cx', px(M).toFixed(1));
-        dotW.setAttribute('cy', py(cur.wrong).toFixed(1));
-        pOut.textContent = 'p = ' + (+pIn.value).toFixed(1) + '%';
-        eOut.textContent = E + (E === 1 ? ' experiment' : ' experiments');
-        mOut.textContent = 'M = ' + M;
-        var tail = p === 0
-          ? ' The generator cannot propose the truth at all, so every extra'
-            + ' model is one more chance a wrong one survives. Notice the other '
-            + (100 * cur.dead).toFixed(1) + '% of runs, though: every hypothesis'
-            + ' dies, and the ensemble is telling you it is broken.'
-          : (best >= MMAX
-             ? ' The right answer is still becoming more likely at 200 models.'
-             : ' Past ' + best + ' models you stop getting a unique answer and'
-               + ' start getting a shortlist, while the wrong-answer rate keeps'
-               + ' falling.');
-        note.textContent = 'With ' + M + ' models, the truth is somewhere in the'
-          + ' ensemble ' + (100 * cur.present).toFixed(1) + '% of the time, is the'
-          + ' only model left standing ' + (100 * cur.clean).toFixed(1) + '% of the'
-          + ' time, and you finish committed to a wrong model '
-          + (100 * cur.wrong).toFixed(1) + '% of the time. Each experiment rules'
-          + ' out half the wrong models.' + tail;
-      }
-      pIn.addEventListener('input', draw);
-      eIn.addEventListener('input', draw);
-      mIn.addEventListener('input', draw);
-      draw();
-    })();
-    </script>
-</div>
-<div class='caption'>
-    <span class='caption-label'>Figure 6.</span>
-    What an ensemble of causal models actually buys you.
-    <span style='color:#3E6491'><b>Truth in hand</b></span> is the chance the
-    right model is somewhere in what survives;
-    <span style='color:#8C77BC'><b>right answer alone</b></span> is the chance
-    it is the only thing left standing; and
-    <span style='color:#A8443E'><b>wrong answer</b></span> is the chance you
-    finish committed to something false. All three come from the closed forms
-    above, which I checked against a 200,000-trial simulation. Watch the gap
-    open between the first two curves: that gap is a shortlist, not a failure.
-    Then set coverage to zero and read the note.
-</div>
-
-Three things fall out, and the first supports Acker.
-
-With even a small coverage the ensemble really does convert uncertainty into
-arithmetic. At $p = 0.03$, twenty proposals contain the truth 45.6% of the
-time and a hundred contain it 95.2%. That is exponential, it is cheap, and it
-is the whole case for generating many models instead of one.
-
-The second thing looks at first like a problem and is not. Hold $p = 0.03$,
-$q = 0.5$ and eight experiments, and the chance of finishing with exactly one
-model standing, and it being the right one, peaks at **72 models** and falls
-after that. I initially read that as a limit on how many hypotheses are worth generating.
-It is not.
-
-Follow where the lost probability goes. At 72 models you finish committed to a
-wrong answer 2.7% of the time, and at 200 models
-that is 0.1%. What you lose is *uniqueness*, not accuracy. Past the peak the
-ensemble stops handing you one answer and starts handing you a shortlist with
-the truth in it, which is not a failure — it is an instruction to run the ninth
-experiment.
-
-The third thing is what I would ask him about. **Set coverage to zero and the
-red curve climbs.** If the true mechanism is outside anything the generator can
-propose, adding models does not leave you agnostic. At twenty models you
-finish confidently wrong 7.5% of the time, and at a hundred, 32.4%.
-
-To its credit, the method does tell you when this is happening, and I nearly
-missed that. In the other 67.6% of those runs at a hundred models, *every
-single hypothesis is falsified* — which is the loudest signal a generator can
-send that it cannot reach the answer. The failure mode is not silent. It is
-only silent if nobody is watching for an empty ensemble.
-
-Now back to those independence assumptions, because they do not cut evenly.
-The one I would attack first is that each wrong model's fate is independent of
-every other's. Real wrong hypotheses come in families, and one good experiment
-kills a whole family at once, which would make survivors near-duplicates
-rather than independent lucky escapes.
-
-But the assumption that proposals are independent draws is if anything
-*kinder* to Acker than reality. A language model sampled repeatedly returns
-correlated hypotheses, so the real $1 - (1-p)^M$ curve saturates well below
-what the widget draws. The setup is also one-shot, while his actual proposal
-is a loop that regenerates conditioned on what died, which this cannot
-represent at all.
-
-So the model does not refute the programme, and it was never going to. What it
-does is name the quantity everything turns on. Coverage decides whether the
-ensemble is a machine for converting uncertainty into risk or a machine for
-manufacturing confidence, and I would want to ask him how you measure it.
-
-## 4. The Box Was Drawn by People
-
-An audience member asked Acker the best question of the day. Can the model
-have initiative? Can it find the question rather than answer it?
-
-I do not think anybody has shown this, and I want to be precise about why it
-is hard. Every system described today was scored against something a human
-supplied — a benchmark of expert answers, a community's consensus label, a
-clinical outcome, a target material. Initiative means choosing what to be
-scored on, and none of the evaluation machinery in this field currently has a
-place to put that.
-
-Three other things I am still chewing on.
-
-**The verifier problem.** Genome-Bench is built from what experts on a forum
-said, so a model scoring 81% has learned to agree with that forum, including
-wherever the forum was wrong. Language models are already tuned this way for
-ordinary conversation, by scoring their answers against what people say they
-prefer, and they inherit the preferences along with the knowledge. It is not a
-criticism of the work — it is a bill that comes due later, when the model is
-confident and the consensus was not right.
-
-**The phrase *AI-created graphene*.** It is accurate and I still flinch at it.
-What Qumus did is remarkable. It ran five experiments over four hours, revised
-its parameters after each one, and finished with a flake larger than 200 µm²,
-with nobody in the room. Elsewhere it recovered from a human yanking its chip
-out mid-run, and from one of its own hallucinated labels.
-
-But the task was specified, the recipe space was bounded, and the material was
-known. That is autonomy inside a well-drawn box, and the box was drawn by
-people.
-
-**The economics.** For one pass through one task, the machinery owns 97.5% of
-the clock, so buying a faster-thinking model buys almost nothing. What that
-argues for is not a cheaper model. It argues that the question worth asking of
-any of these systems is how many experiments it needed, which is the number
-nobody put on a slide.
-
-One last observation, and I want to state it carefully, because the obvious
-version of it is wrong. Mengdi Wang, who co-directs AI², is an author on
-Genome-Bench and on Qumus. Le Cong is first author on LabOS, and Sanfeng Wu
-and Mengdi Wang are on it too. I am not going to draw a conclusion about
-Princeton from that, since a workshop hosted by Princeton naturally features
-Princeton people, and most of the work in my reference list is from somewhere
-else entirely.
-
-What I do draw from it is that the *method* transfers. The same people used
-the same construction on a gene-editing bench and on a graphene bench, and it
-worked twice.
-
-But the method is not the whole of it. Qumus succeeds because
-Wu's lab knows what a good flake looks like under a microscope and knows the
-recipe space is bounded; Genome-Bench succeeds because somebody knew which
-mailing list still contained real disagreement. The transferable part is the
-construction. The domain expertise is what lets you draw the box in the first
-place.
-
-Which is why I recognised so much of it. The questions are the ones I already
-had: where the signal comes from, what counts as a verifiable environment, and
-how you keep an ensemble honest. The biology was the setting, not the subject.
-
-## 5. Chat This Over With Friends
+## 4. Chat This Over With Friends
 
 The one-sentence version is that AI for science has stopped being a modelling
 problem and become an instrumentation problem. The number to bring is from the
 Qumus robotic minilab at Princeton, which really did make graphene by itself.
-Across one complete run of 39 minutes 32 seconds, the AI thought for 59
-seconds and the machinery moved for the other 38 and a half minutes. Two and a
-half percent of the wall clock is reasoning. So a model that thought instantly
-would finish that job 1.03 times faster, and every other gain has to come out
-of the hardware or out of needing fewer runs. The counterpart on the software
-side is just as concrete: a 7-billion-parameter open model, trained by
-reinforcement learning on eleven years of scientists arguing on a mailing
-list, lands level with a frontier reasoning model on genomics questions.
+On one complete run of 39 minutes and 32 seconds, the AI thought for 59
+seconds and the machinery moved for the rest. So a model that thought
+instantly would finish that job about three percent sooner, and every other
+gain has to come out of the hardware or out of needing fewer runs. The
+counterpart on the software side is just as concrete: a seven-billion-parameter
+open model, trained on eleven years of scientists arguing on a mailing list,
+gets within a couple of points of a frontier reasoning model.
 
-The received version of this story, the one in the press releases, is that
-bigger models will eventually do science. What is actually in short supply is a
-world you can be graded against, which is why one of the most advanced
-autonomous labs on earth runs on QR stickers and an object detector. The fair
-objection to my own account is that a stopwatch measures the wrong thing: it
-bounds the time per experiment, while what a better model really buys is fewer
-experiments, and nobody at the workshop reported that number. What stays open
-is the question an audience member asked and nobody could answer. Every one of
-these systems is scored against a target a human chose, so none of them can
-yet decide what is worth working on. That is a more interesting frontier than
-the one in the press releases.
+The received version of this story is that bigger models will eventually do
+science. What is actually scarce is a world you can be graded against, which
+is why one of the most advanced autonomous labs on earth runs on QR stickers
+and an object detector. The fair objection to my own account is that a
+stopwatch measures the wrong thing, since it bounds the time per experiment
+while what a better model buys is fewer of them. And on the benchmark that
+looks most like parity, the same paper's expert-curated set still puts human
+scientists several points ahead. What stays open is the question nobody could
+answer: every one of these systems is graded against a target a person chose.
 
-## 6. References
+## 5. References
 
 1. Boiko, D. A., MacKnight, R., Kline, B., and Gomes, G. (2023). *Autonomous
    chemical research with large language models.* Nature 624, 570–578.
@@ -1037,25 +507,21 @@ the one in the press releases.
 2. Qu, Y. et al. *CRISPR-GPT for agentic automation of gene-editing
    experiments.* Preprint 2024; Nature Biomedical Engineering (2025).
    [arXiv:2404.18021](https://arxiv.org/abs/2404.18021)
-3. Yin, M., Qu, Y., Yang, L., Cong, L., and Wang, M. (2025). *Toward Scientific
-   Reasoning in LLMs: Training from Expert Discussions via Reinforcement
-   Learning.* The Genome-Bench paper.
+3. Lu, C. et al. (2024). *The AI Scientist: Towards Fully Automated
+   Open-Ended Scientific Discovery.*
+   [arXiv:2408.06292](https://arxiv.org/abs/2408.06292)
+4. Gottweis, J. et al. (2025). *Towards an AI co-scientist.*
+   [arXiv:2502.18864](https://arxiv.org/abs/2502.18864)
+5. Yin, M. et al. (2025). *Toward Scientific Reasoning in LLMs.* Genome-Bench.
    [arXiv:2505.19501](https://arxiv.org/abs/2505.19501)
-4. Huang, K. et al. (2025). *Biomni: A General-Purpose Biomedical AI Agent.*
-   bioRxiv.
+6. Huang, K. et al. (2025). *Biomni: A General-Purpose Biomedical AI Agent.*
    [biorxiv.org](https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1)
-5. Cong, L. et al. (2025). *LabOS: The AI-XR Co-Scientist That Sees and Works
+7. Cong, L. et al. (2025). *LabOS: The AI-XR Co-Scientist That Sees and Works
    With Humans.* [arXiv:2510.14861](https://arxiv.org/abs/2510.14861)
-6. Shi, L. et al. (2026). *Qumus: Realization of An Embodied AI Quantum
+8. Shi, L. et al. (2026). *Qumus: Realization of An Embodied AI Quantum
    Material Experimentalist.*
    [arXiv:2605.18407](https://arxiv.org/abs/2605.18407)
-7. Kim, M. J. et al. (2024). *OpenVLA: An Open-Source Vision-Language-Action
-   Model.* [arXiv:2406.09246](https://arxiv.org/abs/2406.09246)
-8. Wang, S. et al. (2026). *De novo design of quasisymmetric two-component
-   protein cages.* Nature 655, 251–258.
-   [nature.com](https://www.nature.com/articles/s41586-026-10464-0)
-9. Project Visipedia, Perona and Belongie. The line of work behind iNaturalist
-   and Merlin Bird ID.
+9. Project Visipedia, Perona and Belongie. Behind iNaturalist and Merlin.
    [ai4science.caltech.edu](https://ai4science.caltech.edu/projects/visipedia.html)
 10. Amdahl, G. M. (1967). *Validity of the single processor approach to
     achieving large scale computing capabilities.* AFIPS Conference
