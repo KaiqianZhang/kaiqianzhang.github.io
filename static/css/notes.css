@@ -157,9 +157,12 @@
   color: var(--n-dim);
   margin-right: 2px;
 }
-/* On a note itself the chips stay neutral. The page below them is already
-   carrying six colours that each mean something, and a keyword picking up
-   one of those hues would read as a claim about which actor it refers to. */
+/* Keywords are neutral everywhere -- one chip treatment on the listing and
+   on the note itself. The note's own page already carries six colours that
+   each mean something specific, so a keyword wearing one of those hues would
+   read as a claim about which actor it refers to; and the listing matching
+   the note keeps the two views of the same keywords looking like the same
+   thing. Only the size differs between them. */
 .notes-site .keywords .kw {
   font-size: 13px;
   line-height: 1.5;
@@ -171,8 +174,7 @@
 }
 
 /* The listing variant: one size down, sitting under each row's one-line
-   description, and here the chips *are* coloured -- a listing has no figures
-   to collide with, and the hues make one row scannable against the next. */
+   description. */
 .notes-site .keywords.row {
   /* .post-subtitle carries a 25px bottom margin that separates one row from
      the next; the negative top margin pulls the chips back up against their
@@ -183,21 +185,12 @@
 .notes-site .keywords.row .kw {
   font-size: 11.5px;
   padding: 1px 9px;
-  color: var(--n-on-fill);
-  border: 0;
-  background: var(--kw-hue, var(--n-violet));
 }
 .notes-site .keywords.row .kw-label {
   text-transform: none;
   letter-spacing: 0;
   font-size: 12.5px;
 }
-.notes-site .keywords.row .kw:nth-of-type(6n + 1) { --kw-hue: var(--n-violet); }
-.notes-site .keywords.row .kw:nth-of-type(6n + 2) { --kw-hue: var(--n-teal); }
-.notes-site .keywords.row .kw:nth-of-type(6n + 3) { --kw-hue: var(--n-rose); }
-.notes-site .keywords.row .kw:nth-of-type(6n + 4) { --kw-hue: var(--n-sage); }
-.notes-site .keywords.row .kw:nth-of-type(6n + 5) { --kw-hue: var(--n-clay); }
-.notes-site .keywords.row .kw:nth-of-type(6n + 6) { --kw-hue: var(--n-ochre); }
 
 .notes-site .article h2 {
   color: var(--n-violet);
