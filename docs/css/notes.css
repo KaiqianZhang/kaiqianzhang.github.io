@@ -134,10 +134,6 @@
 .notes-site .tag-page .post-icon {
   filter: saturate(1.15);
 }
-.notes-site #blog .post-title a:hover,
-.notes-site .tag-page .post-title a:hover {
-  color: var(--n-violet);
-}
 
 /* -- the note's own front matter ------------------------------------------ */
 
