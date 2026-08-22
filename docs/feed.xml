@@ -7,6 +7,14 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>RoPE and iRoPE</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/22/rope-and-irope/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/22/rope-and-irope/</guid>
+        <pubDate>Sat, 22 Aug 2026 00:00:00 +0000</pubDate>
+        <description>Position becomes an angle, the angle decays, and the fix everyone converged on is to stop encoding position in some layers altogether.</description>
+    </item>
+
+    <item>
         <title>A Day at the Agentic Biolab Workshop</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/17/agentic-biolab-workshop/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/17/agentic-biolab-workshop/</guid>

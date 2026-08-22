@@ -61,7 +61,14 @@
     {
       "path": "blog",
       "name": "Blog",
-      "dir": "posts"
+      "dir": "posts",
+      "css": [
+        "/css/widgets.css"
+      ],
+      "js": [
+        "/js/widgets.js",
+        "/js/blog-labs.js"
+      ]
     },
     {
       "path": "notes",
@@ -71,9 +78,11 @@
       "all_label": "All scratch notes",
       "post_icon": "🍦",
       "css": [
+        "/css/widgets.css",
         "/css/notes.css"
       ],
       "js": [
+        "/js/widgets.js",
         "/js/notes.js"
       ],
       "quote": {

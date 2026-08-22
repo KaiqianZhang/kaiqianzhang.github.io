@@ -383,12 +383,21 @@ def reading_time(body):
     two interactive widgets was reading a minute and a half long on that
     alone.
     """
+    return max(1, round(prose_minutes(body)))
+
+
+def prose_minutes(body):
+    """Fractional minutes, so a budget can be checked before rounding."""
     text = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
     text = re.sub(r'<(script|style)\b.*?</\1>', '', text,
                   flags=re.DOTALL | re.IGNORECASE)
+    # A drawing is not prose. Stripping tags alone leaves every axis label and
+    # annotation inside an <svg> behind, which counts a figure-heavy post as
+    # minutes longer than it reads.
+    text = re.sub(r'<svg\b.*?</svg>', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'\$\$.*?\$\$', '', text, flags=re.DOTALL)
     text = re.sub(r'<[^>]+>', '', text)
-    return max(1, round(len(text.split()) / WORDS_PER_MINUTE))
+    return len(text.split()) / float(WORDS_PER_MINUTE)
 
 
 def insert_toc(content):
@@ -450,6 +459,8 @@ class Post:
         self.tags = [t.strip() for t in meta.get('tags', '').split(',')
                      if t.strip()]
 
+        self.body = body
+        self.format = meta.get('format', '')
         self.read_minutes = reading_time(body)
 
         md = Markdown()
@@ -676,6 +687,85 @@ def keywords_html(post, compact=False):
             "%s</div>" % (' row' if compact else '', chips))
 
 
+# The three-part blog post. A post opts in with `format: three-part` in its
+# front matter; anything without it is a legacy post and is left alone.
+#
+# The budgets are the point of the format, not decoration: the whole post is
+# capped at ten minutes so it stays readable in one sitting, and each part is
+# capped so the teaching cannot quietly eat the frontier section. They are
+# enforced rather than reported because a budget that only warns is a budget
+# that gets ignored the first time a section is going well.
+POST_FORMAT = 'three-part'
+POST_MAX_MINUTES = 10
+POST_PARTS = [
+    # (heading, floor, ceiling) in minutes of prose.
+    ('Learning together', 0.0, 5.0),
+    ('Inspire together', 2.5, 4.0),
+    ('Chat together', 0.0, 1.0),
+]
+
+
+def split_parts(body):
+    """{h2 title: prose minutes} for a post body, in document order."""
+    parts, current, buf = [], None, []
+    for line in body.split('\n'):
+        m = re.match(r'^##\s+(.*)$', line)
+        if m:
+            if current is not None:
+                parts.append((current, '\n'.join(buf)))
+            current, buf = m.group(1).strip(), []
+        elif current is not None:
+            buf.append(line)
+    if current is not None:
+        parts.append((current, '\n'.join(buf)))
+    return [(title, prose_minutes(text)) for title, text in parts]
+
+
+def check_post_format(post):
+    """Fail the build on a three-part post that has drifted out of budget."""
+    if post.format != POST_FORMAT:
+        return
+    parts = split_parts(post.body)
+    found = dict(parts)
+    problems, report = [], []
+
+    for heading, floor, ceiling in POST_PARTS:
+        if heading not in found:
+            problems.append('missing the "%s" section' % heading)
+            report.append('  %-20s --      (budget %.4g-%.4g)'
+                          % (heading, floor, ceiling))
+            continue
+        got = found[heading]
+        ok = (got <= ceiling + 0.05) and (got >= floor - 0.05)
+        report.append('  %-20s %4.1f min  (budget %.4g-%.4g)%s'
+                      % (heading, got, floor, ceiling, '' if ok else '  <--'))
+        if got > ceiling + 0.05:
+            problems.append('"%s" runs %.1f min over its %.4g min ceiling '
+                            '(trim ~%d words)'
+                            % (heading, got - ceiling, ceiling,
+                               int((got - ceiling) * WORDS_PER_MINUTE)))
+        elif got < floor - 0.05:
+            problems.append('"%s" is %.1f min under its %.4g min floor'
+                            % (heading, floor - got, floor))
+
+    order = [t for t, _ in parts if t in found]
+    wanted = [h for h, _, _ in POST_PARTS if h in found]
+    if order[:len(wanted)] != wanted:
+        problems.append('the three sections are out of order; they must run '
+                        '%s' % ' then '.join(h for h, _, _ in POST_PARTS))
+
+    total = prose_minutes(post.body)
+    if total > POST_MAX_MINUTES + 0.05:
+        problems.append('the whole post is %.1f min, over the %d min cap'
+                        % (total, POST_MAX_MINUTES))
+
+    if problems:
+        raise SystemExit(
+            'post "%s": %.1f min read, budget is %d.\n%s\n%s'
+            % (post.slug, total, POST_MAX_MINUTES, '\n'.join(report),
+               '\n'.join('  ! ' + p for p in problems)))
+
+
 def build_section(config, section, posts):
     """One listing: index page, every post in it, and its category pages."""
     path = section['path']
@@ -708,6 +798,7 @@ def build_section(config, section, posts):
 
     for post in posts:
         check_figures(post)
+        check_post_format(post)
         tags = ', '.join(
             "<a href='%s/%s/tags/%s/'>%s</a>"
             % (config['base'], path, slug, html.escape(tag_name(section, slug)))
