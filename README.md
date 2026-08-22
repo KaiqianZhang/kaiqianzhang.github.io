@@ -137,13 +137,31 @@ title and under each row of the listing:
 keywords: tokenizer compression ratio, pruning, distillation
 ```
 
-`static/css/notes.css` carries the notes palette (roles, not shades:
-`--n-teacher`, `--n-student`, `--n-loss`, `--n-pruned`, `--n-kept`,
-`--n-data`) and a set of `a-*` animation primitives. A figure is a `.nfig`
-holding inline SVG; it starts paused and plays when scrolled into view, and
-`static/js/notes.js` measures path lengths for `a-draw` and drives the four
-interactive `.lab` widgets. Both honour `prefers-reduced-motion` by landing on
-the finished drawing.
+## The widget engine
+
+`static/css/widgets.css` and `static/js/widgets.js` are shared by both
+sections and own everything drawn or draggable:
+
+- **`.nfig`** — a figure: inline SVG that starts paused, plays when it scrolls
+  into view, and restarts from its replay control.
+- **`.lab`** — an interactive: sliders and segmented toggles over a drawing
+  the reader redraws by dragging.
+- **`.flashcard`** — takeaway cards that deal themselves in.
+- **`a-*` primitives** — `a-draw`, `a-rise`, `a-fade`, `a-grow`, `a-wide`,
+  `a-pop`, `a-drop`, `a-slide`, `a-vanish` for reveals, and `a-flow`,
+  `a-beat`, `a-glow`, `a-spin`, `a-sweep`, `a-travel`, `a-breathe` for motion
+  that keeps running afterwards. Each element sets its own delay in `--d`.
+- **Colours as roles, not shades**: `--w-teacher`, `--w-student`, `--w-loss`,
+  `--w-pruned`, `--w-kept`, `--w-data`, with a dark variant for each.
+
+`widgets.js` measures path lengths for `a-draw`, drives the scroll observer,
+and exposes `window.W` — the DOM, maths and control helpers the labs share.
+Per-section behaviour lives in `static/js/blog-labs.js` and
+`static/js/notes.js`, both of which load after it. Everything honours
+`prefers-reduced-motion` by landing on the finished drawing.
+
+The hand-drawn face applies inside widgets only. A scratch note sets it for
+the whole page in `notes.css`; a blog post leaves it confined to the widgets.
 
 ## Configuration
 

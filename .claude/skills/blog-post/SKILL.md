@@ -148,10 +148,9 @@ for like anything else.
 
 ## Figures and interactives
 
-Both are built on `static/css/widgets.css` and `static/js/widgets.js`, shared
-with the scratch notes. Read `.claude/skills/scratch-note/SKILL.md` for the
-palette, the animation primitives and the mechanical traps; they apply
-unchanged. What differs on the blog:
+Both are built on `static/css/widgets.css` and `static/js/widgets.js`. The
+repo `README.md` documents that engine — the `a-*` primitives, the colour
+roles, and what `window.W` provides. Read it before drawing anything.
 
 - **Type.** The hand face appears *only inside* `.nfig`, `.lab` and
   `.flashcard`. Body prose, headings and captions stay in the site's face.
@@ -182,9 +181,10 @@ unchanged. What differs on the blog:
    each really claims and where it appeared.
 2. **Find the reframing sentence** for ①, and the two-paper gaps that become
    the directions in ②.
-3. **Write with a generator script.** Same rule as the scratch notes: a Python
-   script in the scratchpad that emits the `.md`, prose verbatim, repetitive
-   and computed SVG in loops. Keep it — the budget will make you revise.
+3. **Write with a generator script.** A Python script in the scratchpad that
+   emits the `.md`: prose verbatim in triple-quoted strings, repetitive and
+   computed SVG built in loops. Keep it — the budget will make you revise, and
+   hand-editing hundreds of SVG elements does not survive that.
 4. **Lab behaviour goes in `static/js/blog-labs.js`**, one `init*Lab()` each.
 5. **Build, and let the budget check push back.** Expect two or three trimming
    rounds. That is the format working, not a problem.
@@ -207,8 +207,9 @@ Run all of it; fix, rebuild, and re-run whatever a fix touched.
 4. **Anchors** — check each lab reproduces a known real number.
 5. **Replay** — click every figure's control and the flashcard's, and assert
    the animations return to roughly zero and then finish again.
-6. **Both themes**, and a regression pass over a scratch note, because the
-   engine is shared.
+6. **Both themes.** And if a fix touched `widgets.css` or `widgets.js`, load a
+   page from the other section too — that engine is shared, so a change there
+   reaches further than the post you are working on.
 
 ### Two things that will fool you in the browser
 

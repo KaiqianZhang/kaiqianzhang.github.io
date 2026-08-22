@@ -10,10 +10,11 @@ Scratch notes live at `~/Desktop/blog/notes/` and publish to
 repo's `README.md` first — the **Sections** section documents the machinery
 this skill drives.
 
-A scratch note is not a blog post. The blog is written for a reader; a scratch
-note is the user's own handwritten notebook page, made legible, verified, and
-turned into something you can poke at. If you find yourself deciding what to
-cut, you are writing the wrong thing — see the first rule below.
+A scratch note is the user's own handwritten notebook page, made legible,
+verified, and turned into something you can poke at. It has its own rules,
+which are in this file and nowhere else; do not carry conventions in from
+anything else you have written for this repo. If you find yourself deciding
+what to cut, you are writing the wrong thing — see the first rule below.
 
 ## What a scratch note is, which decides everything else
 
@@ -24,9 +25,8 @@ other rule in this file:
 
 - **Completeness beats selection.** The user's standing instruction is *"don't
   miss any point on my notes."* Every line, formula, arrow, side note and
-  struck-through aside on the scan gets covered. This is the opposite of the
-  `blog-post` skill, where a dropped section beats a padded one. Here, a
-  dropped point is a defect.
+  struck-through aside on the scan gets covered. A dropped point is a defect,
+  however tidy dropping it would make the note.
 - **The notebook's structure is the note's structure.** Follow the page's own
   order and its own headings. If the page says *Side Note*, the note gets a
   side note. If the page numbers five steps ⟨1⟩–⟨5⟩, so does the note.
@@ -120,8 +120,7 @@ page carries meaning-bearing colour, the listing is for scanning titles.
 
 ### Shipping
 
-- **Build, commit, and push live.** This is the standing instruction and
-  differs from the `blog-post` skill, which stops before the push.
+- **Build, commit, and push live.** That is the standing instruction.
 - Run the full verification below *before* pushing, not after.
 
 ## What to ask
