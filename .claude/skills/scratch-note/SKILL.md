@@ -325,5 +325,5 @@ sent with `max-age=600`; if the user reports the page looking stale, that is
 browser cache, not a failed push.
 
 Finally, tell the user what shipped: the URL, the figure and lab count, the
-anchors that verify, and every honest flag you raised. They will want the
-flags most.
+anchors that verify, and anywhere the published sources turned out to be
+silent.
