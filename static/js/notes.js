@@ -891,10 +891,499 @@
   }
 
   // =========================================================================
+  // 2e. Lab: the MoE budget
+  // =========================================================================
+
+  /* Per-expert size is solved from the published totals rather than quoted:
+     Meta reports 109B total / 17B active over 16 experts and 400B / 17B over
+     128, and with one routed expert per token those two facts pin the size of
+     an expert and of the always-on remainder. */
+  var MOE_PRESETS = {
+    scout:    { experts: 16,  esize: 6.133, topk: 1, dense: 10.867 },
+    maverick: { experts: 128, esize: 3.016, topk: 1, dense: 13.984 }
+  };
+
+  function initMoELab() {
+    var root = document.getElementById('moe-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var experts = $(root, '#moe-experts');
+    var esize = $(root, '#moe-esize');
+    var topk = $(root, '#moe-topk');
+    var dense = $(root, '#moe-dense');
+
+    segment(root, '.seg-preset', function (value) {
+      var preset = MOE_PRESETS[value];
+      if (!preset) { return; }
+      experts.value = preset.experts;
+      esize.value = preset.esize;
+      topk.value = preset.topk;
+      dense.value = preset.dense;
+      [experts, esize, topk, dense].forEach(paintRange);
+      draw();
+    });
+
+    function draw() {
+      var n = parseInt(experts.value, 10);
+      var e = parseFloat(esize.value);
+      var k = Math.min(parseInt(topk.value, 10), n);
+      var dn = parseFloat(dense.value);
+
+      var total = dn + n * e;
+      var active = dn + k * e;
+      var frac = active / total;
+
+      $(root, '#moe-experts-v').textContent = n;
+      $(root, '#moe-esize-v').textContent = e.toFixed(2) + ' B';
+      $(root, '#moe-topk-v').textContent = k;
+      $(root, '#moe-dense-v').textContent = dn.toFixed(2) + ' B';
+
+      $(root, '#moe-stat-total').innerHTML =
+          total.toFixed(0) + ' B <small>stored</small>';
+      $(root, '#moe-stat-active').innerHTML =
+          active.toFixed(1) + ' B <small>run</small>';
+      $(root, '#moe-stat-ratio').innerHTML =
+          (frac * 100).toFixed(1) + '% <small>of the weights</small>';
+
+      var verdict = $(root, '#moe-verdict');
+      // bf16 is two bytes a parameter; an H100 is 80GB.
+      var cards = Math.ceil(total * 2 / 80);
+      if (frac > 0.6) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'At ' + (frac * 100).toFixed(0) + '% awake ' +
+            'this is barely a mixture — most of the model runs on every ' +
+            'token, so you are paying dense compute for a sparse layout.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'Storing ' + total.toFixed(0) + ' B and running ' +
+            active.toFixed(1) + ' B: about ' + cards + ' H100' +
+            (cards === 1 ? '' : 's') + ' of memory at bf16 to hold weights ' +
+            'that cost ' + (1 / frac).toFixed(1) + '× less than that to ' +
+            'multiply against.';
+      }
+
+      // ---- the drawing ---------------------------------------------------
+      clear(svg);
+      // Enough columns that 128 experts still fit in a readable block.
+      var cols = n <= 16 ? 8 : (n <= 64 ? 16 : 22);
+      var cell = n <= 16 ? 30 : (n <= 64 ? 22 : 16);
+      var gap = n <= 64 ? 5 : 3;
+      var x0 = 40, y0 = 44;
+
+      svg.appendChild(el('text', { x: x0, y: 26, 'class': 'lbl sm' },
+                         n + ' routed experts, ' + k + ' run per token'));
+      for (var i = 0; i < n; i++) {
+        var on = i < k;
+        svg.appendChild(el('rect', {
+          x: x0 + (i % cols) * (cell + gap),
+          y: y0 + Math.floor(i / cols) * (cell + gap),
+          width: cell, height: cell, rx: 3, 'class': 'cell',
+          fill: on ? 'var(--n-student)' : 'var(--n-grid)',
+          stroke: on ? 'var(--n-student)' : 'var(--n-edge)',
+          'stroke-width': on ? 1.6 : 1,
+          'fill-opacity': on ? 0.92 : 1
+        }));
+      }
+      var gridBottom = y0 + Math.ceil(n / cols) * (cell + gap) + 8;
+
+      // The always-on block, drawn to the same area-per-billion as an expert.
+      svg.appendChild(el('rect', {
+        x: 470, y: y0, width: 190, height: 46, rx: 6, 'class': 'cell',
+        fill: 'var(--n-kept)', 'fill-opacity': 0.9
+      }));
+      svg.appendChild(el('text', {
+        x: 565, y: y0 + 28, 'class': 'lbl mid', fill: 'var(--n-on-fill)'
+      }, 'always on'));
+      svg.appendChild(el('text', {
+        x: 565, y: y0 + 66, 'class': 'lbl sm mid'
+      }, dn.toFixed(1) + ' B — attention, embeddings, shared expert'));
+
+      // Two bars: everything stored, against what actually runs.
+      var barY = Math.max(gridBottom + 18, 180);
+      var barW = 620, scale = barW / Math.max(total, 1);
+      svg.appendChild(el('text', { x: 40, y: barY - 6, 'class': 'lbl sm' },
+                         'stored ' + total.toFixed(0) + ' B'));
+      svg.appendChild(el('rect', {
+        x: 40, y: barY, width: barW, height: 16, rx: 4,
+        fill: 'var(--n-teacher)', 'fill-opacity': 0.85, 'class': 'bar'
+      }));
+      svg.appendChild(el('text', {
+        x: 40, y: barY + 40, 'class': 'lbl sm'
+      }, 'run ' + active.toFixed(1) + ' B'));
+      svg.appendChild(el('rect', {
+        x: 40, y: barY + 46, width: Math.max(2, active * scale), height: 16,
+        rx: 4, fill: 'var(--n-student)', 'fill-opacity': 0.92, 'class': 'bar'
+      }));
+    }
+
+    onInput(experts, draw);
+    onInput(esize, draw);
+    onInput(topk, draw);
+    onInput(dense, draw);
+    draw();
+  }
+
+  // =========================================================================
+  // 2f. Lab: the iRoPE interleave
+  // =========================================================================
+
+  function initIRoPELab() {
+    var root = document.getElementById('irope-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var layers = $(root, '#irope-layers');
+    var period = $(root, '#irope-period');
+
+    function draw() {
+      var n = parseInt(layers.value, 10);
+      var p = parseInt(period.value, 10);
+      var nope = Math.floor(n / p);
+      var rope = n - nope;
+
+      $(root, '#irope-layers-v').textContent = n;
+      $(root, '#irope-period-v').textContent = 'every ' + p;
+
+      $(root, '#irope-stat-rope').innerHTML =
+          rope + ' <small>with rotary</small>';
+      $(root, '#irope-stat-nope').innerHTML =
+          nope + ' <small>bare</small>';
+      $(root, '#irope-stat-frac').innerHTML =
+          (nope / n * 100).toFixed(0) + '%';
+
+      var verdict = $(root, '#irope-verdict');
+      if (p === 2) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'Half the stack with no positional signal at ' +
+            'all. Long-range structure has plenty of room, but the model has ' +
+            'given up a lot of the machinery that resolves nearby order.';
+      } else if (p >= 8) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'Only ' + nope + ' bare layer' +
+            (nope === 1 ? '' : 's') + ' in ' + n + '. Almost everything ' +
+            'decays with distance again, which is the behaviour the ' +
+            'interleave exists to avoid.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = rope + ' rotary layers resolve local order and ' +
+            nope + ' bare ones carry the long range — the notebook’s ' +
+            'example is exactly this at a period of 4.';
+      }
+
+      // ---- the drawing ---------------------------------------------------
+      clear(svg);
+      var x0 = 30, wMax = 640;
+      var slot = wMax / n;
+      var bw = Math.max(3, slot - Math.min(5, slot * 0.22));
+
+      svg.appendChild(el('text', { x: x0, y: 26, 'class': 'lbl sm' },
+                         'layer 1'));
+      svg.appendChild(el('text', {
+        x: x0 + wMax, y: 26, 'class': 'lbl sm end'
+      }, 'layer ' + n));
+
+      for (var i = 0; i < n; i++) {
+        var bare = ((i + 1) % p) === 0;
+        svg.appendChild(el('rect', {
+          x: x0 + i * slot, y: 40, width: bw, height: 74, rx: 4,
+          'class': 'cell',
+          fill: bare ? 'var(--n-teacher)' : 'var(--n-student)',
+          'fill-opacity': bare ? 0.92 : 0.22
+        }));
+      }
+
+      var lg = [
+        { c: 'var(--n-student)', o: 0.22, t: 'RoPE — local, the < 32k part' },
+        { c: 'var(--n-teacher)', o: 0.92, t: 'NoPE — overall, the > 32k part' }
+      ];
+      lg.forEach(function (item, i) {
+        var lx = x0 + i * 320;
+        svg.appendChild(el('rect', {
+          x: lx, y: 142, width: 13, height: 13, rx: 3,
+          fill: item.c, 'fill-opacity': item.o
+        }));
+        svg.appendChild(el('text', {
+          x: lx + 20, y: 153, 'class': 'lbl sm'
+        }, item.t));
+      });
+      svg.appendChild(el('text', { x: x0, y: 180, 'class': 'lbl sm' },
+                         'a bare layer still knows roughly where it is — a '
+                         + 'token that can see 5,000 others is not at position 5'));
+    }
+
+    onInput(layers, draw);
+    onInput(period, draw);
+    draw();
+  }
+
+  // =========================================================================
+  // 2g. Lab: temperature
+  // =========================================================================
+
+  function initTempLab() {
+    var root = document.getElementById('temp-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var tIn = $(root, '#temp-t');
+    var spread = $(root, '#temp-spread');
+    var KEYS = 12;
+
+    function draw() {
+      var T = parseFloat(tIn.value);
+      var sp = parseFloat(spread.value);
+
+      // A fixed decaying logit profile, stretched by the spread control.
+      var logits = [], i;
+      for (i = 0; i < KEYS; i++) {
+        logits.push(sp * (3.2 - 0.42 * i - 0.25 * Math.sin(i * 1.7)));
+      }
+      var probs = softmax(logits, T);
+
+      var ent = 0;
+      for (i = 0; i < probs.length; i++) {
+        if (probs[i] > 1e-12) { ent -= probs[i] * Math.log(probs[i]); }
+      }
+      var eff = Math.exp(ent);
+
+      $(root, '#temp-t-v').textContent = 'T = ' + T.toFixed(2);
+      $(root, '#temp-spread-v').textContent = '×' + sp.toFixed(2);
+      $(root, '#temp-stat-max').innerHTML =
+          Math.max.apply(null, probs).toFixed(3);
+      $(root, '#temp-stat-eff').innerHTML =
+          eff.toFixed(1) + ' <small>of ' + KEYS + '</small>';
+      $(root, '#temp-stat-ent').innerHTML =
+          ent.toFixed(3) + ' <small>nats</small>';
+
+      var verdict = $(root, '#temp-verdict');
+      if (eff < 1.6) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'Cold enough that the query reads essentially ' +
+            'one key and ignores the rest — decisive, and brittle if the ' +
+            'top-ranked key happens to be the wrong one.';
+      } else if (eff > KEYS * 0.8) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'Hot enough that all ' + KEYS + ' keys are ' +
+            'read almost equally. The ordering is intact, but the query is ' +
+            'barely pointing at anything — this is what attention fading ' +
+            'looks like, arrived at on purpose.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'The query is effectively reading about ' +
+            eff.toFixed(1) + ' of the ' + KEYS + ' keys. T never reorders ' +
+            'them — the same key ranks first at every temperature.';
+      }
+
+      // ---- the drawing ---------------------------------------------------
+      clear(svg);
+      var x0 = 44, baseline = 172, wMax = 616;
+      var slot = wMax / KEYS;
+      var peak = Math.max.apply(null, probs);
+      var scale = (baseline - 36) / Math.max(peak, 0.08);
+
+      for (i = 0; i < KEYS; i++) {
+        var h = Math.max(1.5, probs[i] * scale);
+        svg.appendChild(el('rect', {
+          x: x0 + i * slot + slot * 0.16, y: baseline - h,
+          width: slot * 0.68, height: h, rx: 3, 'class': 'bar',
+          fill: 'var(--n-student)', 'fill-opacity': 0.9
+        }));
+        svg.appendChild(el('text', {
+          x: x0 + i * slot + slot / 2, y: baseline + 17,
+          'class': 'lbl sm mid'
+        }, 'k' + (i + 1)));
+      }
+      svg.appendChild(el('line', {
+        x1: x0 - 6, y1: baseline, x2: x0 + wMax, y2: baseline,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4
+      }));
+      svg.appendChild(el('text', { x: x0 - 6, y: 26, 'class': 'lbl sm' },
+                         'attention weight over 12 keys'));
+      // A flat reference line: what "reads everything equally" would look like.
+      var flat = baseline - (1 / KEYS) * scale;
+      svg.appendChild(el('line', {
+        x1: x0, y1: flat, x2: x0 + wMax, y2: flat, 'class': 'bar',
+        stroke: 'var(--n-loss)', 'stroke-width': 1.6, 'stroke-dasharray': '5 4'
+      }));
+      svg.appendChild(el('text', {
+        x: x0 + wMax, y: flat - 6, 'class': 'lbl sm end', fill: 'var(--n-loss)'
+      }, 'uniform'));
+      svg.appendChild(el('text', { x: x0, y: 210, 'class': 'lbl sm' },
+                         'the dashed line is 1/12 — attention that has stopped '
+                         + 'choosing'));
+    }
+
+    onInput(tIn, draw);
+    onInput(spread, draw);
+    draw();
+  }
+
+  // =========================================================================
+  // 2h. Lab: softmax against SSMax
+  // =========================================================================
+
+  /* One needle of logit z among n-1 background logits at zero. Softmax gives
+     the needle e^z / (e^z + n - 1); SSMax scales every logit by s*ln(n)
+     first, so the needle's share climbs with n instead of collapsing. */
+  function needleSoftmax(z, n) {
+    var e = Math.exp(z);
+    return e / (e + (n - 1));
+  }
+
+  function needleSSMax(z, n, s) {
+    var a = s * Math.log(n);
+    // exp overflows long before n does, so work in the log domain.
+    var az = a * z;
+    return 1 / (1 + Math.exp(Math.log(Math.max(n - 1, 1e-9)) - az));
+  }
+
+  function initSSMaxLab() {
+    var root = document.getElementById('ssmax-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var nIn = $(root, '#ssmax-n');
+    var sIn = $(root, '#ssmax-s');
+    var zIn = $(root, '#ssmax-z');
+
+    function draw() {
+      var logN = parseFloat(nIn.value);
+      var n = Math.pow(10, logN);
+      var s = parseFloat(sIn.value);
+      var z = parseFloat(zIn.value);
+
+      var ps = needleSoftmax(z, n);
+      var pk = needleSSMax(z, n, s);
+      var scale = s * Math.log(n);
+
+      $(root, '#ssmax-n-v').textContent =
+          'n = ' + (n >= 1e4 ? '10^' + logN.toFixed(2) : commas(n));
+      $(root, '#ssmax-s-v').textContent = 's = ' + s.toFixed(2);
+      $(root, '#ssmax-z-v').textContent = 'z = ' + z.toFixed(1);
+
+      $(root, '#ssmax-stat-soft').innerHTML =
+          (ps < 0.001 ? ps.toExponential(1) : ps.toFixed(3));
+      $(root, '#ssmax-stat-ss').innerHTML =
+          (pk < 0.001 ? pk.toExponential(1) : pk.toFixed(3));
+      $(root, '#ssmax-stat-temp').innerHTML =
+          scale.toFixed(2) + (scale > 1 ? ' <small>&gt; 1</small>'
+                                        : ' <small>&lt; 1</small>');
+
+      var verdict = $(root, '#ssmax-verdict');
+      if (scale <= 1) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'With s·ln n = ' + scale.toFixed(2) + ' the ' +
+            'rescaling is below 1, so SSMax is flattening rather than ' +
+            'sharpening. The paper’s condition is s·log n > 1 — that is ' +
+            'what makes it a fix rather than another temperature.';
+      } else if (ps < 0.02) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'Softmax has ' +
+            (ps < 0.001 ? ps.toExponential(1) : ps.toFixed(3)) +
+            ' on the one key that matters; SSMax has ' + pk.toFixed(3) +
+            ', about ' + Math.round(pk / Math.max(ps, 1e-12)) +
+            '× more. This gap is the whole paper.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'At this length softmax still copes. Drag n ' +
+            'right and watch its share fall while SSMax’s climbs — the ' +
+            'two curves cross and then diverge.';
+      }
+
+      // ---- the drawing ---------------------------------------------------
+      clear(svg);
+      var x0 = 56, y0 = 30, w = 590, h = 170;
+      var lo = 1, hi = 7;
+      var toX = function (lg) { return x0 + (lg - lo) / (hi - lo) * w; };
+      var toY = function (p) { return y0 + (1 - p) * h; };
+
+      // Frame and gridlines.
+      for (var g = 0; g <= 4; g++) {
+        var gy = y0 + (g / 4) * h;
+        svg.appendChild(el('line', {
+          x1: x0, y1: gy, x2: x0 + w, y2: gy,
+          stroke: 'var(--n-grid)', 'stroke-width': 1
+        }));
+        svg.appendChild(el('text', {
+          x: x0 - 10, y: gy + 4, 'class': 'lbl sm end'
+        }, (1 - g / 4).toFixed(2)));
+      }
+      for (var t = 1; t <= 7; t++) {
+        svg.appendChild(el('text', {
+          x: toX(t), y: y0 + h + 18, 'class': 'lbl sm mid'
+        }, '10^' + t));
+      }
+
+      // The two curves.
+      function curve(fn, colour, width) {
+        var pts = [];
+        for (var lg = lo; lg <= hi + 0.0001; lg += 0.06) {
+          pts.push(toX(lg).toFixed(1) + ' ' + toY(fn(Math.pow(10, lg))).toFixed(1));
+        }
+        svg.appendChild(el('path', {
+          d: 'M' + pts.join(' L'), fill: 'none', stroke: colour,
+          'stroke-width': width, 'stroke-linejoin': 'round'
+        }));
+      }
+      curve(function (nn) { return needleSoftmax(z, nn); },
+            'var(--n-loss)', 2.4);
+      curve(function (nn) { return needleSSMax(z, nn, s); },
+            'var(--n-student)', 2.4);
+
+      // The marker at the current n.
+      svg.appendChild(el('line', {
+        x1: toX(logN), y1: y0 - 6, x2: toX(logN), y2: y0 + h + 4,
+        stroke: 'var(--n-dim)', 'stroke-width': 1.6,
+        'stroke-dasharray': '5 4', 'class': 'bar'
+      }));
+      svg.appendChild(el('circle', {
+        cx: toX(logN), cy: toY(ps), r: 5, fill: 'var(--n-loss)',
+        'class': 'bar'
+      }));
+      svg.appendChild(el('circle', {
+        cx: toX(logN), cy: toY(pk), r: 5, fill: 'var(--n-student)',
+        'class': 'bar'
+      }));
+
+      svg.appendChild(el('text', { x: x0 - 46, y: 20, 'class': 'lbl sm' },
+                         'weight on the needle'));
+      // Below the tick row, not on it -- at this width the axis title and the
+      // 10^6 / 10^7 labels land on the same pixels.
+      svg.appendChild(el('text', {
+        x: x0 + w, y: y0 + h + 38, 'class': 'lbl sm end'
+      }, 'context length n'));
+
+      var lg2 = [
+        { c: 'var(--n-loss)', t: 'softmax' },
+        { c: 'var(--n-student)', t: 'SSMax' }
+      ];
+      lg2.forEach(function (item, i) {
+        var lx = x0 + i * 150;
+        svg.appendChild(el('rect', {
+          x: lx, y: 250, width: 13, height: 13, rx: 3, fill: item.c
+        }));
+        svg.appendChild(el('text', {
+          x: lx + 20, y: 261, 'class': 'lbl sm'
+        }, item.t));
+      });
+    }
+
+    onInput(nIn, draw);
+    onInput(sIn, draw);
+    onInput(zIn, draw);
+    draw();
+  }
+
+  // =========================================================================
 
   initFigures();
   initTokenLab();
   initPruneLab();
   initDistillLab();
   initFFNLab();
+  initMoELab();
+  initIRoPELab();
+  initTempLab();
+  initSSMaxLab();
 }());

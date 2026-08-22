@@ -1,0 +1,532 @@
+---
+title: Long Context & MoE in LLaMA4
+subtitle: Where the parameters go when only a sixteenth of them wake up, and the two tricks that let a model read ten million tokens without its attention dissolving.
+date: 2026-08-22
+tags: foundations, pre-training
+keywords: long-context tricks, iRoPE, NoPE, temperature scaling, SSMax, MoE
+---
+
+<p class='lede'>Llama 4 changes two things at once. The weights become sparse — a mixture of experts, where a token touches a fraction of the model — and the context becomes enormous, ten million tokens for the smaller of the two. Those are separate problems with separate fixes, and the second one is more interesting than it looks: making a window that long is easy, but making attention still <em>point</em> at anything once it is that long is not.</p>
+
+[TOC]
+
+## Two versions of LLaMA 4
+
+Llama 4 uses **MoE** — a mixture of experts. Two versions are worth putting side by side.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 292' role='img' aria-label='A comparison of Llama 4 Scout and Llama 4 Maverick across five specifications'>
+<text x='300' y='26' class='lbl mid a-fade' style='--d:0.00s;fill:var(--n-student)'>A. LLaMA4 Scout</text>
+<text x='560' y='26' class='lbl mid a-fade' style='--d:0.10s;fill:var(--n-teacher)'>B. LLaMA4 Maverick</text>
+<line x1='16' y1='38' x2='684' y2='38' stroke='var(--n-edge)' stroke-width='1.4' class='a-wide' style='--d:0.15s'/>
+<text x='16' y='66' class='lbl sm a-rise' style='--d:0.30s'>total parameters</text>
+<rect x='214' y='54' width='46.9' height='16' rx='3' fill='var(--n-student)' fill-opacity='0.16' class='a-wide' style='--d:0.40s'/>
+<rect x='474' y='54' width='172.0' height='16' rx='3' fill='var(--n-teacher)' fill-opacity='0.16' class='a-wide' style='--d:0.40s'/>
+<text x='300' y='66' class='lbl mid a-rise' style='--d:0.38s;fill:var(--n-student)'>109 B</text>
+<text x='560' y='66' class='lbl mid a-rise' style='--d:0.44s;fill:var(--n-teacher)'>400 B</text>
+<line x1='16' y1='90' x2='684' y2='90' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:0.50s'/>
+<text x='16' y='110' class='lbl sm a-rise' style='--d:0.43s'>activated parameters</text>
+<rect x='214' y='98' width='7.3' height='16' rx='3' fill='var(--n-student)' fill-opacity='0.16' class='a-wide' style='--d:0.53s'/>
+<rect x='474' y='98' width='7.3' height='16' rx='3' fill='var(--n-teacher)' fill-opacity='0.16' class='a-wide' style='--d:0.53s'/>
+<text x='300' y='110' class='lbl mid a-rise' style='--d:0.51s;fill:var(--n-student)'>17 B</text>
+<text x='560' y='110' class='lbl mid a-rise' style='--d:0.57s;fill:var(--n-teacher)'>17 B</text>
+<line x1='16' y1='134' x2='684' y2='134' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:0.63s'/>
+<text x='16' y='154' class='lbl sm a-rise' style='--d:0.56s'>context length</text>
+<text x='300' y='154' class='lbl mid a-rise' style='--d:0.64s;fill:var(--n-student)'>10M tokens</text>
+<text x='560' y='154' class='lbl mid a-rise' style='--d:0.70s;fill:var(--n-teacher)'>1M tokens</text>
+<text x='300' y='170' class='lbl sm mid a-fade' style='--d:0.86s'>&#8776; 15,000 pages</text>
+<text x='560' y='170' class='lbl sm mid a-fade' style='--d:0.92s'>&#8776; 1,500 pages</text>
+<line x1='16' y1='178' x2='684' y2='178' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:0.76s'/>
+<text x='16' y='198' class='lbl sm a-rise' style='--d:0.69s'>training data</text>
+<text x='300' y='198' class='lbl mid a-rise' style='--d:0.77s;fill:var(--n-student)'>40 T tokens</text>
+<text x='560' y='198' class='lbl mid a-rise' style='--d:0.83s;fill:var(--n-teacher)'>22 T tokens</text>
+<line x1='16' y1='222' x2='684' y2='222' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:0.89s'/>
+<text x='16' y='242' class='lbl sm a-rise' style='--d:0.82s'>experts</text>
+<text x='300' y='242' class='lbl mid a-rise' style='--d:0.90s;fill:var(--n-student)'>16</text>
+<text x='560' y='242' class='lbl mid a-rise' style='--d:0.96s;fill:var(--n-teacher)'>128</text>
+<line x1='16' y1='266' x2='684' y2='266' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:1.02s'/>
+<line x1='430' y1='14' x2='430' y2='276' stroke='var(--n-edge)' stroke-width='1.2' stroke-dasharray='4 5' class='a-fade' style='--d:0.20s'/>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 1.</span> The two Llama 4 models the notebook compares, straight from Meta's model card. The row that matters is the second: four times the model, the same cost per token.</div>
+</div>
+
+Read the second row against the first. Scout stores 109B parameters and Maverick 400B, but both spend **17B per token**. That gap is the entire point of a mixture of experts: capacity you pay for in memory, not in arithmetic. Maverick is nearly four times the model Scout is, and costs the same to run per token.
+
+<div class='sidenote'>
+<span class='tag'>where MoE came from</span>
+<p>The notebook says MoE was <i>first introduced by Mixtral, and got famous due to DeepSeek</i>. The second half is right; the first is a little generous to Mixtral. Sparsely-gated mixtures go back to Shazeer et al. in 2017, and the idea of a mixture of experts to Jacobs and Hinton in 1991. What Mixtral 8x7B did in December 2023 was make a sparse MoE work at open-weight scale that anybody could download — which is why it feels like the beginning. DeepSeek then pushed the shape further, with many small experts and a shared one that always runs.</p>
+</div>
+
+That shared expert is worth drawing, because it is the part that makes the arithmetic above work out.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 300' role='img' aria-label='A token routed by a router to one of sixteen experts plus a shared expert, then summed'>
+<rect x='14' y='122' width='84' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:0.00s'/>
+<text x='56' y='150.0' class='lbl mid a-fade' style='--d:0.15s;fill:var(--n-data)'>token</text>
+<rect x='132' y='122' width='92' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-lav)' stroke-width='2' class='a-pop' style='--d:0.35s'/>
+<text x='178' y='150.0' class='lbl mid a-fade' style='--d:0.50s;fill:var(--n-lav)'>router</text>
+<path d='M98.0 145.0 L125.0 145.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.20s'/>
+<path d='M125.0 149.6 L132.0 145.0 L125.0 140.4' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.65s'/>
+<rect x='292' y='24' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.60s'/>
+<rect x='338' y='24' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.63s'/>
+<rect x='384' y='24' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.66s'/>
+<rect x='430' y='24' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.69s'/>
+<rect x='292' y='66' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.72s'/>
+<rect x='338' y='66' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.75s'/>
+<rect x='384' y='66' width='38' height='32' rx='5' fill='var(--n-student)' fill-opacity='0.9' stroke='var(--n-student)' stroke-width='2' class='a-pop' style='--d:0.78s'/>
+<rect x='430' y='66' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.81s'/>
+<rect x='292' y='108' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.84s'/>
+<rect x='338' y='108' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.87s'/>
+<rect x='384' y='108' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.90s'/>
+<rect x='430' y='108' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.93s'/>
+<rect x='292' y='150' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.96s'/>
+<rect x='338' y='150' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:0.99s'/>
+<rect x='384' y='150' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:1.02s'/>
+<rect x='430' y='150' width='38' height='32' rx='5' fill='var(--n-panel-2)' fill-opacity='1' stroke='var(--n-edge)' stroke-width='1.3' class='a-pop' style='--d:1.05s'/>
+<text x='384' y='16' class='lbl sm mid a-fade' style='--d:1.10s'>16 routed experts &#8212; one is picked</text>
+<path d='M224.0 138.0 L282.5 92.3' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.75s'/>
+<path d='M285.3 95.9 L288.0 88.0 L279.7 88.7' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.20s'/>
+<rect x='292' y='210' width='176' height='40' rx='7' fill='var(--n-kept)' fill-opacity='0.85' class='a-pop' style='--d:1.15s'/>
+<text x='380' y='234' class='lbl mid a-fade on' style='--d:1.30s'>shared expert</text>
+<text x='380' y='266' class='lbl sm mid a-fade' style='--d:1.40s;fill:var(--n-kept)'>runs for every token</text>
+<path d='M224.0 152.0 L283.4 220.7' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.75s'/>
+<path d='M279.9 223.7 L288.0 226.0 L286.9 217.7' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.20s'/>
+<circle cx='548' cy='145' r='17' fill='var(--n-panel)' stroke='var(--n-loss)' stroke-width='2' class='a-pop' style='--d:1.60s'/>
+<text x='548' y='151' class='lbl mid a-fade' style='--d:1.75s;fill:var(--n-loss)'>+</text>
+<path d='M474.0 108.0 L524.8 134.7' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.50s'/>
+<path d='M522.7 138.8 L531.0 138.0 L526.9 130.7' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.95s'/>
+<path d='M474.0 226.0 L526.5 163.4' stroke='var(--n-kept)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.50s'/>
+<path d='M530.0 166.3 L531.0 158.0 L523.0 160.4' stroke='var(--n-kept)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.95s'/>
+<rect x='600' y='122' width='86' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:1.95s'/>
+<text x='643' y='150.0' class='lbl mid a-fade' style='--d:2.10s;fill:var(--n-data)'>output</text>
+<path d='M565.0 145.0 L593.0 145.0' stroke='var(--n-loss)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.85s'/>
+<path d='M593.0 149.6 L600.0 145.0 L593.0 140.4' stroke='var(--n-loss)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:2.30s'/>
+<text x='384' y='288' class='lbl sm mid a-fade' style='--d:2.20s'>every expert is stored; two are ever run</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 2.</span> One MoE layer. The router picks a single expert out of sixteen, and a shared expert runs for every token regardless. All sixteen sit in memory; two of them do any work. Maverick is the same picture with 128 boxes in the grid — which is why its total quadruples while its activated count does not move.</div>
+</div>
+
+Maverick routes each token to **one of 128 experts plus one shared expert** that runs every time. Scout does the same over 16. So "17B activated" is the always-on machinery — attention, embeddings, the shared expert — plus exactly one routed expert's worth of FFN.
+
+<div class='lab wide' id='moe-lab'>
+<div class='lab-head'><span class='name'>Lab 1 · the MoE budget</span><span class='hint'>load a real model, then move one dial at a time</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label>start from</label>
+<div class='seg seg-preset'>
+<button type='button' data-value='scout' aria-pressed='true'>Scout</button>
+<button type='button' data-value='maverick' aria-pressed='false'>Maverick</button>
+</div>
+</div>
+<div class='ctl'>
+<label for='moe-experts'>routed experts <span class='val' id='moe-experts-v'></span></label>
+<input type='range' id='moe-experts' min='2' max='256' step='1' value='16'>
+</div>
+<div class='ctl'>
+<label for='moe-esize'>parameters per expert (B) <span class='val' id='moe-esize-v'></span></label>
+<input type='range' id='moe-esize' min='0.5' max='12' step='0.001' value='6.133'>
+</div>
+<div class='ctl'>
+<label for='moe-topk'>experts run per token <span class='val' id='moe-topk-v'></span></label>
+<input type='range' id='moe-topk' min='1' max='8' step='1' value='1'>
+</div>
+<div class='ctl'>
+<label for='moe-dense'>always-on part (B) <span class='val' id='moe-dense-v'></span></label>
+<input type='range' id='moe-dense' min='2' max='40' step='0.001' value='10.867'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>total parameters</span><span class='v' id='moe-stat-total'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>activated per token</span><span class='v' id='moe-stat-active'></span></div>
+<div class='stat' style='--stat-hue:var(--n-clay)'><span class='k'>fraction awake</span><span class='v' id='moe-stat-ratio'></span></div>
+</div>
+<div class='verdict' id='moe-verdict'></div>
+<svg viewBox='0 0 700 250' role='img'></svg>
+<p class='cap'>Every square is stored in memory; the lit ones are the only weights a token actually multiplies against. The <b>always-on part</b> is attention, embeddings and the shared expert together. Per-expert size is <b>derived</b> from the published totals — Meta reports 109B/17B and 400B/17B, not the size of one expert.</p>
+</div>
+</div>
+
+## Ten million tokens
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 224' role='img' aria-label='Context windows converted to pages of text on a logarithmic scale'>
+<text x='16' y='70' class='lbl sm a-rise' style='--d:0.10s'>Llama 3.1 / Llama 4 dense era</text>
+<rect x='250' y='54' width='47.5' height='22' rx='4' fill='var(--n-pruned)' fill-opacity='0.88' class='a-wide' style='--d:0.30s'/>
+<text x='305.5' y='70' class='lbl sm a-fade' style='--d:0.90s;fill:var(--n-pruned)'>197 pages</text>
+<text x='16' y='120' class='lbl sm a-rise' style='--d:0.26s'>Llama 4 Maverick — 1M</text>
+<rect x='250' y='104' width='189.9' height='22' rx='4' fill='var(--n-teacher)' fill-opacity='0.88' class='a-wide' style='--d:0.46s'/>
+<text x='447.9' y='120' class='lbl sm a-fade' style='--d:1.06s;fill:var(--n-teacher)'>1,500 pages</text>
+<text x='16' y='170' class='lbl sm a-rise' style='--d:0.42s'>Llama 4 Scout — 10M</text>
+<rect x='250' y='154' width='351.4' height='22' rx='4' fill='var(--n-student)' fill-opacity='0.88' class='a-wide' style='--d:0.62s'/>
+<text x='609.4' y='170' class='lbl sm a-fade' style='--d:1.22s;fill:var(--n-student)'>15,000 pages</text>
+<line x1='250.0' y1='36' x2='250.0' y2='212' stroke='var(--n-grid)' stroke-width='1.2' class='a-fade' style='--d:0.20s'/>
+<text x='250.0' y='208' class='lbl sm mid a-fade' style='--d:0.25s'>100</text>
+<line x1='411.5' y1='36' x2='411.5' y2='212' stroke='var(--n-grid)' stroke-width='1.2' class='a-fade' style='--d:0.20s'/>
+<text x='411.5' y='208' class='lbl sm mid a-fade' style='--d:0.25s'>1,000</text>
+<line x1='573.0' y1='36' x2='573.0' y2='212' stroke='var(--n-grid)' stroke-width='1.2' class='a-fade' style='--d:0.20s'/>
+<text x='573.0' y='208' class='lbl sm mid a-fade' style='--d:0.25s'>10,000</text>
+<text x='16' y='24' class='lbl sm a-fade' style='--d:0.00s'>pages of text (log scale) &#8212; at 0.75 words per token and 500 words per page</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 3.</span> Context windows as pages of text, on a log scale because a linear one would render the first bar invisible. Scout's window is roughly a fifteen-thousand-page document — and the conversion is the compression ratio from the previous note, run backwards.</div>
+</div>
+
+The notebook's conversion is worth keeping: **10M tokens ≈ 15,000 pages**, 1M ≈ 1,500. That falls out of 0.75 words per token and 500 words per page — the same compression ratio from the [previous note](/notes/2026/08/21/pruning-distillation-llama3/), used the other way round.
+
+Two caveats, because this number has been oversold. Scout was **pre-trained and post-trained at 256K**; the 10M figure is length *generalisation* beyond that, not a window it was trained in. And while Meta reports near-perfect needle-in-a-haystack retrieval across the window, independent evaluations that ask for comprehension rather than retrieval — holding relationships across a long text, not just finding a planted sentence — have been considerably more mixed. Retrieval at 10M is real; understanding at 10M is a stronger claim than the benchmark supports.
+
+Scout gets there with two tricks: **iRoPE** and **SSMax**.
+
+## iRoPE: the i is for interleave
+
+The problem RoPE has at long range is that attention concentrates on the high-frequency part of the embedding — the fast-rotating dimensions at the beginning, which encode *near* rather than *far*. That is exactly what you want at 8K and exactly what you do not want at 10M.
+
+So interleave. Most layers use RoPE; every so often, a layer uses **NoPE** — no positional encoding at all.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 234' role='img' aria-label='Twelve layers where every fourth uses no positional encoding'>
+<rect x='26' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.10s'/>
+<text x='50' y='110' class='lbl sm mid a-fade' style='--d:0.30s;fill:var(--n-student)'>RoPE</text>
+<text x='50' y='152' class='lbl sm mid a-fade' style='--d:0.35s'>1</text>
+<rect x='80' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.17s'/>
+<text x='104' y='110' class='lbl sm mid a-fade' style='--d:0.37s;fill:var(--n-student)'>RoPE</text>
+<text x='104' y='152' class='lbl sm mid a-fade' style='--d:0.42s'>2</text>
+<rect x='134' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.24s'/>
+<text x='158' y='110' class='lbl sm mid a-fade' style='--d:0.44s;fill:var(--n-student)'>RoPE</text>
+<text x='158' y='152' class='lbl sm mid a-fade' style='--d:0.49s'>3</text>
+<rect x='188' y='74' width='48' height='60' rx='7' fill='var(--n-teacher)' fill-opacity='0.9' class='a-pop' style='--d:0.31s'/>
+<text x='212' y='110' class='lbl sm mid a-fade' style='--d:0.51s;fill:var(--n-on-fill)'>NoPE</text>
+<text x='212' y='152' class='lbl sm mid a-fade' style='--d:0.56s'>4</text>
+<rect x='242' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.38s'/>
+<text x='266' y='110' class='lbl sm mid a-fade' style='--d:0.58s;fill:var(--n-student)'>RoPE</text>
+<text x='266' y='152' class='lbl sm mid a-fade' style='--d:0.63s'>5</text>
+<rect x='296' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.45s'/>
+<text x='320' y='110' class='lbl sm mid a-fade' style='--d:0.65s;fill:var(--n-student)'>RoPE</text>
+<text x='320' y='152' class='lbl sm mid a-fade' style='--d:0.70s'>6</text>
+<rect x='350' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.52s'/>
+<text x='374' y='110' class='lbl sm mid a-fade' style='--d:0.72s;fill:var(--n-student)'>RoPE</text>
+<text x='374' y='152' class='lbl sm mid a-fade' style='--d:0.77s'>7</text>
+<rect x='404' y='74' width='48' height='60' rx='7' fill='var(--n-teacher)' fill-opacity='0.9' class='a-pop' style='--d:0.59s'/>
+<text x='428' y='110' class='lbl sm mid a-fade' style='--d:0.79s;fill:var(--n-on-fill)'>NoPE</text>
+<text x='428' y='152' class='lbl sm mid a-fade' style='--d:0.84s'>8</text>
+<rect x='458' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.66s'/>
+<text x='482' y='110' class='lbl sm mid a-fade' style='--d:0.86s;fill:var(--n-student)'>RoPE</text>
+<text x='482' y='152' class='lbl sm mid a-fade' style='--d:0.91s'>9</text>
+<rect x='512' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.73s'/>
+<text x='536' y='110' class='lbl sm mid a-fade' style='--d:0.93s;fill:var(--n-student)'>RoPE</text>
+<text x='536' y='152' class='lbl sm mid a-fade' style='--d:0.98s'>10</text>
+<rect x='566' y='74' width='48' height='60' rx='7' fill='var(--n-student)' fill-opacity='0.22' class='a-pop' style='--d:0.80s'/>
+<text x='590' y='110' class='lbl sm mid a-fade' style='--d:1.00s;fill:var(--n-student)'>RoPE</text>
+<text x='590' y='152' class='lbl sm mid a-fade' style='--d:1.05s'>11</text>
+<rect x='620' y='74' width='48' height='60' rx='7' fill='var(--n-teacher)' fill-opacity='0.9' class='a-pop' style='--d:0.87s'/>
+<text x='644' y='110' class='lbl sm mid a-fade' style='--d:1.07s;fill:var(--n-on-fill)'>NoPE</text>
+<text x='644' y='152' class='lbl sm mid a-fade' style='--d:1.12s'>12</text>
+<text x='26' y='30' class='lbl a-fade' style='--d:0.00s'>every fourth layer drops positional encoding</text>
+<text x='26' y='50' class='lbl sm a-fade' style='--d:0.10s'>layers 1,2,3 RoPE &#183; layer 4 NoPE &#183; layers 5,6,7 RoPE &#183; layer 8 NoPE &#183; …</text>
+<rect x='26' y='180' width='13' height='13' rx='3' fill='var(--n-student)' fill-opacity='0.22' class='a-fade' style='--d:1.10s'/>
+<text x='46' y='191' class='lbl sm a-fade' style='--d:1.15s'>RoPE &#8212; learns local features, the under-32k structure</text>
+<rect x='26' y='204' width='13' height='13' rx='3' fill='var(--n-teacher)' fill-opacity='0.9' class='a-fade' style='--d:1.20s'/>
+<text x='46' y='215' class='lbl sm a-fade' style='--d:1.25s'>NoPE &#8212; learns overall features, the beyond-32k structure</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 4.</span> The interleave. Most layers carry rotary position; every fourth carries none. The rotary layers resolve what is near, the bare layers are free to relate things that are far apart, because nothing in them decays with distance.</div>
+</div>
+
+<div class='lab wide' id='irope-lab'>
+<div class='lab-head'><span class='name'>Lab 2 · the interleave</span><span class='hint'>set the depth and how often positional encoding is dropped</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='irope-layers'>layers <span class='val' id='irope-layers-v'></span></label>
+<input type='range' id='irope-layers' min='8' max='64' step='1' value='48'>
+</div>
+<div class='ctl'>
+<label for='irope-period'>NoPE every n-th layer <span class='val' id='irope-period-v'></span></label>
+<input type='range' id='irope-period' min='2' max='12' step='1' value='4'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>RoPE layers</span><span class='v' id='irope-stat-rope'></span></div>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>NoPE layers</span><span class='v' id='irope-stat-nope'></span></div>
+<div class='stat' style='--stat-hue:var(--n-clay)'><span class='k'>share without position</span><span class='v' id='irope-stat-frac'></span></div>
+</div>
+<div class='verdict' id='irope-verdict'></div>
+<svg viewBox='0 0 700 190' role='img'></svg>
+<p class='cap'>Violet layers carry rotary position; teal layers carry none and have to infer order from causal masking alone. Set the period to 4 and you have the notebook’s example. The exact period Meta used is <b>not published</b> — this is the shape of the idea, not a spec.</p>
+</div>
+</div>
+
+A layer with no positional encoding is not a layer with no sense of order. Causal masking alone leaks position: a token at index 5 can see five things and a token at index 5,000 can see five thousand, and that difference is learnable. This is **implicit positional information**, and it is what lets the NoPE layers carry structure over distances the rotary layers were never going to reach.
+
+The division of labour the notebook draws: RoPE layers **learn local features** — the under-32k part — and NoPE layers **learn overall features**, the beyond-32k part.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 396' role='img' aria-label='Input sequence and temperature scaling feeding interleaved attention, which splits into RoPE and NoPE paths and rejoins at the output'>
+<rect x='56' y='20' width='130' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:0.00s'/>
+<text x='121' y='48.0' class='lbl mid a-fade' style='--d:0.15s;fill:var(--n-data)'>Input sequence</text>
+<rect x='300' y='20' width='156' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-pruned)' stroke-width='2' class='a-pop' style='--d:0.15s'/>
+<text x='378' y='40.0' class='lbl mid a-fade' style='--d:0.30s;fill:var(--n-pruned)'>Temperature</text>
+<text x='378' y='56.0' class='lbl mid a-fade' style='--d:0.30s;fill:var(--n-pruned)'>scaling</text>
+<rect x='140' y='116' width='190' height='52' rx='9' fill='var(--n-panel-2)' stroke='var(--n-lav)' stroke-width='2' class='a-pop' style='--d:0.50s'/>
+<text x='235' y='139.0' class='lbl mid a-fade' style='--d:0.65s;fill:var(--n-lav)'>Interleave</text>
+<text x='235' y='155.0' class='lbl mid a-fade' style='--d:0.65s;fill:var(--n-lav)'>attention</text>
+<path d='M121.0 66.0 L194.1 112.3' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.30s'/>
+<path d='M191.6 116.1 L200.0 116.0 L196.5 108.4' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.75s'/>
+<path d='M378.0 66.0 L291.2 112.7' stroke='var(--n-pruned)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.30s'/>
+<path d='M289.0 108.6 L285.0 116.0 L293.3 116.7' stroke='var(--n-pruned)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.75s'/>
+<rect x='52' y='214' width='116' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-student)' stroke-width='2' class='a-pop' style='--d:1.00s'/>
+<text x='110' y='242.0' class='lbl mid a-fade' style='--d:1.15s;fill:var(--n-student)'>RoPE</text>
+<rect x='300' y='214' width='116' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-teacher)' stroke-width='2' class='a-pop' style='--d:1.00s'/>
+<text x='358' y='242.0' class='lbl mid a-fade' style='--d:1.15s;fill:var(--n-teacher)'>NoPE</text>
+<path d='M200.0 168.0 L116.2 210.8' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.80s'/>
+<path d='M114.1 206.7 L110.0 214.0 L118.3 214.9' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.25s'/>
+<text x='155.0' y='185.0' class='lbl sm mid a-fade' style='--d:1.20s;fill:var(--n-lav)'>part of it uses</text>
+<path d='M285.0 168.0 L352.1 210.3' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.80s'/>
+<path d='M349.6 214.2 L358.0 214.0 L354.5 206.4' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.25s'/>
+<text x='321.5' y='185.0' class='lbl sm mid a-fade' style='--d:1.20s;fill:var(--n-lav)'>part of it uses</text>
+<text x='24' y='284' class='lbl sm a-fade' style='--d:1.25s;fill:var(--n-student)'>learn local features</text>
+<text x='24' y='300' class='lbl sm a-fade' style='--d:1.30s;fill:var(--n-student)'>(the &lt; 32k part)</text>
+<text x='430' y='232' class='lbl sm a-fade' style='--d:1.25s;fill:var(--n-teacher)'>learn overall features</text>
+<text x='430' y='248' class='lbl sm a-fade' style='--d:1.30s;fill:var(--n-teacher)'>(the &gt; 32k part)</text>
+<text x='430' y='276' class='lbl sm a-fade' style='--d:1.50s;fill:var(--n-loss)'>use SSMax to prevent</text>
+<text x='430' y='292' class='lbl sm a-fade' style='--d:1.55s;fill:var(--n-loss)'>overdue attention fading</text>
+<rect x='20' y='316' width='180' height='50' rx='9' fill='var(--n-panel-2)' stroke='var(--n-student)' stroke-width='2' class='a-pop' style='--d:1.70s'/>
+<text x='110' y='338.0' class='lbl mid a-fade' style='--d:1.85s;fill:var(--n-student)'>Explicit</text>
+<text x='110' y='354.0' class='lbl mid a-fade' style='--d:1.85s;fill:var(--n-student)'>Positional Encoding</text>
+<rect x='258' y='316' width='200' height='50' rx='9' fill='var(--n-panel-2)' stroke='var(--n-teacher)' stroke-width='2' class='a-pop' style='--d:1.70s'/>
+<text x='358' y='338.0' class='lbl mid a-fade' style='--d:1.85s;fill:var(--n-teacher)'>Implicit Positional</text>
+<text x='358' y='354.0' class='lbl mid a-fade' style='--d:1.85s;fill:var(--n-teacher)'>Information</text>
+<path d='M110.0 260.0 L110.0 309.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.50s'/>
+<path d='M105.4 309.0 L110.0 316.0 L114.6 309.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.95s'/>
+<path d='M358.0 260.0 L358.0 309.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.50s'/>
+<path d='M353.4 309.0 L358.0 316.0 L362.6 309.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.95s'/>
+<text x='476' y='340' class='lbl sm a-fade' style='--d:1.95s'>position is learned indirectly,</text>
+<text x='476' y='356' class='lbl sm a-fade' style='--d:2.00s'>from causal masking alone</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 5.</span> The notebook's own iRoPE diagram. Attention splits into a rotary path and a position-free path; one ends in explicit positional encoding, the other in position inferred from causal masking alone. Temperature scaling sits on top of both.</div>
+</div>
+
+## Temperature scaling
+
+The third box in that diagram is temperature. Attention weights come from a softmax, and a softmax takes a divisor:
+
+$$p = \mathrm{softmax}\!\left(\frac{z}{T}\right), \qquad z:\ \text{logits}, \quad T:\ \text{temperature}$$
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 240' role='img' aria-label='The same logits under three temperatures, sharpening and flattening'>
+<text x='24' y='26' class='lbl sm a-fade' style='--d:0.10s'>T = 0.5  sharper</text>
+<rect x='24' y='81.1' width='16' height='108.9' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.30s'/>
+<rect x='46' y='163.1' width='16' height='26.9' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.33s'/>
+<rect x='68' y='180.1' width='16' height='9.9' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.36s'/>
+<rect x='90' y='187.6' width='16' height='2.4' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.39s'/>
+<rect x='112' y='188.5' width='16' height='1.5' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.42s'/>
+<rect x='134' y='188.5' width='16' height='1.5' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.45s'/>
+<rect x='156' y='188.5' width='16' height='1.5' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.48s'/>
+<rect x='178' y='188.5' width='16' height='1.5' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.51s'/>
+<line x1='20' y1='190' x2='204' y2='190' stroke='var(--n-edge)' stroke-width='1.3'/>
+<text x='24' y='210' class='lbl sm a-fade' style='--d:0.90s'>max p = 0.73</text>
+<text x='252' y='26' class='lbl sm a-fade' style='--d:0.35s'>T = 1  as-is</text>
+<rect x='252' y='121.4' width='16' height='68.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.55s'/>
+<rect x='274' y='155.9' width='16' height='34.1' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.58s'/>
+<rect x='296' y='169.3' width='16' height='20.7' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.61s'/>
+<rect x='318' y='179.7' width='16' height='10.3' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.64s'/>
+<rect x='340' y='183.1' width='16' height='6.9' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.67s'/>
+<rect x='362' y='185.4' width='16' height='4.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.70s'/>
+<rect x='384' y='186.9' width='16' height='3.1' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.73s'/>
+<rect x='406' y='188.1' width='16' height='1.9' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.76s'/>
+<line x1='248' y1='190' x2='432' y2='190' stroke='var(--n-edge)' stroke-width='1.3'/>
+<text x='252' y='210' class='lbl sm a-fade' style='--d:1.15s'>max p = 0.46</text>
+<text x='480' y='26' class='lbl sm a-fade' style='--d:0.60s'>T = 2.5  flatter</text>
+<rect x='480' y='153.5' width='16' height='36.5' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.80s'/>
+<rect x='502' y='162.4' width='16' height='27.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.83s'/>
+<rect x='524' y='167.4' width='16' height='22.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.86s'/>
+<rect x='546' y='172.9' width='16' height='17.1' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.89s'/>
+<rect x='568' y='175.4' width='16' height='14.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.92s'/>
+<rect x='590' y='177.6' width='16' height='12.4' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.95s'/>
+<rect x='612' y='179.4' width='16' height='10.6' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.98s'/>
+<rect x='634' y='181.3' width='16' height='8.7' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:1.01s'/>
+<line x1='476' y1='190' x2='660' y2='190' stroke='var(--n-edge)' stroke-width='1.3'/>
+<text x='480' y='210' class='lbl sm a-fade' style='--d:1.40s'>max p = 0.24</text>
+<text x='24' y='232' class='lbl sm a-fade' style='--d:1.50s'>softmax(z / T) over the same eight logits &#8212; T only rescales, it never reorders</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 6.</span> The same eight logits at three temperatures. Dividing by T before the softmax moves the distribution between reading one key and reading all of them, and never changes which key comes first.</div>
+</div>
+
+Raising $T$ flattens the distribution; lowering it sharpens. It never changes the ranking — the largest logit stays the largest — only how much of the budget the winner takes. Meta applies this **at inference time** to attention, as a length-generalisation knob: a model asked to read far more than it was trained on can have its attention re-tuned without retraining.
+
+<div class='lab wide' id='temp-lab'>
+<div class='lab-head'><span class='name'>Lab 3 · temperature</span><span class='hint'>one dial, and what it does to where attention goes</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='temp-t'>temperature T <span class='val' id='temp-t-v'></span></label>
+<input type='range' id='temp-t' min='0.2' max='5' step='0.05' value='1'>
+</div>
+<div class='ctl'>
+<label for='temp-spread'>how far apart the logits are <span class='val' id='temp-spread-v'></span></label>
+<input type='range' id='temp-spread' min='0.2' max='3' step='0.05' value='1'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>largest weight</span><span class='v' id='temp-stat-max'></span></div>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>keys effectively attended</span><span class='v' id='temp-stat-eff'></span></div>
+<div class='stat' style='--stat-hue:var(--n-clay)'><span class='k'>entropy</span><span class='v' id='temp-stat-ent'></span></div>
+</div>
+<div class='verdict' id='temp-verdict'></div>
+<svg viewBox='0 0 700 230' role='img'></svg>
+<p class='cap'>“Keys effectively attended” is exp(entropy) — 1.0 means the query reads exactly one key, 12.0 means it reads all twelve equally. Temperature slides the distribution between those two without ever changing which key ranks first.</p>
+</div>
+</div>
+
+## SSMax, and why attention fades
+
+Here is the failure that motivates all of it. Softmax normalises over $n$ keys:
+
+$$z_i \mapsto \frac{e^{z_i}}{\sum_{j=1}^{n} e^{z_j}}$$
+
+Every extra key adds a term to the denominator. So as $n$ grows, the largest attainable weight shrinks — **when $n$ is large, $p_{\max}$ can be very small**, even when one key genuinely is the right one. The attention distribution flattens out until it is barely pointing at anything. That is *attention fading*, and it is worst exactly where NoPE layers are supposed to be doing their work.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 262' role='img' aria-label='Maximum attention probability against context length for softmax and SSMax'>
+<rect x='50.0' y='92.4' width='42' height='103.6' rx='4' fill='var(--n-loss)' fill-opacity='0.88' class='a-grow' style='--d:0.20s'/>
+<text x='71.0' y='85.4' class='lbl sm mid a-fade' style='--d:0.90s;fill:var(--n-loss)'>0.69</text>
+<rect x='100.0' y='93.4' width='42' height='102.6' rx='4' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.30s'/>
+<text x='121.0' y='86.4' class='lbl sm mid a-fade' style='--d:1.00s;fill:var(--n-student)'>0.68</text>
+<text x='96.0' y='216' class='lbl sm mid a-fade' style='--d:0.40s'>n = 10</text>
+<rect x='218.0' y='193.0' width='42' height='3.0' rx='4' fill='var(--n-loss)' fill-opacity='0.88' class='a-grow' style='--d:0.40s'/>
+<text x='239.0' y='186.0' class='lbl sm mid a-fade' style='--d:1.10s;fill:var(--n-loss)'>0.02</text>
+<rect x='268.0' y='63.8' width='42' height='132.2' rx='4' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.50s'/>
+<text x='289.0' y='56.8' class='lbl sm mid a-fade' style='--d:1.20s;fill:var(--n-student)'>0.88</text>
+<text x='264.0' y='216' class='lbl sm mid a-fade' style='--d:0.60s'>n = 10<tspan dy="-5" font-size="9">3</tspan></text>
+<rect x='386.0' y='194.0' width='42' height='2.0' rx='4' fill='var(--n-loss)' fill-opacity='0.88' class='a-grow' style='--d:0.60s'/>
+<text x='407.0' y='187.0' class='lbl sm mid a-fade' style='--d:1.30s;fill:var(--n-loss)'>0.00</text>
+<rect x='436.0' y='51.1' width='42' height='144.9' rx='4' fill='var(--n-student)' fill-opacity='0.88' class='a-grow' style='--d:0.70s'/>
+<text x='457.0' y='44.1' class='lbl sm mid a-fade' style='--d:1.40s;fill:var(--n-student)'>0.97</text>
+<text x='432.0' y='216' class='lbl sm mid a-fade' style='--d:0.80s'>n = 10<tspan dy="-5" font-size="9">5</tspan></text>
+<line x1='30' y1='196' x2='660' y2='196' stroke='var(--n-edge)' stroke-width='1.4'/>
+<text x='30' y='34' class='lbl sm a-fade' style='--d:0.00s'>largest attention weight the query can place on any one key</text>
+<rect x='30' y='236' width='13' height='13' rx='3' fill='var(--n-loss)' fill-opacity='0.88' class='a-fade' style='--d:1.50s'/>
+<text x='50' y='247' class='lbl sm a-fade' style='--d:1.55s'>softmax &#8212; collapses as the context grows</text>
+<rect x='330' y='236' width='13' height='13' rx='3' fill='var(--n-student)' fill-opacity='0.88' class='a-fade' style='--d:1.60s'/>
+<text x='350' y='247' class='lbl sm a-fade' style='--d:1.65s'>SSMax &#8212; sharpens instead</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 7.</span> Attention fading, with one genuinely-relevant key among n. Softmax has to share its budget with every key in the window, so the needle's weight collapses as the context grows; SSMax scales the logits by s·ln n and sharpens instead. Computed from the two formulas at s = 0.43.</div>
+</div>
+
+**SSMax** — Scalable-Softmax — fixes it by making the temperature depend on how many keys there are:
+
+$$z_i \mapsto \frac{e^{(s \log n)\, z_i}}{\sum_{j=1}^{n} e^{(s \log n)\, z_j}} \qquad \text{where } s\log n > 1$$
+
+which is the same thing as
+
+$$\mathrm{SSMax}(z) = \mathrm{softmax}\big((s\log n)\, z\big)$$
+
+The idea in one line: **when the context $n$ gets longer, SSMax increases the differences among the attention logits**, by exactly enough to cancel the flattening that the growing denominator would otherwise cause. $s$ is a learnable scalar, one per attention head per layer — in the paper's 12-layer, 12-head model, 144 extra parameters in total.
+
+<div class='lab wide' id='ssmax-lab'>
+<div class='lab-head'><span class='name'>Lab 4 · softmax vs SSMax as the context grows</span><span class='hint'>drag the context length and watch softmax lose the thread</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='ssmax-n'>context length n (powers of ten) <span class='val' id='ssmax-n-v'></span></label>
+<input type='range' id='ssmax-n' min='1' max='7' step='0.05' value='3'>
+</div>
+<div class='ctl'>
+<label for='ssmax-s'>scaling parameter s <span class='val' id='ssmax-s-v'></span></label>
+<input type='range' id='ssmax-s' min='0.05' max='1.5' step='0.01' value='0.43'>
+</div>
+<div class='ctl'>
+<label for='ssmax-z'>how much the needle stands out <span class='val' id='ssmax-z-v'></span></label>
+<input type='range' id='ssmax-z' min='0.5' max='6' step='0.1' value='3'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-loss)'><span class='k'>softmax max weight</span><span class='v' id='ssmax-stat-soft'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>SSMax max weight</span><span class='v' id='ssmax-stat-ss'></span></div>
+<div class='stat' style='--stat-hue:var(--n-clay)'><span class='k'>effective scale s·ln n</span><span class='v' id='ssmax-stat-temp'></span></div>
+</div>
+<div class='verdict' id='ssmax-verdict'></div>
+<svg viewBox='0 0 700 280' role='img'></svg>
+<p class='cap'>One key holds the answer and the other n−1 are noise. Softmax splits its budget across all of them, so the needle’s share falls as n grows; SSMax rescales by s·ln n, so it climbs instead. This is a <b>single-needle idealisation</b> — real attention logits are not one spike over flat noise — but it is the mechanism the paper is about.</p>
+</div>
+</div>
+
+The paper reports models with SSMax keeping their loss down at roughly **20× the training context**, and retrieving planted key information at about **10× training length** where a standard transformer had already failed. It can also be retrofitted into an already-trained model.
+
+<div class='sidenote'>
+<span class='tag'>one honest gap</span>
+<p>The notebook files SSMax under Llama 4's long-context tricks alongside iRoPE. Meta's own writeup describes <i>“inference time temperature scaling of attention to enhance length generalization”</i> — the same mechanism — but does not name SSMax or publish the form it uses. So: SSMax is the published, named version of this idea, and it is the right thing to study to understand what Llama 4 is doing. Whether it is literally the function in Meta's code is not something the release tells us.</p>
+</div>
+
+## A multi-modal model
+
+The last thing on the page. Llama 4 is natively multi-modal, and the word doing the work is **early**.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 352' role='img' aria-label='Images, text and video encoded separately then fused early into one MoE backbone'>
+<rect x='18' y='16' width='104' height='40' rx='9' fill='var(--n-panel-2)' stroke='var(--n-student)' stroke-width='2' class='a-pop' style='--d:0.00s'/>
+<text x='70' y='41.0' class='lbl mid a-fade' style='--d:0.15s;fill:var(--n-student)'>images</text>
+<path d='M70.0 56.0 L70.0 93.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.30s'/>
+<path d='M65.4 93.0 L70.0 100.0 L74.6 93.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.75s'/>
+<text x='70.0' y='74.0' class='lbl sm mid a-fade' style='--d:0.70s;fill:var(--n-student)'>ViT</text>
+<rect x='2' y='100' width='136' height='42' rx='9' fill='var(--n-panel-2)' stroke='var(--n-student)' stroke-width='2' class='a-pop' style='--d:0.55s'/>
+<text x='70' y='126.0' class='lbl mid a-fade' style='--d:0.70s;fill:var(--n-student)'>image embedding</text>
+<path d='M70.0 142.0 L70.0 175.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.85s'/>
+<path d='M65.4 175.0 L70.0 182.0 L74.6 175.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.30s'/>
+<rect x='248' y='16' width='104' height='40' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:0.12s'/>
+<text x='300' y='41.0' class='lbl mid a-fade' style='--d:0.27s;fill:var(--n-data)'>texts</text>
+<path d='M300.0 56.0 L300.0 93.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.42s'/>
+<path d='M295.4 93.0 L300.0 100.0 L304.6 93.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.87s'/>
+<text x='300.0' y='74.0' class='lbl sm mid a-fade' style='--d:0.82s;fill:var(--n-data)'>LLaMA</text>
+<rect x='232' y='100' width='136' height='42' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:0.67s'/>
+<text x='300' y='126.0' class='lbl mid a-fade' style='--d:0.82s;fill:var(--n-data)'>text embedding</text>
+<path d='M300.0 142.0 L300.0 175.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.97s'/>
+<path d='M295.4 175.0 L300.0 182.0 L304.6 175.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.42s'/>
+<rect x='478' y='16' width='104' height='40' rx='9' fill='var(--n-panel-2)' stroke='var(--n-teacher)' stroke-width='2' class='a-pop' style='--d:0.24s'/>
+<text x='530' y='41.0' class='lbl mid a-fade' style='--d:0.39s;fill:var(--n-teacher)'>videos</text>
+<path d='M530.0 56.0 L530.0 93.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.54s'/>
+<path d='M525.4 93.0 L530.0 100.0 L534.6 93.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.99s'/>
+<text x='530.0' y='74.0' class='lbl sm mid a-fade' style='--d:0.94s;fill:var(--n-teacher)'>CNN (3D) + FC</text>
+<rect x='462' y='100' width='136' height='42' rx='9' fill='var(--n-panel-2)' stroke='var(--n-teacher)' stroke-width='2' class='a-pop' style='--d:0.79s'/>
+<text x='530' y='126.0' class='lbl mid a-fade' style='--d:0.94s;fill:var(--n-teacher)'>video embedding</text>
+<path d='M530.0 142.0 L530.0 175.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.09s'/>
+<path d='M525.4 175.0 L530.0 182.0 L534.6 175.0' stroke='var(--n-teacher)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:1.54s'/>
+<rect x='30' y='182' width='640' height='46' rx='9' fill='var(--n-panel-2)' stroke='var(--n-lav)' stroke-width='2' class='a-wide' style='--d:1.20s'/>
+<text x='350' y='211' class='lbl mid a-fade' style='--d:1.40s;fill:var(--n-lav)'>early fusion</text>
+<path d='M350.0 228.0 L350.0 251.0' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.55s'/>
+<path d='M345.4 251.0 L350.0 258.0 L354.6 251.0' stroke='var(--n-lav)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:2.00s'/>
+<rect x='272' y='258' width='156' height='44' rx='9' fill='var(--n-panel-2)' stroke='var(--n-loss)' stroke-width='2' class='a-pop' style='--d:1.70s'/>
+<text x='350' y='285.0' class='lbl mid a-fade' style='--d:1.85s;fill:var(--n-loss)'>LLM (MoE)</text>
+<path d='M350.0 302.0 L350.0 317.0' stroke='var(--n-loss)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:1.95s'/>
+<path d='M345.4 317.0 L350.0 324.0 L354.6 317.0' stroke='var(--n-loss)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:2.40s'/>
+<text x='350' y='344' class='lbl sm mid a-fade' style='--d:2.10s'>output &#8212; text, image or video</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 8.</span> Early fusion. Three encoders, one shared embedding space, and a single backbone that sees the whole sequence at once. The alternative — encode separately, reason separately, combine the conclusions — is late fusion, and it is what "natively multi-modal" is defined against.</div>
+</div>
+
+Each modality gets its own encoder — a ViT for images, the language stack for text, a 3D CNN plus a fully-connected layer for video — and each produces embeddings in a shared space. Those are concatenated and fed into **one** backbone. Fusion happens before the model starts thinking, not after: there is no separate vision tower whose conclusions get stapled to a text model's at the end. The MoE backbone sees one sequence with pictures in it.
+
+Meta's vision encoder is based on MetaCLIP, trained separately alongside a frozen Llama so the encoder adapts to the language model rather than the other way round.
+
+## Sources
+
+- Meta, [*The Llama 4 herd*](https://ai.meta.com/blog/llama-4-multimodal-intelligence/) — Scout and Maverick specifications, iRoPE, early fusion, the MetaCLIP encoder.
+- Meta, [Llama-4-Scout-17B-16E model card](https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct) — the table in Figure 1, verbatim.
+- Nakanishi, [*Scalable-Softmax Is Superior for Attention*](https://arxiv.org/abs/2501.19399) (arXiv:2501.19399) — SSMax, the formula and the long-context results.
+- Kazemnejad et al., [*The Impact of Positional Encoding on Length Generalization in Transformers*](https://arxiv.org/abs/2305.19466) (arXiv:2305.19466) — NoPE, and why causal masking alone carries position.
+- Shazeer et al., [*Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer*](https://arxiv.org/abs/1701.06538) (arXiv:1701.06538) — where sparse MoE actually starts.
+
+<details class='scans'>
+<summary>the original pages</summary>
+<img src='/images/scratch-llama4-scan-1.jpg' alt='Handwritten notebook page 27: Llama 4 versions, long context tricks, iRoPE and the interleave diagram'>
+<div class='caption'>Page 27 — Scout against Maverick, iRoPE, temperature scaling, and the interleave diagram.</div>
+<img src='/images/scratch-llama4-scan-2.jpg' alt='Handwritten notebook page 28: SSMax formulas, the attention fading chart, and the multi-modal pipeline'>
+<div class='caption'>Page 28 — SSMax, the p-max chart, and early fusion.</div>
+</details>
