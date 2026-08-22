@@ -85,9 +85,16 @@
         paint(on, true);
         if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
         if (!api) return;
+        /* text/plain, not application/json, and deliberately so: a JSON
+           content type is not CORS-safelisted, so the browser sends an
+           OPTIONS preflight first and the POST only happens if that
+           succeeds. Everything here is a same-shaped JSON body either way --
+           the Worker parses it with request.json() regardless of the header
+           -- and this way there is no preflight to fail, and one fewer round
+           trip per click. */
         fetch(api + '/' + slug, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': 'text/plain;charset=UTF-8'},
           body: JSON.stringify({delta: on ? 1 : -1})
         }).then(function (r) { return r.json(); })
           .then(function (d) {

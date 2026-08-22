@@ -22,16 +22,21 @@ const ALLOWED_ORIGINS = [
 
 const SLUG = /^[a-z0-9][a-z0-9\-\/]{0,127}$/;
 
+function corsHeaders(origin) {
+  return {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Cache-Control': 'no-store',
+  };
+}
+
 function reply(body, status, origin) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Cache-Control': 'no-store',
-    },
+    headers: corsHeaders(origin),
   });
 }
 
@@ -43,7 +48,11 @@ export default {
       : ALLOWED_ORIGINS[0];
 
     if (request.method === 'OPTIONS') {
-      return reply({}, 204, origin);
+      // A 204 must not carry a body. Building one with a body throws in the
+      // Workers runtime, which surfaces as a 500 -- and a 500 on the
+      // preflight silently blocks every POST behind it, so likes are fetched
+      // fine and never recorded.
+      return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
     const slug = new URL(request.url).pathname.replace(/^\/+|\/+$/g, '');

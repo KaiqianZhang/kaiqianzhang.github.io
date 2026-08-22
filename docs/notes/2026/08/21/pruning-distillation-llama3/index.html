@@ -10,8 +10,8 @@
     <meta name='author' content='Kaiqian Zhang'>
 
     <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
-    <link href='/css/blog.css' rel='stylesheet'/>
-    <link href='/css/pygments.css' rel='stylesheet'/>
+    <link href='/css/blog.css?v=374b2ece' rel='stylesheet'/>
+    <link href='/css/pygments.css?v=0bba0ab0' rel='stylesheet'/>
 
     <script>
     /* Runs before anything is painted: a reader who chose the dark page must
@@ -40,10 +40,10 @@
     <script id='MathJax-script' async
             src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
     </script>
-    <link href='/css/widgets.css' rel='stylesheet'/>
-    <link href='/css/notes.css' rel='stylesheet'/>
-    <script defer src='/js/widgets.js'></script>
-    <script defer src='/js/notes.js'></script>
+    <link href='/css/widgets.css?v=2058554a' rel='stylesheet'/>
+    <link href='/css/notes.css?v=b3f75899' rel='stylesheet'/>
+    <script defer src='/js/widgets.js?v=d1676b61'></script>
+    <script defer src='/js/notes.js?v=cc1c42bf'></script>
 </head>
 <body class='notes-site notes-note'>
     <button class='theme-toggle' type='button' aria-pressed='false'
@@ -955,9 +955,16 @@ $$\mathrm{FFN}(x) = W_{\text{down}}\big[\mathrm{SiLU}(W_{\text{gate}}\,x) \odot 
         paint(on, true);
         if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
         if (!api) return;
+        /* text/plain, not application/json, and deliberately so: a JSON
+           content type is not CORS-safelisted, so the browser sends an
+           OPTIONS preflight first and the POST only happens if that
+           succeeds. Everything here is a same-shaped JSON body either way --
+           the Worker parses it with request.json() regardless of the header
+           -- and this way there is no preflight to fail, and one fewer round
+           trip per click. */
         fetch(api + '/' + slug, {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': 'text/plain;charset=UTF-8'},
           body: JSON.stringify({delta: on ? 1 : -1})
         }).then(function (r) { return r.json(); })
           .then(function (d) {

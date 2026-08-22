@@ -10,6 +10,7 @@ Only the standard library is required. If Pygments is installed, fenced code
 blocks are syntax highlighted; otherwise they are rendered as plain <pre>.
 """
 
+import hashlib
 import html
 import json
 import os
@@ -623,6 +624,8 @@ def page(config, body, page_title, description, head_extra='',
                   keywords=html.escape(config.get('keywords', '')),
                   author=html.escape(config['author']),
                   base=config['base'],
+                  blog_css=asset_url(config, '/css/blog.css'),
+                  pygments_css=asset_url(config, '/css/pygments.css'),
                   nav=nav_html(config),
                   head_extra=head_extra,
                   body=body,
@@ -655,6 +658,34 @@ def check_figures(post):
             'figure whose number moved.' % (post.slug, nums, expected))
 
 
+_ASSET_HASHES = {}
+
+
+def asset_url(config, path):
+    """A stylesheet or script URL with a content hash on it.
+
+    GitHub Pages serves everything with `max-age=600`, so without this a
+    reader keeps the old CSS for ten minutes after a change, and a hard reload
+    is the only way to see the new one. With the hash in the query string the
+    URL changes exactly when the file does: a changed file is fetched at once,
+    an unchanged one keeps being served from cache.
+
+    Hashed from the built copy in docs/, so generated files like pygments.css
+    are covered too. Called after the static tree is in place.
+    """
+    if path not in _ASSET_HASHES:
+        built = os.path.join(OUT_DIR, path.lstrip('/'))
+        try:
+            with open(built, 'rb') as f:
+                _ASSET_HASHES[path] = hashlib.sha1(f.read()).hexdigest()[:8]
+        except OSError:
+            # A missing asset is not worth failing a build over; it just goes
+            # out unhashed and behaves as it did before.
+            _ASSET_HASHES[path] = ''
+    digest = _ASSET_HASHES[path]
+    return '%s%s%s' % (config['base'], path, '?v=' + digest if digest else '')
+
+
 def section_assets(config, section):
     """Extra <head> tags a section asks for: its own stylesheet and script.
 
@@ -664,11 +695,11 @@ def section_assets(config, section):
     """
     tags = []
     for href in section['css']:
-        tags.append("    <link href='%s%s' rel='stylesheet'/>"
-                    % (config['base'], href))
+        tags.append("    <link href='%s' rel='stylesheet'/>"
+                    % asset_url(config, href))
     for src in section['js']:
-        tags.append("    <script defer src='%s%s'></script>"
-                    % (config['base'], src))
+        tags.append("    <script defer src='%s'></script>"
+                    % asset_url(config, src))
     return '\n'.join(tags)
 
 
@@ -906,6 +937,7 @@ def build():
                  author=html.escape(config['author']),
                  email=html.escape(config['email']),
                  base=config['base'],
+                 main_css=asset_url(config, '/css/main.css'),
                  links=links,
                  credit=credit_html(config, wrapped=False)))
 
