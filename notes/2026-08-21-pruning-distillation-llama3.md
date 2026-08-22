@@ -10,35 +10,54 @@ keywords: tokenizer compression ratio, pruning, distillation, KL divergence, log
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 700 266' role='img' aria-label='A braced tree of the sections in this note'>
+<svg viewBox='0 0 700 266' role='img' aria-label='A braced tree of the sections in this note, each one a link'>
 <text x='14' y='121.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-plum)'>Pruning &amp;</text>
 <text x='14' y='143.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-plum)'>Distillation</text>
 <path d='M172.0 34.0 C168.7 34.0, 168.7 130.0, 150.0 136.0 C168.7 142.0, 168.7 238.0, 172.0 238.0' fill='none' stroke='var(--n-plum)' stroke-width='2.2' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
+<a href='#tokenizer-compression-ratio' class='rm-row'>
+<rect x='178' y='16.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='30.0' r='4' fill='var(--n-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
 <text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Tokenizer compression ratio</text>
 <text x='452' y='34.0' class='lbl sm a-rise' style='--d:0.60s'>how much text one token carries</text>
+</a>
+<a href='#can-an-8k-model-read-a-10000-word-prompt' class='rm-row'>
+<rect x='178' y='50.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='64.0' r='4' fill='var(--n-teacher)' class='a-beat' style='--dur:2.2s;--d:0.58s'/>
 <text x='200' y='68.0' class='lbl a-rise' style='--d:0.58s;fill:var(--n-teacher)'>Can 8K read 10,000 words?</text>
 <text x='452' y='68.0' class='lbl sm a-rise' style='--d:0.68s'>the arithmetic, in both languages</text>
+</a>
+<a href='#pruning' class='rm-row'>
+<rect x='178' y='84.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='98.0' r='4' fill='var(--n-loss)' class='a-beat' style='--dur:2.5s;--d:0.66s'/>
 <text x='200' y='102.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-loss)'>Pruning</text>
 <text x='452' y='102.0' class='lbl sm a-rise' style='--d:0.76s'>structured, and along which axis</text>
+</a>
+<a href='#distillation' class='rm-row'>
+<rect x='178' y='118.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='132.0' r='4' fill='var(--n-kept)' class='a-beat' style='--dur:2.8s;--d:0.74s'/>
 <text x='200' y='136.0' class='lbl a-rise' style='--d:0.74s;fill:var(--n-kept)'>Distillation</text>
 <text x='452' y='136.0' class='lbl sm a-rise' style='--d:0.84s'>teacher frozen, student learning</text>
+</a>
+<a href='#the-process-end-to-end' class='rm-row'>
+<rect x='178' y='152.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='166.0' r='4' fill='var(--n-pruned)' class='a-beat' style='--dur:1.9s;--d:0.82s'/>
 <text x='200' y='170.0' class='lbl a-rise' style='--d:0.82s;fill:var(--n-pruned)'>The process, end to end</text>
 <text x='452' y='170.0' class='lbl sm a-rise' style='--d:0.92s'>the five steps</text>
+</a>
+<a href='#loss-can-be-many-things' class='rm-row'>
+<rect x='178' y='186.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='200.0' r='4' fill='var(--n-lav)' class='a-beat' style='--dur:2.2s;--d:0.90s'/>
 <text x='200' y='204.0' class='lbl a-rise' style='--d:0.90s;fill:var(--n-lav)'>Loss can be many things</text>
 <text x='452' y='204.0' class='lbl sm a-rise' style='--d:1.00s'>where a loss can attach</text>
+</a>
+<a href='#what-it-bought' class='rm-row'>
+<rect x='178' y='220.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='234.0' r='4' fill='var(--n-data)' class='a-beat' style='--dur:2.5s;--d:0.98s'/>
 <text x='200' y='238.0' class='lbl a-rise' style='--d:0.98s;fill:var(--n-data)'>What it bought</text>
 <text x='452' y='238.0' class='lbl sm a-rise' style='--d:1.08s'>the numbers NVIDIA published</text>
+</a>
 </svg>
 </div>
-
-[TOC]
 
 ## Tokenizer compression ratio
 

@@ -71,25 +71,31 @@ them.** Ask only about the things listed under *What to ask* below.
 | Categories | The fixed ten in `site.json`; pick 1–2, do not invent new ones without asking |
 | Row icon | 🍦 (`post_icon` on the section) |
 | Index epigraph | *"Learning for the sake of learning."* |
-| Note furniture | Roadmap, keywords chips, date + read-time byline, `[TOC]`, like button |
+| Note furniture | Roadmap, keywords chips, date + read-time byline, like button |
 | Front matter | `title`, `subtitle`, `date`, `tags`, `keywords` |
 
 ### The roadmap
 
-**Every note opens with one**, immediately above `[TOC]`. It is a braced tree
-of the note's own contents: the title on the left in two short lines, a brace
-out to the sections, and each section as a coloured row — a beating dot, the
-section name in its hue, and a short gloss in the right-hand column saying
-what that section is for.
+**Every note opens with one**, and it *is* the contents list — **do not also
+use `[TOC]`**, which says the same thing twice. It is a braced tree: the title
+on the left in two short lines, a brace out to the sections, and each section
+as a coloured row — a beating dot, the section name in its hue, and a short
+gloss in the right-hand column saying what that section is for.
 
+- **Every row links to its section.** Wrap the row in
+  `<a href='#anchor' class='rm-row'>`, with a transparent `<rect>` behind it so
+  the whole strip is the target and not just the glyphs. `widgets.css` styles
+  the hover and focus states.
+- **Assert the anchors.** The generator slugifies its own `##` headings and
+  checks every roadmap link resolves, so renaming a heading fails the build
+  instead of shipping a dead link. Keep that check — the anchors are derived
+  from heading text and drift silently otherwise.
 - **Do not number it as a figure.** It is wayfinding. Numbering it pushes
   every real figure along by one and `check_figures` makes you renumber every
   caption.
 - **It gets no caption.** The tree explains itself.
 - **Escape ampersands.** A bare `&` in a title makes the SVG malformed and the
   markup check will catch it; `&amp;` is what you want.
-- It sits *with* the contents list, not instead of it. `[TOC]` is the
-  clickable index; the roadmap is the shape of the thing.
 
 ### Typography, which is deliberately split
 

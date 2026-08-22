@@ -466,6 +466,19 @@
               x 0.13s linear, fill-opacity 0.2s ease, fill 0.2s ease;
 }
 
+/* A roadmap row is a link to its section, so it needs to look like one on
+   hover. The transparent rect behind each row is what makes the whole strip
+   clickable rather than only the glyphs. */
+.article .nfig.roadmap a { cursor: pointer; }
+.article .nfig.roadmap a text { transition: fill 0.15s ease; }
+.article .nfig.roadmap a:hover text { text-decoration: underline; }
+.article .nfig.roadmap a:hover rect { fill: var(--w-panel-2); }
+.article .nfig.roadmap a:focus-visible rect {
+  fill: var(--w-panel-2);
+  outline: 2px solid var(--w-violet);
+  outline-offset: 2px;
+}
+
 /* -- the takeaway flashcard -----------------------------------------------
    The last minute of a three-part post. Cards deal themselves in on entry
    and can be dealt again; each bullet is something you could say out loud. */

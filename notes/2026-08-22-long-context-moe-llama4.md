@@ -10,32 +10,48 @@ keywords: long-context tricks, iRoPE, NoPE, temperature scaling, SSMax, MoE
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 700 232' role='img' aria-label='A braced tree of the sections in this note'>
+<svg viewBox='0 0 700 232' role='img' aria-label='A braced tree of the sections in this note, each one a link'>
 <text x='14' y='104.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-plum)'>Long Context</text>
 <text x='14' y='126.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-plum)'>&amp; MoE</text>
 <path d='M172.0 34.0 C168.7 34.0, 168.7 113.0, 150.0 119.0 C168.7 125.0, 168.7 204.0, 172.0 204.0' fill='none' stroke='var(--n-plum)' stroke-width='2.2' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
+<a href='#two-versions-of-llama-4' class='rm-row'>
+<rect x='178' y='16.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='30.0' r='4' fill='var(--n-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
 <text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Two versions of LLaMA 4</text>
 <text x='452' y='34.0' class='lbl sm a-rise' style='--d:0.60s'>Scout and Maverick, side by side</text>
+</a>
+<a href='#ten-million-tokens' class='rm-row'>
+<rect x='178' y='50.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='64.0' r='4' fill='var(--n-teacher)' class='a-beat' style='--dur:2.2s;--d:0.58s'/>
 <text x='200' y='68.0' class='lbl a-rise' style='--d:0.58s;fill:var(--n-teacher)'>Ten million tokens</text>
 <text x='452' y='68.0' class='lbl sm a-rise' style='--d:0.68s'>what that is, in pages</text>
+</a>
+<a href='#irope-the-i-is-for-interleave' class='rm-row'>
+<rect x='178' y='84.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='98.0' r='4' fill='var(--n-loss)' class='a-beat' style='--dur:2.5s;--d:0.66s'/>
 <text x='200' y='102.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-loss)'>iRoPE</text>
 <text x='452' y='102.0' class='lbl sm a-rise' style='--d:0.76s'>interleave rotary layers with bare ones</text>
+</a>
+<a href='#temperature-scaling' class='rm-row'>
+<rect x='178' y='118.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='132.0' r='4' fill='var(--n-kept)' class='a-beat' style='--dur:2.8s;--d:0.74s'/>
 <text x='200' y='136.0' class='lbl a-rise' style='--d:0.74s;fill:var(--n-kept)'>Temperature scaling</text>
 <text x='452' y='136.0' class='lbl sm a-rise' style='--d:0.84s'>one divisor, and what it does</text>
+</a>
+<a href='#ssmax-and-why-attention-fades' class='rm-row'>
+<rect x='178' y='152.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='166.0' r='4' fill='var(--n-pruned)' class='a-beat' style='--dur:1.9s;--d:0.82s'/>
 <text x='200' y='170.0' class='lbl a-rise' style='--d:0.82s;fill:var(--n-pruned)'>SSMax, and attention fading</text>
 <text x='452' y='170.0' class='lbl sm a-rise' style='--d:0.92s'>why long context flattens attention</text>
+</a>
+<a href='#a-multi-modal-model' class='rm-row'>
+<rect x='178' y='186.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='200.0' r='4' fill='var(--n-lav)' class='a-beat' style='--dur:2.2s;--d:0.90s'/>
 <text x='200' y='204.0' class='lbl a-rise' style='--d:0.90s;fill:var(--n-lav)'>A multi-modal model</text>
 <text x='452' y='204.0' class='lbl sm a-rise' style='--d:1.00s'>three encoders, one backbone</text>
+</a>
 </svg>
 </div>
-
-[TOC]
 
 ## Two versions of LLaMA 4
 
