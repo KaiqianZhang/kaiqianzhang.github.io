@@ -52,6 +52,17 @@ completeness — **enough to think with, not everything there is**.
 
 - Open with the mechanism in one or two sentences, then the formula that makes
   it precise. Do not warm up.
+- **Build the chain; do not assert the result.** Assume no background. Every
+  step the reader needs must be on the page, in order, each one earning the
+  next. The first draft of the RoPE post said "rotating both and taking the
+  dot product leaves a rotation by n−m" and stopped there — true, and useless
+  to anyone who did not already know it. What was missing was the chain
+  underneath: an attention score is one number per pair of tokens; that number
+  is a dot product; **a dot product only cares about the angle between two
+  vectors**; so spin the query by its position and the key by its position,
+  and the angle between them shifts by exactly their distance. Four steps, and
+  the last one is the delight. Find that chain before writing, and check it by
+  reading the section as somebody who knows nothing.
 - **Bullets carry the load.** The facts a reader must leave with go in a
   bullet list, not buried in prose.
 - Include **the one idea that reframes the topic** — the sentence that turns a

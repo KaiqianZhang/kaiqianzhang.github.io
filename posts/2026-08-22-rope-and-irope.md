@@ -42,22 +42,29 @@ format: three-part
 
 ## Learning together
 
-Attention is a set operation: strip position out and *"the dog bit the man"*
-and *"the man bit the dog"* are the same input. **RoPE** is how almost every
-open model puts the order back, and I still think it is the prettiest idea
-in the modern transformer.
+Attention is a set operation: without position, *"the dog bit the man"* and
+*"the man bit the dog"* are the same input. **RoPE** puts the order back, and
+I still think it is the prettiest idea in the modern transformer.
 
-The trick fits in a line. Take the query and key **two coordinates at a
-time** — I will call each such pair a **band** — read each band as a point on
-a dial, and **turn that dial by an angle proportional to the token's
-position**.
+Attention works by **scoring pairs**. For every pair of tokens it computes one
+number from the first token's *query* vector and the second's *key* vector,
+and that number decides how much the first reads from the second. The number
+is a dot product.
+
+Everything turns on one fact about dot products: **they only care about the
+angle between the two vectors.** Spin both by the same amount and the score
+does not move. Open the angle between them and it falls.
+
+So take the query and key **two coordinates at a time** — I will call each
+such pair a **band** — read each band as a point on a dial, and **spin the
+query's dial by its position $m$, the key's by its position $n$**.
 
 $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 \langle R_m q,\; R_n k\rangle = \langle q,\; R_{n-m} k\rangle$$
 
-That equality is the whole design, and the one line I would keep. Rotating both and then taking the dot product
-leaves a rotation by $n-m$ — **the difference of the two positions**. Absolute
-position is injected and then deliberately cancels.
+Both dials turned, so the angle between them opened by exactly $n-m$. The
+score cannot say where either token sits — only how far apart they are.
+Absolute position goes in, and cancels itself on the way out.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -123,27 +130,22 @@ band's **wavelength** is how many tokens it takes to come full circle: band 0
 comes round every 6, band 56 every 20,000 or so. That spread is the part I
 want you to hold on to:
 
-- **Fast bands are a local ruler.** They resolve "three tokens back" sharply,
-  and wrap uselessly over long distances.
-- **Slow bands are the long-range ruler.** They are the only ones that can
-  still tell 5,000 apart from 6,000.
-- **A band is only useful if it turns at least once inside your context.**
-  Slower than that and it returns nearly the same angle for every position it
-  sees — it cannot distinguish anything.
+- **Fast bands are the local ruler, slow bands the long-range one.** Band 0
+  resolves "three tokens back" sharply and wraps uselessly beyond it; only the
+  slow bands can tell 5,000 from 6,000.
+- **A band is useless if it never turns inside your context.** It hands back
+  almost the same angle for every position it sees.
 - **So the frequency spectrum is the design surface.** Nearly every long
   context method in the literature is a decision about what to do with the
   slow end of this bank.
 
 ### Long-range decay, which was sold as a feature
 
-Here is the part I find genuinely uncomfortable. Put two tokens that really
-do match — a query and key that agree across the bands — and slide them
-apart.
-
-At distance zero every band contributes fully. As distance grows each band
-turns at its own rate, they fall out of step, and their contributions start
-cancelling. The score falls. This is **long-range decay**, which the original
-RoPE paper presents as a feature: nearby tokens naturally matter more.
+Here is the part I find uncomfortable. Take two tokens that really do match
+and slide them apart. At distance zero every band contributes fully; as the
+gap grows the bands fall out of step and start cancelling, and the score
+falls. This is **long-range decay**, which the RoPE paper presents as a
+feature: nearby tokens naturally matter more.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -174,14 +176,13 @@ RoPE paper presents as a feature: nearby tokens naturally matter more.
 <div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, from the real bank at base 10,000. It falls, then stops falling and levels out at what an unrelated pair scores.</div>
 </div>
 
-It is desirable right up until it isn't, and it took me a while to see why.
-The problem is not that the score decays; it is **what it decays to**:
+It is desirable right up until it isn't. The problem is not that the score
+decays but **what it decays to**:
 
 - An unrelated query and key do not score zero. They score around
   $1/\sqrt{d/2}$ — random phases adding up to a nonzero floor.
 - Once a matching pair reaches that floor, **the score stops carrying
-  information** — "related, 6,000 apart" and "unrelated" produce the same
-  number.
+  information**: "related, 6,000 apart" and "unrelated" give the same number.
 - Past the trained length it is worse: the curve stops falling and rattles
   around the floor, on rotation angles the model never saw.
 
@@ -212,7 +213,7 @@ vectors.
 </div>
 <div class='verdict' id='dec-verdict'></div>
 <svg viewBox='0 0 700 268' role='img'></svg>
-<p class='cap'>Computed from the real bank. Violet is a query and key that <b>agree</b>; the clay band is where an <b>unrelated</b> pair sits. Once violet is inside clay, the score says nothing about whether the two tokens match.</p>
+<p class='cap'>Computed from the real bank. Violet is a query and key that <b>agree</b>; clay is where an <b>unrelated</b> pair sits. Once violet is inside clay, the score says nothing about a match.</p>
 </div>
 </div>
 
@@ -221,14 +222,13 @@ vectors.
 The fix I did not see coming, and the one the field converged on: **in some
 layers, encode no position at all.**
 
-A layer with no positional encoding is not orderless. Causal masking already
-leaks position — a token at index 5 can see five things, one at index 5,000
-can see five thousand — and that difference is learnable. This is **NoPE**,
-it recovers is *implicit*.
+A layer with no positional encoding is not orderless. Causal masking leaks
+position — a token at index 5 sees five things, one at 5,000 sees five
+thousand — and that is learnable. This is **NoPE**; the order is *implicit*.
 
-So interleave. Most layers keep RoPE and work locally; every fourth or so gets
-nothing and carries the long range. That is **iRoPE** — *i* for interleaved —
-and it is what Llama 4 Scout uses to claim a 10M context.
+So interleave. Most layers keep RoPE and work locally; every fourth gets
+nothing and carries the long range. That is **iRoPE** — *i* for interleaved
+— what Llama 4 Scout uses to claim 10M.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
