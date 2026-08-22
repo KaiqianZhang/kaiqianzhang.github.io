@@ -9,7 +9,8 @@ format: three-part
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 326' role='img' aria-label='A braced tree of the post: three sections, each expanding into the ideas it covers'>
-<text x='14' y='189.5' class='lbl bg a-pop' style='--d:0.00s;fill:var(--w-plum)'>RoPE and iRoPE</text>
+<text x='14' y='180.5' class='lbl bg a-pop' style='--d:0.00s;fill:var(--w-plum)'>RoPE</text>
+<text x='14' y='202.5' class='lbl bg a-pop' style='--d:0.08s;fill:var(--w-plum)'>and iRoPE</text>
 <path d='M142.0 65.0 C138.7 65.0, 138.7 178.5, 120.0 184.5 C138.7 190.5, 138.7 304.0, 142.0 304.0' fill='none' stroke='var(--w-plum)' stroke-width='2.4' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
 <circle cx='152' cy='65.0' r='4' fill='var(--w-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
 <text x='164' y='70.0' class='lbl a-rise' style='--d:0.50s;fill:var(--w-student)'>① Learning together</text>
@@ -35,16 +36,16 @@ format: three-part
 <rect x='306' y='294.0' width='44' height='19' rx='9' fill='var(--w-loss)' fill-opacity='0.16' class='a-pop' style='--d:0.92s'/>
 <text x='328' y='308.0' class='lbl sm mid a-fade' style='--d:1.02s;fill:var(--w-loss)'>1 min</text>
 <path d='M366 304.0 L388 304.0' fill='none' stroke='var(--w-loss)' stroke-width='2' stroke-linecap='round' class='a-draw' style='--d:1.31s'/>
-<text x='396' y='308.0' class='lbl sm a-rise' style='--d:1.51s'>six things you could say out loud</text>
+<text x='396' y='308.0' class='lbl sm a-rise' style='--d:1.51s'>the takeaways</text>
 </svg>
 </div>
 
 ## Learning together
 
 Attention is a set operation: strip position out and *"the dog bit the man"*
-and *"the man bit the dog"* are the same input. **RoPE** — rotary position
-embedding — is how almost every open model puts the order back, and I still
-think it is the prettiest idea in the modern transformer.
+and *"the man bit the dog"* are the same input. **RoPE** is how almost every
+open model puts the order back, and I still think it is the prettiest idea
+in the modern transformer.
 
 The trick fits in a line. Take the query and key **two coordinates at a
 time** — I will call each such pair a **band** — read each band as a point on
@@ -54,8 +55,7 @@ position**.
 $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 \langle R_m q,\; R_n k\rangle = \langle q,\; R_{n-m} k\rangle$$
 
-That equality is the whole design, and if you remember one line from me, I
-would like it to be this one. Rotating both and then taking the dot product
+That equality is the whole design, and the one line I would keep. Rotating both and then taking the dot product
 leaves a rotation by $n-m$ — **the difference of the two positions**. Absolute
 position is injected and then deliberately cancels.
 
@@ -113,13 +113,15 @@ position is injected and then deliberately cancels.
 <div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, turning at rates proportional to their real wavelengths. Both arrows rotate with position; the wedge between them never changes. I stopped at band 24 because band 56 turns three thousand times slower, and no animation shows that honestly.</div>
 </div>
 
-A head does not run one dial. It runs one per band, $d/2$ in all, at angles
+A head does not run one dial. It runs one per band, $d/2$ in all, where $d$
+is the head's dimension, at angles
 
 $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 
-which for the usual base of 10,000 spans **four orders of magnitude**. Band 0
-completes a turn every 6 tokens; band 56 takes about 20,000. That spread is
-the part I want you to hold on to:
+which for the usual base of 10,000 spans **four orders of magnitude**. A
+band's **wavelength** is how many tokens it takes to come full circle: band 0
+comes round every 6, band 56 every 20,000 or so. That spread is the part I
+want you to hold on to:
 
 - **Fast bands are a local ruler.** They resolve "three tokens back" sharply,
   and wrap uselessly over long distances.
@@ -169,7 +171,7 @@ RoPE paper presents as a feature: nearby tokens naturally matter more.
 <text x='571.6' y='110.8' class='lbl sm a-fade' style='--d:3.00s;fill:var(--w-loss)'>past here it is not</text>
 <text x='571.6' y='126.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--w-loss)'>decaying, it is rattling</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, computed from the real bank at base 10,000. It falls — that is the long-range decay — then stops falling and levels out at what an unrelated pair scores.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, from the real bank at base 10,000. It falls, then stops falling and levels out at what an unrelated pair scores.</div>
 </div>
 
 It is desirable right up until it isn't, and it took me a while to see why.
@@ -177,16 +179,14 @@ The problem is not that the score decays; it is **what it decays to**:
 
 - An unrelated query and key do not score zero. They score around
   $1/\sqrt{d/2}$ — random phases adding up to a nonzero floor.
-- Once a matching pair has decayed to that floor, **the score no longer
-  carries information**. "These two tokens belong together, 6,000 apart" and
-  "these two have nothing to do with each other" produce the same number.
-- Past the trained length it is worse than decay. The curve stops falling and
-  starts oscillating around the floor, because the model has never seen those
-  rotation angles and has no reason to behave smoothly there.
+- Once a matching pair reaches that floor, **the score stops carrying
+  information** — "related, 6,000 apart" and "unrelated" produce the same
+  number.
+- Past the trained length it is worse: the curve stops falling and rattles
+  around the floor, on rotation angles the model never saw.
 
-That, to me, is the ceiling — not an implementation bug but the geometry of
-adding up rotating vectors, and why a model trained at 8K does not merely get *worse* at
-100K but stops discriminating at all.
+That is the ceiling: not a bug but the geometry of adding up rotating
+vectors.
 
 <div class='lab wide' id='decay-lab'>
 <div class='lab-head'><span class='name'>Lab 1 · how far RoPE can still see</span><span class='hint'>raise the base and watch the usable range move</span></div>
@@ -224,8 +224,7 @@ layers, encode no position at all.**
 A layer with no positional encoding is not orderless. Causal masking already
 leaks position — a token at index 5 can see five things, one at index 5,000
 can see five thousand — and that difference is learnable. This is **NoPE**,
-and the order it recovers is *implicit*. Crucially, **nothing in it decays
-with distance**, because nothing in it depends on distance.
+it recovers is *implicit*.
 
 So interleave. Most layers keep RoPE and work locally; every fourth or so gets
 nothing and carries the long range. That is **iRoPE** — *i* for interleaved —
@@ -293,8 +292,16 @@ and it is what Llama 4 Scout uses to claim a 10M context.
 <rect x='300' y='272' width='12' height='12' rx='3' fill='var(--w-teacher)' fill-opacity='0.85'/>
 <text x='318' y='282' class='lbl sm'>NoPE &#8212; global, order inferred from the causal mask alone</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 3.</span> The interleave. Most layers carry rotary position and work locally; every fourth carries none, and has no distance-dependent term left to decay.</div>
+<div class='caption'><span class='caption-label'>Figure 3.</span> The interleave. Most layers carry rotary position and work locally; every fourth carries none, so nothing in it decays.</div>
 </div>
+
+### What to carry into the next part
+
+- **Position enters as a rotation and then cancels.** Attention only ever sees $n-m$.
+- **A head is a bank of bands**, whose wavelengths span four orders of magnitude.
+- **Fast bands are the local ruler; slow bands are the only long-range one.**
+- **A matching pair decays to the score an unrelated pair gets** — that is the ceiling, and it is geometry, not a bug.
+- **A NoPE layer has nothing that decays**, because nothing in it depends on distance.
 
 ## Inspire together
 
@@ -304,19 +311,20 @@ bands.**
 **Stretch them.**
 
 - **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — divide every position index by the stretch factor. Uniform, so it blunts the fast bands too.
-- **NTK-aware scaling** — raise the base: slow bands stretch a lot, fast bands barely. Community-invented, never published, universally used.
+- **NTK-aware scaling** — raise the base: slow bands stretch a lot, fast bands barely. Never formally published, universally used.
 - **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) — NTK-by-parts: leave bands that already turn often alone, fully interpolate the ones that barely turn, ramp between. Plus attention temperature $t = 0.1\ln s + 1$. Llama 3.1 uses this.
-- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the per-band rescaling rather than deriving it.
+- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the rescaling rather than deriving it.
 
 **Raise the base.**
 
 - **Base of RoPE Bounds Context Length** ([Men et al., NeurIPS 2024](https://arxiv.org/abs/2405.14591)) — the sharpest result here: for a target length there is a **lower bound** on the base, below which a model can only *look* like it handles long context. Llama 3's 500,000 is this in production.
 
+
 **Delete position in some layers.**
 
 - **NoPE** ([Kazemnejad et al., NeurIPS 2023](https://arxiv.org/abs/2305.19466)) — decoder-only transformers length-generalise *better* with no positional encoding at all.
-- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) — interleaves the two and shows why it works: retrieval concentrates in the NoPE layers, with a spike of attention mass on the target span.
-- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) — NoPE interleaved with sliding-window RoPE; an existing model can be **converted** with modest retraining.
+- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) — interleaves the two and shows why: retrieval concentrates in the NoPE layers, with a spike of attention mass on the target span.
+- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) — NoPE interleaved with sliding-window RoPE; an existing model can be **converted** cheaply.
 - **iRoPE** ([Meta, Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/)) — the same shape at scale.
 
 <div class='nfig wide'>
@@ -605,24 +613,31 @@ bands.**
 
 **Stop treating heads alike.**
 
-- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) — learnable per-head frequencies and attention scaling, on the finding that heads with different jobs want different frequency ranges. Beats partial-RoPE, NoPE and YaRN.
+- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) — learnable per-head frequencies and attention scaling, on the finding that heads with different jobs want different frequency ranges.
 
 **Or: the approach may be wrong.**
 
-- **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance. And the base **trades distinguishing positions against distinguishing tokens, and cannot keep both.**
-- **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — across OLMo-2, Qwen, Llama and Gemma: masking OLMo-2's 87 retrieval heads drops recall from 1.00 to 0.00, and zeroing only the 32 lowest-frequency RoPE dimensions inside them drops it to 0.18. The long-range machinery lives in exactly the bands that break first.
+- **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance. And the base **trades distinguishing positions against distinguishing tokens.**
+- **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — retrieval heads being the few that copy a token from far earlier in the context. Across OLMo-2, Qwen, Llama and Gemma: masking OLMo-2's 87 of them drops recall from 1.00 to 0.00, and zeroing only the 32 lowest-frequency RoPE dimensions inside them drops it to 0.18. The long-range machinery lives in exactly the bands that break first.
 - **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the share of obtuse angles between query and key sub-vectors, predicts it: above ~50% the score fluctuates instead of decaying, and long-context post-training mostly works by *lowering* it.
 
 ### Where this could go
 
 Each sits in a gap between two papers above, and I would happily take any.
 
-- **Give the slow bands to the heads measured to need them.** AdaRoPE *learns* per-head frequencies; the retrieval-head work *identifies* which heads do the long-range copying. Join them — allocate by measurement, not gradient. The detector exists.
-- **Make POCP an objective, not a diagnostic.** It predicts decay failure before the loss does, and post-training already lowers it by accident.
+- **Give the slow bands to the heads measured to need them.** AdaRoPE
+*learns* per-head frequencies; the retrieval-head work *identifies* which
+heads do the long-range copying. Join them — allocate by measurement, not
+gradient.
+- **Make POCP an objective, not a diagnostic.** It predicts decay failure
+before the loss does, and post-training already lowers it by accident.
 
 - **Derive the interleave ratio.** RNoPE, SWAN-GPT and iRoPE all pick "every fourth layer" by hand. Predict the right NoPE fraction from POCP or a head census and a hyperparameter becomes a measurement.
 - **Test whether SSMax and NoPE are redundant.** Same symptom, opposite ends, and Llama 4 ships both. If SSMax cuts how many NoPE layers you need, nobody has measured it.
-- **Build the benchmark the negative result implies.** Du et al. prove *two* failures — position and token indistinguishability. Needle-in-a-haystack conflates them, and saturates.
+
+- **Build the benchmark the negative result implies.** Du et al. prove *two*
+failures — position and token indistinguishability. Needle-in-a-haystack
+conflates them.
 
 <div class='lab wide' id='spec-lab'>
 <div class='lab-head'><span class='name'>Lab 2 · the four ways to stretch a context</span><span class='hint'>pick a method, then stretch it and read both costs</span></div>
@@ -660,7 +675,7 @@ Each sits in a gap between two papers above, and I would happily take any.
 ## Chat together
 
 <div class='flashcard'>
-<div class='fc-head'><span class='name'>The takeaways</span><span class='hint'>six things you could say out loud</span><button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>deal again</button></div>
+<div class='fc-head'><span class='name'>The takeaways</span><button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>deal again</button></div>
 <div class='fc-body'>
 <div class='card' style='--d:0.08s'><span class='q'>what RoPE does</span><span class='a'>Turns each pair of dimensions by an angle proportional to position. The rotation cancels in the dot product, so attention only sees the <em>difference</em> of two positions.</span></div>
 <div class='card' style='--d:0.21s'><span class='q'>what long-range decay is</span><span class='a'>A head is a bank of dials at different speeds. Two matching tokens start in phase; as they separate the dials fall out of step and cancel, so the score decays with distance.</span></div>

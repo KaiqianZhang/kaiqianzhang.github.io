@@ -487,7 +487,13 @@
   background: var(--w-violet);
   color: var(--w-on-fill);
 }
-.article .flashcard > .fc-head .name { font-size: 15px; letter-spacing: 0.04em; }
+/* The name takes the slack now that there is no hint beside it, so the
+   control still lands hard against the right edge. */
+.article .flashcard > .fc-head .name {
+  flex: 1;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
 /* The hint takes the slack so the control lands hard against the right edge
    instead of on top of the hint, which is what an absolutely positioned
    replay button did here. */

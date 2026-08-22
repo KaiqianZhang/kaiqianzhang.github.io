@@ -17,7 +17,7 @@ The work is deciding what goes inside the three parts, not what the parts are.
 
 | `##` heading | Budget | What it does |
 |---|---|---|
-| **Learning together** | ≤ 5 min | Teach the essence. Bullets for what matters. Leave the reader able to think about research. |
+| **Learning together** | ≤ 5 min | Teach the essence. Bullets for what matters. Ends with a bulleted recap. |
 | **Inspire together** | 3–4 min | The frontier: real papers, what people are doing up to today, then concrete directions. |
 | **Chat together** | ≤ 1 min | An animated flashcard of takeaways, in the words you would use with a friend. |
 
@@ -60,6 +60,14 @@ completeness — **enough to think with, not everything there is**.
   decision about the slow bands."* Find that sentence. It is what makes ②
   legible and what lets a reader invent something rather than just recall it.
 - **At least two animations and at least one interactive.**
+- **Close with a bulleted recap** under `### What to carry into the next part`
+  — four or five lines, each a single claim, no new material. It is the hinge
+  into the frontier: a reader who skips straight to ② should still be able to
+  follow it from these lines alone.
+
+  Write the recap *before* the final trim, then use it to find what the prose
+  no longer has to say. In the RoPE post it made a whole closing paragraph and
+  two bullets redundant, which is most of what paid for it.
 
 ### ② Inspire together
 
