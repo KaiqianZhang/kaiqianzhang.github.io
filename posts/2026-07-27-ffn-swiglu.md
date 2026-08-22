@@ -2,7 +2,7 @@
 title: FFN-SwiGLU
 subtitle: The feed-forward layer holds most of a transformer's parameters, and the field demoted its activation to a gate that nobody can explain.
 date: 2026-07-27
-tags: llm
+tags: foundations
 icon: 🍵
 length: long
 draft: true

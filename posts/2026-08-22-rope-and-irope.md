@@ -2,7 +2,7 @@
 title: RoPE and iRoPE
 subtitle: Position becomes an angle, the angle decays, and the fix everyone converged on is to stop encoding position in some layers altogether.
 date: 2026-08-22
-tags: llm
+tags: foundations
 format: three-part
 ---
 

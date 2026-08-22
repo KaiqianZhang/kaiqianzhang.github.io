@@ -2,7 +2,7 @@
 title: Attention
 subtitle: How a model lets each word look at the others, and why the formula divides by a square root.
 date: 2026-06-24
-tags: llm
+tags: foundations
 icon: 🍵
 draft: true
 ---

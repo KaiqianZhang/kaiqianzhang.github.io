@@ -2,7 +2,7 @@
 title: "My Mindmap of LLMs: Past Lives and Present"
 subtitle: Every idea a transformer replaced was itself a fix for the thing before it, and the whole chain is one argument about how to represent a word.
 date: 2026-06-16
-tags: llm
+tags: foundations
 icon: 🍵
 length: long
 draft: true

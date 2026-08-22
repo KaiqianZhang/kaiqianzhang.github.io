@@ -2,7 +2,7 @@
 title: RMSNorm vs. LayerNorm
 subtitle: Modern language models deleted one step from the operation that normalizes them, and the deleted step turns out to have been doing almost nothing.
 date: 2026-07-10
-tags: llm
+tags: foundations
 icon: 🍵
 length: long
 draft: true

@@ -49,8 +49,44 @@
   ],
   "tags": [
     {
-      "slug": "llm",
-      "name": "Foundations for LLM"
+      "slug": "foundations",
+      "name": "Foundations of LLM"
+    },
+    {
+      "slug": "pre-training",
+      "name": "Pre-Training"
+    },
+    {
+      "slug": "mid-training",
+      "name": "Mid-Training"
+    },
+    {
+      "slug": "sft",
+      "name": "SFT"
+    },
+    {
+      "slug": "model-merging",
+      "name": "Model Merging"
+    },
+    {
+      "slug": "rl",
+      "name": "Reinforcement Learning"
+    },
+    {
+      "slug": "dpo",
+      "name": "DPO"
+    },
+    {
+      "slug": "post-training",
+      "name": "Post-Training"
+    },
+    {
+      "slug": "agent",
+      "name": "Agent"
+    },
+    {
+      "slug": "agentic-rl",
+      "name": "Agentic RL"
     },
     {
       "slug": "uncat",

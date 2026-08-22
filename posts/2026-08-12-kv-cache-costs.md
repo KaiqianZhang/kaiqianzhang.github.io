@@ -2,7 +2,7 @@
 title: What the KV Cache Costs
 subtitle: The buffer that makes generation affordable is the reason serving a language model is hard.
 date: 2026-08-12
-tags: llm
+tags: foundations
 icon: 🍵
 draft: true
 ---
