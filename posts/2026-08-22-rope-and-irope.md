@@ -51,9 +51,9 @@ number from the first token's *query* vector and the second's *key* vector,
 and that number decides how much the first reads from the second. The number
 is a dot product.
 
-Everything turns on one fact about dot products: **they only care about the
-angle between the two vectors.** Spin both by the same amount and the score
-does not move. Open the angle between them and it falls.
+Everything turns on one fact I wish I had been told sooner: **a dot product
+only cares about the angle between the two vectors.** Spin both by the same
+amount and the score does not move. Open the angle and it falls.
 
 So take the query and key **two coordinates at a time** — I will call each
 such pair a **band** — read each band as a point on a dial, and **spin the
@@ -117,7 +117,7 @@ Absolute position goes in, and cancels itself on the way out.
 <rect x='122' y='284' width='18' height='12' rx='3' fill='var(--w-loss)' fill-opacity='0.35'/>
 <text x='146' y='294' class='lbl sm' style='fill:var(--w-loss)'>the gap that survives the dot product</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, turning at rates proportional to their real wavelengths. Both arrows rotate with position; the wedge between them never changes. I stopped at band 24 because band 56 turns three thousand times slower, and no animation shows that honestly.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, turning at rates proportional to their real wavelengths. Both arrows rotate with position; the wedge between them never changes. I stopped at band 24 because band 56 turns three thousand times slower.</div>
 </div>
 
 A head does not run one dial. It runs one per band, $d/2$ in all, where $d$
@@ -310,22 +310,28 @@ bands.**
 
 **Stretch them.**
 
-- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — divide every position index by the stretch factor. Uniform, so it blunts the fast bands too.
-- **NTK-aware scaling** — raise the base: slow bands stretch a lot, fast bands barely. Never formally published, universally used.
-- **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) — NTK-by-parts: leave bands that already turn often alone, fully interpolate the ones that barely turn, ramp between. Plus attention temperature $t = 0.1\ln s + 1$. Llama 3.1 uses this.
+The first instinct was to squeeze: if a model only saw positions up to 4,096,
+map 32,768 down into that range and nothing is unfamiliar. It works, and pays
+for safety in the wrong currency.
+
+- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — the clean version, and the one that shows the bill: the fast local bands slow down too.
+- **NTK-aware scaling** — the community's answer, never published, used everywhere. Raise the base: the slow end stretches, the fast end barely moves.
+- **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) — the one that actually ships. Fast bands untouched, slow ones interpolated, a ramp between, plus a softmax warmed by $t = 0.1\ln s + 1$. Llama 3.1 uses it, the strongest endorsement here.
 - **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the rescaling rather than deriving it.
 
-**Raise the base.**
+**Raise the base.** If you read one paper here, I would make it this one.
 
-- **Base of RoPE Bounds Context Length** ([Men et al., NeurIPS 2024](https://arxiv.org/abs/2405.14591)) — the sharpest result here: for a target length there is a **lower bound** on the base, below which a model can only *look* like it handles long context. Llama 3's 500,000 is this in production.
-
+- **Base of RoPE Bounds Context Length** ([Men et al., NeurIPS 2024](https://arxiv.org/abs/2405.14591)) — for a target length there is a **lower bound** on the base, below which a model can only *look* like it handles long context. Llama 3's 500,000 is this in production.
 
 **Delete position in some layers.**
 
+Then people asked the question I would never have thought to ask: what if
+some layers are simply not told where anything is?
+
 - **NoPE** ([Kazemnejad et al., NeurIPS 2023](https://arxiv.org/abs/2305.19466)) — decoder-only transformers length-generalise *better* with no positional encoding at all.
-- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) — interleaves the two and shows why: retrieval concentrates in the NoPE layers, with a spike of attention mass on the target span.
-- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) — NoPE interleaved with sliding-window RoPE; an existing model can be **converted** cheaply.
-- **iRoPE** ([Meta, Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/)) — the same shape at scale.
+- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) — interleaves the two and shows why: retrieval concentrates in the NoPE layers.
+- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) — same shape plus sliding windows; an existing model converts cheaply.
+- **iRoPE** ([Meta, Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/)) — shipped at scale.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -604,40 +610,35 @@ bands.**
 <text x='607.2' y='54' class='lbl sm mid'>10,000,000</text>
 <text x='16' y='312' class='lbl sm'>log scale &#8212; what matters is which end of the bank each method moves</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> The same bank under each family of fix. Interpolation slides everything right, blunting the fast bands; raising the base stretches the slow end much more; YaRN moves only the slow end; NoPE removes the bank.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> The same bank under each family of fix. Interpolation slides everything right; raising the base moves the slow end far more; YaRN moves only the slow end; NoPE removes it.</div>
 </div>
 
-**Fix the softmax instead.**
+**Fix the softmax instead.** Everything above moves the encoding; this leaves
+it alone and goes after the other end.
 
-- **Scalable-Softmax** ([Nakanishi, 2025](https://arxiv.org/abs/2501.19399)) — as $n$ grows, softmax's largest attainable weight shrinks and attention flattens. SSMax scales logits by $s\log n$ to cancel it.
+- **Scalable-Softmax** ([Nakanishi, 2025](https://arxiv.org/abs/2501.19399)) — as $n$ grows, softmax's largest attainable weight shrinks. SSMax scales logits by $s\log n$ to cancel it.
 
-**Stop treating heads alike.**
+**Stop treating heads alike.** The assumption nobody was questioning: that one
+frequency schedule suits every head.
 
-- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) — learnable per-head frequencies and attention scaling, on the finding that heads with different jobs want different frequency ranges.
+- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) — learnable per-head frequencies and scaling: heads with different jobs want different ranges.
 
-**Or: the approach may be wrong.**
+**Or: the approach may be wrong.** These are the ones that unsettled me.
 
-- **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance. And the base **trades distinguishing positions against distinguishing tokens.**
-- **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — retrieval heads being the few that copy a token from far earlier in the context. Across OLMo-2, Qwen, Llama and Gemma: masking OLMo-2's 87 of them drops recall from 1.00 to 0.00, and zeroing only the 32 lowest-frequency RoPE dimensions inside them drops it to 0.18. The long-range machinery lives in exactly the bands that break first.
-- **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the share of obtuse angles between query and key sub-vectors, predicts it: above ~50% the score fluctuates instead of decaying, and long-context post-training mostly works by *lowering* it.
+- **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance; and the base **trades distinguishing positions against distinguishing tokens.**
+- **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — the few heads that copy from far earlier. Mask OLMo-2's 87 and recall goes 1.00 → 0.00; zero their 32 slowest dimensions and it drops to 0.18.
+- **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the share of obtuse angles between query and key sub-vectors: above ~50% the score fluctuates rather than decays.
 
 ### Where this could go
 
-Each sits in a gap between two papers above, and I would happily take any.
+Each sits in a gap between two papers above, and I would take any of them.
 
-- **Give the slow bands to the heads measured to need them.** AdaRoPE
-*learns* per-head frequencies; the retrieval-head work *identifies* which
-heads do the long-range copying. Join them — allocate by measurement, not
-gradient.
-- **Make POCP an objective, not a diagnostic.** It predicts decay failure
-before the loss does, and post-training already lowers it by accident.
+- **Give the slow bands to the heads that need them.** AdaRoPE *learns* per-head frequencies; the retrieval-head work *identifies* which heads do the copying. Nobody has joined them.
+- **Make POCP an objective, not a diagnostic.** It predicts decay failure before the loss shows it.
+- **Derive the interleave ratio.** RNoPE, SWAN-GPT and iRoPE all pick "every fourth layer" by hand. Predict it from POCP or a head census.
+- **Test whether SSMax and NoPE are redundant.** Same symptom, opposite ends, and Llama 4 ships both.
+- **Build the benchmark the negative result implies.** Du et al. prove *two* failures; needle-in-a-haystack conflates them.
 
-- **Derive the interleave ratio.** RNoPE, SWAN-GPT and iRoPE all pick "every fourth layer" by hand. Predict the right NoPE fraction from POCP or a head census and a hyperparameter becomes a measurement.
-- **Test whether SSMax and NoPE are redundant.** Same symptom, opposite ends, and Llama 4 ships both. If SSMax cuts how many NoPE layers you need, nobody has measured it.
-
-- **Build the benchmark the negative result implies.** Du et al. prove *two*
-failures — position and token indistinguishability. Needle-in-a-haystack
-conflates them.
 
 <div class='lab wide' id='spec-lab'>
 <div class='lab-head'><span class='name'>Lab 2 · the four ways to stretch a context</span><span class='hint'>pick a method, then stretch it and read both costs</span></div>
@@ -668,7 +669,7 @@ conflates them.
 </div>
 <div class='verdict' id='spec-verdict'></div>
 <svg viewBox='0 0 700 210' role='img'></svg>
-<p class='cap'>Two costs. <b>Vertical</b>: how far past its trained angles each band is pushed — 1× means it never meets an unfamiliar one. <b>Local ruler</b>: resolution the fastest band gave up. PI buys safety with resolution; NTK and YaRN get both.</p>
+<p class='cap'>Two costs, and every method trades between them: how far past its trained angles a band is pushed, and what the fastest band gave up. PI buys one with the other; NTK and YaRN get both.</p>
 </div>
 </div>
 
@@ -679,9 +680,9 @@ conflates them.
 <div class='fc-body'>
 <div class='card' style='--d:0.08s'><span class='q'>what RoPE does</span><span class='a'>Turns each pair of dimensions by an angle proportional to position. The rotation cancels in the dot product, so attention only sees the <em>difference</em> of two positions.</span></div>
 <div class='card' style='--d:0.21s'><span class='q'>what long-range decay is</span><span class='a'>A head is a bank of dials at different speeds. Two matching tokens start in phase; as they separate the dials fall out of step and cancel, so the score decays with distance.</span></div>
-<div class='card' style='--d:0.34s'><span class='q'>why that is a ceiling</span><span class='a'>It decays <em>to the score an unrelated pair gets</em>. Past that point "related, far apart" and "unrelated" are the same number.</span></div>
-<div class='card' style='--d:0.47s'><span class='q'>the one design surface</span><span class='a'>Every fix is a decision about the slow bands: interpolate them, stretch them unevenly, raise the base, or delete them. That is the whole literature.</span></div>
-<div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>Interleave. Most layers keep RoPE; every fourth gets none and infers order from the causal mask. Cohere and NVIDIA published the shape; Llama 4 ships it.</span></div>
-<div class='card' style='--d:0.73s'><span class='q'>what to argue about</span><span class='a'>A 2026 proof says the base trades position-discrimination against token-discrimination and cannot keep both. If it holds, rescaling never saves RoPE.</span></div>
+<div class='card' style='--d:0.34s'><span class='q'>why that is a ceiling</span><span class='a'>It decays <em>to the score an unrelated pair gets</em> — past which "related, far apart" and "unrelated" are one number.</span></div>
+<div class='card' style='--d:0.47s'><span class='q'>the one design surface</span><span class='a'>Every fix is a decision about the slow bands: interpolate them, stretch them unevenly, raise the base, or delete them. That is the whole literature as I read it.</span></div>
+<div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>Interleave. Most layers keep RoPE; every fourth gets none and infers order from the causal mask. Cohere and NVIDIA published it; Llama 4 ships it.</span></div>
+<div class='card' style='--d:0.73s'><span class='q'>what to argue about</span><span class='a'>A 2026 proof says the base trades position-discrimination against token-discrimination and cannot keep both. If it holds, rescaling never I do not think rescaling ever saves RoPE.</span></div>
 </div>
 </div>

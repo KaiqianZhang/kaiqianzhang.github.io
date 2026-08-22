@@ -86,7 +86,24 @@ The most important part of the post, and the one to spend research effort on.
 It must be **verified, insightful, and current to the day it is written**.
 
 - Group the work by *what it does*, not chronologically. Each group gets a
-  short bold header and bullets.
+  short bold header.
+- **Every group opens with a bridge**: one or two sentences, in first person,
+  saying why anyone tried this and what it cost. Bullets alone are clear and
+  read like a related-work section — nothing in a bare list explains why the
+  next idea happened, and no sentence has a person behind it. The bridge is
+  what makes the section writing rather than a bibliography.
+
+  *"The first instinct was to squeeze: if a model only saw positions up to
+  4,096, map 32,768 down into that range and nothing is unfamiliar. It works,
+  and pays for safety in the wrong currency."*
+
+  Bridges are not free, and they should not be. Let them carry the *why* and
+  then cut the same amount out of the bullets, which no longer have to explain
+  themselves. A single-bullet group can put its bridge on the header line.
+- **Bullets carry judgment, not just description.** Say which one actually
+  gets used, which result is sharpest, which you would read first — each tied
+  to evidence already in the bullet: adoption, a venue, a number. *"the one
+  that actually ships … Llama 3.1 uses it, the strongest endorsement here."*
 - Every bullet: **name, link to the actual paper, and what it actually
   claims.** Numbers where there are numbers.
 - **Search for current work every time.** Training data is stale by
@@ -108,6 +125,26 @@ One minute. A `.flashcard` holding about six cards, each a question-shaped
 label and an answer you could say out loud. It deals itself in on scroll and
 has a *deal again* control. Keep each card to roughly 30 words — the section
 has about 220 to spend.
+
+## Voice
+
+**Write in first person.** These are one person explaining something they find
+interesting, not a survey with the author sanded off. Aim for a dozen or more
+`I`s across ten minutes, and put them where they carry weight rather than
+sprinkling them:
+
+- the opening claim — *"I still think it is the prettiest idea in the modern
+  transformer"*
+- the place the topic gets uncomfortable — *"here is the part I find
+  uncomfortable"*
+- what surprised you — *"the fix I did not see coming"*
+- judgments in ② — *"if you read one paper here, I would make it this one"*
+- limits you chose — *"I stopped at band 24 because band 56 turns three
+  thousand times slower"*
+
+An `I` that replaces an impersonal construction usually costs nothing, which
+matters because the budget is tight. An `I` that adds a clause has to be paid
+for like anything else.
 
 ## Figures and interactives
 
