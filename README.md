@@ -104,6 +104,47 @@ For a bordered, captioned figure, drop in raw HTML:
 Images live in `static/images/` and are referenced from the site root as
 `/images/...`.
 
+## Sections
+
+The site has two independent listings, `blog/` and `notes/` ("Scratch Notes"),
+declared by the `sections` array in `site.json`:
+
+```json
+{ "path": "notes", "name": "Scratch Notes", "dir": "notes",
+  "body_class": "notes-site", "post_body_class": "notes-note",
+  "post_icon": "\ud83c\udf66", "all_label": "All scratch notes",
+  "css": ["/css/notes.css"], "js": ["/js/notes.js"],
+  "quote": { "text": "Learning for the sake of learning." },
+  "tags": [ ... ] }
+```
+
+Each section gets its own content directory, index at `/<path>/`, category
+pages at `/<path>/tags/<slug>/`, and post URLs `/<path>/YYYY/MM/DD/slug/`.
+Anything a section leaves out falls back to the matching top-level key, so a
+site with only a blog needs no `sections` array at all.
+
+- `body_class` goes on every page of the section; `post_body_class` goes only
+  on the individual posts. Scratch Notes uses the split so the notes
+  themselves are set in Excalifont while the index and category listings keep
+  the site's normal face.
+- `css` and `js` are extra `<head>` links, emitted for that section only.
+- Only the first section gets an RSS feed.
+
+Notes take one extra front-matter field, rendered as coloured chips under the
+title and under each row of the listing:
+
+```markdown
+keywords: tokenizer compression ratio, pruning, distillation
+```
+
+`static/css/notes.css` carries the notes palette (roles, not shades:
+`--n-teacher`, `--n-student`, `--n-loss`, `--n-pruned`, `--n-kept`,
+`--n-data`) and a set of `a-*` animation primitives. A figure is a `.nfig`
+holding inline SVG; it starts paused and plays when scrolled into view, and
+`static/js/notes.js` measures path lengths for `a-draw` and drives the four
+interactive `.lab` widgets. Both honour `prefers-reduced-motion` by landing on
+the finished drawing.
+
 ## Configuration
 
 Everything user-facing is in `site.json`:

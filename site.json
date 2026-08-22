@@ -16,16 +16,114 @@
     "link": ""
   },
   "links": [
-    { "name": "Blog", "url": "/blog/" },
-    { "name": "Code", "url": "https://github.com/KaiqianZhang" }
+    {
+      "name": "Scratch Notes",
+      "url": "/notes/"
+    },
+    {
+      "name": "Blog",
+      "url": "/blog/"
+    },
+    {
+      "name": "Code",
+      "url": "https://github.com/KaiqianZhang"
+    }
   ],
   "nav": [
-    { "name": "Home", "url": "/" },
-    { "name": "Blog", "url": "/blog/" },
-    { "name": "RSS", "url": "/feed.xml" }
+    {
+      "name": "Home",
+      "url": "/"
+    },
+    {
+      "name": "Blog",
+      "url": "/blog/"
+    },
+    {
+      "name": "Scratch Notes",
+      "url": "/notes/"
+    },
+    {
+      "name": "RSS",
+      "url": "/feed.xml"
+    }
   ],
   "tags": [
-    { "slug": "llm", "name": "Foundations for LLM" },
-    { "slug": "uncat", "name": "Uncategorized" }
+    {
+      "slug": "llm",
+      "name": "Foundations for LLM"
+    },
+    {
+      "slug": "uncat",
+      "name": "Uncategorized"
+    }
+  ],
+  "sections": [
+    {
+      "path": "blog",
+      "name": "Blog",
+      "dir": "posts"
+    },
+    {
+      "path": "notes",
+      "name": "Scratch Notes",
+      "dir": "notes",
+      "body_class": "notes-site",
+      "all_label": "All scratch notes",
+      "post_icon": "🍦",
+      "css": [
+        "/css/notes.css"
+      ],
+      "js": [
+        "/js/notes.js"
+      ],
+      "quote": {
+        "text": "Learning for the sake of learning.",
+        "author": "",
+        "link": ""
+      },
+      "tags": [
+        {
+          "slug": "foundations",
+          "name": "Foundations of LLM"
+        },
+        {
+          "slug": "pre-training",
+          "name": "Pre-Training"
+        },
+        {
+          "slug": "mid-training",
+          "name": "Mid-Training"
+        },
+        {
+          "slug": "sft",
+          "name": "SFT"
+        },
+        {
+          "slug": "model-merging",
+          "name": "Model Merging"
+        },
+        {
+          "slug": "rl",
+          "name": "Reinforcement Learning"
+        },
+        {
+          "slug": "dpo",
+          "name": "DPO"
+        },
+        {
+          "slug": "post-training",
+          "name": "Post-Training"
+        },
+        {
+          "slug": "agent",
+          "name": "Agent"
+        },
+        {
+          "slug": "agentic-rl",
+          "name": "Agentic RL"
+        }
+      ],
+      "post_body_class": "notes-note"
+    }
   ]
 }

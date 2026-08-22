@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="{{ lang }}">
+<html lang="en">
 <head>
-    <title>{{ page_title }}</title>
+    <title>Agentic RL | Kaiqian Zhang</title>
     <meta charset='UTF-8'>
     <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
-    <meta name='description' content='{{ description }}'>
-    <meta name='keywords' content='{{ keywords }}'>
-    <meta name='author' content='{{ author }}'>
+    <meta name='description' content='Posts tagged Agentic RL.'>
+    <meta name='keywords' content='natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization'>
+    <meta name='author' content='Kaiqian Zhang'>
 
-    <link rel='alternate' type='application/rss+xml' title='{{ site_title }}' href='{{ base }}/feed.xml'>
-    <link href='{{ base }}/css/blog.css' rel='stylesheet'/>
-    <link href='{{ base }}/css/pygments.css' rel='stylesheet'/>
+    <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
+    <link href='/css/blog.css' rel='stylesheet'/>
+    <link href='/css/pygments.css' rel='stylesheet'/>
 
     <script>
     /* Runs before anything is painted: a reader who chose the dark page must
@@ -40,9 +40,10 @@
     <script id='MathJax-script' async
             src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
     </script>
-{{ head_extra }}
+    <link href='/css/notes.css' rel='stylesheet'/>
+    <script defer src='/js/notes.js'></script>
 </head>
-<body class='{{ body_class }}'>
+<body class='notes-site'>
     <button class='theme-toggle' type='button' aria-pressed='false'
             aria-label='Switch to dark mode' title='Switch to dark mode'>
         <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
@@ -55,11 +56,39 @@
     </button>
     <div class='nav'>
     <ul class='wrap'>
-{{ nav }}
+        <li><a href='/'>Home</a></li>
+        <li><a href='/blog/'>Blog</a></li>
+        <li><a href='/notes/'>Scratch Notes</a></li>
+        <li><a href='/feed.xml'>RSS</a></li>
     </ul>
 </div>
-{{ body }}
-{{ credit }}
+    <div class='tag-page wrap'>
+        <h1>Agentic RL <span>(0)</span></h1>
+        <div id='tags'>
+    <ul id='tag-nav'>
+        <li><a href='/notes/tags/foundations/'>Foundations of LLM</a></li>
+        <li><a href='/notes/tags/pre-training/'>Pre-Training</a></li>
+        <li><a href='/notes/tags/mid-training/'>Mid-Training</a></li>
+        <li><a href='/notes/tags/sft/'>SFT</a></li>
+        <li><a href='/notes/tags/model-merging/'>Model Merging</a></li>
+        <li><a href='/notes/tags/rl/'>Reinforcement Learning</a></li>
+        <li><a href='/notes/tags/dpo/'>DPO</a></li>
+        <li><a href='/notes/tags/post-training/'>Post-Training</a></li>
+        <li><a href='/notes/tags/agent/'>Agent</a></li>
+        <li><a href='/notes/tags/agentic-rl/' class='active'>Agentic RL</a></li>
+    </ul>
+</div>
+        <div id='posts' class='section'>
+            <p class='post-subtitle'>No posts yet.</p>
+        </div>
+        <div id='more'>
+            <a href='/notes/'>All scratch notes</a>
+        </div>
+    </div>
+
+    <div class='credit'>
+        <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
+    </div>
     <script>
     (function () {
       var btn = document.querySelector('.theme-toggle');

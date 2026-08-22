@@ -425,7 +425,8 @@ def slugify(text):
 
 class Post:
 
-    def __init__(self, path, config):
+    def __init__(self, path, config, section):
+        self.section = section
         with open(path, encoding='utf-8') as f:
             raw = f.read()
         meta, body = split_front_matter(raw, path)
@@ -440,7 +441,11 @@ class Post:
 
         self.title = meta.get('title', self.slug.replace('-', ' ').title())
         self.subtitle = meta.get('subtitle', '')
-        self.icon = meta.get('icon', '')     # overrides site.json post_icon
+        self.icon = meta.get('icon', '')     # overrides the section's icon
+        # Shown as chips under the title. Scratch notes open with them the way
+        # the paper notebook does; blog posts leave the field out.
+        self.keywords = [k.strip() for k in meta.get('keywords', '').split(',')
+                         if k.strip()]
         self.draft = str(meta.get('draft', '')).lower() in ('true', 'yes', '1')
         self.tags = [t.strip() for t in meta.get('tags', '').split(',')
                      if t.strip()]
@@ -452,12 +457,13 @@ class Post:
         self.footnotes = md.footnotes_html()
         self.content = insert_toc(self.content)
 
-        self.url = '%s/blog/%s/%s/' % (config['base'],
-                                       self.date.strftime('%Y/%m/%d'),
-                                       self.slug)
+        self.url = '%s/%s/%s/%s/' % (config['base'], section['path'],
+                                     self.date.strftime('%Y/%m/%d'),
+                                     self.slug)
         self.out_path = os.path.join(
-            OUT_DIR, 'blog', self.date.strftime('%Y'), self.date.strftime('%m'),
-            self.date.strftime('%d'), self.slug, 'index.html')
+            OUT_DIR, section['path'], self.date.strftime('%Y'),
+            self.date.strftime('%m'), self.date.strftime('%d'), self.slug,
+            'index.html')
 
     @property
     def date_display(self):
@@ -502,11 +508,38 @@ def load_config():
     config.setdefault('base', '')
     config['base'] = config['base'].rstrip('/')
     config['url'] = config.get('url', '').rstrip('/')
+    # A section is one independent listing: its own content directory, index,
+    # category pages and per-post URL prefix. Anything a section leaves out
+    # falls back to the top-level key, so a site with only a blog needs no
+    # `sections` array at all and behaves exactly as it did before.
+    config.setdefault('sections', [{'path': 'blog', 'name': 'Blog',
+                                    'dir': 'posts'}])
+    for section in config['sections']:
+        section.setdefault('dir', section['path'])
+        section.setdefault('name', section['path'].capitalize())
+        section.setdefault('quote', config.get('quote') or {})
+        section.setdefault('tags', config.get('tags') or [])
+        section.setdefault('post_icon', config.get('post_icon', ''))
+        section.setdefault('body_class', '')
+        # Applied to the individual pages only, never to the index or the
+        # category listings -- those stay in the site's normal face.
+        section.setdefault('post_body_class', '')
+        section.setdefault('all_label', 'All posts')
+        section.setdefault('css', [])
+        section.setdefault('js', [])
+        section['url'] = config['base'] + '/' + section['path'] + '/'
     return config
 
 
-def tag_name(config, slug):
-    for tag in config['tags']:
+def find_section(config, path):
+    for section in config['sections']:
+        if section['path'] == path:
+            return section
+    return config['sections'][0]
+
+
+def tag_name(section, slug):
+    for tag in section['tags']:
         if tag['slug'] == slug:
             return tag['name']
     return slug.replace('-', ' ').capitalize()
@@ -535,39 +568,43 @@ def absolute(config, url):
     return config['base'] + url
 
 
-def tag_nav_html(config, posts, active=None):
+def tag_nav_html(config, section, active=None):
     """Every configured tag is listed, whether or not it has posts yet."""
     items = []
-    for tag in config['tags']:
+    for tag in section['tags']:
         cls = " class='active'" if tag['slug'] == active else ''
-        items.append("        <li><a href='%s/blog/tags/%s/'%s>%s</a></li>"
-                     % (config['base'], tag['slug'], cls, tag['name']))
+        items.append("        <li><a href='%s/%s/tags/%s/'%s>%s</a></li>"
+                     % (config['base'], section['path'], tag['slug'], cls,
+                        tag['name']))
     return '\n'.join(items)
 
 
-def post_icon_html(config, post):
+def post_icon_html(section, post):
     """Emoji or raw SVG, shown before the title. Empty string omits it."""
-    icon = post.icon or config.get('post_icon', '')
+    icon = post.icon or section.get('post_icon', '')
     if not icon.strip():
         return ''
     return "<span class='post-icon'>%s</span>" % icon
 
 
-def post_rows(config, posts):
+def post_rows(section, posts):
     rows = []
     for n, post in enumerate(posts, start=1):
         rows.append(render(template('post_row.html'),
                            url=post.url,
-                           icon=post_icon_html(config, post),
+                           icon=post_icon_html(section, post),
                            title=html.escape(post.title),
                            date=post.date_display,
                            subtitle=html.escape(post.subtitle),
+                           keywords=keywords_html(post, compact=True),
                            index=n))
     return '\n'.join(rows)
 
 
-def page(config, body, page_title, description, head_extra=''):
+def page(config, body, page_title, description, head_extra='',
+         body_class=''):
     return render(template('base.html'),
+                  body_class=body_class,
                   lang=config['lang'],
                   page_title=html.escape(page_title),
                   site_title=html.escape(config['title']),
@@ -607,16 +644,127 @@ def check_figures(post):
             'figure whose number moved.' % (post.slug, nums, expected))
 
 
+def section_assets(config, section):
+    """Extra <head> tags a section asks for: its own stylesheet and script.
+
+    Scratch notes carry a palette, a hand-drawn face and four interactive
+    widgets that no blog post needs, so they ship as separate files that only
+    the notes pages link.
+    """
+    tags = []
+    for href in section['css']:
+        tags.append("    <link href='%s%s' rel='stylesheet'/>"
+                    % (config['base'], href))
+    for src in section['js']:
+        tags.append("    <script defer src='%s%s'></script>"
+                    % (config['base'], src))
+    return '\n'.join(tags)
+
+
+def keywords_html(post, compact=False):
+    """The chip row mirroring the notebook's own `Keywords:` line.
+
+    Two sizes: the full one under a note's title, and a smaller unlabelled
+    one under each row of a listing, where the label would be repeated on
+    every line and earn nothing. Blog posts have no keywords and get nothing.
+    """
+    if not post.keywords:
+        return ''
+    chips = ''.join("<span class='kw'>%s</span>" % html.escape(k)
+                    for k in post.keywords)
+    return ("<div class='keywords%s'><span class='kw-label'>Keywords:</span>"
+            "%s</div>" % (' row' if compact else '', chips))
+
+
+def build_section(config, section, posts):
+    """One listing: index page, every post in it, and its category pages."""
+    path = section['path']
+    head_extra = section_assets(config, section)
+    body_class = section['body_class']
+    post_class = (body_class + ' ' + section['post_body_class']).strip()
+    all_url = '%s/%s/' % (config['base'], path)
+
+    quote = section.get('quote') or {}
+    quote_author = ''
+    if quote.get('author'):
+        name = html.escape(quote['author'])
+        link = (quote.get('link') or '').strip()
+        # An attribution without a source stays plain text rather than
+        # becoming a link to nowhere.
+        quote_author = ("<a href='%s' target='_blank'>%s</a>" % (link, name)
+                        if link else '<p>%s</p>' % name)
+    index_body = render(template('index.html'),
+                        quote_text=html.escape(quote.get('text', '')),
+                        quote_author=quote_author,
+                        tag_nav=tag_nav_html(config, section),
+                        posts=(post_rows(section, posts) if posts else
+                               "            <p class='post-subtitle'>"
+                               'No notes yet.</p>'))
+    title = ('%s | %s' % (section['name'], config['title'])
+             if path != 'blog' else config['title'])
+    write(os.path.join(OUT_DIR, path, 'index.html'),
+          page(config, index_body, title, config['description'],
+               head_extra=head_extra, body_class=body_class))
+
+    for post in posts:
+        check_figures(post)
+        tags = ', '.join(
+            "<a href='%s/%s/tags/%s/'>%s</a>"
+            % (config['base'], path, slug, html.escape(tag_name(section, slug)))
+            for slug in post.tags) or '&mdash;'
+        body = render(template('post.html'),
+                      title=html.escape(post.title),
+                      subtitle=html.escape(post.subtitle),
+                      keywords=keywords_html(post),
+                      date=post.date_display,
+                      read_time='%d min read' % post.read_minutes,
+                      tags=tags,
+                      content=post.content,
+                      footnotes=post.footnotes,
+                      slug=post.slug,
+                      likes_endpoint=config.get('likes_endpoint', '').rstrip('/'),
+                      all_url=all_url,
+                      all_label=html.escape(section['all_label']))
+        write(post.out_path,
+              page(config, body, '%s | %s' % (post.title, config['title']),
+                   post.subtitle or config['description'],
+                   head_extra=head_extra, body_class=post_class))
+
+    for tag in section['tags']:
+        tagged = [p for p in posts if tag['slug'] in p.tags]
+        body = render(template('tag.html'),
+                      tag_name=html.escape(tag['name']),
+                      count=len(tagged),
+                      tag_nav=tag_nav_html(config, section,
+                                           active=tag['slug']),
+                      posts=(post_rows(section, tagged) if tagged else
+                             "            <p class='post-subtitle'>"
+                             'No posts yet.</p>'),
+                      all_url=all_url,
+                      all_label=html.escape(section['all_label']))
+        write(os.path.join(OUT_DIR, path, 'tags', tag['slug'], 'index.html'),
+              page(config, body, '%s | %s' % (tag['name'], config['title']),
+                   'Posts tagged %s.' % tag['name'],
+                   head_extra=head_extra, body_class=body_class))
+
+
 def build():
     config = load_config()
 
-    posts = []
-    for name in sorted(os.listdir(POSTS_DIR)):
-        if name.endswith('.md') and not name.startswith('.'):
-            posts.append(Post(os.path.join(POSTS_DIR, name), config))
-    drafts = [p for p in posts if p.draft]
-    posts = sorted((p for p in posts if not p.draft),
-                   key=lambda p: (p.date, p.slug), reverse=True)
+    # {section path: [posts]}, newest first, drafts pulled out.
+    by_section = {}
+    drafts = []
+    for section in config['sections']:
+        found = []
+        content_dir = os.path.join(ROOT, section['dir'])
+        for name in sorted(os.listdir(content_dir)):
+            if name.endswith('.md') and not name.startswith('.'):
+                found.append(Post(os.path.join(content_dir, name), config,
+                                  section))
+        drafts += [p for p in found if p.draft]
+        by_section[section['path']] = sorted(
+            (p for p in found if not p.draft),
+            key=lambda p: (p.date, p.slug), reverse=True)
 
     if os.path.isdir(OUT_DIR):
         shutil.rmtree(OUT_DIR)
@@ -670,60 +818,10 @@ def build():
                  links=links,
                  credit=credit_html(config, wrapped=False)))
 
-    # Blog index.
-    quote = config.get('quote') or {}
-    quote_author = ''
-    if quote.get('author'):
-        name = html.escape(quote['author'])
-        link = (quote.get('link') or '').strip()
-        # An attribution without a source stays plain text rather than
-        # becoming a link to nowhere.
-        quote_author = ("<a href='%s' target='_blank'>%s</a>" % (link, name)
-                        if link else '<p>%s</p>' % name)
-    index_body = render(template('index.html'),
-                        quote_text=html.escape(quote.get('text', '')),
-                        quote_author=quote_author,
-                        tag_nav=tag_nav_html(config, posts),
-                        posts=post_rows(config, posts))
-    write(os.path.join(OUT_DIR, 'blog', 'index.html'),
-          page(config, index_body, config['title'], config['description']))
+    for section in config['sections']:
+        build_section(config, section, by_section[section['path']])
 
-    # Posts.
-    for post in posts:
-        check_figures(post)
-        tags = ', '.join(
-            "<a href='%s/blog/tags/%s/'>%s</a>"
-            % (config['base'], slug, html.escape(tag_name(config, slug)))
-            for slug in post.tags) or '&mdash;'
-        body = render(template('post.html'),
-                      title=html.escape(post.title),
-                      subtitle=html.escape(post.subtitle),
-                      date=post.date_display,
-                      read_time='%d min read' % post.read_minutes,
-                      tags=tags,
-                      content=post.content,
-                      footnotes=post.footnotes,
-                      slug=post.slug,
-                      likes_endpoint=config.get('likes_endpoint', '').rstrip('/'),
-                      base=config['base'])
-        write(post.out_path,
-              page(config, body, '%s | %s' % (post.title, config['title']),
-                   post.subtitle or config['description']))
-
-    # Tag pages.
-    for tag in config['tags']:
-        tagged = [p for p in posts if tag['slug'] in p.tags]
-        body = render(template('tag.html'),
-                      tag_name=html.escape(tag['name']),
-                      count=len(tagged),
-                      tag_nav=tag_nav_html(config, posts, active=tag['slug']),
-                      posts=(post_rows(config, tagged) if tagged else
-                             "            <p class='post-subtitle'>"
-                             'No posts yet.</p>'),
-                      base=config['base'])
-        write(os.path.join(OUT_DIR, 'blog', 'tags', tag['slug'], 'index.html'),
-              page(config, body, '%s | %s' % (tag['name'], config['title']),
-                   'Posts tagged %s.' % tag['name']))
+    posts = by_section[config['sections'][0]['path']]
 
     # RSS feed.
     items = []
@@ -746,11 +844,13 @@ def build():
     # GitHub Pages: do not run the output through Jekyll.
     write(os.path.join(OUT_DIR, '.nojekyll'), '')
 
-    print('Built %d post%s into %s'
-          % (len(posts), '' if len(posts) == 1 else 's',
-             os.path.relpath(OUT_DIR, ROOT)))
-    for post in posts:
-        print('  %s  %s' % (post.date.strftime('%Y-%m-%d'), post.url))
+    total = sum(len(v) for v in by_section.values())
+    print('Built %d page%s into %s'
+          % (total, '' if total == 1 else 's', os.path.relpath(OUT_DIR, ROOT)))
+    for section in config['sections']:
+        print('  [%s]' % section['name'])
+        for post in by_section[section['path']]:
+            print('    %s  %s' % (post.date.strftime('%Y-%m-%d'), post.url))
     for draft in drafts:
         print('  (draft, skipped) %s' % draft.slug)
 
