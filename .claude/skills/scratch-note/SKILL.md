@@ -124,9 +124,16 @@ legend. Reuse them; do not introduce new hues per note.
 | kept | `--n-kept` (sage) | retained, always-on, the good case |
 | data | `--n-data` (ochre) | inputs, datasets, the prompt |
 
-Keywords are **coloured chips on the note** and **muted chips on the
-listing**, both labelled `Keywords:`. That split is intentional: the note's
-page carries meaning-bearing colour, the listing is for scanning titles.
+Keywords appear twice, styled differently on purpose, both labelled
+`Keywords:`:
+
+- **On the note** — coloured pills, cycling the palette. The keywords open the
+  page and the colour belongs with everything else on it.
+- **On the listing** — no box at all. Neutral grey words with a faint middot
+  between them, using `--n-chip-ink` and `--n-chip-edge`, which are the only
+  greys on the site with no purple in them. A listing row is scanned, not
+  read, and an outline around every keyword is more furniture than the
+  information needs.
 
 ### Figures and motion
 
