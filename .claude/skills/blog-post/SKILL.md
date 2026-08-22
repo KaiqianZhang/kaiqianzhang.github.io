@@ -15,11 +15,31 @@ The work is deciding what goes inside the three parts, not what the parts are.
 
 ## The shape, which is fixed
 
-| `##` heading | Budget | What it does |
+| Part | Budget | What it does |
 |---|---|---|
+| *(the roadmap)* | — | A braced tree of the whole post, before the first heading. |
 | **Learning together** | ≤ 5 min | Teach the essence. Bullets for what matters. Ends with a bulleted recap. |
 | **Inspire together** | 3–4 min | The frontier: real papers, what people are doing up to today, then concrete directions. |
 | **Chat together** | ≤ 1 min | An animated flashcard of takeaways, in the words you would use with a friend. |
+
+### The roadmap
+
+**Every post opens with one**, above the first `##`. It is a braced tree: the
+title on the left, a trunk brace out to the three sections, and a second brace
+from each section to the four or five ideas it covers, with the minutes on a
+badge beside each section name. Colour-code the branches — one hue per section
+— and give each a beating dot so the tree is alive before anything scrolls.
+
+Three things it took a rebuild to get right:
+
+- **Do not number it as a figure.** It is wayfinding, like a contents list.
+  Numbering it pushes every real figure along by one, and `check_figures`
+  makes you renumber every caption.
+- **It gets no caption.** The tree explains itself, and a caption is the only
+  part of it that would count against the ten minutes.
+- **Split the title across two short lines.** At the heading type size one
+  long line runs past the trunk brace and collides with it. Measure the gap
+  rather than eyeballing it: the label's right edge against the brace's left.
 
 **Ten minutes total, hard capped.** Front matter must include
 `format: three-part`, which is what turns the enforcement on:
@@ -188,6 +208,9 @@ roles, and what `window.W` provides. Read it before drawing anything.
 4. **Lab behaviour goes in `static/js/blog-labs.js`**, one `init*Lab()` each.
 5. **Build, and let the budget check push back.** Expect two or three trimming
    rounds. That is the format working, not a problem.
+6. **Draw the roadmap once the trimming has settled.** It names what the
+   sections actually ended up covering, so drawing it early means drawing it
+   twice.
 
 ## Verification, before the push
 
