@@ -86,7 +86,36 @@
             <div class='clear'></div>
         </div>
         <div class='article'>
-<p class='lede'>Three ideas from one page of a notebook: what makes a tokenizer good, what it means to cut a model down, and how the cut-down model is taught to behave like the one it came from. They belong together because they are the three places a model's size actually gets decided — how much text a token carries, how many weights survive, and how well the survivors are retrained.</p>
+<p class='lede'>Three ideas that belong together: what makes a tokenizer good, what it means to cut a model down, and how the cut-down model is taught to behave like the one it came from. They are the three places a model's size actually gets decided — how much text a token carries, how many weights survive, and how well the survivors are retrained.</p>
+<div class='nfig wide roadmap'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 266' role='img' aria-label='A braced tree of the sections in this note'>
+<text x='14' y='121.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-plum)'>Pruning &amp;</text>
+<text x='14' y='143.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-plum)'>Distillation</text>
+<path d='M172.0 34.0 C168.7 34.0, 168.7 130.0, 150.0 136.0 C168.7 142.0, 168.7 238.0, 172.0 238.0' fill='none' stroke='var(--n-plum)' stroke-width='2.2' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
+<circle cx='186' cy='30.0' r='4' fill='var(--n-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
+<text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Tokenizer compression ratio</text>
+<text x='452' y='34.0' class='lbl sm a-rise' style='--d:0.60s'>how much text one token carries</text>
+<circle cx='186' cy='64.0' r='4' fill='var(--n-teacher)' class='a-beat' style='--dur:2.2s;--d:0.58s'/>
+<text x='200' y='68.0' class='lbl a-rise' style='--d:0.58s;fill:var(--n-teacher)'>Can 8K read 10,000 words?</text>
+<text x='452' y='68.0' class='lbl sm a-rise' style='--d:0.68s'>the arithmetic, in both languages</text>
+<circle cx='186' cy='98.0' r='4' fill='var(--n-loss)' class='a-beat' style='--dur:2.5s;--d:0.66s'/>
+<text x='200' y='102.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-loss)'>Pruning</text>
+<text x='452' y='102.0' class='lbl sm a-rise' style='--d:0.76s'>structured, and along which axis</text>
+<circle cx='186' cy='132.0' r='4' fill='var(--n-kept)' class='a-beat' style='--dur:2.8s;--d:0.74s'/>
+<text x='200' y='136.0' class='lbl a-rise' style='--d:0.74s;fill:var(--n-kept)'>Distillation</text>
+<text x='452' y='136.0' class='lbl sm a-rise' style='--d:0.84s'>teacher frozen, student learning</text>
+<circle cx='186' cy='166.0' r='4' fill='var(--n-pruned)' class='a-beat' style='--dur:1.9s;--d:0.82s'/>
+<text x='200' y='170.0' class='lbl a-rise' style='--d:0.82s;fill:var(--n-pruned)'>The process, end to end</text>
+<text x='452' y='170.0' class='lbl sm a-rise' style='--d:0.92s'>the five steps</text>
+<circle cx='186' cy='200.0' r='4' fill='var(--n-lav)' class='a-beat' style='--dur:2.2s;--d:0.90s'/>
+<text x='200' y='204.0' class='lbl a-rise' style='--d:0.90s;fill:var(--n-lav)'>Loss can be many things</text>
+<text x='452' y='204.0' class='lbl sm a-rise' style='--d:1.00s'>where a loss can attach</text>
+<circle cx='186' cy='234.0' r='4' fill='var(--n-data)' class='a-beat' style='--dur:2.5s;--d:0.98s'/>
+<text x='200' y='238.0' class='lbl a-rise' style='--d:0.98s;fill:var(--n-data)'>What it bought</text>
+<text x='452' y='238.0' class='lbl sm a-rise' style='--d:1.08s'>the numbers NVIDIA published</text>
+</svg>
+</div>
 <nav class='toc'>
     <p class='toc-head'>Contents</p>
     <ul>
@@ -215,7 +244,7 @@ $$\text{compression ratio} = \frac{\#\ \text{of characters}}{\#\ \text{of tokens
 </div>
 <div class='verdict' id='tok-verdict'></div>
 <svg viewBox='0 0 700 226' role='img'></svg>
-<p class='cap'>Each bar is how much <b>original text</b> a context window holds at the current ratio; the dashed line is your prompt. The lab uses the exact windows — 8,192 / 32,768 / 131,072 tokens — so at 0.75 it reads 6,144 / 24,576 / 98,304 words, a little above the notebook's rounded 6,000 / 24,000 / 96,000.</p>
+<p class='cap'>Each bar is how much <b>original text</b> a context window holds at the current ratio; the dashed line is your prompt. The windows here are exact — 8,192 / 32,768 / 131,072 tokens — so at 0.75 they read 6,144 / 24,576 / 98,304 words.</p>
 </div>
 </div>
 <p>Llama 3 was trained on sequences of 8,192 tokens, which is exactly the 8192 in the question. Llama 3.1 raised it to 128K — the third row of the table.</p>
@@ -522,7 +551,7 @@ $$\mathrm{KL}(P\,\|\,Q) = \sum_x p(x) \log \frac{p(x)}{q(x)}$$
 <p><b>Two different things get called “logits”.</b> The word means “the raw score before a softmax”, and a transformer has two of them.</p>
 <p><b>Attention logits</b> are the attention scores — the matrix inside every head that softmax turns into attention weights:</p>
 <p><b>Vocabulary logits</b> are the raw score for every possible token, produced by the LM head, before the softmax that turns them into a probability distribution over the vocabulary.</p>
-<p>Distillation on “logits” means the second kind. When the notebook diagram labels the student's and teacher's outputs <i>(vocabulary logits)</i>, that is the disambiguation.</p>
+<p>Distillation on “logits” means the second kind, which is why both outputs in the diagram above are labelled <i>(vocabulary logits)</i>.</p>
 </div>
 $$\text{attention logits} = \frac{QK^\top}{\sqrt{d_k}}, \qquad \text{attention weights} = \mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)$$
 <div class='nfig wide'>
@@ -632,7 +661,12 @@ $$\text{attention logits} = \frac{QK^\top}{\sqrt{d_k}}, \qquad \text{attention w
 <p class='cap'>Teal is the frozen teacher, violet the student. Dragging <b>progress</b> moves the student's logits toward the teacher's and you can watch KL₁ fall to zero. KL₂ here is an <b>illustrative</b> decay curve, not a computed quantity — eight vocabulary entries carry no hidden states to compare.</p>
 </div>
 </div>
-<p>One honest wrinkle. Written as $\mathrm{KL}(P\|Q)$ with $P$ the student and $Q$ the teacher, that is the <em>reverse</em> KL — it punishes the student for putting probability mass where the teacher put none, and lets it quietly drop modes the teacher had. Minitron minimises the <strong>forward</strong> KL, with the teacher as $P$, and drops the ground-truth cross-entropy term entirely. The lab above has a toggle for the direction; the two values differ, sometimes a lot, and they only agree once the student has actually converged onto the teacher.</p>
+<p>Two directions exist, and they are not the same thing:</p>
+<ul>
+  <li><strong>KL(student ‖ teacher)</strong> punishes the student for putting mass where the teacher put none.</li>
+  <li><strong>KL(teacher ‖ student)</strong> punishes it for missing mass the teacher had.</li>
+</ul>
+<p>Minitron minimises the <strong>forward</strong> KL, teacher as $P$, and drops the ground-truth cross-entropy term entirely. The toggle above shows the two values apart until the student converges.</p>
 <h2 id='the-process-end-to-end'>The process, end to end</h2>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -673,7 +707,7 @@ $$\text{attention logits} = \frac{QK^\top}{\sqrt{d_k}}, \qquad \text{attention w
 <path d='M410.0 236.0 L369.0 236.0' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:2.45s'/>
 <path d='M369.0 231.4 L362.0 236.0 L369.0 240.6' stroke='var(--n-student)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:2.90s'/>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 5.</span> The five steps, in the order the notebook draws them: train the teacher, estimate importance, rank, trim, distil. Ranking and trimming are one operation split in two — the ranking decides everything, the trim just applies it.</div>
+<div class='caption'><span class='caption-label'>Figure 5.</span> The five steps: train the teacher, estimate importance, rank, trim, distil. Ranking and trimming are one operation split in two — the ranking decides everything, the trim just applies it.</div>
 </div>
 <p><strong>⟨1⟩ Train the LLM</strong> that will be the teacher.</p>
 <p><strong>⟨2⟩ Estimate importance</strong> — of layers, heads, embeddings, and channels. How? Two moves:</p>
@@ -839,6 +873,7 @@ $$\mathrm{FFN}(x) = W_{\text{down}}\big[\mathrm{SiLU}(W_{\text{gate}}\,x) \odot 
   <li>Sreenivas et al., <a href='https://arxiv.org/abs/2408.11796'><em>LLM Pruning and Distillation in Practice: The Minitron Approach</em></a> (arXiv:2408.11796) — the Llama 3.1 8B → 4B numbers used here.</li>
   <li>NVIDIA, <a href='https://developer.nvidia.com/blog/how-to-prune-and-distill-llama-3-1-8b-to-an-nvidia-llama-3-1-minitron-4b-model'><em>How to Prune and Distill Llama 3.1 8B</em></a> — best practices and the teacher-correction step.</li>
   <li>Meta, <a href='https://ai.meta.com/blog/meta-llama-3/'><em>Introducing Meta Llama 3</em></a> — the 128,256-token vocabulary and the 15% figure.</li>
+  <li><a href='/blog/2026/08/22/rope-and-irope/'>RoPE and iRoPE</a> — my blog post on positional encoding and long context.</li>
   <li>Meta, <a href='https://huggingface.co/meta-llama/Llama-3.2-1B'>Llama 3.2 1B model card</a> — pruning plus logit distillation from the 8B and 70B.</li>
 </ul>
 <details class='scans'>

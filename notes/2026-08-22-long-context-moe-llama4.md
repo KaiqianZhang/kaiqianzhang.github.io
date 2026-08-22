@@ -8,6 +8,33 @@ keywords: long-context tricks, iRoPE, NoPE, temperature scaling, SSMax, MoE
 
 <p class='lede'>Llama 4 changes two things at once. The weights become sparse — a mixture of experts, where a token touches a fraction of the model — and the context becomes enormous, ten million tokens for the smaller of the two. Those are separate problems with separate fixes, and the second one is more interesting than it looks: making a window that long is easy, but making attention still <em>point</em> at anything once it is that long is not.</p>
 
+<div class='nfig wide roadmap'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 232' role='img' aria-label='A braced tree of the sections in this note'>
+<text x='14' y='104.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-plum)'>Long Context</text>
+<text x='14' y='126.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-plum)'>&amp; MoE</text>
+<path d='M172.0 34.0 C168.7 34.0, 168.7 113.0, 150.0 119.0 C168.7 125.0, 168.7 204.0, 172.0 204.0' fill='none' stroke='var(--n-plum)' stroke-width='2.2' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
+<circle cx='186' cy='30.0' r='4' fill='var(--n-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
+<text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Two versions of LLaMA 4</text>
+<text x='452' y='34.0' class='lbl sm a-rise' style='--d:0.60s'>Scout and Maverick, side by side</text>
+<circle cx='186' cy='64.0' r='4' fill='var(--n-teacher)' class='a-beat' style='--dur:2.2s;--d:0.58s'/>
+<text x='200' y='68.0' class='lbl a-rise' style='--d:0.58s;fill:var(--n-teacher)'>Ten million tokens</text>
+<text x='452' y='68.0' class='lbl sm a-rise' style='--d:0.68s'>what that is, in pages</text>
+<circle cx='186' cy='98.0' r='4' fill='var(--n-loss)' class='a-beat' style='--dur:2.5s;--d:0.66s'/>
+<text x='200' y='102.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-loss)'>iRoPE</text>
+<text x='452' y='102.0' class='lbl sm a-rise' style='--d:0.76s'>interleave rotary layers with bare ones</text>
+<circle cx='186' cy='132.0' r='4' fill='var(--n-kept)' class='a-beat' style='--dur:2.8s;--d:0.74s'/>
+<text x='200' y='136.0' class='lbl a-rise' style='--d:0.74s;fill:var(--n-kept)'>Temperature scaling</text>
+<text x='452' y='136.0' class='lbl sm a-rise' style='--d:0.84s'>one divisor, and what it does</text>
+<circle cx='186' cy='166.0' r='4' fill='var(--n-pruned)' class='a-beat' style='--dur:1.9s;--d:0.82s'/>
+<text x='200' y='170.0' class='lbl a-rise' style='--d:0.82s;fill:var(--n-pruned)'>SSMax, and attention fading</text>
+<text x='452' y='170.0' class='lbl sm a-rise' style='--d:0.92s'>why long context flattens attention</text>
+<circle cx='186' cy='200.0' r='4' fill='var(--n-lav)' class='a-beat' style='--dur:2.2s;--d:0.90s'/>
+<text x='200' y='204.0' class='lbl a-rise' style='--d:0.90s;fill:var(--n-lav)'>A multi-modal model</text>
+<text x='452' y='204.0' class='lbl sm a-rise' style='--d:1.00s'>three encoders, one backbone</text>
+</svg>
+</div>
+
 [TOC]
 
 ## Two versions of LLaMA 4
@@ -48,14 +75,18 @@ Llama 4 uses **MoE** — a mixture of experts. Two versions are worth putting si
 <line x1='16' y1='266' x2='684' y2='266' stroke='var(--n-grid)' stroke-width='1.2' class='a-wide' style='--d:1.02s'/>
 <line x1='430' y1='14' x2='430' y2='276' stroke='var(--n-edge)' stroke-width='1.2' stroke-dasharray='4 5' class='a-fade' style='--d:0.20s'/>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> The two Llama 4 models the notebook compares, straight from Meta's model card. The row that matters is the second: four times the model, the same cost per token.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Scout and Maverick, straight from Meta's model card. The row that matters is the second: four times the model, the same cost per token.</div>
 </div>
 
 Read the second row against the first. Scout stores 109B parameters and Maverick 400B, but both spend **17B per token**. That gap is the entire point of a mixture of experts: capacity you pay for in memory, not in arithmetic. Maverick is nearly four times the model Scout is, and costs the same to run per token.
 
 <div class='sidenote'>
 <span class='tag'>where MoE came from</span>
-<p>The notebook says MoE was <i>first introduced by Mixtral, and got famous due to DeepSeek</i>. The second half is right; the first is a little generous to Mixtral. Sparsely-gated mixtures go back to Shazeer et al. in 2017, and the idea of a mixture of experts to Jacobs and Hinton in 1991. What Mixtral 8x7B did in December 2023 was make a sparse MoE work at open-weight scale that anybody could download — which is why it feels like the beginning. DeepSeek then pushed the shape further, with many small experts and a shared one that always runs.</p>
+<p>MoE reached most people through DeepSeek, and Mixtral 8x7B is what made a sparse MoE downloadable at open-weight scale in December 2023. The idea is older than both:</p>
+<ul>
+<li><b>1991</b> — mixture of experts, Jacobs and Hinton.</li>
+<li><b>2017</b> — sparsely-gated MoE, Shazeer et al.</li>
+</ul>
 </div>
 
 That shared expert is worth drawing, because it is the part that makes the arithmetic above work out.
@@ -174,7 +205,10 @@ Maverick routes each token to **one of 128 experts plus one shared expert** that
 <div class='caption'><span class='caption-label'>Figure 3.</span> Context windows as pages of text, on a log scale because a linear one would render the first bar invisible. Scout's window is roughly a fifteen-thousand-page document — and the conversion is the compression ratio from the previous note, run backwards.</div>
 </div>
 
-The notebook's conversion is worth keeping: **10M tokens ≈ 15,000 pages**, 1M ≈ 1,500. That falls out of 0.75 words per token and 500 words per page — the same compression ratio from the [previous note](/notes/2026/08/21/pruning-distillation-llama3/), used the other way round.
+**10M tokens ≈ 15,000 pages**; 1M ≈ 1,500. That falls out of 0.75 words per
+token and 500 words per page — the compression ratio from the
+[previous note](/notes/2026/08/21/pruning-distillation-llama3/), used the
+other way round.
 
 Two caveats, because this number has been oversold. Scout was **pre-trained and post-trained at 256K**; the 10M figure is length *generalisation* beyond that, not a window it was trained in. And while Meta reports near-perfect needle-in-a-haystack retrieval across the window, independent evaluations that ask for comprehension rather than retrieval — holding relationships across a long text, not just finding a planted sentence — have been considerably more mixed. Retrieval at 10M is real; understanding at 10M is a stronger claim than the benchmark supports.
 
@@ -255,13 +289,18 @@ So interleave. Most layers use RoPE; every so often, a layer uses **NoPE** — n
 </div>
 <div class='verdict' id='irope-verdict'></div>
 <svg viewBox='0 0 700 190' role='img'></svg>
-<p class='cap'>Violet layers carry rotary position; teal layers carry none and have to infer order from causal masking alone. Set the period to 4 and you have the notebook’s example. The exact period Meta used is <b>not published</b> — this is the shape of the idea, not a spec.</p>
+<p class='cap'>Violet layers carry rotary position; teal layers carry none and have to infer order from causal masking alone. A period of 4 is the worked example. The exact period Meta used is <b>not published</b> — this is the shape of the idea, not a spec.</p>
 </div>
 </div>
 
 A layer with no positional encoding is not a layer with no sense of order. Causal masking alone leaks position: a token at index 5 can see five things and a token at index 5,000 can see five thousand, and that difference is learnable. This is **implicit positional information**, and it is what lets the NoPE layers carry structure over distances the rotary layers were never going to reach.
 
-The division of labour the notebook draws: RoPE layers **learn local features** — the under-32k part — and NoPE layers **learn overall features**, the beyond-32k part.
+The division of labour:
+
+- **RoPE layers learn local features** — the under-32k part.
+- **NoPE layers learn overall features** — the beyond-32k part.
+
+I went further into all of this in [RoPE and iRoPE](/blog/2026/08/22/rope-and-irope/), including why the rotary layers fade in the first place.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -307,7 +346,7 @@ The division of labour the notebook draws: RoPE layers **learn local features** 
 <text x='476' y='340' class='lbl sm a-fade' style='--d:1.95s'>position is learned indirectly,</text>
 <text x='476' y='356' class='lbl sm a-fade' style='--d:2.00s'>from causal masking alone</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 5.</span> The notebook's own iRoPE diagram. Attention splits into a rotary path and a position-free path; one ends in explicit positional encoding, the other in position inferred from causal masking alone. Temperature scaling sits on top of both.</div>
+<div class='caption'><span class='caption-label'>Figure 5.</span> The iRoPE flow. Attention splits into a rotary path and a position-free path; one ends in explicit positional encoding, the other in position inferred from causal masking alone. Temperature scaling sits on top of both.</div>
 </div>
 
 ## Temperature scaling
@@ -460,8 +499,8 @@ The idea in one line: **when the context $n$ gets longer, SSMax increases the di
 The paper reports models with SSMax keeping their loss down at roughly **20× the training context**, and retrieving planted key information at about **10× training length** where a standard transformer had already failed. It can also be retrofitted into an already-trained model.
 
 <div class='sidenote'>
-<span class='tag'>one honest gap</span>
-<p>The notebook files SSMax under Llama 4's long-context tricks alongside iRoPE. Meta's own writeup describes <i>“inference time temperature scaling of attention to enhance length generalization”</i> — the same mechanism — but does not name SSMax or publish the form it uses. So: SSMax is the published, named version of this idea, and it is the right thing to study to understand what Llama 4 is doing. Whether it is literally the function in Meta's code is not something the release tells us.</p>
+<span class='tag'>what Meta published</span>
+<p>Meta describes <i>“inference time temperature scaling of attention to enhance length generalization”</i> — the same mechanism — without naming SSMax or publishing the form it uses. SSMax is the named, published version of the idea, and the right thing to study here.</p>
 </div>
 
 ## A multi-modal model
@@ -521,6 +560,7 @@ Meta's vision encoder is based on MetaCLIP, trained separately alongside a froze
 - Meta, [Llama-4-Scout-17B-16E model card](https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct) — the table in Figure 1, verbatim.
 - Nakanishi, [*Scalable-Softmax Is Superior for Attention*](https://arxiv.org/abs/2501.19399) (arXiv:2501.19399) — SSMax, the formula and the long-context results.
 - Kazemnejad et al., [*The Impact of Positional Encoding on Length Generalization in Transformers*](https://arxiv.org/abs/2305.19466) (arXiv:2305.19466) — NoPE, and why causal masking alone carries position.
+- [RoPE and iRoPE](/blog/2026/08/22/rope-and-irope/) — my longer write-up of the decay and the interleave.
 - Shazeer et al., [*Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer*](https://arxiv.org/abs/1701.06538) (arXiv:1701.06538) — where sparse MoE actually starts.
 
 <details class='scans'>

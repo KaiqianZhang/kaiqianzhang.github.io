@@ -30,14 +30,32 @@ other rule in this file:
 - **The notebook's structure is the note's structure.** Follow the page's own
   order and its own headings. If the page says *Side Note*, the note gets a
   side note. If the page numbers five steps ⟨1⟩–⟨5⟩, so does the note.
-- **Verification is additive, never corrective-by-stealth.** Check everything
-  against primary sources and bring in real numbers, but never quietly rewrite
-  what the page says. Where the page simplifies, says something dated, or is
-  generous to somebody, **flag it in the note** — as a marked aside, in the
-  user's own framing. See *Honest flags* below.
+- **State the fact; do not narrate the correction.** Check everything against
+  primary sources, then write what is *true* — quietly, in the note's own
+  voice. Never say the page is wrong, never say "the notebook says X but", and
+  never spend a paragraph on a correction that deserves a clause. A scratch
+  note is a teaching note built from the user's own page; a reader should meet
+  the right fact, not a referee's report.
+
+  Wrong: *"The notebook says MoE was first introduced by Mixtral. The second
+  half is right; the first is a little generous to Mixtral. Sparsely-gated
+  mixtures go back to…"*
+
+  Right: *"MoE reached most people through DeepSeek, and Mixtral 8x7B made a
+  sparse MoE downloadable at open-weight scale in 2023. The idea is older than
+  both:"* then two bullets, 1991 and 2017. Same information, no verdict.
+
+  The same applies to attribution generally: **do not write "the notebook",
+  "the page", or "your note" in the body at all.** Write the fact. The scans
+  are at the bottom for anyone who wants the provenance, and their alt text is
+  the only place the word belongs.
 - **It should be fun to read.** The user asked for colour, motion, and things
   to drag. A correct note that reads like a transcript has failed half the
   job.
+- **Prefer bullets to prose.** Whenever a passage is a list of things — two
+  directions of a KL, what a layer learns, where a loss can attach, what a
+  method costs — make it a list. Bullets are the house style here, and a
+  paragraph that could have been three bullets is a paragraph to rewrite.
 
 ## Settled preferences
 
@@ -53,8 +71,25 @@ them.** Ask only about the things listed under *What to ask* below.
 | Categories | The fixed ten in `site.json`; pick 1–2, do not invent new ones without asking |
 | Row icon | 🍦 (`post_icon` on the section) |
 | Index epigraph | *"Learning for the sake of learning."* |
-| Note furniture | Keywords chips, date + read-time byline, `[TOC]`, like button — all four |
+| Note furniture | Roadmap, keywords chips, date + read-time byline, `[TOC]`, like button |
 | Front matter | `title`, `subtitle`, `date`, `tags`, `keywords` |
+
+### The roadmap
+
+**Every note opens with one**, immediately above `[TOC]`. It is a braced tree
+of the note's own contents: the title on the left in two short lines, a brace
+out to the sections, and each section as a coloured row — a beating dot, the
+section name in its hue, and a short gloss in the right-hand column saying
+what that section is for.
+
+- **Do not number it as a figure.** It is wayfinding. Numbering it pushes
+  every real figure along by one and `check_figures` makes you renumber every
+  caption.
+- **It gets no caption.** The tree explains itself.
+- **Escape ampersands.** A bare `&` in a title makes the SVG malformed and the
+  markup check will catch it; `&amp;` is what you want.
+- It sits *with* the contents list, not instead of it. `[TOC]` is the
+  clickable index; the roadmap is the shape of the thing.
 
 ### Typography, which is deliberately split
 
@@ -118,6 +153,12 @@ page carries meaning-bearing colour, the listing is for scanning titles.
 - Reference model for the interaction feel:
   <https://akeylab.github.io/correlated-traits-prediction/>
 
+### Cross-references
+
+Link the blog where it goes deeper, both inline at the point of overlap and in
+`## Sources`. The notes and the posts are one body of work, and a reader who
+wants the long version of iRoPE should not have to go looking for it.
+
 ### Shipping
 
 - **Build, commit, and push live.** That is the standing instruction.
@@ -170,20 +211,17 @@ release post — not a summary of it. Record the exact figures you will quote
 and where each came from. Every note ends with a `## Sources` list of real
 links.
 
-### 4. Honest flags
+### 4. Where the page and the sources differ
 
-Where verification and the page disagree, or where the source is silent, say
-so in the note. Do it in a marked `<div class='sidenote'>` with a tag that
-names the issue, generously and without condescension. Established examples:
+Write what is true, in the note's own voice, and keep it short. Do not
+announce that anything was corrected. If a claim on the page is dated,
+simplified, or generous to somebody, the note simply carries the accurate
+version — usually in a clause or a couple of bullets.
 
-- The LLaMA 3 note: the page writes KL(P‖Q) with P as the student — the
-  *reverse* KL — while Minitron minimises the forward one.
-- The LLaMA 4 note: MoE predates Mixtral by a long way; Scout was trained at
-  256K and generalises to 10M rather than being trained there; Meta describes
-  inference-time attention temperature scaling without ever naming SSMax.
-
-Aim for two or three per note. Zero usually means you did not check hard
-enough.
+The only thing worth an explicit aside is where **the sources themselves are
+silent**, because that is a fact about the world rather than about the page.
+Meta describing inference-time attention temperature scaling without naming
+SSMax is worth a side note; a date being off by a year is not.
 
 ### 5. Write it with a generator script
 
