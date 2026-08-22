@@ -99,9 +99,22 @@
 .notes-note blockquote,
 .notes-note .front-matter h4,
 .notes-note .article,
-.notes-note .nav,
 .notes-note .credit {
   font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
+}
+
+/* The bar across the top is the same navigation every page of the site has,
+   so it stays in the site's own face even where the page under it does not.
+   It has to be restated because the rule above sets the face on the element
+   itself, which the nav's links would otherwise inherit. */
+.notes-note .nav,
+.notes-note .nav a,
+.notes-note .nav li {
+  font-family: inherit;
+}
+.notes-note .nav {
+  /* The same stack blog.css uses everywhere else. */
+  font-family: -apple-system, Helvetica, arial, sans-serif;
 }
 
 /* ...and the two things that must not be. A hand face turns a code column
@@ -157,12 +170,10 @@
   color: var(--n-dim);
   margin-right: 2px;
 }
-/* Keywords are neutral everywhere -- one chip treatment on the listing and
-   on the note itself. The note's own page already carries six colours that
-   each mean something specific, so a keyword wearing one of those hues would
-   read as a claim about which actor it refers to; and the listing matching
-   the note keeps the two views of the same keywords looking like the same
-   thing. Only the size differs between them. */
+/* The chips are muted by default; the note's own copy takes the palette.
+   A listing is a place to scan titles, so its chips stay quiet and let the
+   titles lead -- but on the note itself the keywords open the page, and the
+   colour belongs with everything else on it. */
 .notes-site .keywords .kw {
   font-size: 13px;
   line-height: 1.5;
@@ -172,6 +183,17 @@
   border: 1px solid var(--n-edge);
   background: var(--n-panel-2);
 }
+.notes-site .keywords:not(.row) .kw {
+  color: var(--n-on-fill);
+  border-color: transparent;
+  background: var(--kw-hue, var(--n-violet));
+}
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 1) { --kw-hue: var(--n-violet); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 2) { --kw-hue: var(--n-teal); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 3) { --kw-hue: var(--n-rose); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 4) { --kw-hue: var(--n-sage); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 5) { --kw-hue: var(--n-clay); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 6) { --kw-hue: var(--n-ochre); }
 
 /* The listing variant: one size down, sitting under each row's one-line
    description. */
