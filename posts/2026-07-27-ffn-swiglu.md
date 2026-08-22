@@ -5,6 +5,7 @@ date: 2026-07-27
 tags: llm
 icon: 🍵
 length: long
+draft: true
 ---
 
 Attention gets the attention. It is the part of a transformer with the famous

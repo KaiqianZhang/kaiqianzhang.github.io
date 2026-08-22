@@ -4,6 +4,7 @@ subtitle: How a model lets each word look at the others, and why the formula div
 date: 2026-06-24
 tags: llm
 icon: 🍵
+draft: true
 ---
 I want to explain attention, which is the mechanism that made modern language
 models possible. If you have read anything about how these models work you

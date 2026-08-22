@@ -4,6 +4,7 @@ subtitle: What the frontier of AI for science actually looks like, from one day 
 date: 2026-08-17
 tags: uncat
 icon: 🍵
+draft: true
 ---
 
 I spent a day at the Agentic Biolab Workshop, run by Princeton's

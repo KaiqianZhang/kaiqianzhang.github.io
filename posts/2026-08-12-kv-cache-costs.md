@@ -4,6 +4,7 @@ subtitle: The buffer that makes generation affordable is the reason serving a la
 date: 2026-08-12
 tags: llm
 icon: 🍵
+draft: true
 ---
 
 I wrote a post about [the KV cache](/blog/2026/08/04/kv-cache/), which is the

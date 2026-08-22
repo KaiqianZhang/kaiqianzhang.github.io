@@ -5,6 +5,7 @@ date: 2026-07-18
 tags: llm
 icon: 🍵
 length: long
+draft: true
 ---
 
 I want to write about a decision that looks like nothing at all: which of

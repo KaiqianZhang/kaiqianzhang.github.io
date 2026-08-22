@@ -5,6 +5,7 @@ date: 2026-06-16
 tags: llm
 icon: 🍵
 length: long
+draft: true
 ---
 
 For a while now I have kept a mindmap of how language models got to where they
