@@ -5,3 +5,13 @@
 __pycache__/
 *.pyc
 .DS_Store
+# Sync-client conflict copies. build.py deletes and recreates docs/ on every
+# build; a file-sync client (iCloud, Dropbox) sees that as a conflict and
+# leaves "index 2.html", ".nojekyll 2" and friends behind. They are stale
+# generated output, never worth committing, and `git add -A` would sweep
+# them in. Scoped to docs/ so a legitimately named figure elsewhere -- say
+# "Figure 2.png" -- is unaffected.
+docs/**/* [0-9]
+docs/**/* [0-9].*
+docs/* [0-9]
+docs/* [0-9].*
