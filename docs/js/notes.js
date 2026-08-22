@@ -166,11 +166,26 @@
       });
     });
 
+    /* Every animated class, spelled out. A restart has to touch the exact
+       elements, and `[class*="a-"]` would also catch anything else that
+       happens to contain those two characters. */
+    var ANIMATED = ['.a-draw', '.a-rise', '.a-fade', '.a-grow', '.a-wide',
+                    '.a-pop', '.a-drop', '.a-slide', '.a-flow', '.a-beat',
+                    '.a-glow', '.a-vanish'].join(',');
+
     function play(fig) {
+      /* Toggling `is-playing` alone only flips animation-play-state, and
+         every animation here is `forwards` -- once it has finished, resuming
+         it just holds the last frame, so Replay appeared to do nothing. The
+         animation has to be destroyed and rebuilt: drop it inline, force a
+         reflow so the removal is committed, then hand it back. Clearing the
+         inline value restores the stylesheet's own animation, delays and all,
+         and leaves the --d custom properties on the element untouched. */
+      var nodes = $$(fig, ANIMATED);
       fig.classList.remove('is-playing');
-      // Force a reflow so removing and re-adding the class restarts the
-      // animations rather than being coalesced into no change at all.
+      nodes.forEach(function (node) { node.style.animation = 'none'; });
       void fig.offsetWidth;
+      nodes.forEach(function (node) { node.style.animation = ''; });
       fig.classList.add('is-playing');
     }
 
