@@ -6,80 +6,120 @@ tags: llm
 format: three-part
 ---
 
+<div class='nfig wide roadmap'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 700 326' role='img' aria-label='A braced tree of the post: three sections, each expanding into the ideas it covers'>
+<text x='14' y='189.5' class='lbl bg a-pop' style='--d:0.00s;fill:var(--w-plum)'>RoPE and iRoPE</text>
+<path d='M142.0 65.0 C138.7 65.0, 138.7 178.5, 120.0 184.5 C138.7 190.5, 138.7 304.0, 142.0 304.0' fill='none' stroke='var(--w-plum)' stroke-width='2.4' stroke-linecap='round' class='a-draw' style='--d:0.25s;--dur:0.9s'/>
+<circle cx='152' cy='65.0' r='4' fill='var(--w-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
+<text x='164' y='70.0' class='lbl a-rise' style='--d:0.50s;fill:var(--w-student)'>① Learning together</text>
+<rect x='306' y='55.0' width='44' height='19' rx='9' fill='var(--w-student)' fill-opacity='0.16' class='a-pop' style='--d:0.62s'/>
+<text x='328' y='69.0' class='lbl sm mid a-fade' style='--d:0.72s;fill:var(--w-student)'>5 min</text>
+<path d='M388.0 26.0 C384.7 26.0, 384.7 59.0, 366.0 65.0 C384.7 71.0, 384.7 104.0, 388.0 104.0' fill='none' stroke='var(--w-student)' stroke-width='2.0' stroke-linecap='round' class='a-draw' style='--d:0.95s;--dur:0.9s'/>
+<text x='396' y='30.0' class='lbl sm a-rise' style='--d:1.15s'>position becomes an angle that cancels</text>
+<text x='396' y='56.0' class='lbl sm a-rise' style='--d:1.22s'>a bank of dials, fast to slow</text>
+<text x='396' y='82.0' class='lbl sm a-rise' style='--d:1.29s'>long-range decay, and the floor under it</text>
+<text x='396' y='108.0' class='lbl sm a-rise' style='--d:1.36s'>iRoPE — drop position in some layers</text>
+<circle cx='152' cy='204.0' r='4' fill='var(--w-teacher)' class='a-beat' style='--dur:2.2s;--d:0.65s'/>
+<text x='164' y='209.0' class='lbl a-rise' style='--d:0.65s;fill:var(--w-teacher)'>② Inspire together</text>
+<rect x='306' y='194.0' width='44' height='19' rx='9' fill='var(--w-teacher)' fill-opacity='0.16' class='a-pop' style='--d:0.77s'/>
+<text x='328' y='208.0' class='lbl sm mid a-fade' style='--d:0.87s;fill:var(--w-teacher)'>4 min</text>
+<path d='M388.0 152.0 C384.7 152.0, 384.7 198.0, 366.0 204.0 C384.7 210.0, 384.7 256.0, 388.0 256.0' fill='none' stroke='var(--w-teacher)' stroke-width='2.0' stroke-linecap='round' class='a-draw' style='--d:1.13s;--dur:0.9s'/>
+<text x='396' y='156.0' class='lbl sm a-rise' style='--d:1.33s'>stretch the bands — PI, NTK, YaRN</text>
+<text x='396' y='182.0' class='lbl sm a-rise' style='--d:1.40s'>raise the base — and the bound on it</text>
+<text x='396' y='208.0' class='lbl sm a-rise' style='--d:1.47s'>drop position — NoPE, RNoPE, SWAN, iRoPE</text>
+<text x='396' y='234.0' class='lbl sm a-rise' style='--d:1.54s'>fix the softmax — SSMax</text>
+<text x='396' y='260.0' class='lbl sm a-rise' style='--d:1.61s'>where this could go — five openings</text>
+<circle cx='152' cy='304.0' r='4' fill='var(--w-loss)' class='a-beat' style='--dur:2.6s;--d:0.80s'/>
+<text x='164' y='309.0' class='lbl a-rise' style='--d:0.80s;fill:var(--w-loss)'>③ Chat together</text>
+<rect x='306' y='294.0' width='44' height='19' rx='9' fill='var(--w-loss)' fill-opacity='0.16' class='a-pop' style='--d:0.92s'/>
+<text x='328' y='308.0' class='lbl sm mid a-fade' style='--d:1.02s;fill:var(--w-loss)'>1 min</text>
+<path d='M366 304.0 L388 304.0' fill='none' stroke='var(--w-loss)' stroke-width='2' stroke-linecap='round' class='a-draw' style='--d:1.31s'/>
+<text x='396' y='308.0' class='lbl sm a-rise' style='--d:1.51s'>six things you could say out loud</text>
+</svg>
+</div>
+
 ## Learning together
 
 Attention is a set operation: strip position out and *"the dog bit the man"*
 and *"the man bit the dog"* are the same input. **RoPE** — rotary position
-embedding — is how almost every open model puts the order back.
+embedding — is how almost every open model puts the order back, and I still
+think it is the prettiest idea in the modern transformer.
 
-The trick fits in a line. Take the query and key two coordinates at a time,
-read each pair as a point on a dial, and **turn it by an angle proportional to
-the token's position**.
+The trick fits in a line. Take the query and key **two coordinates at a
+time** — I will call each such pair a **band** — read each band as a point on
+a dial, and **turn that dial by an angle proportional to the token's
+position**.
 
 $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 \langle R_m q,\; R_n k\rangle = \langle q,\; R_{n-m} k\rangle$$
 
-That equality is the whole design. Rotating both and then taking the dot
-product leaves a rotation by $n-m$ — **the difference of the two positions**.
-Absolute position is injected and then deliberately cancels.
+That equality is the whole design, and if you remember one line from me, I
+would like it to be this one. Rotating both and then taking the dot product
+leaves a rotation by $n-m$ — **the difference of the two positions**. Absolute
+position is injected and then deliberately cancels.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 700 292' role='img' aria-label='Three dials turning at very different speeds, each carrying a query arrow and a key arrow with a fixed wedge between them'>
-<text x='16' y='24' class='lbl sm'>one head is a bank of dials. every dial turns by its own angle per token; the gap between the two arrows never changes.</text>
-<circle cx='138' cy='138' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='190.0' y1='138.0' x2='200.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='138.0' y1='190.0' x2='138.0' y2='200.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='86.0' y1='138.0' x2='76.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='138.0' y1='86.0' x2='138.0' y2='76.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<g class='a-spin' style='--dur:6.0s;--ox:138px;--oy:138px'>
-<path d='M138 138 L188.0 138.0 A50 50 0 0 0 166.7 97.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
-<line x1='138' y1='138' x2='196.0' y2='138.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
-<line x1='138' y1='138' x2='171.3' y2='90.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
+<svg viewBox='0 0 700 300' role='img' aria-label='Three dials on one clock, turning at rates proportional to their real wavelengths, each carrying a query arrow and a key arrow with a fixed wedge between them'>
+<text x='16' y='22' class='lbl sm'>a band is one pair of coordinates, read as a dial. a head runs d/2 of them, each turning by its own angle per token.</text>
+<text x='16' y='40' class='lbl sm'>all three run off one clock — by the time the first has gone round 32 times, the third has turned once.</text>
+<circle cx='138' cy='150' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='190.0' y1='150.0' x2='200.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='138.0' y1='202.0' x2='138.0' y2='212.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='86.0' y1='150.0' x2='76.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='138.0' y1='98.0' x2='138.0' y2='88.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<g class='a-spin' style='--dur:1.9s;--ox:138px;--oy:150px'>
+<path d='M138 150 L188.0 150.0 A50 50 0 0 0 166.7 109.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
+<line x1='138' y1='150' x2='196.0' y2='150.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
+<line x1='138' y1='150' x2='171.3' y2='102.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
 </g>
-<circle cx='138' cy='138' r='4' fill='var(--w-dim)'/>
-<text x='138' y='230' class='lbl mid'>band 0</text>
-<text x='138' y='248' class='lbl sm mid'>one turn every 6.3 tokens</text>
-<circle cx='356' cy='138' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='408.0' y1='138.0' x2='418.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='356.0' y1='190.0' x2='356.0' y2='200.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='304.0' y1='138.0' x2='294.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='356.0' y1='86.0' x2='356.0' y2='76.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<g class='a-spin' style='--dur:13.0s;--ox:356px;--oy:138px'>
-<path d='M356 138 L406.0 138.0 A50 50 0 0 0 384.7 97.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
-<line x1='356' y1='138' x2='414.0' y2='138.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
-<line x1='356' y1='138' x2='389.3' y2='90.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
+<circle cx='138' cy='150' r='4' fill='var(--w-dim)'/>
+<text x='138' y='242' class='lbl mid'>band 0</text>
+<text x='138' y='260' class='lbl sm mid'>one turn every 6.3 tokens</text>
+<circle cx='356' cy='150' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='408.0' y1='150.0' x2='418.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='356.0' y1='202.0' x2='356.0' y2='212.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='304.0' y1='150.0' x2='294.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='356.0' y1='98.0' x2='356.0' y2='88.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<g class='a-spin' style='--dur:10.7s;--ox:356px;--oy:150px'>
+<path d='M356 150 L406.0 150.0 A50 50 0 0 0 384.7 109.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
+<line x1='356' y1='150' x2='414.0' y2='150.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
+<line x1='356' y1='150' x2='389.3' y2='102.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
 </g>
-<circle cx='356' cy='138' r='4' fill='var(--w-dim)'/>
-<text x='356' y='230' class='lbl mid'>band 24</text>
-<text x='356' y='248' class='lbl sm mid'>one turn every 198 tokens</text>
-<circle cx='574' cy='138' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='626.0' y1='138.0' x2='636.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='574.0' y1='190.0' x2='574.0' y2='200.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='522.0' y1='138.0' x2='512.0' y2='138.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<line x1='574.0' y1='86.0' x2='574.0' y2='76.0' stroke='var(--w-edge)' stroke-width='1.5'/>
-<g class='a-spin' style='--dur:34.0s;--ox:574px;--oy:138px'>
-<path d='M574 138 L624.0 138.0 A50 50 0 0 0 602.7 97.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
-<line x1='574' y1='138' x2='632.0' y2='138.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
-<line x1='574' y1='138' x2='607.3' y2='90.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
+<circle cx='356' cy='150' r='4' fill='var(--w-dim)'/>
+<text x='356' y='242' class='lbl mid'>band 12</text>
+<text x='356' y='260' class='lbl sm mid'>one turn every 35.3 tokens</text>
+<circle cx='574' cy='150' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='626.0' y1='150.0' x2='636.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='574.0' y1='202.0' x2='574.0' y2='212.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='522.0' y1='150.0' x2='512.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<line x1='574.0' y1='98.0' x2='574.0' y2='88.0' stroke='var(--w-edge)' stroke-width='1.5'/>
+<g class='a-spin' style='--dur:60.1s;--ox:574px;--oy:150px'>
+<path d='M574 150 L624.0 150.0 A50 50 0 0 0 602.7 109.0 Z' fill='var(--w-loss)' fill-opacity='0.22'/>
+<line x1='574' y1='150' x2='632.0' y2='150.0' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
+<line x1='574' y1='150' x2='607.3' y2='102.5' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
 </g>
-<circle cx='574' cy='138' r='4' fill='var(--w-dim)'/>
-<text x='574' y='230' class='lbl mid'>band 56</text>
-<text x='574' y='248' class='lbl sm mid'>one turn every 19,869 tokens</text>
-<text x='16' y='286' class='lbl sm' style='fill:var(--w-student)'>query</text>
-<text x='66' y='286' class='lbl sm' style='fill:var(--w-teacher)'>key</text>
-<text x='104' y='286' class='lbl sm' style='fill:var(--w-loss)'>the gap that survives the dot product</text>
+<circle cx='574' cy='150' r='4' fill='var(--w-dim)'/>
+<text x='574' y='242' class='lbl mid'>band 24</text>
+<text x='574' y='260' class='lbl sm mid'>one turn every 198 tokens</text>
+<line x1='16' y1='290' x2='34' y2='290' stroke='var(--w-student)' stroke-width='3.5' stroke-linecap='round'/>
+<text x='40' y='294' class='lbl sm' style='fill:var(--w-student)'>query</text>
+<line x1='75' y1='290' x2='93' y2='290' stroke='var(--w-teacher)' stroke-width='3.5' stroke-linecap='round'/>
+<text x='99' y='294' class='lbl sm' style='fill:var(--w-teacher)'>key</text>
+<rect x='122' y='284' width='18' height='12' rx='3' fill='var(--w-loss)' fill-opacity='0.35'/>
+<text x='146' y='294' class='lbl sm' style='fill:var(--w-loss)'>the gap that survives the dot product</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> Three of the dials in one head. Both arrows rotate with absolute position; the wedge between them — the only thing the dot product sees — never changes. Band 0 turns every 6 tokens, band 56 every 20,000.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, turning at rates proportional to their real wavelengths. Both arrows rotate with position; the wedge between them never changes. I stopped at band 24 because band 56 turns three thousand times slower, and no animation shows that honestly.</div>
 </div>
 
-A head does not run one dial. It runs $d/2$ of them, at angles
+A head does not run one dial. It runs one per band, $d/2$ in all, at angles
 
 $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 
 which for the usual base of 10,000 spans **four orders of magnitude**. Band 0
 completes a turn every 6 tokens; band 56 takes about 20,000. That spread is
-the part worth holding on to:
+the part I want you to hold on to:
 
 - **Fast bands are a local ruler.** They resolve "three tokens back" sharply,
   and wrap uselessly over long distances.
@@ -92,16 +132,16 @@ the part worth holding on to:
   context method in the literature is a decision about what to do with the
   slow end of this bank.
 
-### 远程衰减: the decay that was sold as a feature
+### Long-range decay, which was sold as a feature
 
-Now put two tokens that genuinely match — a query and key that agree across
-the bands — and slide them apart.
+Here is the part I find genuinely uncomfortable. Put two tokens that really
+do match — a query and key that agree across the bands — and slide them
+apart.
 
 At distance zero every band contributes fully. As distance grows each band
 turns at its own rate, they fall out of step, and their contributions start
-cancelling. The score falls. This is **远程衰减**, long-range decay, which the
-original RoPE paper presents as a feature: nearby tokens naturally matter
-more.
+cancelling. The score falls. This is **long-range decay**, which the original
+RoPE paper presents as a feature: nearby tokens naturally matter more.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -123,17 +163,17 @@ more.
 <line x1='62' y1='150.6' x2='652' y2='150.6' stroke='var(--w-pruned)' stroke-width='1.6' stroke-dasharray='5 4' class='a-breathe' style='--dur:3.4s;--lo:0.45;--hi:1'/>
 <text x='70' y='143.6' class='lbl sm' style='fill:var(--w-pruned)'>noise floor &#8212; an unrelated pair scores this much</text>
 <path d='M62.0 43.8 L107.4 53.1 L133.9 63.3 L152.8 70.4 L167.4 73.2 L179.3 73.4 L189.4 73.9 L198.2 76.1 L205.9 79.3 L212.8 81.8 L219.0 82.8 L224.7 82.7 L229.9 83.0 L234.8 84.4 L239.3 86.4 L243.5 88.0 L247.5 88.4 L254.8 88.3 L261.3 91.2 L267.3 92.4 L272.8 92.0 L277.8 94.8 L282.5 95.6 L286.8 94.7 L290.9 97.8 L294.8 98.4 L300.2 97.7 L305.2 101.7 L309.8 97.9 L314.1 106.0 L318.1 97.4 L323.2 109.6 L327.9 99.1 L332.2 110.3 L336.3 102.5 L340.2 109.9 L344.7 104.2 L348.9 109.3 L352.9 113.1 L357.4 111.6 L361.5 119.4 L365.5 109.4 L369.8 119.2 L373.8 107.1 L378.1 113.6 L382.2 111.3 L386.0 120.8 L390.1 122.9 L394.3 117.1 L398.3 126.6 L402.4 112.0 L406.2 121.4 L410.2 119.5 L414.3 125.3 L418.3 129.3 L422.2 117.4 L426.1 126.1 L430.0 118.1 L433.9 127.9 L437.8 123.6 L441.7 134.9 L445.6 138.3 L449.5 125.2 L453.5 130.5 L457.3 130.9 L461.3 131.4 L465.1 143.7 L469.0 122.8 L473.0 137.4 L476.8 136.2 L480.6 139.4 L484.5 142.8 L488.4 132.3 L492.2 141.7 L496.1 135.3 L499.9 135.9 L503.8 136.8 L507.7 147.0 L511.6 154.7 L515.4 130.9 L519.3 152.2 L523.1 148.4 L526.9 149.4 L530.8 161.7 L534.6 142.9 L538.4 146.6 L542.3 140.1 L546.1 144.4 L549.9 164.1 L553.8 143.1 L557.6 151.6 L561.4 151.7 L565.3 149.1 L569.1 167.1 L572.9 142.3 L576.7 151.8 L580.6 152.5 L584.4 156.0 L588.2 160.8 L592.0 148.7 L595.9 157.4 L599.7 157.4 L603.5 163.7 L607.3 155.2 L611.2 164.6 L615.0 171.4 L618.8 151.5 L622.6 158.3 L626.5 158.9 L630.3 172.3 L634.1 177.2 L637.9 156.0 L641.7 174.9 L645.6 179.3 L649.4 172.0' fill='none' stroke='var(--w-student)' stroke-width='2.2' stroke-linejoin='round' class='a-draw' style='--dur:2.4s'/>
-<text x='133.9' y='57.7' class='lbl sm a-fade' style='--d:2.50s;fill:var(--w-student)'>远程衰减 &#8212; the score decays with distance</text>
+<text x='133.9' y='57.7' class='lbl sm a-fade' style='--d:2.50s;fill:var(--w-student)'>the score decays with distance</text>
 <line x1='561.2' y1='34.0' x2='561.2' y2='172.4' stroke='var(--w-loss)' stroke-width='1.6' stroke-dasharray='4 4'/>
 <text x='561.2' y='28.0' class='lbl sm mid' style='fill:var(--w-loss)'>trained length</text>
 <text x='571.6' y='110.8' class='lbl sm a-fade' style='--d:3.00s;fill:var(--w-loss)'>past here it is not</text>
 <text x='571.6' y='126.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--w-loss)'>decaying, it is rattling</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, computed from the real bank at base 10,000. It falls — 远程衰减 — then stops falling and levels out at what an unrelated pair scores.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, computed from the real bank at base 10,000. It falls — that is the long-range decay — then stops falling and levels out at what an unrelated pair scores.</div>
 </div>
 
-It is desirable right up until it isn't. The problem is not that the score
-decays; it is **what it decays to**:
+It is desirable right up until it isn't, and it took me a while to see why.
+The problem is not that the score decays; it is **what it decays to**:
 
 - An unrelated query and key do not score zero. They score around
   $1/\sqrt{d/2}$ — random phases adding up to a nonzero floor.
@@ -144,8 +184,8 @@ decays; it is **what it decays to**:
   starts oscillating around the floor, because the model has never seen those
   rotation angles and has no reason to behave smoothly there.
 
-That is the ceiling — not an implementation bug but the geometry of adding up
-rotating vectors, and why a model trained at 8K does not merely get *worse* at
+That, to me, is the ceiling — not an implementation bug but the geometry of
+adding up rotating vectors, and why a model trained at 8K does not merely get *worse* at
 100K but stops discriminating at all.
 
 <div class='lab wide' id='decay-lab'>
@@ -178,7 +218,7 @@ rotating vectors, and why a model trained at 8K does not merely get *worse* at
 
 ### iRoPE: stop encoding position in some layers
 
-The counterintuitive fix, and the one the field converged on: **in some
+The fix I did not see coming, and the one the field converged on: **in some
 layers, encode no position at all.**
 
 A layer with no positional encoding is not orderless. Causal masking already
@@ -258,14 +298,15 @@ and it is what Llama 4 Scout uses to claim a 10M context.
 
 ## Inspire together
 
-One question, six families of answer: **what to do about the slow bands.**
+I read all of it as one question asked six ways: **what to do about the slow
+bands.**
 
 **Stretch them.**
 
-- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — divide every position index by the stretch factor. Uniform, so it blunts the fast bands.
-- **NTK-aware scaling** — raise the base instead: slow bands stretch a lot, fast bands barely. Community-invented, never published, universally used.
+- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — divide every position index by the stretch factor. Uniform, so it blunts the fast bands too.
+- **NTK-aware scaling** — raise the base: slow bands stretch a lot, fast bands barely. Community-invented, never published, universally used.
 - **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) — NTK-by-parts: leave bands that already turn often alone, fully interpolate the ones that barely turn, ramp between. Plus attention temperature $t = 0.1\ln s + 1$. Llama 3.1 uses this.
-- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the per-band rescaling instead of deriving it; near-lossless 128K.
+- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the per-band rescaling rather than deriving it.
 
 **Raise the base.**
 
@@ -570,14 +611,15 @@ One question, six families of answer: **what to do about the slow bands.**
 
 - **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance. And the base **trades distinguishing positions against distinguishing tokens, and cannot keep both.**
 - **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — across OLMo-2, Qwen, Llama and Gemma: masking OLMo-2's 87 retrieval heads drops recall from 1.00 to 0.00, and zeroing only the 32 lowest-frequency RoPE dimensions inside them drops it to 0.18. The long-range machinery lives in exactly the bands that break first.
-- **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the proportion of obtuse angles between query and key sub-vectors, predicts it: above ~50% the score fluctuates instead of decaying, and long-context post-training mostly works by *lowering* it.
+- **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the share of obtuse angles between query and key sub-vectors, predicts it: above ~50% the score fluctuates instead of decaying, and long-context post-training mostly works by *lowering* it.
 
 ### Where this could go
 
-Each sits in a gap between two of the papers above.
+Each sits in a gap between two papers above, and I would happily take any.
 
 - **Give the slow bands to the heads measured to need them.** AdaRoPE *learns* per-head frequencies; the retrieval-head work *identifies* which heads do the long-range copying. Join them — allocate by measurement, not gradient. The detector exists.
 - **Make POCP an objective, not a diagnostic.** It predicts decay failure before the loss does, and post-training already lowers it by accident.
+
 - **Derive the interleave ratio.** RNoPE, SWAN-GPT and iRoPE all pick "every fourth layer" by hand. Predict the right NoPE fraction from POCP or a head census and a hyperparameter becomes a measurement.
 - **Test whether SSMax and NoPE are redundant.** Same symptom, opposite ends, and Llama 4 ships both. If SSMax cuts how many NoPE layers you need, nobody has measured it.
 - **Build the benchmark the negative result implies.** Du et al. prove *two* failures — position and token indistinguishability. Needle-in-a-haystack conflates them, and saturates.
@@ -611,7 +653,7 @@ Each sits in a gap between two of the papers above.
 </div>
 <div class='verdict' id='spec-verdict'></div>
 <svg viewBox='0 0 700 210' role='img'></svg>
-<p class='cap'>Two costs. <b>Vertical</b>: how far past its trained angles each band is pushed, where 1× means it never meets an unfamiliar angle. <b>Local ruler</b>: resolution the fastest band gave up. PI buys safety with resolution; NTK and YaRN get both.</p>
+<p class='cap'>Two costs. <b>Vertical</b>: how far past its trained angles each band is pushed — 1× means it never meets an unfamiliar one. <b>Local ruler</b>: resolution the fastest band gave up. PI buys safety with resolution; NTK and YaRN get both.</p>
 </div>
 </div>
 
@@ -621,7 +663,7 @@ Each sits in a gap between two of the papers above.
 <div class='fc-head'><span class='name'>The takeaways</span><span class='hint'>six things you could say out loud</span><button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>deal again</button></div>
 <div class='fc-body'>
 <div class='card' style='--d:0.08s'><span class='q'>what RoPE does</span><span class='a'>Turns each pair of dimensions by an angle proportional to position. The rotation cancels in the dot product, so attention only sees the <em>difference</em> of two positions.</span></div>
-<div class='card' style='--d:0.21s'><span class='q'>what 远程衰减 is</span><span class='a'>A head is a bank of dials at different speeds. Two matching tokens start in phase; as they separate the dials fall out of step and cancel, so the score decays with distance.</span></div>
+<div class='card' style='--d:0.21s'><span class='q'>what long-range decay is</span><span class='a'>A head is a bank of dials at different speeds. Two matching tokens start in phase; as they separate the dials fall out of step and cancel, so the score decays with distance.</span></div>
 <div class='card' style='--d:0.34s'><span class='q'>why that is a ceiling</span><span class='a'>It decays <em>to the score an unrelated pair gets</em>. Past that point "related, far apart" and "unrelated" are the same number.</span></div>
 <div class='card' style='--d:0.47s'><span class='q'>the one design surface</span><span class='a'>Every fix is a decision about the slow bands: interpolate them, stretch them unevenly, raise the base, or delete them. That is the whole literature.</span></div>
 <div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>Interleave. Most layers keep RoPE; every fourth gets none and infers order from the causal mask. Cohere and NVIDIA published the shape; Llama 4 ships it.</span></div>
