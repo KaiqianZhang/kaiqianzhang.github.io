@@ -7,6 +7,14 @@
     <description>Notes on natural language processing, transformers, and machine learning.</description>
     <language>en</language>
     <item>
+        <title>How to Read a Paper?</title>
+        <link>https://kaiqianzhang.github.io/blog/2026/08/23/how-to-read-a-paper/</link>
+        <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/23/how-to-read-a-paper/</guid>
+        <pubDate>Sun, 23 Aug 2026 00:00:00 +0000</pubDate>
+        <description>Three passes, each one allowed to fail — the method I learned from 李沐, plus a tiered list of where to find papers worth the third pass.</description>
+    </item>
+
+    <item>
         <title>RoPE and iRoPE</title>
         <link>https://kaiqianzhang.github.io/blog/2026/08/22/rope-and-irope/</link>
         <guid isPermaLink="true">https://kaiqianzhang.github.io/blog/2026/08/22/rope-and-irope/</guid>

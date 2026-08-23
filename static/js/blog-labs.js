@@ -358,6 +358,156 @@
     draw();
   }
 
+
+  // =========================================================================
+  // Lab 3: what a real week actually holds
+  //
+  // Steady-state arithmetic over Keshav's own per-pass costs. For every paper
+  // that enters the funnel you pay t1, then s1 of them cost t2, then s1*s2 of
+  // them cost t3 -- so one triaged paper costs t1 + s1*t2 + s1*s2*t3 minutes
+  // all in, and the week's budget divided by that is how many can enter.
+  // =========================================================================
+
+  var T1 = 10, T2 = 60, T3 = 240;        // minutes per pass, Keshav 2007
+  var WEEKS_PER_MONTH = 52 / 12;
+
+  function initFunnelLab() {
+    var root = document.getElementById('funnel-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var minIn = $(root, '#fun-min');
+    var daysIn = $(root, '#fun-days');
+    var s1In = $(root, '#fun-s1');
+    var s2In = $(root, '#fun-s2');
+
+    function draw() {
+      var mins = parseFloat(minIn.value);
+      var days = parseFloat(daysIn.value);
+      var s1 = parseFloat(s1In.value) / 100;
+      var s2 = parseFloat(s2In.value) / 100;
+
+      var budget = mins * days;                        // minutes per week
+      var perPaper = T1 + s1 * T2 + s1 * s2 * T3;      // all-in cost of one
+      var n1 = budget / perPaper;
+      var n2 = n1 * s1;
+      var n3 = n2 * s2;
+      var deepPerMonth = n3 * WEEKS_PER_MONTH;
+
+      var t1 = n1 * T1, t2 = n2 * T2, t3 = n3 * T3;    // sums to budget
+
+      $(root, '#fun-min-v').textContent = mins + ' min';
+      $(root, '#fun-days-v').textContent = days;
+      $(root, '#fun-s1-v').textContent = Math.round(s1 * 100) + '%';
+      $(root, '#fun-s2-v').textContent = Math.round(s2 * 100) + '%';
+
+      $(root, '#fun-stat-1').innerHTML =
+          n1.toFixed(1) + ' <small>a week</small>';
+      $(root, '#fun-stat-2').innerHTML =
+          n2.toFixed(1) + ' <small>a week</small>';
+      $(root, '#fun-stat-3').innerHTML =
+          deepPerMonth.toFixed(1) + ' <small>a month</small>';
+
+      var v = $(root, '#fun-verdict');
+      if (deepPerMonth < 0.5) {
+        v.className = 'verdict bad';
+        v.textContent = 'At ' + budget + ' minutes a week you finish a third ' +
+            'pass about once every ' + (1 / deepPerMonth).toFixed(1) +
+            ' months. You are triaging, not reading — fine for a survey, ' +
+            'fatal if you are meant to be building on something.';
+      } else if (n1 < 3) {
+        v.className = 'verdict warn';
+        v.textContent = 'Only ' + n1.toFixed(1) + ' papers reach a first pass ' +
+            'each week, so almost nothing is being rejected — the funnel is ' +
+            'too narrow at the top to be choosing well. Widen it before you ' +
+            'deepen it.';
+      } else if (deepPerMonth > 6) {
+        v.className = 'verdict warn';
+        v.textContent = deepPerMonth.toFixed(1) + ' rebuilt papers a month is ' +
+            'more than most full-time researchers manage. Worth checking that ' +
+            'what you are calling a third pass is not a careful second one.';
+      } else {
+        v.className = 'verdict';
+        v.textContent = n1.toFixed(1) + ' triaged a week, ' + n2.toFixed(1) +
+            ' read through, ' + deepPerMonth.toFixed(1) + ' rebuilt a month. ' +
+            'That is a working funnel: wide enough at the top to reject, ' +
+            'narrow enough at the bottom to finish something.';
+      }
+
+      // ---- the drawing ----------------------------------------------------
+      clear(svg);
+      var x0 = 168, wMax = 396;
+      var rows = [
+        ['pass 1 · triage',      n1, T1, 'var(--w-student)', n1.toFixed(1) + ' / week'],
+        ['pass 2 · read through', n2, T2, 'var(--w-teacher)', n2.toFixed(1) + ' / week'],
+        ['pass 3 · rebuild',      n3, T3, 'var(--w-loss)',
+         deepPerMonth.toFixed(1) + ' / month']
+      ];
+      var top = n1 > 0 ? n1 : 1;
+
+      rows.forEach(function (r, i) {
+        var y = 26 + 50 * i;
+        var w = Math.max(2, wMax * (r[1] / top));
+        svg.appendChild(el('rect', {
+          x: x0, y: y, width: wMax, height: 34, rx: 8,
+          fill: 'var(--w-grid)'
+        }));
+        svg.appendChild(el('rect', {
+          x: x0, y: y, width: w, height: 34, rx: 8,
+          fill: r[3], 'fill-opacity': 0.85, 'class': 'bar'
+        }));
+        svg.appendChild(el('text', {
+          x: x0 - 12, y: y + 22, 'class': 'lbl sm end'
+        }, r[0]));
+        svg.appendChild(el('text', {
+          x: x0 + w + 10, y: y + 22, 'class': 'lbl sm',
+          style: 'fill:' + r[3]
+        }, r[4]));
+        // only label inside the bar when there is room; a narrow pass-3 bar
+        // would otherwise collide with its own count on the right.
+        if (w > 96) {
+          svg.appendChild(el('text', {
+            x: x0 + 12, y: y + 22, 'class': 'lbl sm on'
+          }, r[2] + ' min each'));
+        }
+      });
+
+      // where the minutes go
+      var by = 196, bw = wMax;
+      svg.appendChild(el('text', { x: x0 - 12, y: by + 20, 'class': 'lbl sm end' },
+                         'the week’s minutes'));
+      var segs = [[t1, 'var(--w-student)'], [t2, 'var(--w-teacher)'],
+                  [t3, 'var(--w-loss)']];
+      var cx = x0;
+      segs.forEach(function (s) {
+        var w = bw * (s[0] / budget);
+        svg.appendChild(el('rect', {
+          x: cx, y: by, width: Math.max(0, w), height: 30,
+          fill: s[1], 'fill-opacity': 0.85, 'class': 'bar'
+        }));
+        if (w > 40) {
+          svg.appendChild(el('text', {
+            x: cx + w / 2, y: by + 20, 'class': 'lbl sm mid on'
+          }, Math.round(100 * s[0] / budget) + '%'));
+        }
+        cx += w;
+      });
+      svg.appendChild(el('text', {
+        x: x0 + bw + 10, y: by + 20, 'class': 'lbl sm'
+      }, commas(budget) + ' min'));
+      svg.appendChild(el('text', { x: x0, y: 16, 'class': 'lbl sm' },
+                         'one triaged paper costs ' + perPaper.toFixed(0) +
+                         ' minutes all in, third pass included'));
+    }
+
+    onInput(minIn, draw);
+    onInput(daysIn, draw);
+    onInput(s1In, draw);
+    onInput(s2In, draw);
+    draw();
+  }
+
   initDecayLab();
   initSpectrumLab();
+  initFunnelLab();
 }());
