@@ -55,18 +55,11 @@ icon: 📄
 </svg>
 </div>
 
-A couple of hundred papers land on arXiv every weekday. So how do you read
-one?
-
-The best answer I know is not mine. It is **李沐 (Mu Li)**'s, and it goes back
-to a two-page note by **S. Keshav** from 2007. I met it in a Zhihu write-up, I
-have used it ever since, and this is my English rendering — all credited at
-the end.
-
-The idea: **read a paper three times, and let yourself stop after any of
-them.**
-
-That last part took me the longest to accept.
+A couple of hundred papers land on arXiv every weekday, and I still find
+reading even one of them properly hard. The method I lean on is not mine — it
+comes from 李沐's 论文精读, and before that a two-page note by S. Keshav, both
+credited at the end. The idea: **read a paper three times, and let yourself
+stop after any of them.**
 
 ## One · What a paper is made of
 
