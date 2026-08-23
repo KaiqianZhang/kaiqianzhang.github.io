@@ -15,3 +15,7 @@ docs/**/* [0-9]
 docs/**/* [0-9].*
 docs/* [0-9]
 docs/* [0-9].*
+
+# Wrangler writes account id/name into this cache on every deploy. Generated,
+# never useful to anyone else, and not something to publish.
+worker/.wrangler/
