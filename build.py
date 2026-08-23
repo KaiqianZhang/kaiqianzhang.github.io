@@ -389,7 +389,13 @@ def reading_time(body):
 
 def prose_minutes(body):
     """Fractional minutes, so a budget can be checked before rounding."""
-    text = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
+    # A reference list is looked up, not read start to finish, so it belongs
+    # in neither the read-time byline nor a three-part budget. Every post ends
+    # with one, and counting it would make the ten-minute format unachievable
+    # for exactly the posts that cite the most.
+    text = re.sub(r'\n##\s+References\b.*?(?=\n## |\Z)', '\n', body,
+                  flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'```.*?```', '', text, flags=re.DOTALL)
     text = re.sub(r'<(script|style)\b.*?</\1>', '', text,
                   flags=re.DOTALL | re.IGNORECASE)
     # A drawing is not prose. Stripping tags alone leaves every axis label and

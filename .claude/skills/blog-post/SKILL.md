@@ -21,6 +21,7 @@ The work is deciding what goes inside the three parts, not what the parts are.
 | **Learning together** | ≤ 5 min | Teach the essence. Bullets for what matters. Ends with a bulleted recap. |
 | **Inspire together** | 3–4 min | The frontier: real papers, what people are doing up to today, then concrete directions. |
 | **Chat together** | ≤ 1 min | An animated flashcard of takeaways, in the words you would use with a friend. |
+| **References** | not counted | Every work the post cites, linked to the paper itself. |
 
 ### The roadmap
 
@@ -145,6 +146,31 @@ One minute. A `.flashcard` holding about six cards, each a question-shaped
 label and an answer you could say out loud. It deals itself in on scroll and
 has a *deal again* control. Keep each card to roughly 30 words — the section
 has about 220 to spend.
+
+### References
+
+**Every post ends with `## References`.** No exceptions, including posts that
+are not about papers — a post adapting somebody else's idea credits them here
+too.
+
+- **List every work the post cites**, in the order the post meets it, and link
+  the **paper itself** rather than a summary, a blog post about it, or a
+  search result.
+- **Verify every link before pushing.** A 404 in a reference list is worse
+  than no reference list. Check the fetched page's title actually matches the
+  work you are citing.
+- **Never invent an author line.** If you are not certain of the authors, cite
+  the lab or the title alone. "Cohere, 2025" is honest; a guessed *et al.* is
+  not.
+- Say so when a method has **no paper** — several widely used tricks were only
+  ever forum posts, and that is worth telling the reader.
+- A one-clause note after each entry, saying why it is there, is worth its
+  space. It is what makes the list usable rather than decorative.
+- **It costs nothing against the budget.** `prose_minutes` in `build.py`
+  strips a trailing `## References` section from the read time, because a
+  bibliography is looked up rather than read start to finish. This is why the
+  rule is affordable on a ten-minute post — do not "make room" for references
+  by cutting the writing.
 
 ## Voice
 

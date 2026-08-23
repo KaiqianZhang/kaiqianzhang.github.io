@@ -685,6 +685,29 @@ Each sits in a gap between two papers above, and I would take any of them.
 <div class='card' style='--d:0.34s'><span class='q'>why that is a ceiling</span><span class='a'>It decays <em>to the score an unrelated pair gets</em> — past which "related, far apart" and "unrelated" are one number.</span></div>
 <div class='card' style='--d:0.47s'><span class='q'>the one design surface</span><span class='a'>Every fix is a decision about the slow bands: interpolate them, stretch them unevenly, raise the base, or delete them. That is the whole literature as I read it.</span></div>
 <div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>Interleave. Most layers keep RoPE; every fourth gets none and infers order from the causal mask. Cohere and NVIDIA published it; Llama 4 ships it.</span></div>
-<div class='card' style='--d:0.73s'><span class='q'>what to argue about</span><span class='a'>A 2026 proof says the base trades position-discrimination against token-discrimination and cannot keep both. If it holds, rescaling never I do not think rescaling ever saves RoPE.</span></div>
+<div class='card' style='--d:0.73s'><span class='q'>what to argue about</span><span class='a'>A 2026 proof says the base trades position-discrimination against token-discrimination and cannot keep both. If it holds, I do not think rescaling ever saves RoPE.</span></div>
 </div>
 </div>
+
+## References
+
+Everything cited above, in the order the post meets it. Titles link to the
+paper itself rather than to a summary of it.
+
+1. Su et al. [RoFormer: Enhanced Transformer with Rotary Position Embedding](https://arxiv.org/abs/2104.09864), 2021 — the original RoPE, and where long-range decay is offered as a feature.
+2. Chen et al. [Extending Context Window of Large Language Models via Positional Interpolation](https://arxiv.org/abs/2306.15595), 2023 — Position Interpolation.
+3. Peng et al. [YaRN: Efficient Context Window Extension of Large Language Models](https://arxiv.org/abs/2309.00071), 2023 — the rescaling Llama 3.1 ships.
+4. Microsoft. [LongRoPE2: Near-Lossless LLM Context Window Scaling](https://arxiv.org/abs/2502.20082), 2025 — searches the rescaling rather than deriving it.
+5. Men et al. [Base of RoPE Bounds Context Length](https://arxiv.org/abs/2405.14591), NeurIPS 2024 — the lower bound on the base for a target length.
+6. Kazemnejad et al. [The Impact of Positional Encoding on Length Generalization in Transformers](https://arxiv.org/abs/2305.19466), NeurIPS 2023 — NoPE.
+7. Cohere. [RoPE to NoPE and Back Again: A New Hybrid Attention Strategy](https://arxiv.org/abs/2501.18795), 2025 — RNoPE, and why retrieval concentrates in the NoPE layers.
+8. NVIDIA. [SWAN-GPT: An Efficient and Scalable Approach for Long-Context Language Modeling](https://arxiv.org/abs/2504.08719), 2025.
+9. Meta. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/), 2025 — iRoPE, shipped at scale.
+10. Nakanishi. [Scalable-Softmax Is Superior for Attention](https://arxiv.org/abs/2501.19399), 2025 — SSMax.
+11. [AdaRoPE: Not All Attention Heads Should Rotate and Scale Equally](https://arxiv.org/abs/2607.19363), 2026 — learnable per-head frequencies.
+12. Du et al. [RoPE Distinguishes Neither Positions Nor Tokens in Long Contexts, Provably](https://arxiv.org/abs/2605.15514), 2026 — the negative result, and the one I would read first.
+13. [Does RoPE Prevent or Degrade Retrieval Heads? A Mechanistic Analysis](https://arxiv.org/abs/2606.21249), 2026 — retrieval heads run on the slow bands.
+14. [Why RoPE Struggles to Maintain Long-Term Decay in Long Sequences?](https://iclr-blogposts.github.io/2025/blog/pocp/) ICLR 2025 blogpost — POCP.
+
+NTK-aware scaling is the one method here with no paper: it was proposed in a
+community thread, never written up, and is used everywhere regardless.
