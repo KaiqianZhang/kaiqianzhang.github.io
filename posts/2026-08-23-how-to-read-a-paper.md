@@ -563,7 +563,7 @@ Which is fine, as long as you know which pass you are in.
    知乎专栏, 5 May 2022. The write-up this post follows — its structure, its
    order, and its three third-pass questions are all from here. I have
    rendered it in English in my own words rather than translating it, and I
-   have left out its aside about 学术范.
+   have left out its one promotional aside.
 2. 李沐 (Mu Li). [如何读论文【论文精读·1】](https://www.bilibili.com/video/BV1H44y1t75x/),
    bilibili, 2021 — the video the above is a write-up of, and the origin of
    the three-pass framing in its Chinese-language form. Series index:
