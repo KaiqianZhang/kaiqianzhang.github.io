@@ -55,21 +55,18 @@ icon: 📄
 </svg>
 </div>
 
-I get asked this more than anything else by people starting out. A couple of
-hundred new machine-learning papers land on arXiv every weekday, and reading
-one properly takes hours. So how does anybody keep up?
+A couple of hundred papers land on arXiv every weekday. So how do you read
+one?
 
-The best answer I know is not mine. It is **李沐 (Mu Li)**'s, from the first
-episode of his 论文精读 series, and it descends from a two-page note
-**S. Keshav** published in *SIGCOMM CCR* in 2007. I met it in a Zhihu write-up
-of that video, I have used it on every paper since, and what follows is my
-English rendering of it. Everything is credited at the end.
+The best answer I know is not mine. It is **李沐 (Mu Li)**'s, and it goes back
+to a two-page note by **S. Keshav** from 2007. I met it in a Zhihu write-up, I
+have used it ever since, and this is my English rendering — all credited at
+the end.
 
-The idea in one line: **you read a paper three times, and you are allowed —
-expected — to stop after any of them.**
+The idea: **read a paper three times, and let yourself stop after any of
+them.**
 
-That last clause took me the longest to accept. A pass that never rejects
-anything is not a filter. It is just slow reading.
+That last part took me the longest to accept.
 
 ## One · What a paper is made of
 
@@ -373,8 +370,7 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='64' width='294' height='64' rx='11' fill='var(--w-violet)' fill-opacity='0.13' stroke='var(--w-violet)' stroke-width='2' class='a-rise' style='--d:0.45s'/>
 <text x='394' y='90' class='lbl bg a-rise' style='--d:0.51s;fill:var(--w-violet)'>Could I have BUILT it?</text>
 <text x='394' y='110' class='lbl sm a-rise' style='--d:0.57s'>what method would I have reached for?</text>
-<circle cx='344' cy='96' r='5' fill='var(--w-violet)' class='a-travel' style='--dur:3.0s;--fx:-270px;--tx:0px'/>
-<circle cx='356' cy='96' r='5' fill='var(--w-violet)' class='a-travel' style='--dur:3.0s;--fx:0px;--tx:270px'/>
+<g class='a-travel' style='--dur:4.0s;--fx:-258px;--tx:258px'><circle cx='350' cy='96' r='5.5' fill='var(--w-violet)' class='a-breathe' style='--dur:4.0s;--lo:0;--hi:0.95'/></g>
 <circle cx='350' cy='96' r='16' fill='var(--w-violet)' class='a-beat' style='--dur:1.7s;--d:0.25s'/>
 <text x='350' y='101' class='lbl mid on a-fade' style='--d:0.35s'>①</text>
 <rect x='30' y='156' width='294' height='64' rx='11' class='box a-rise' style='--d:0.55s'/>
@@ -383,8 +379,7 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='156' width='294' height='64' rx='11' fill='var(--w-teal)' fill-opacity='0.13' stroke='var(--w-teal)' stroke-width='2' class='a-rise' style='--d:0.75s'/>
 <text x='394' y='182' class='lbl bg a-rise' style='--d:0.81s;fill:var(--w-teal)'>Could I have TESTED it better?</text>
 <text x='394' y='202' class='lbl sm a-rise' style='--d:0.87s'>what would my table have looked like?</text>
-<circle cx='344' cy='188' r='5' fill='var(--w-teal)' class='a-travel' style='--dur:3.4s;--fx:-270px;--tx:0px'/>
-<circle cx='356' cy='188' r='5' fill='var(--w-teal)' class='a-travel' style='--dur:3.4s;--fx:0px;--tx:270px'/>
+<g class='a-travel' style='--dur:4.5s;--fx:-258px;--tx:258px'><circle cx='350' cy='188' r='5.5' fill='var(--w-teal)' class='a-breathe' style='--dur:4.5s;--lo:0;--hi:0.95'/></g>
 <circle cx='350' cy='188' r='16' fill='var(--w-teal)' class='a-beat' style='--dur:2.0s;--d:0.55s'/>
 <text x='350' y='193' class='lbl mid on a-fade' style='--d:0.65s'>②</text>
 <rect x='30' y='248' width='294' height='64' rx='11' class='box a-rise' style='--d:0.85s'/>
@@ -393,13 +388,12 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='248' width='294' height='64' rx='11' fill='var(--w-rose)' fill-opacity='0.13' stroke='var(--w-rose)' stroke-width='2' class='a-rise' style='--d:1.05s'/>
 <text x='394' y='274' class='lbl bg a-rise' style='--d:1.11s;fill:var(--w-rose)'>Could I TAKE IT FURTHER?</text>
 <text x='394' y='294' class='lbl sm a-rise' style='--d:1.17s'>is the thing they skipped my next paper?</text>
-<circle cx='344' cy='280' r='5' fill='var(--w-rose)' class='a-travel' style='--dur:3.8s;--fx:-270px;--tx:0px'/>
-<circle cx='356' cy='280' r='5' fill='var(--w-rose)' class='a-travel' style='--dur:3.8s;--fx:0px;--tx:270px'/>
+<g class='a-travel' style='--dur:5.0s;--fx:-258px;--tx:258px'><circle cx='350' cy='280' r='5.5' fill='var(--w-rose)' class='a-breathe' style='--dur:5.0s;--lo:0;--hi:0.95'/></g>
 <circle cx='350' cy='280' r='16' fill='var(--w-rose)' class='a-beat' style='--dur:2.3s;--d:0.85s'/>
 <text x='350' y='285' class='lbl mid on a-fade' style='--d:0.95s'>③</text>
 <text x='350' y='356' class='lbl mid a-rise' style='--d:1.5s;fill:var(--w-sage)'>then shut it — and see how much you can still draw</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> Three questions, each the author's move reflected back at you: <b>built</b>, <b>tested</b>, <b>further</b>. Ask them in order and the paper stops being something you consumed.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> Three questions, each the author's move reflected back at you: <b>built</b>, <b>tested</b>, <b>further</b>. Each pulse carries one move across, brightest at the mirror — the moment their choice becomes your question. Ask them in order and the paper stops being something you consumed.</div>
 </div>
 
 **① Could I have built it?** They state a problem and choose a method. Cover
