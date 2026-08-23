@@ -119,13 +119,13 @@
 </svg>
 </div>
 <h2 id='learning-together'>Learning together</h2>
-<p>Attention is a set operation: without position, <em>"the dog bit the man"</em> and <em>"the man bit the dog"</em> are the same input. <strong>RoPE</strong> puts the order back, and I still think it is the prettiest idea in the modern transformer.</p>
-<p>Attention works by <strong>scoring pairs</strong>. For every pair of tokens it computes one number from the first token's <em>query</em> vector and the second's <em>key</em> vector, and that number decides how much the first reads from the second. The number is a dot product.</p>
-<p>Everything turns on one fact I wish I had been told sooner: <strong>a dot product only cares about the angle between the two vectors.</strong> Spin both by the same amount and the score does not move. Open the angle and it falls.</p>
-<p>So take the query and key <strong>two coordinates at a time</strong> — I will call each such pair a <strong>band</strong> — read each band as a point on a dial, and <strong>spin the query's dial by its position $m$, the key's by its position $n$</strong>.</p>
+<p>Attention is a set operation. With nothing to mark position, <em>"the dog bit the man"</em> and <em>"the man bit the dog"</em> reach the model as the same input. <strong>Rotary position embedding (RoPE)</strong> puts the order back, and I still think it is the prettiest idea in the modern transformer.</p>
+<p>Attention works by <strong>scoring pairs</strong>. For each pair it computes a single number from the first token's <em>query</em> vector and the second's <em>key</em> vector, and that number sets how much the first reads from the second. That number is a dot product.</p>
+<p>Everything turns on one fact I wish someone had told me sooner: <strong>a dot product only cares about the angle between two vectors.</strong> Spin both by the same amount and the score does not move. Open the angle and it falls.</p>
+<p>So take the query and key <strong>two coordinates at a time</strong> — I will call each pair a <strong>band</strong> — read each band as a point on a dial, and <strong>spin the query's dial by its position $m$ and the key's by its position $n$</strong>.</p>
 $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 \langle R_m q,\; R_n k\rangle = \langle q,\; R_{n-m} k\rangle$$
-<p>Both dials turned, so the angle between them opened by exactly $n-m$. The score cannot say where either token sits — only how far apart they are. Absolute position goes in, and cancels itself on the way out.</p>
+<p>Both dials turned, so the angle between them opened by exactly $n-m$. The score cannot say where either token sits, only how far apart the two are. Absolute position goes in and cancels itself on the way out.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 300' role='img' aria-label='Three dials on one clock, turning at rates proportional to their real wavelengths, each carrying a query arrow and a key arrow with a fixed wedge between them'>
@@ -177,18 +177,18 @@ $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 <rect x='122' y='284' width='18' height='12' rx='3' fill='var(--w-loss)' fill-opacity='0.35'/>
 <text x='146' y='294' class='lbl sm' style='fill:var(--w-loss)'>the gap that survives the dot product</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, turning at rates proportional to their real wavelengths. Both arrows rotate with position; the wedge between them never changes. I stopped at band 24 because band 56 turns three thousand times slower.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, at rates proportional to their real wavelengths. Both arrows turn with position; the wedge between them never changes. I stopped at band 24 — band 56 turns three thousand times slower.</div>
 </div>
 <p>A head does not run one dial. It runs one per band, $d/2$ in all, where $d$ is the head's dimension, at angles</p>
 $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
-<p>which for the usual base of 10,000 spans <strong>four orders of magnitude</strong>. A band's <strong>wavelength</strong> is how many tokens it takes to come full circle: band 0 comes round every 6, band 56 every 20,000 or so. That spread is the part I want you to hold on to:</p>
+<p>which for the usual base of 10,000 spans <strong>four orders of magnitude</strong>. A band's <strong>wavelength</strong> is how many tokens it takes to come full circle: band 0 every 6 tokens, band 56 every 20,000 or so. That spread is what I want you to hold on to:</p>
 <ul>
-  <li><strong>Fast bands are the local ruler, slow bands the long-range one.</strong> Band 0 resolves "three tokens back" sharply and wraps uselessly beyond it; only the slow bands can tell 5,000 from 6,000.</li>
-  <li><strong>A band is useless if it never turns inside your context.</strong> It hands back almost the same angle for every position it sees.</li>
-  <li><strong>So the frequency spectrum is the design surface.</strong> Nearly every long context method in the literature is a decision about what to do with the slow end of this bank.</li>
+  <li><strong>Fast bands are the local ruler; slow bands are the long-range one.</strong> Band 0 resolves "three tokens back" sharply, then wraps uselessly beyond it; only the slow bands tell 5,000 from 6,000.</li>
+  <li><strong>A band is useless if it never turns inside your context</strong>, because it hands back nearly the same angle for every position it sees.</li>
+  <li><strong>So the frequency spectrum is the design surface.</strong> Nearly every long-context method in the literature is a decision about what to do with the slow end of this bank.</li>
 </ul>
-<h3 id='long-range-decay-which-was-sold-as-a-feature'>Long-range decay, which was sold as a feature</h3>
-<p>Here is the part I find uncomfortable. Take two tokens that really do match and slide them apart. At distance zero every band contributes fully; as the gap grows the bands fall out of step and start cancelling, and the score falls. This is <strong>long-range decay</strong>, which the RoPE paper presents as a feature: nearby tokens naturally matter more.</p>
+<h3 id='long-range-decay-and-what-it-decays-to'>Long-range decay, and what it decays to</h3>
+<p>Here is the part I find uncomfortable. Take two tokens that genuinely match and slide them apart. At distance zero every band contributes fully; as the gap grows the bands fall out of step, cancel, and the score drops. This is <strong>long-range decay</strong>, which the RoPE paper presents as a feature: nearby tokens naturally matter more.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 214' role='img' aria-label='RoPE relative attention score falling as distance grows and then flattening into a noise floor'>
@@ -215,15 +215,15 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 <text x='571.6' y='110.8' class='lbl sm a-fade' style='--d:3.00s;fill:var(--w-loss)'>past here it is not</text>
 <text x='571.6' y='126.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--w-loss)'>decaying, it is rattling</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, from the real bank at base 10,000. It falls, then stops falling and levels out at what an unrelated pair scores.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, from the real bank at base 10,000. It falls, then levels out at what an unrelated pair scores.</div>
 </div>
-<p>It is desirable right up until it isn't. The problem is not that the score decays but <strong>what it decays to</strong>:</p>
+<p>That is useful, right up to the point where it is not. The trouble is not that the score decays, but <strong>what it decays to</strong>:</p>
 <ul>
-  <li>An unrelated query and key do not score zero. They score around $1/\sqrt{d/2}$ — random phases adding up to a nonzero floor.</li>
-  <li>Once a matching pair reaches that floor, <strong>the score stops carrying information</strong>: "related, 6,000 apart" and "unrelated" give the same number.</li>
-  <li>Past the trained length it is worse: the curve stops falling and rattles around the floor, on rotation angles the model never saw.</li>
+  <li>An unrelated query and key do not score zero. They score around $1/\sqrt{d/2}$, random phases adding up to a nonzero floor.</li>
+  <li>Once a matching pair sinks to that floor, <strong>the score stops carrying information</strong>: "related, 6,000 apart" and "unrelated" become one number.</li>
+  <li>Past the trained length it is worse. The curve stops falling and rattles around the floor, at angles the model never saw.</li>
 </ul>
-<p>That is the ceiling: not a bug but the geometry of adding up rotating vectors.</p>
+<p>That is the ceiling, and it is not a bug. It is what adding up rotating vectors does.</p>
 <div class='lab wide' id='decay-lab'>
 <div class='lab-head'><span class='name'>Lab 1 · how far RoPE can still see</span><span class='hint'>raise the base and watch the usable range move</span></div>
 <div class='lab-body'>
@@ -248,13 +248,13 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 </div>
 <div class='verdict' id='dec-verdict'></div>
 <svg viewBox='0 0 700 268' role='img'></svg>
-<p class='cap'>Computed from the real bank. Violet is a query and key that <b>agree</b>; clay is where an <b>unrelated</b> pair sits. Once violet is inside clay, the score says nothing about a match.</p>
+<p class='cap'>Computed from the real bank. Violet is a query and key that <b>agree</b>; clay is where an <b>unrelated</b> pair sits. Once violet is inside clay, the score says nothing.</p>
 </div>
 </div>
 <h3 id='irope-stop-encoding-position-in-some-layers'>iRoPE: stop encoding position in some layers</h3>
-<p>The fix I did not see coming, and the one the field converged on: <strong>in some layers, encode no position at all.</strong></p>
-<p>A layer with no positional encoding is not orderless. Causal masking leaks position — a token at index 5 sees five things, one at 5,000 sees five thousand — and that is learnable. This is <strong>NoPE</strong>; the order is <em>implicit</em>.</p>
-<p>So interleave. Most layers keep RoPE and work locally; every fourth gets nothing and carries the long range. That is <strong>iRoPE</strong> — <em>i</em> for interleaved — what Llama 4 Scout uses to claim 10M.</p>
+<p>Here is the fix I did not see coming, and the one the field converged on: <strong>in some layers, encode no position at all.</strong></p>
+<p>A layer with no positional encoding is still not orderless. Causal masking leaks position on its own: a token at index 5 sees five things, one at 5,000 sees five thousand, and that is learnable. This is <strong>NoPE</strong>, where order is <em>implicit</em>.</p>
+<p>So interleave them. Most layers keep RoPE and work locally; every fourth gets nothing and carries the long range. That is <strong>iRoPE</strong>, <em>i</em> for interleaved, and what Llama 4 Scout uses to claim 10M.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 292' role='img' aria-label='A stack of layers where most carry rotary position and every fourth carries none, with information hopping locally in the first and jumping far in the second'>
@@ -317,7 +317,7 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 <rect x='300' y='272' width='12' height='12' rx='3' fill='var(--w-teacher)' fill-opacity='0.85'/>
 <text x='318' y='282' class='lbl sm'>NoPE &#8212; global, order inferred from the causal mask alone</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 3.</span> The interleave. Most layers carry rotary position and work locally; every fourth carries none, so nothing in it decays.</div>
+<div class='caption'><span class='caption-label'>Figure 3.</span> The interleave. Most layers carry rotary position and work locally; every fourth carries none, so nothing decays.</div>
 </div>
 <h3 id='what-to-carry-into-the-next-part'>What to carry into the next part</h3>
 <ul>
@@ -328,9 +328,9 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
   <li><strong>A NoPE layer has nothing that decays</strong>, because nothing in it depends on distance.</li>
 </ul>
 <h2 id='inspire-together'>Inspire together</h2>
-<p>I read all of it as one question asked six ways: <strong>what to do about the slow bands.</strong></p>
+<p>I read all of it as one question asked six ways: <strong>what should we do about the slow bands?</strong></p>
 <p><strong>Stretch them.</strong></p>
-<p>The first instinct was to squeeze: if a model only saw positions up to 4,096, map 32,768 down into that range and nothing is unfamiliar. It works, and pays for safety in the wrong currency.</p>
+<p>The first instinct was to squeeze. If a model only saw positions up to 4,096, map 32,768 down into that range and nothing looks unfamiliar. It works, and pays for that safety in the wrong currency.</p>
 <ul>
   <li><strong>Position Interpolation</strong> (<a href='https://arxiv.org/abs/2306.15595'>Chen et al., 2023</a>) — the clean version, and the one that shows the bill: the fast local bands slow down too.</li>
   <li><strong>NTK-aware scaling</strong> — the community's answer, never published, used everywhere. Raise the base: the slow end stretches, the fast end barely moves.</li>
@@ -342,7 +342,7 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
   <li><strong>Base of RoPE Bounds Context Length</strong> (<a href='https://arxiv.org/abs/2405.14591'>Men et al., NeurIPS 2024</a>) — for a target length there is a <strong>lower bound</strong> on the base, below which a model can only <em>look</em> like it handles long context. Llama 3's 500,000 is this in production.</li>
 </ul>
 <p><strong>Delete position in some layers.</strong></p>
-<p>Then people asked the question I would never have thought to ask: what if some layers are simply not told where anything is?</p>
+<p>Then people asked the question I would never have thought to ask: what if some layers are never told where anything is?</p>
 <ul>
   <li><strong>NoPE</strong> (<a href='https://arxiv.org/abs/2305.19466'>Kazemnejad et al., NeurIPS 2023</a>) — decoder-only transformers length-generalise <em>better</em> with no positional encoding at all.</li>
   <li><strong>RNoPE</strong> (<a href='https://arxiv.org/abs/2501.18795'>Cohere, 2025</a>) — interleaves the two and shows why: retrieval concentrates in the NoPE layers.</li>
@@ -626,17 +626,17 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 <text x='607.2' y='54' class='lbl sm mid'>10,000,000</text>
 <text x='16' y='312' class='lbl sm'>log scale &#8212; what matters is which end of the bank each method moves</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> The same bank under each family of fix. Interpolation slides everything right; raising the base moves the slow end far more; YaRN moves only the slow end; NoPE removes it.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> The same bank under each fix. Interpolation slides everything right; raising the base moves the slow end far more; YaRN moves only the slow end; NoPE removes it.</div>
 </div>
 <p><strong>Fix the softmax instead.</strong> Everything above moves the encoding; this leaves it alone and goes after the other end.</p>
 <ul>
   <li><strong>Scalable-Softmax</strong> (<a href='https://arxiv.org/abs/2501.19399'>Nakanishi, 2025</a>) — as $n$ grows, softmax's largest attainable weight shrinks. SSMax scales logits by $s\log n$ to cancel it.</li>
 </ul>
-<p><strong>Stop treating heads alike.</strong> The assumption nobody was questioning: that one frequency schedule suits every head.</p>
+<p><strong>Stop treating heads alike.</strong> This attacks the assumption nobody questioned: that one frequency schedule suits every head.</p>
 <ul>
   <li><strong>AdaRoPE</strong> (<a href='https://arxiv.org/abs/2607.19363'>2026</a>) — learnable per-head frequencies and scaling: heads with different jobs want different ranges.</li>
 </ul>
-<p><strong>Or: the approach may be wrong.</strong> These are the ones that unsettled me.</p>
+<p><strong>Or the whole approach may be wrong.</strong> These unsettled me most.</p>
 <ul>
   <li><strong>RoPE Distinguishes Neither Positions Nor Tokens, Provably</strong> (<a href='https://arxiv.org/abs/2605.15514'>Du et al., May 2026</a>) — as context grows RoPE provably loses its locality bias, failure probability approaching chance; and the base <strong>trades distinguishing positions against distinguishing tokens.</strong></li>
   <li><strong>Retrieval heads run on the slow bands</strong> (<a href='https://arxiv.org/abs/2606.21249'>June 2026</a>) — the few heads that copy from far earlier. Mask OLMo-2's 87 and recall goes 1.00 → 0.00; zero their 32 slowest dimensions and it drops to 0.18.</li>
@@ -680,7 +680,7 @@ $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 </div>
 <div class='verdict' id='spec-verdict'></div>
 <svg viewBox='0 0 700 210' role='img'></svg>
-<p class='cap'>Two costs, and every method trades between them: how far past its trained angles a band is pushed, and what the fastest band gave up. PI buys one with the other; NTK and YaRN get both.</p>
+<p class='cap'>Two costs, and every method trades between them: how far a band is pushed past its trained angles, and what the fastest band gave up. PI buys one with the other; NTK and YaRN get both.</p>
 </div>
 </div>
 <h2 id='chat-together'>Chat together</h2>

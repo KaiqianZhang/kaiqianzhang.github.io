@@ -148,23 +148,58 @@ has about 220 to spend.
 
 ## Voice
 
-**Write in first person.** These are one person explaining something they find
-interesting, not a survey with the author sanded off. Aim for a dozen or more
-`I`s across ten minutes, and put them where they carry weight rather than
-sprinkling them:
+The house style is **Lil'Log** — [Lilian Weng's blog](https://lilianweng.github.io/)
+— carrying first person and warmth. If the voice has gone fuzzy, read one of
+her posts before writing.
 
-- the opening claim — *"I still think it is the prettiest idea in the modern
-  transformer"*
-- the place the topic gets uncomfortable — *"here is the part I find
-  uncomfortable"*
-- what surprised you — *"the fix I did not see coming"*
-- judgments in ② — *"if you read one paper here, I would make it this one"*
-- limits you chose — *"I stopped at band 24 because band 56 turns three
-  thousand times slower"*
+What to take from her:
 
-An `I` that replaces an impersonal construction usually costs nothing, which
-matters because the budget is tight. An `I` that adds a clause has to be paid
-for like anything else.
+- **Motivation before mechanism.** Open by saying why the problem matters and
+  what breaks without it, then build the machinery. Never open with a
+  definition.
+- **Descriptive headings, hierarchically nested.** A heading names what the
+  section is about, never a joke or a tease. Sections narrow progressively:
+  a broad framing section, then the specific methods inside it.
+- **Bold on first introduction of a term; italics for contrast.** A reader
+  scanning for where a concept is defined should land on the bold.
+- **Notation is defined before it is used**, and every symbol in a formula is
+  named in the prose around it.
+- **Bullets enumerate; prose argues.** A bare list of papers reads like a
+  related-work section, which is what the bridges exist to prevent.
+- **Honest about difficulty.** *"It is hard to specify X"* beats hedging.
+  Where something failed, say so, and say what it taught.
+- **Varied rhythm.** Dense technical passages punctuated by a short sentence
+  or a concrete analogy. Three long sentences in a row means breaking one.
+- **Captions carry a takeaway, not a label**, and credit the source whenever
+  a figure is reproduced or adapted from a paper.
+- **Every claim links its paper**, author–year, inline.
+- **No hype.** No *revolutionary*, no *game-changing*, no exclamation marks.
+  The results are interesting enough without adjectives.
+
+Where we **deliberately depart** from her: she keeps first person almost
+entirely out of a post until a closing appeal. We do not.
+
+- **Write in first person, and keep it.** These are one person explaining
+  something they find interesting, not a survey with the author sanded off.
+  Aim for a dozen or more `I`s across ten minutes, placed where they carry
+  weight rather than sprinkled:
+  - the opening claim — *"I still think it is the prettiest idea in the
+    modern transformer"*
+  - the place the topic gets uncomfortable — *"here is the part I find
+    uncomfortable"*
+  - what surprised you — *"the fix I did not see coming"*
+  - judgments in ② — *"if you read one paper here, I would make it this one"*
+  - limits you chose — *"I stopped at band 24 because band 56 turns three
+    thousand times slower"*
+- **Warm, not chummy.** Write to one curious reader you like and respect.
+  Second person is welcome — *"the part I want you to hold on to"*. Say what
+  took you a long time to understand; that is where the warmth comes from,
+  and it is also true.
+- **Never condescend.** No *simply*, no *obviously*, no *of course*, no *just*.
+  If a step is easy, the reader will find it easy without being told.
+- **An `I` that replaces an impersonal construction costs nothing**, which
+  matters because the budget is tight. An `I` that adds a clause has to be
+  paid for like anything else.
 
 ## Figures and interactives
 

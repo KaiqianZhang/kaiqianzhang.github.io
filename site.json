@@ -98,6 +98,11 @@
       "path": "blog",
       "name": "Blog",
       "dir": "posts",
+      "quote": {
+        "text": "I learned very early the difference between knowing the name of something and knowing something.",
+        "author": "Richard Feynman",
+        "link": ""
+      },
       "css": [
         "/css/widgets.css"
       ],

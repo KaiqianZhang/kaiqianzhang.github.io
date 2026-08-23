@@ -70,9 +70,10 @@ That last part took me the longest to accept.
 
 ## One · What a paper is made of
 
-Before the passes, the anatomy. Every paper you will open is the same seven
-parts in the same order, and knowing which part carries what is the entire
-reason a partial read can be a *correct* read rather than a lazy one.
+Before the passes, the anatomy. Every paper you open is the same seven parts
+in the same order, and knowing which part carries what is the whole reason a
+partial read can be a *correct* read rather than a lazy one. I ignored this
+for years, and without it "read less" is only guessing.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -143,11 +144,12 @@ Two things I want you to take from that picture:
 
 So a pass is not "read faster". A pass is **read these parts and not those**.
 
-## Two · The first pass
+## Two · The first pass: is this paper for me?
 
-**Title, abstract, conclusion.** In that order, ten to fifteen minutes. Then
-the move most people skip: jump *back up* into the experiments and look at the
-key figures and tables. Not read — look.
+The **first pass** is a triage, and it should cost you ten to fifteen minutes.
+Read the **title**, the **abstract**, and the **conclusion**, in that order.
+Then comes the move most people skip: jump *back up* into the experiments and
+look at the key figures and tables. Not read — look.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -231,13 +233,14 @@ It is **is this paper for me?**
   something the prose was never going to tell you.
 
 Then you either promote the paper to a second pass or you put it down. I put
-down the large majority and I have stopped feeling bad about it. Being able to
-say *"not for me, and here is why"* inside fifteen minutes **is** the skill —
-it is not the thing you do instead of the skill.
+down the large majority, and it took me a long time to stop feeling bad about
+that. Being able to say *"not for me, and here is why"* inside fifteen minutes
+**is** the skill — not the thing you do instead of it.
 
-## Three · The second pass
+## Three · The second pass: what does it actually show?
 
-Now read the whole thing, front to back, at a pace that does not stop.
+The **second pass** costs about an hour. Read the whole thing, front to back,
+at a pace that does not stop.
 
 **Skip the proofs.** Skip the derivations, skip the hyperparameter appendix.
 If a formula does not come in about ten seconds, mark it and keep going. It is
@@ -341,13 +344,14 @@ background, so go and read its parents first.** The threshold is lower there,
 and you come back able to finish.
 
 At the end of a second pass you know what the paper does, roughly how, and
-roughly how well. For most papers, that is where reading them correctly ends.
+roughly how well. For most papers that is where reading them correctly ends,
+and I think saying so plainly matters: stopping here is not laziness.
 
-## Four · The third pass
+## Four · The third pass: could I have written it?
 
-The third pass costs hours rather than minutes, so ask once more whether this
-particular paper has earned it. A paper earns a third pass when you are going
-to build on it, review it, or argue with it.
+The **third pass** costs hours rather than minutes, so ask once more whether
+this particular paper has earned it. A paper earns one when you are going to
+build on it, review it, or argue with it.
 
 The standard now changes completely. In the second pass you needed to know
 what each *section* was doing. Here you need to know what each *sentence* is
@@ -370,8 +374,9 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='64' width='294' height='64' rx='11' fill='var(--w-violet)' fill-opacity='0.13' stroke='var(--w-violet)' stroke-width='2' class='a-rise' style='--d:0.45s'/>
 <text x='394' y='90' class='lbl bg a-rise' style='--d:0.51s;fill:var(--w-violet)'>Could I have BUILT it?</text>
 <text x='394' y='110' class='lbl sm a-rise' style='--d:0.57s'>what method would I have reached for?</text>
-<g class='a-travel' style='--dur:4.0s;--fx:-258px;--tx:258px'><circle cx='350' cy='96' r='5.5' fill='var(--w-violet)' class='a-breathe' style='--dur:4.0s;--lo:0;--hi:0.95'/></g>
-<circle cx='350' cy='96' r='16' fill='var(--w-violet)' class='a-beat' style='--dur:1.7s;--d:0.25s'/>
+<clipPath id='f4glint0'><rect x='376' y='64' width='294' height='64' rx='11'/></clipPath>
+<g clip-path='url(#f4glint0)'><g class='a-travel' style='--dur:3.4s;--fx:-40px;--tx:340px'><polygon points='384,62 410,62 388,130 362,130' fill='var(--w-violet)' fill-opacity='0.20'/></g></g>
+<circle cx='350' cy='96' r='16' fill='var(--w-violet)' class='a-beat' style='--dur:2.7s;--d:0.00s'/>
 <text x='350' y='101' class='lbl mid on a-fade' style='--d:0.35s'>①</text>
 <rect x='30' y='156' width='294' height='64' rx='11' class='box a-rise' style='--d:0.55s'/>
 <text x='48' y='182' class='lbl a-rise' style='--d:0.61s'>runs the experiments that support it</text>
@@ -379,8 +384,9 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='156' width='294' height='64' rx='11' fill='var(--w-teal)' fill-opacity='0.13' stroke='var(--w-teal)' stroke-width='2' class='a-rise' style='--d:0.75s'/>
 <text x='394' y='182' class='lbl bg a-rise' style='--d:0.81s;fill:var(--w-teal)'>Could I have TESTED it better?</text>
 <text x='394' y='202' class='lbl sm a-rise' style='--d:0.87s'>what would my table have looked like?</text>
-<g class='a-travel' style='--dur:4.5s;--fx:-258px;--tx:258px'><circle cx='350' cy='188' r='5.5' fill='var(--w-teal)' class='a-breathe' style='--dur:4.5s;--lo:0;--hi:0.95'/></g>
-<circle cx='350' cy='188' r='16' fill='var(--w-teal)' class='a-beat' style='--dur:2.0s;--d:0.55s'/>
+<clipPath id='f4glint1'><rect x='376' y='156' width='294' height='64' rx='11'/></clipPath>
+<g clip-path='url(#f4glint1)'><g class='a-travel' style='--dur:3.9s;--fx:-40px;--tx:340px'><polygon points='384,154 410,154 388,222 362,222' fill='var(--w-teal)' fill-opacity='0.20'/></g></g>
+<circle cx='350' cy='188' r='16' fill='var(--w-teal)' class='a-beat' style='--dur:2.7s;--d:0.60s'/>
 <text x='350' y='193' class='lbl mid on a-fade' style='--d:0.65s'>②</text>
 <rect x='30' y='248' width='294' height='64' rx='11' class='box a-rise' style='--d:0.85s'/>
 <text x='48' y='274' class='lbl a-rise' style='--d:0.91s'>leaves the rest to “future work”</text>
@@ -388,12 +394,13 @@ asked into a mirror: everything the author did, reflected back at me.
 <rect x='376' y='248' width='294' height='64' rx='11' fill='var(--w-rose)' fill-opacity='0.13' stroke='var(--w-rose)' stroke-width='2' class='a-rise' style='--d:1.05s'/>
 <text x='394' y='274' class='lbl bg a-rise' style='--d:1.11s;fill:var(--w-rose)'>Could I TAKE IT FURTHER?</text>
 <text x='394' y='294' class='lbl sm a-rise' style='--d:1.17s'>is the thing they skipped my next paper?</text>
-<g class='a-travel' style='--dur:5.0s;--fx:-258px;--tx:258px'><circle cx='350' cy='280' r='5.5' fill='var(--w-rose)' class='a-breathe' style='--dur:5.0s;--lo:0;--hi:0.95'/></g>
-<circle cx='350' cy='280' r='16' fill='var(--w-rose)' class='a-beat' style='--dur:2.3s;--d:0.85s'/>
+<clipPath id='f4glint2'><rect x='376' y='248' width='294' height='64' rx='11'/></clipPath>
+<g clip-path='url(#f4glint2)'><g class='a-travel' style='--dur:4.4s;--fx:-40px;--tx:340px'><polygon points='384,246 410,246 388,314 362,314' fill='var(--w-rose)' fill-opacity='0.20'/></g></g>
+<circle cx='350' cy='280' r='16' fill='var(--w-rose)' class='a-beat' style='--dur:2.7s;--d:1.20s'/>
 <text x='350' y='285' class='lbl mid on a-fade' style='--d:0.95s'>③</text>
 <text x='350' y='356' class='lbl mid a-rise' style='--d:1.5s;fill:var(--w-sage)'>then shut it — and see how much you can still draw</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> Three questions, each the author's move reflected back at you: <b>built</b>, <b>tested</b>, <b>further</b>. Each pulse carries one move across, brightest at the mirror — the moment their choice becomes your question. Ask them in order and the paper stops being something you consumed.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> Three questions, each the author's move reflected back at you: <b>built</b>, <b>tested</b>, <b>further</b>. Ask them in order — the badges light down the mirror in that order, and the glint crossing each card is the reflection doing its work. Answer all three and the paper stops being something you merely consumed.</div>
 </div>
 
 **① Could I have built it?** They state a problem and choose a method. Cover
@@ -417,7 +424,7 @@ problem, the method, the figure that carries the argument, the number. What
 you can still draw is what you actually have. What you cannot is where you go
 back — and now you know exactly which page.
 
-## Five · Where to find papers worth three passes
+## Five · Where to find papers worth a third pass
 
 The method above is a filter, and a filter is only as good as what you point
 it at. So here is what I actually keep open, ranked — the ordering is by how
@@ -532,12 +539,13 @@ that list you can use.
 
 At half an hour a day, five days a week — the defaults above — the funnel
 holds about **four papers triaged a week, one second pass, and one paper a
-month you could rebuild from memory.** That number looks far too small the
-first time you see it. I have come to think it is roughly right, and that the
-people who appear to read forty papers a week are doing four first passes a
-day and calling it reading.
+month you could rebuild from memory.** That number looked far too small to me
+the first time I worked it out. I have come to think it is roughly right, and
+that people who appear to read forty papers a week are doing four first passes
+a day and calling it reading.
 
-Which is fine, as long as you know which pass you are in.
+Which is fine, as long as you know which pass you are in. That is the part I
+would keep, if you keep nothing else.
 
 <div class='flashcard'>
 <div class='fc-head'><span class='name'>The takeaways</span><button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>deal again</button></div>
