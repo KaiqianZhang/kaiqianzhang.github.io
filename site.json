@@ -17,7 +17,7 @@
   },
   "links": [
     {
-      "name": "Scratch Notes",
+      "name": "Research Notes",
       "url": "/notes/"
     },
     {
@@ -35,12 +35,8 @@
       "url": "/blog/"
     },
     {
-      "name": "Scratch Notes",
+      "name": "Research Notes",
       "url": "/notes/"
-    },
-    {
-      "name": "RSS",
-      "url": "/feed.xml"
     }
   ],
   "tags": [
@@ -109,10 +105,10 @@
     },
     {
       "path": "notes",
-      "name": "Scratch Notes",
+      "name": "Research Notes",
       "dir": "notes",
       "body_class": "notes-site",
-      "all_label": "All scratch notes",
+      "all_label": "All research notes",
       "post_icon": "🍦",
       "css": [
         "/css/widgets.css",

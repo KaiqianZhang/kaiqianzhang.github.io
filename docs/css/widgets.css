@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------------------
    widgets.css -- the drawn-figure and interactive-lab engine.
 
-   Shared by blog posts and scratch notes. It owns three things:
+   Shared by blog posts and research notes. It owns three things:
 
    1. `.nfig` -- a drawn figure: inline SVG that animates when it scrolls into
       view, with a replay control.
@@ -11,7 +11,7 @@
 
    The type inside a widget is the hand-drawn face, deliberately, and only
    inside a widget: a figure should look drawn, and the prose around it should
-   not. On a scratch note the whole page is already in that face and this
+   not. On a research note the whole page is already in that face and this
    changes nothing; on a blog post it is the only place the face appears.
 
    Colours are declared as roles rather than shades -- teacher, student, loss,
@@ -86,7 +86,7 @@
 }
 /* A caption is prose about a figure, not part of the drawing, so it stays in
    the body face. `inherit` would take the hand face from .nfig itself, so the
-   stack is named. A scratch note, where the whole page is hand-drawn, sets it
+   stack is named. A research note, where the whole page is hand-drawn, sets it
    back in notes.css. */
 .article .nfig > .caption,
 .article .lab .cap {

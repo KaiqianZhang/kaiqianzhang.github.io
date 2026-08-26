@@ -458,7 +458,7 @@ class Post:
         self.title = meta.get('title', self.slug.replace('-', ' ').title())
         self.subtitle = meta.get('subtitle', '')
         self.icon = meta.get('icon', '')     # overrides the section's icon
-        # Shown as chips under the title. Scratch notes open with them the way
+        # Shown as chips under the title. Research notes open with them the way
         # the paper notebook does; blog posts leave the field out.
         self.keywords = [k.strip() for k in meta.get('keywords', '').split(',')
                          if k.strip()]
@@ -695,7 +695,7 @@ def asset_url(config, path):
 def section_assets(config, section):
     """Extra <head> tags a section asks for: its own stylesheet and script.
 
-    Scratch notes carry a palette, a hand-drawn face and four interactive
+    Research notes carry a palette, a hand-drawn face and four interactive
     widgets that no blog post needs, so they ship as separate files that only
     the notes pages link.
     """
@@ -720,8 +720,12 @@ def keywords_html(post, compact=False):
         return ''
     chips = ''.join("<span class='kw'>%s</span>" % html.escape(k)
                     for k in post.keywords)
+    # The chips live in their own wrapper so the label sits in one flex
+    # column and the words in another: a second line of words then starts
+    # under the first word rather than under `Keywords:`.
     return ("<div class='keywords%s'><span class='kw-label'>Keywords:</span>"
-            "%s</div>" % (' row' if compact else '', chips))
+            "<span class='kw-list'>%s</span></div>"
+            % (' row' if compact else '', chips))
 
 
 # The three-part blog post. A post opts in with `format: three-part` in its

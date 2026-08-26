@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    widgets.js -- the figure driver and the helpers every lab is built from.
 
-   Shared by blog posts and scratch notes, and loaded before either of their
+   Shared by blog posts and research notes, and loaded before either of their
    own scripts. It does two things:
 
    1. Drives `.nfig` and `.flashcard`: both start paused, play when they first

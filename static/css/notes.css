@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
-   notes.css -- Scratch Notes.
+   notes.css -- Research Notes.
 
    Loaded only on /notes/ pages (site.json gives the section a `css` list), so
    nothing here can reach the blog. Two jobs:
@@ -8,7 +8,7 @@
       already use. Code and math opt back out -- a monospace column and a
       MathJax glyph run are both unreadable in a hand face.
    2. Carry a saturated Morandi palette. The blog's lavender is deliberately
-      quiet; a scratch note is a place to think out loud, so the same hues are
+      quiet; a research note is a place to think out loud, so the same hues are
       pushed until they hold their own against white *and* against #16171C,
       and every recurring actor gets one -- teacher teal, student violet, loss
       rose, pruned clay, kept sage, data ochre. A reader who learns the five
@@ -164,10 +164,21 @@
    under the title. */
 .notes-site .keywords {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
   margin: 14px 0 4px;
+}
+/* The label keeps its own column so it never wraps, and the words wrap
+   inside theirs -- a second line then starts under the first word instead
+   of back under `Keywords:`. */
+.notes-site .keywords .kw-label { flex: none; }
+.notes-site .keywords .kw-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 6px;
+  min-width: 0;
 }
 .notes-site .keywords .kw-label {
   font-size: 11px;
@@ -194,12 +205,12 @@
   border-color: transparent;
   background: var(--kw-hue, var(--n-violet));
 }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 1) { --kw-hue: var(--n-violet); }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 2) { --kw-hue: var(--n-teal); }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 3) { --kw-hue: var(--n-rose); }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 4) { --kw-hue: var(--n-sage); }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 5) { --kw-hue: var(--n-clay); }
-.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 6) { --kw-hue: var(--n-ochre); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 6) { --kw-hue: var(--n-violet); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 1) { --kw-hue: var(--n-teal); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 2) { --kw-hue: var(--n-rose); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 3) { --kw-hue: var(--n-sage); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 4) { --kw-hue: var(--n-clay); }
+.notes-site .keywords:not(.row) .kw:nth-of-type(6n + 5) { --kw-hue: var(--n-ochre); }
 
 /* The listing variant: one size down, sitting under each row's one-line
    description. */
@@ -216,6 +227,12 @@
 .notes-site .keywords.row {
   gap: 8px;
 }
+/* A wrapped second line is the same sentence continuing, not a new block:
+   the words stay a normal line apart, not a chip-gap apart. */
+.notes-site .keywords.row .kw-list {
+  column-gap: 8px;
+  row-gap: 0;
+}
 .notes-site .keywords.row .kw {
   font-size: 12px;
   padding: 0;
@@ -224,9 +241,12 @@
   background: transparent;
   color: var(--n-chip-ink);
 }
-.notes-site .keywords.row .kw + .kw::before {
+/* The middot hangs off the end of the word before it, not the start of the
+   word after: when the list wraps, a second line then opens on a word,
+   flush with the first line, instead of on a stray dot. */
+.notes-site .keywords.row .kw:not(:last-child)::after {
   content: '\00b7';
-  margin-right: 8px;
+  margin-left: 8px;
   color: var(--n-chip-edge);
 }
 .notes-site .keywords.row .kw-label {

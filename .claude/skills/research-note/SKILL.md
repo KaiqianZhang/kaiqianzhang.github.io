@@ -1,22 +1,22 @@
 ---
-name: scratch-note
-description: Write a new Scratch Note for the site at ~/Desktop/blog (published at kaiqianzhang.github.io/notes/). Use when the user asks to turn notebook pages or scans into a scratch note, or invokes /scratch-note. Handles transcription, fact-verification against primary sources, drawn animated figures, interactive labs, building, and pushing live.
+name: research-note
+description: Write a new Research Note for the site at ~/Desktop/blog (published at kaiqianzhang.github.io/notes/). Use when the user asks to turn notebook pages or scans into a research note, or invokes /research-note. Handles transcription, fact-verification against primary sources, drawn animated figures, interactive labs, building, and pushing live.
 ---
 
-# Writing a scratch note
+# Writing a research note
 
-Scratch notes live at `~/Desktop/blog/notes/` and publish to
+Research notes live at `~/Desktop/blog/notes/` and publish to
 <https://kaiqianzhang.github.io/notes/> from `docs/` on `main`. Read that
 repo's `README.md` first — the **Sections** section documents the machinery
 this skill drives.
 
-A scratch note is the user's own handwritten notebook page, made legible,
+A research note is the user's own handwritten notebook page, made legible,
 verified, and turned into something you can poke at. It has its own rules,
 which are in this file and nowhere else; do not carry conventions in from
 anything else you have written for this repo. If you find yourself deciding
 what to cut, you are writing the wrong thing — see the first rule below.
 
-## What a scratch note is, which decides everything else
+## What a research note is, which decides everything else
 
 **The source is a page of the user's notebook, and the page is the spec.**
 
@@ -33,7 +33,7 @@ other rule in this file:
 - **State the fact; do not narrate the correction.** Check everything against
   primary sources, then write what is *true* — quietly, in the note's own
   voice. Never say the page is wrong, never say "the notebook says X but", and
-  never spend a paragraph on a correction that deserves a clause. A scratch
+  never spend a paragraph on a correction that deserves a clause. A research
   note is a teaching note built from the user's own page; a reader should meet
   the right fact, not a referee's report.
 

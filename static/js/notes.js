@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
-   notes.js -- behaviour for Scratch Notes.
+   notes.js -- behaviour for Research Notes.
 
-   The eight interactive labs across the two scratch notes. The figure
+   The eight interactive labs across the two research notes. The figure
    driver, the maths and the control helpers all live in widgets.js, which is
    shared with the blog and loaded first.
 
