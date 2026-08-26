@@ -149,7 +149,7 @@ are what forced each move.
         <text class='yr' x='403.0' y='288.5'>2020-</text>
         <text class='stage' x='403.0' y='312.5'>pre-norm by default</text>
         <circle class='bul' cx='407.0' cy='330.5' r='2'/>
-        <text class='body' x='416.0' y='334.5'>GPT-3, LLaMA, PaLM and the rest adopt it</text>
+        <text class='body' x='416.0' y='334.5'>GPT-3, Llama, PaLM and the rest adopt it</text>
         <circle class='bul' cx='407.0' cy='350.0' r='2'/>
         <text class='body' x='416.0' y='354.0'>post-norm survives in a few places</text>
       </g>
@@ -476,7 +476,7 @@ residual stream, so the logits grow with it and something must bound them.
   var MODES = [
     {name: 'post-norm', users: 'Transformer, BERT', formula: 'x \u2190 N(x + F(x))',
      onPath: true,  pre: false, post: false},
-    {name: 'pre-norm', users: 'GPT-2 onwards, LLaMA, Mistral', formula: 'x \u2190 x + F(N(x))',
+    {name: 'pre-norm', users: 'GPT-2 onwards, Llama, Mistral', formula: 'x \u2190 x + F(N(x))',
      onPath: false, pre: true,  post: false},
     {name: 'reordered', users: 'Swin V2, OLMo 2', formula: 'x \u2190 x + N(F(x))',
      onPath: false, pre: false, post: true},

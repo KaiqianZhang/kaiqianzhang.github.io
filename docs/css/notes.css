@@ -353,3 +353,220 @@
 .notes-note .article .lab .cap {
   font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
 }
+
+/* --------------------------------------------------------------------------
+   The decoder map. The interactive figure at the heart of the Llama 3
+   from-scratch note: a vertical roadmap of one layer, opened up. Every box is
+   a button -- click the box for the tensor it produces and that tensor's
+   shape (teal), click `code` for the few lines behind it (plum). The green
+   boxes are the one-time setup at the top of each layer; the dashed bracket
+   is the per-head loop. Behaviour lives in notes.js (initDecoderRoadmap).
+   -------------------------------------------------------------------------- */
+.notes-site {
+  --n-sage-rgb: 92, 138, 85;
+  --n-plum-rgb: 69, 55, 99;
+  --n-ochre-rgb: 168, 129, 26;
+}
+[data-theme='dark'] .notes-site {
+  --n-sage-rgb: 147, 201, 138;
+  --n-plum-rgb: 220, 208, 245;
+  --n-ochre-rgb: 227, 193, 88;
+}
+
+.notes-note .article .decoder-map {
+  max-width: 580px;
+  margin: 40px auto;
+}
+.notes-note .article .dm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.notes-note .article .dm-title {
+  font-size: 13px;
+  color: var(--n-dim);
+  line-height: 1.45;
+}
+.notes-note .article .dm-title em { color: var(--n-student); font-style: italic; }
+
+/* The re-drawn replay control -- deliberately not `.replay`, which the figure
+   CSS positions absolutely inside an .nfig. */
+.notes-note .article .dm-replay {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--n-dim);
+  background: var(--n-panel);
+  border: 1.5px solid var(--n-edge);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.notes-note .article .dm-replay:hover { color: var(--n-student); border-color: var(--n-lav); }
+.notes-note .article .dm-replay svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* Input / output badges and the loop-back note -- the connective tissue. */
+.notes-note .article .dm-input,
+.notes-note .article .dm-out {
+  text-align: center;
+  font-size: 13.5px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(var(--n-teal-rgb), 0.10);
+  color: var(--n-teacher);
+  border: 1.5px dashed rgba(var(--n-teal-rgb), 0.45);
+}
+.notes-note .article .dm-out {
+  background: rgba(var(--n-violet-rgb), 0.10);
+  color: var(--n-student);
+  border-color: rgba(var(--n-violet-rgb), 0.45);
+  margin-top: 12px;
+}
+.notes-note .article .dm-input strong,
+.notes-note .article .dm-out strong { font-weight: 700; }
+.notes-note .article .dm-loopback {
+  text-align: center;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--n-dim);
+  margin: 12px 0 4px;
+}
+.notes-note .article .dm-phase {
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--n-dim);
+  margin: 20px 0 8px;
+  opacity: 0.85;
+}
+
+/* A step: the box, then its two reveal panels. */
+.notes-note .article .dm-step { margin-top: 8px; }
+.notes-note .article .dm-step:first-of-type { margin-top: 4px; }
+.notes-note .article .dm-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  padding: 10px 13px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--n-ink);
+  background: var(--n-panel);
+  border: 1.8px solid var(--n-edge);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.notes-note .article .dm-box:hover { border-color: var(--n-lav); background: var(--n-panel-2); }
+.notes-note .article .dm-name { flex: 1; }
+.notes-note .article .dm-tags { flex: none; display: inline-flex; align-items: center; gap: 6px; }
+.notes-note .article .dm-hint,
+.notes-note .article .dm-code-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1.3px solid transparent;
+  white-space: nowrap;
+}
+.notes-note .article .dm-hint {
+  color: var(--n-teacher);
+  background: rgba(var(--n-teal-rgb), 0.12);
+  border-color: rgba(var(--n-teal-rgb), 0.30);
+}
+.notes-note .article .dm-code-btn {
+  color: var(--n-student);
+  background: rgba(var(--n-violet-rgb), 0.12);
+  border-color: rgba(var(--n-violet-rgb), 0.30);
+  cursor: pointer;
+}
+.notes-note .article .dm-title .dm-code-btn { font-size: 11px; }
+
+/* Green: the one-time setup boxes the reader misdrew as many. One role, one colour. */
+.notes-note .article .dm-green .dm-box {
+  border-color: rgba(var(--n-sage-rgb), 0.55);
+  background: rgba(var(--n-sage-rgb), 0.08);
+  box-shadow: inset 3px 0 0 var(--n-sage);
+}
+.notes-note .article .dm-green .dm-box:hover { background: rgba(var(--n-sage-rgb), 0.14); }
+
+/* Open states recolour the box to match the panel that opened. */
+.notes-note .article .dm-step.io-open > .dm-box { border-color: var(--n-teal); }
+.notes-note .article .dm-step.io-open .dm-hint { color: var(--n-on-fill); background: var(--n-teacher); border-color: var(--n-teacher); }
+.notes-note .article .dm-step.code-open .dm-code-btn { color: var(--n-on-fill); background: var(--n-student); border-color: var(--n-student); }
+
+/* The two reveals. Hidden until their class is set, then a small fade-in. */
+.notes-note .article .dm-io,
+.notes-note .article .dm-code { display: none; }
+.notes-note .article .dm-step.io-open > .dm-io,
+.notes-note .article .dm-step.code-open > .dm-code {
+  display: block;
+  animation: dm-reveal 0.28s ease both;
+}
+.notes-note .article .dm-io {
+  margin: 6px 0 0 12px;
+  padding: 9px 13px;
+  border-left: 3px solid var(--n-teal);
+  background: rgba(var(--n-teal-rgb), 0.07);
+  border-radius: 0 8px 8px 0;
+}
+.notes-note .article .dm-io-shape {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--n-teacher);
+  font-size: 14.5px;
+  margin-right: 8px;
+}
+.notes-note .article .dm-io-note { color: var(--n-dim); font-size: 13.5px; }
+.notes-note .article .dm-code {
+  margin: 6px 0 0 12px;
+  padding: 8px 13px;
+  border-left: 3px solid var(--n-plum);
+  background: rgba(var(--n-plum-rgb), 0.06);
+  border-radius: 0 8px 8px 0;
+}
+.notes-note .article .dm-code pre { margin: 0; background: none; border: none; padding: 0; overflow-x: auto; }
+.notes-note .article .dm-code code { font-size: 12.5px; line-height: 1.7; color: var(--n-ink); background: none; }
+@keyframes dm-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* The per-head loop, bracketed. */
+.notes-note .article .dm-loop {
+  border-left: 2.5px dashed rgba(var(--n-violet-rgb), 0.55);
+  margin: 8px 0 0 3px;
+  padding: 2px 0 6px 14px;
+}
+.notes-note .article .dm-loop-label {
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--n-student);
+  margin: 6px 0 2px;
+}
+.notes-note .article .dm-loop-label em { font-style: italic; font-weight: 700; }
+
+/* Entrance flourish -- additive, so the map is fully readable even if the
+   script never runs. `playing` is added on scroll-in and on Replay. */
+.notes-note .article .decoder-map.playing .dm-step,
+.notes-note .article .decoder-map.playing .dm-phase,
+.notes-note .article .decoder-map.playing .dm-input,
+.notes-note .article .decoder-map.playing .dm-loop,
+.notes-note .article .decoder-map.playing .dm-loopback,
+.notes-note .article .decoder-map.playing .dm-out {
+  animation: dm-in 0.5s ease both;
+  animation-delay: calc(var(--i, 0) * 0.05s);
+}
+@keyframes dm-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .notes-note .article .decoder-map.playing .dm-step,
+  .notes-note .article .decoder-map.playing .dm-phase,
+  .notes-note .article .decoder-map.playing .dm-input,
+  .notes-note .article .decoder-map.playing .dm-loop,
+  .notes-note .article .decoder-map.playing .dm-loopback,
+  .notes-note .article .decoder-map.playing .dm-out { animation: none; }
+}

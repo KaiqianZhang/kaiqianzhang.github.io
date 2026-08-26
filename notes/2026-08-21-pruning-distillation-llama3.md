@@ -1,5 +1,5 @@
 ---
-title: Pruning & Distillation in LLaMA3
+title: Pruning & Distillation in Llama3
 subtitle: How an 8B model becomes a 4B model that still knows most of what it knew, and why the tokenizer decides whether the prompt fits at all.
 date: 2026-08-21
 tags: foundations, post-training

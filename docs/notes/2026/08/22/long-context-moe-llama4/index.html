@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Long Context &amp; MoE in LLaMA4 | Kaiqian Zhang</title>
+    <title>Long Context &amp; MoE in Llama4 | Kaiqian Zhang</title>
     <meta charset='UTF-8'>
     <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
@@ -41,9 +41,9 @@
             src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
     </script>
     <link href='/css/widgets.css?v=2058554a' rel='stylesheet'/>
-    <link href='/css/notes.css?v=b3f75899' rel='stylesheet'/>
+    <link href='/css/notes.css?v=96d439b6' rel='stylesheet'/>
     <script defer src='/js/widgets.js?v=d1676b61'></script>
-    <script defer src='/js/notes.js?v=cc1c42bf'></script>
+    <script defer src='/js/notes.js?v=ae68afb0'></script>
 </head>
 <body class='notes-site notes-note'>
     <button class='theme-toggle' type='button' aria-pressed='false'
@@ -66,7 +66,7 @@
 </div>
     <div class='wrap content'>
         <div class='front-matter'>
-            <h1>Long Context &amp; MoE in LLaMA4</h1>
+            <h1>Long Context &amp; MoE in Llama4</h1>
             <h4>Where the parameters go when only a sixteenth of them wake up, and the two tricks that let a model read ten million tokens without its attention dissolving.</h4>
 <div class='keywords'><span class='kw-label'>Keywords:</span><span class='kw'>long-context tricks</span><span class='kw'>iRoPE</span><span class='kw'>NoPE</span><span class='kw'>temperature scaling</span><span class='kw'>SSMax</span><span class='kw'>MoE</span></div>
             <div class='bylines'>
@@ -96,7 +96,7 @@
 <a href='#two-versions-of-llama-4' class='rm-row'>
 <rect x='178' y='16.0' width='508' height='26' rx='6' fill='transparent'/>
 <circle cx='186' cy='30.0' r='4' fill='var(--n-student)' class='a-beat' style='--dur:1.9s;--d:0.50s'/>
-<text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Two versions of LLaMA 4</text>
+<text x='200' y='34.0' class='lbl a-rise' style='--d:0.50s;fill:var(--n-student)'>Two versions of Llama 4</text>
 <text x='452' y='34.0' class='lbl sm a-rise' style='--d:0.60s'>Scout and Maverick, side by side</text>
 </a>
 <a href='#ten-million-tokens' class='rm-row'>
@@ -131,13 +131,13 @@
 </a>
 </svg>
 </div>
-<h2 id='two-versions-of-llama-4'>Two versions of LLaMA 4</h2>
+<h2 id='two-versions-of-llama-4'>Two versions of Llama 4</h2>
 <p>Llama 4 uses <strong>MoE</strong> — a mixture of experts. Two versions are worth putting side by side.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 292' role='img' aria-label='A comparison of Llama 4 Scout and Llama 4 Maverick across five specifications'>
-<text x='300' y='26' class='lbl mid a-fade' style='--d:0.00s;fill:var(--n-student)'>A. LLaMA4 Scout</text>
-<text x='560' y='26' class='lbl mid a-fade' style='--d:0.10s;fill:var(--n-teacher)'>B. LLaMA4 Maverick</text>
+<text x='300' y='26' class='lbl mid a-fade' style='--d:0.00s;fill:var(--n-student)'>A. Llama4 Scout</text>
+<text x='560' y='26' class='lbl mid a-fade' style='--d:0.10s;fill:var(--n-teacher)'>B. Llama4 Maverick</text>
 <line x1='16' y1='38' x2='684' y2='38' stroke='var(--n-edge)' stroke-width='1.4' class='a-wide' style='--d:0.15s'/>
 <text x='16' y='66' class='lbl sm a-rise' style='--d:0.30s'>total parameters</text>
 <rect x='214' y='54' width='46.9' height='16' rx='3' fill='var(--n-student)' fill-opacity='0.16' class='a-wide' style='--d:0.40s'/>
@@ -571,7 +571,7 @@ $$\mathrm{SSMax}(z) = \mathrm{softmax}\big((s\log n)\, z\big)$$
 <text x='300' y='41.0' class='lbl mid a-fade' style='--d:0.27s;fill:var(--n-data)'>texts</text>
 <path d='M300.0 56.0 L300.0 93.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.42s'/>
 <path d='M295.4 93.0 L300.0 100.0 L304.6 93.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linejoin='round' class='a-fade' style='--d:0.87s'/>
-<text x='300.0' y='74.0' class='lbl sm mid a-fade' style='--d:0.82s;fill:var(--n-data)'>LLaMA</text>
+<text x='300.0' y='74.0' class='lbl sm mid a-fade' style='--d:0.82s;fill:var(--n-data)'>Llama</text>
 <rect x='232' y='100' width='136' height='42' rx='9' fill='var(--n-panel-2)' stroke='var(--n-data)' stroke-width='2' class='a-pop' style='--d:0.67s'/>
 <text x='300' y='126.0' class='lbl mid a-fade' style='--d:0.82s;fill:var(--n-data)'>text embedding</text>
 <path d='M300.0 142.0 L300.0 175.0' stroke='var(--n-data)' stroke-width='1.9' fill='none' stroke-linecap='round' class='a-draw' style='--d:0.97s'/>

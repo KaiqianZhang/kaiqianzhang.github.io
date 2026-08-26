@@ -99,7 +99,7 @@ thing doing the work to something more like a tap.
     </svg>
     <div class='caption'>
         <span class='caption-label'>Figure 1.</span>
-        A SwiGLU feed-forward layer, with LLaMA 7B's widths on it. The token
+        A SwiGLU feed-forward layer, with Llama 7B's widths on it. The token
         takes <i>two</i> routes up rather than one: $W$ and $V$ project the
         same input into the same wide space, Swish squashes only the first,
         and the two are multiplied entry by entry before $W_2$ brings it home.
@@ -113,7 +113,7 @@ The pieces were lying around for years before anybody assembled them, and not
 in the order the usual telling implies.
 
 <div class='roadmap'>
-    <svg viewBox='0 0 760 459' role='img' aria-label='Roadmap of the feed-forward layer: a gate arrives in 2016, the Transformer ships a plain two-matrix FFN in 2017, Shazeer puts the gate inside it in 2020, and LLaMA makes that the default.'>
+    <svg viewBox='0 0 760 459' role='img' aria-label='Roadmap of the feed-forward layer: a gate arrives in 2016, the Transformer ships a plain two-matrix FFN in 2017, Shazeer puts the gate inside it in 2020, and Llama makes that the default.'>
       <path class='spine' d='M99.5,230.0 Q380.0,229.3 660.5,229.6'/>
       <path class='head' d='M180.0,228.9 Q192.7,229.0 205.4,229.0'/>
       <path class='head' d='M180.6,229.4 Q193.6,229.9 206.6,229.4'/>
@@ -188,9 +188,9 @@ in the order the usual telling implies.
         <path class='box' d='M397.8,302.9 Q567.3,303.1 736.8,302.9 Q745.8,302.9 745.8,311.9 Q746.6,381.1 745.8,450.4 Q745.8,459.4 736.8,459.4 Q567.3,459.3 397.8,459.4 Q388.8,459.4 388.8,450.4 Q388.9,381.1 388.8,311.9 Q388.8,302.9 397.8,302.9'/>
         <path class='box' d='M397.2,302.7 Q566.5,302.1 735.7,302.7 Q744.7,302.7 744.7,311.7 Q745.0,381.1 744.7,450.6 Q744.7,459.6 735.7,459.6 Q566.5,460.5 397.2,459.6 Q388.2,459.6 388.2,450.6 Q387.6,381.1 388.2,311.7 Q388.2,302.7 397.2,302.7'/>
         <text class='yr' x='403.0' y='324.5'>2023-</text>
-        <text class='stage' x='403.0' y='348.5'>LLaMA makes it default</text>
+        <text class='stage' x='403.0' y='348.5'>Llama makes it default</text>
         <circle class='bul' cx='407.0' cy='366.5' r='2'/>
-        <text class='body' x='416.0' y='370.5'>SwiGLU in LLaMA, Mistral, Qwen, DeepSeek</text>
+        <text class='body' x='416.0' y='370.5'>SwiGLU in Llama, Mistral, Qwen, DeepSeek</text>
         <circle class='bul' cx='407.0' cy='386.0' r='2'/>
         <text class='body' x='416.0' y='390.0'>Gemma keeps the GELU-gated variant</text>
       </g>
@@ -205,7 +205,7 @@ Shazeer's introduction says so plainly. What went unrevisited was the
 
 It is worth pausing on how much was riding on that unexamined shape. The
 feed-forward block holds about two thirds of the non-embedding parameters in a
-decoder-only model: 66.8% of them in LLaMA 7B. (The figure was only 57% in the
+decoder-only model: 66.8% of them in Llama 7B. (The figure was only 57% in the
 2017 encoder-decoder, which spends parameters on cross-attention that a modern
 decoder does not have.) The most-copied design decision in the architecture
 was also one of the least examined ones.
@@ -268,7 +268,7 @@ With the customary $d_{ff} = 4d$, the new width is $\tfrac{8}{3}d$. One extra
 matrix, paid for entirely in width, at identical parameter count and very
 nearly identical arithmetic.
 
-Watch the rule land in a real model. LLaMA 7B has $d = 4096$, so two thirds of
+Watch the rule land in a real model. Llama 7B has $d = 4096$, so two thirds of
 $4d$ is $10{,}922.67$ — not a width anybody can allocate, and not a shape the
 hardware would like even if you could. It rounds up to the next multiple of
 256, giving **11,008**, which is the number written on Figure 1. That rounding
@@ -576,8 +576,8 @@ ungated, and a tie inside the gated family.
 
 Which makes adoption the question, and the usual telling is wrong. It was not
 Meta choosing and everyone copying: **PaLM used SwiGLU in April 2022**, a year
-before LLaMA, at 540B, and it was Google's — while Google's Gemma ships
-**GEGLU** to this day. The split runs inside labs, not between them. LLaMA's
+before Llama, at 540B, and it was Google's — while Google's Gemma ships
+**GEGLU** to this day. The split runs inside labs, not between them. Llama's
 choice mattered because its weights were public, so Mistral, Qwen, DeepSeek
 and Phi inherited a recipe, not a measurement.
 
@@ -642,14 +642,14 @@ decides how much of the other matrix gets through. The elegant part is the
 accounting. Three matrices where there were two would cost half again as much,
 so you shrink the wide middle to exactly two thirds of its old width, and
 because the model width cancels out of that calculation the rule holds at
-every scale. In LLaMA 7B it means going up to 11,008 instead of 16,384: the
+every scale. In Llama 7B it means going up to 11,008 instead of 16,384: the
 same budget, spent differently.
 
 What most people get wrong is that a winner was ever established. GEGLU edges
 SwiGLU on pretraining perplexity by 0.003, a margin the paper never shows to
 be real, and the three downstream tables go to ReGLU, SwiGLU and Bilinear, one
 each. Nor was this Meta choosing and the field copying: Google's PaLM shipped
-SwiGLU a year before LLaMA, while Google's Gemma ships GEGLU to this day. The
+SwiGLU a year before Llama, while Google's Gemma ships GEGLU to this day. The
 best part is the paper's last line, where Shazeer declines to explain the
 result and attributes it "to divine benevolence." People have tried since;
 no account has won. A great deal of what runs in production is there because

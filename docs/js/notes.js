@@ -1180,6 +1180,65 @@
   }
 
   // =========================================================================
+  // 2i. The decoder map -- the interactive figure in the Llama 3 note.
+  // =========================================================================
+
+  /* Not a lab: no sliders, no redraw. A static roadmap of one decoder layer
+     where every box reveals in two stages. Clicking the box body opens the
+     tensor it produces and that tensor's shape (teal); clicking the `code`
+     chip opens the lines behind it (plum). The two are independent, so a
+     reader can hold the shape and the code side by side. A small entrance
+     stagger plays when the map first scrolls into view, and again on Replay --
+     additive only, so the map stays fully readable if this never runs. */
+  function initDecoderRoadmap() {
+    var map = document.querySelector('.decoder-map');
+    if (!map) { return; }
+
+    map.addEventListener('click', function (e) {
+      // The `code` chip: only the ones inside a step do anything -- the one in
+      // the header is a legend and stays inert.
+      var chip = e.target.closest('.dm-code-btn');
+      if (chip) {
+        var stepC = chip.closest('.dm-step');
+        if (stepC) {
+          e.stopPropagation();
+          stepC.classList.toggle('code-open');
+        }
+        return;
+      }
+      var box = e.target.closest('.dm-box');
+      if (box) {
+        var step = box.closest('.dm-step');
+        var open = step.classList.toggle('io-open');
+        box.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+    });
+
+    function play() {
+      map.classList.remove('playing');
+      void map.offsetWidth;      // commit the removal so the animation restarts
+      map.classList.add('playing');
+    }
+    var replay = map.querySelector('.dm-replay');
+    if (replay) { replay.addEventListener('click', play); }
+
+    if (window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { play(); io.disconnect(); }
+        });
+      }, { threshold: 0.12 });
+      io.observe(map);
+    } else {
+      play();
+    }
+  }
+
+  // =========================================================================
 
   initTokenLab();
   initPruneLab();
@@ -1189,4 +1248,5 @@
   initIRoPELab();
   initTempLab();
   initSSMaxLab();
+  initDecoderRoadmap();
 }());

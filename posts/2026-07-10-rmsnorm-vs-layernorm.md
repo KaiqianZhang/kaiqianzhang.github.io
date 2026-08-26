@@ -69,7 +69,7 @@ this post takes place inside one of them.
                 <span class='who'>(b) Pre-norm, the modern arrangement.</span>
                 The green boxes moved <i>inside</i> the residual branch, before
                 each sub-layer, leaving the main path clear. GPT-2 and
-                GPT-3 already did this with LayerNorm; LLaMA, Mistral, Qwen,
+                GPT-3 already did this with LayerNorm; Llama, Mistral, Qwen,
                 and Gemma do it with RMSNorm in those boxes.
             </div>
         </div>
@@ -173,7 +173,7 @@ charged.
         <text class='yr' x='403.0' y='269.0'>2023-</text>
         <text class='stage' x='403.0' y='293.0'>the default</text>
         <circle class='bul' cx='407.0' cy='311.0' r='2'/>
-        <text class='body' x='416.0' y='315.0'>LLaMA ships it; Mistral, Qwen, Gemma</text>
+        <text class='body' x='416.0' y='315.0'>Llama ships it; Mistral, Qwen, Gemma</text>
         <text class='body' x='416.0' y='334.5'>follow</text>
         <circle class='bul' cx='407.0' cy='350.0' r='2'/>
         <text class='body' x='416.0' y='354.0'>LayerNorm becomes the exception</text>
@@ -789,7 +789,7 @@ formula. It is that a component everyone treated as settled had an explanation
 attached to it that nobody had tested, and testing it was worth more than
 improving it.
 
-The specific result is now everywhere: RMSNorm is in LLaMA, Mistral, Qwen,
+The specific result is now everywhere: RMSNorm is in Llama, Mistral, Qwen,
 Gemma and essentially every open model released since 2023, and the ordinary
 implementation fuses it into a single kernel so the division costs almost
 nothing. That makes it a closed question in practice.
