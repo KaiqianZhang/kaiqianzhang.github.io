@@ -17,12 +17,12 @@
   },
   "links": [
     {
-      "name": "Research Notes",
-      "url": "/notes/"
-    },
-    {
       "name": "Blog",
       "url": "/blog/"
+    },
+    {
+      "name": "Research Notes",
+      "url": "/notes/"
     }
   ],
   "nav": [
