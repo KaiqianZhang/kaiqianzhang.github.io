@@ -1,6 +1,6 @@
 ---
 title: RoPE and iRoPE
-subtitle: Position becomes an angle, the angle decays, and the fix everyone converged on is to stop encoding position in some layers altogether.
+subtitle: How I learned to see position as rotation — and why some long-context models mix RoPE with layers that use no explicit positional encoding.
 date: 2026-08-22
 tags: foundations
 format: three-part
@@ -17,20 +17,20 @@ format: three-part
 <rect x='306' y='55.0' width='44' height='19' rx='9' fill='var(--w-student)' fill-opacity='0.16' class='a-pop' style='--d:0.62s'/>
 <text x='328' y='69.0' class='lbl sm mid a-fade' style='--d:0.72s;fill:var(--w-student)'>5 min</text>
 <path d='M388.0 26.0 C384.7 26.0, 384.7 59.0, 366.0 65.0 C384.7 71.0, 384.7 104.0, 388.0 104.0' fill='none' stroke='var(--w-student)' stroke-width='2.0' stroke-linecap='round' class='a-draw' style='--d:0.95s;--dur:0.9s'/>
-<text x='396' y='30.0' class='lbl sm a-rise' style='--d:1.15s'>position becomes an angle that cancels</text>
-<text x='396' y='56.0' class='lbl sm a-rise' style='--d:1.22s'>a bank of dials, fast to slow</text>
-<text x='396' y='82.0' class='lbl sm a-rise' style='--d:1.29s'>long-range decay, and the floor under it</text>
-<text x='396' y='108.0' class='lbl sm a-rise' style='--d:1.36s'>iRoPE — drop position in some layers</text>
+<text x='396' y='30.0' class='lbl sm a-rise' style='--d:1.15s'>how RoPE turns position into relative rotation</text>
+<text x='396' y='56.0' class='lbl sm a-rise' style='--d:1.22s'>why one head uses many rotation speeds</text>
+<text x='396' y='82.0' class='lbl sm a-rise' style='--d:1.29s'>why long-range scores can weaken</text>
+<text x='396' y='108.0' class='lbl sm a-rise' style='--d:1.36s'>how iRoPE mixes RoPE and NoPE</text>
 <circle cx='152' cy='204.0' r='4' fill='var(--w-teacher)' class='a-beat' style='--dur:2.2s;--d:0.65s'/>
 <text x='164' y='209.0' class='lbl a-rise' style='--d:0.65s;fill:var(--w-teacher)'>② Inspire together</text>
 <rect x='306' y='194.0' width='44' height='19' rx='9' fill='var(--w-teacher)' fill-opacity='0.16' class='a-pop' style='--d:0.77s'/>
 <text x='328' y='208.0' class='lbl sm mid a-fade' style='--d:0.87s;fill:var(--w-teacher)'>4 min</text>
 <path d='M388.0 152.0 C384.7 152.0, 384.7 198.0, 366.0 204.0 C384.7 210.0, 384.7 256.0, 388.0 256.0' fill='none' stroke='var(--w-teacher)' stroke-width='2.0' stroke-linecap='round' class='a-draw' style='--d:1.13s;--dur:0.9s'/>
-<text x='396' y='156.0' class='lbl sm a-rise' style='--d:1.33s'>stretch the bands — PI, NTK, YaRN</text>
-<text x='396' y='182.0' class='lbl sm a-rise' style='--d:1.40s'>raise the base — and the bound on it</text>
-<text x='396' y='208.0' class='lbl sm a-rise' style='--d:1.47s'>drop position — NoPE, RNoPE, SWAN, iRoPE</text>
-<text x='396' y='234.0' class='lbl sm a-rise' style='--d:1.54s'>fix the softmax — SSMax</text>
-<text x='396' y='260.0' class='lbl sm a-rise' style='--d:1.61s'>where this could go — five openings</text>
+<text x='396' y='156.0' class='lbl sm a-rise' style='--d:1.33s'>stretching context with PI, NTK, and YaRN</text>
+<text x='396' y='182.0' class='lbl sm a-rise' style='--d:1.40s'>raising the base, and the bound on it</text>
+<text x='396' y='208.0' class='lbl sm a-rise' style='--d:1.47s'>removing explicit position in some layers</text>
+<text x='396' y='234.0' class='lbl sm a-rise' style='--d:1.54s'>changing softmax instead with SSMax</text>
+<text x='396' y='260.0' class='lbl sm a-rise' style='--d:1.61s'>five research questions I was left with</text>
 <circle cx='152' cy='304.0' r='4' fill='var(--w-loss)' class='a-beat' style='--dur:2.6s;--d:0.80s'/>
 <text x='164' y='309.0' class='lbl a-rise' style='--d:0.80s;fill:var(--w-loss)'>③ Chat together</text>
 <rect x='306' y='294.0' width='44' height='19' rx='9' fill='var(--w-loss)' fill-opacity='0.16' class='a-pop' style='--d:0.92s'/>
@@ -40,38 +40,44 @@ format: three-part
 </svg>
 </div>
 
+When I first encountered RoPE, I pictured each pair of query and key
+coordinates as two hands on a clock. That picture helped me understand RoPE,
+its long-range limits, and why iRoPE mixes RoPE with NoPE layers.
+
 ## Learning together
 
-Attention is a set operation. With nothing to mark position, *"the dog bit
-the man"* and *"the man bit the dog"* reach the model as the same input.
-**Rotary position embedding (RoPE)** puts the order back, and I still think
-it is the prettiest idea in the modern transformer.
+Self-attention has no built-in notion of token order: without positional
+information or a causal mask, permuting the tokens simply permutes the
+outputs. A decoder does receive some order information from its causal mask,
+but **rotary position embedding (RoPE)** gives attention an explicit way to
+represent relative distance. I still find it one of the most elegant ideas
+in the modern transformer.
 
-Attention works by **scoring pairs**. For each pair it computes a single
-number from the first token's *query* vector and the second's *key* vector,
-and that number sets how much the first reads from the second. That number is
-a dot product.
+Attention **scores pairs of tokens**. A query at position $m$ and a key at
+position $n$ produce a dot product called an attention logit. After softmax,
+a larger logit generally means that the query reads more from that key.
 
-Everything turns on one fact I wish someone had told me sooner: **a dot
-product only cares about the angle between two vectors.** Spin both by the
-same amount and the score does not move. Open the angle and it falls.
+One fact made RoPE click for me: **a dot product depends on vector lengths
+and their angle.** Rotation preserves the lengths, so RoPE changes only the
+relative angle. Rotating both vectors by the same amount leaves their dot
+product unchanged.
 
-So take the query and key **two coordinates at a time** — I will call each
-pair a **band** — read each band as a point on a dial, and **spin the query's
-dial by its position $m$ and the key's by its position $n$**.
+RoPE works **two coordinates at a time**. I will call each pair a **band** as
+a visual shorthand, not as standard terminology. For band $i$, RoPE rotates
+the query by $m\theta_i$ and the key by $n\theta_i$.
 
 $$q_m \rightarrow R_m q, \qquad k_n \rightarrow R_n k, \qquad
 \langle R_m q,\; R_n k\rangle = \langle q,\; R_{n-m} k\rangle$$
 
-Both dials turned, so the angle between them opened by exactly $n-m$. The
-score cannot say where either token sits, only how far apart the two are.
-Absolute position goes in and cancels itself on the way out.
+Here, $R_m$ collects all band-wise rotations $m\theta_i$. Within band $i$,
+the **relative** rotation is $(n-m)\theta_i$, so the dot product depends on
+relative rather than absolute position.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 300' role='img' aria-label='Three dials on one clock, turning at rates proportional to their real wavelengths, each carrying a query arrow and a key arrow with a fixed wedge between them'>
-<text x='16' y='22' class='lbl sm'>a band is one pair of coordinates, read as a dial. a head runs d/2 of them, each turning by its own angle per token.</text>
-<text x='16' y='40' class='lbl sm'>all three run off one clock — by the time the first has gone round 32 times, the third has turned once.</text>
+<text x='16' y='22' class='lbl sm'>I picture each pair of coordinates as a dial. A head has d/2 dials, each rotating at its own rate.</text>
+<text x='16' y='40' class='lbl sm'>Here, by the time the first dial has made 32 turns, the third has made only one.</text>
 <circle cx='138' cy='150' r='62' fill='none' stroke='var(--w-edge)' stroke-width='1.5'/>
 <line x1='190.0' y1='150.0' x2='200.0' y2='150.0' stroke='var(--w-edge)' stroke-width='1.5'/>
 <line x1='138.0' y1='202.0' x2='138.0' y2='212.0' stroke='var(--w-edge)' stroke-width='1.5'/>
@@ -118,40 +124,38 @@ Absolute position goes in and cancels itself on the way out.
 <rect x='122' y='284' width='18' height='12' rx='3' fill='var(--w-loss)' fill-opacity='0.35'/>
 <text x='146' y='294' class='lbl sm' style='fill:var(--w-loss)'>the gap that survives the dot product</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one head, at rates proportional to their real wavelengths. Both arrows turn with position; the wedge between them never changes. I stopped at band 24 — band 56 turns three thousand times slower.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Three bands from one attention head, rotating at different rates. Within a band, both arrows rotate with position; their relative angle is what survives in the dot product. I stop at band 24 here — band 56 rotates roughly three thousand times more slowly than band 0.</div>
 </div>
 
-A head does not run one dial. It runs one per band, $d/2$ in all, where $d$
-is the head's dimension, at angles
+One attention head contains many of these dials. If the head dimension is
+$d$, RoPE creates $d/2$ bands, with rotation rates
 
 $$\theta_i = \theta_{\text{base}}^{-2i/d}, \qquad i = 0 \ldots d/2-1$$
 
-which for the usual base of 10,000 spans **four orders of magnitude**. A
-band's **wavelength** is how many tokens it takes to come full circle: band 0
-every 6 tokens, band 56 every 20,000 or so. That spread is what I want you to
-hold on to:
+With the usual base of 10,000, these rates span nearly **four orders of
+magnitude**. A band's **wavelength** is the number of tokens required for one
+full turn: about 6 for band 0, but roughly 20,000 for band 56. I carry three
+intuitions from this:
 
-- **Fast bands are the local ruler; slow bands are the long-range one.** Band
-  0 resolves "three tokens back" sharply, then wraps uselessly beyond it; only
-  the slow bands tell 5,000 from 6,000.
-- **A band is useless if it never turns inside your context**, because it
-  hands back nearly the same angle for every position it sees.
-- **So the frequency spectrum is the design surface.** Nearly every
-  long-context method in the literature is a decision about what to do with
-  the slow end of this bank.
+- **Fast bands resolve nearby offsets; slow bands vary over longer ranges.**
+  Fast bands are precise locally but wrap around many times.
+- **A band that barely rotates contributes little positional resolution.**
+  It assigns nearly the same angle to many positions.
+- **The frequency spectrum is a design choice.** I read many long-context
+  methods as different ways to modify its slow end.
 
-### Long-range decay, and what it decays to
+### A useful picture of long-range decay
 
-Here is the part I find uncomfortable. Take two tokens that genuinely match
-and slide them apart. At distance zero every band contributes fully; as the
-gap grows the bands fall out of step, cancel, and the score drops.
-This is **long-range decay**, which the RoPE paper presents as a feature:
-nearby tokens naturally matter more.
+Imagine a simple case in which the query and key are identical before RoPE.
+At zero distance, every band is aligned. As I separate the tokens, band $i$
+acquires the angle $(n-m)\theta_i$; positive and negative contributions can
+then cancel. This tendency is called **long-range decay**. The original RoPE
+paper presents it as a useful bias toward nearby tokens.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 700 214' role='img' aria-label='RoPE relative attention score falling as distance grows and then flattening into a noise floor'>
-<text x='16' y='22' class='lbl sm'>relative attention score for a query and key that match, as they move apart</text>
+<svg viewBox='0 0 700 214' role='img' aria-label='An illustrative RoPE score weakening with distance until it becomes comparable to random score variation'>
+<text x='16' y='22' class='lbl sm'>a toy relative score for an initially aligned query and key as their distance grows</text>
 <line x1='62' y1='166.4' x2='652' y2='166.4' stroke='var(--w-edge)' stroke-width='1.3'/>
 <line x1='62.0' y1='40.0' x2='62.0' y2='172.4' stroke='var(--w-grid)' stroke-width='1'/>
 <text x='62.0' y='186.4' class='lbl sm mid'>1</text>
@@ -166,29 +170,30 @@ nearby tokens naturally matter more.
 <text x='54' y='44.0' class='lbl sm end'>1.0</text>
 <text x='54' y='170.4' class='lbl sm end'>0</text>
 <line x1='62' y1='150.6' x2='652' y2='150.6' stroke='var(--w-pruned)' stroke-width='1.6' stroke-dasharray='5 4' class='a-breathe' style='--dur:3.4s;--lo:0.45;--hi:1'/>
-<text x='70' y='143.6' class='lbl sm' style='fill:var(--w-pruned)'>noise floor &#8212; an unrelated pair scores this much</text>
+<text x='70' y='143.6' class='lbl sm' style='fill:var(--w-pruned)'>typical noise scale &#8212; unrelated pairs fluctuate around zero</text>
 <path d='M62.0 43.8 L107.4 53.1 L133.9 63.3 L152.8 70.4 L167.4 73.2 L179.3 73.4 L189.4 73.9 L198.2 76.1 L205.9 79.3 L212.8 81.8 L219.0 82.8 L224.7 82.7 L229.9 83.0 L234.8 84.4 L239.3 86.4 L243.5 88.0 L247.5 88.4 L254.8 88.3 L261.3 91.2 L267.3 92.4 L272.8 92.0 L277.8 94.8 L282.5 95.6 L286.8 94.7 L290.9 97.8 L294.8 98.4 L300.2 97.7 L305.2 101.7 L309.8 97.9 L314.1 106.0 L318.1 97.4 L323.2 109.6 L327.9 99.1 L332.2 110.3 L336.3 102.5 L340.2 109.9 L344.7 104.2 L348.9 109.3 L352.9 113.1 L357.4 111.6 L361.5 119.4 L365.5 109.4 L369.8 119.2 L373.8 107.1 L378.1 113.6 L382.2 111.3 L386.0 120.8 L390.1 122.9 L394.3 117.1 L398.3 126.6 L402.4 112.0 L406.2 121.4 L410.2 119.5 L414.3 125.3 L418.3 129.3 L422.2 117.4 L426.1 126.1 L430.0 118.1 L433.9 127.9 L437.8 123.6 L441.7 134.9 L445.6 138.3 L449.5 125.2 L453.5 130.5 L457.3 130.9 L461.3 131.4 L465.1 143.7 L469.0 122.8 L473.0 137.4 L476.8 136.2 L480.6 139.4 L484.5 142.8 L488.4 132.3 L492.2 141.7 L496.1 135.3 L499.9 135.9 L503.8 136.8 L507.7 147.0 L511.6 154.7 L515.4 130.9 L519.3 152.2 L523.1 148.4 L526.9 149.4 L530.8 161.7 L534.6 142.9 L538.4 146.6 L542.3 140.1 L546.1 144.4 L549.9 164.1 L553.8 143.1 L557.6 151.6 L561.4 151.7 L565.3 149.1 L569.1 167.1 L572.9 142.3 L576.7 151.8 L580.6 152.5 L584.4 156.0 L588.2 160.8 L592.0 148.7 L595.9 157.4 L599.7 157.4 L603.5 163.7 L607.3 155.2 L611.2 164.6 L615.0 171.4 L618.8 151.5 L622.6 158.3 L626.5 158.9 L630.3 172.3 L634.1 177.2 L637.9 156.0 L641.7 174.9 L645.6 179.3 L649.4 172.0' fill='none' stroke='var(--w-student)' stroke-width='2.2' stroke-linejoin='round' class='a-draw' style='--dur:2.4s'/>
 <text x='133.9' y='57.7' class='lbl sm a-fade' style='--d:2.50s;fill:var(--w-student)'>the score decays with distance</text>
 <line x1='561.2' y1='34.0' x2='561.2' y2='172.4' stroke='var(--w-loss)' stroke-width='1.6' stroke-dasharray='4 4'/>
 <text x='561.2' y='28.0' class='lbl sm mid' style='fill:var(--w-loss)'>trained length</text>
-<text x='571.6' y='110.8' class='lbl sm a-fade' style='--d:3.00s;fill:var(--w-loss)'>past here it is not</text>
-<text x='571.6' y='126.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--w-loss)'>decaying, it is rattling</text>
+<text x='571.6' y='110.8' class='lbl sm a-fade' style='--d:3.00s;fill:var(--w-loss)'>past here, the score</text>
+<text x='571.6' y='126.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--w-loss)'>oscillates at unseen angles</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> The relative score for a matching pair, from the real bank at base 10,000. It falls, then levels out at what an unrelated pair scores.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> An illustrative relative score computed from a RoPE frequency bank with base 10,000. The signal weakens with distance and eventually becomes comparable to the variation expected from unrelated vectors.</div>
 </div>
 
-That is useful, right up to the point where it is not. The trouble is not
-that the score decays, but **what it decays to**:
+This is intuition, not a universal law. Real queries and keys are not
+identical, and their scores can oscillate. Still, the toy case exposes a
+signal-to-noise problem:
 
-- An unrelated query and key do not score zero. They score around
-  $1/\sqrt{d/2}$, random phases adding up to a nonzero floor.
-- Once a matching pair sinks to that floor, **the score stops carrying
-  information**: "related, 6,000 apart" and "unrelated" become one number.
-- Past the trained length it is worse. The curve stops falling and rattles
-  around the floor, at angles the model never saw.
+- An unrelated pair has expected normalized score zero, but individual
+  scores vary by roughly $1/\sqrt{d/2}$ in this simplified picture.
+- When the signal falls to that scale, **one head cannot reliably separate a
+  distant match from an unrelated token using this signal alone**.
+- Beyond the training length, the model also encounters relative angles it
+  was never optimized to interpret.
 
-That is the ceiling, and it is not a bug. It is what adding up rotating
-vectors does.
+For me, this is the limitation the dial picture reveals: many rotating
+components can make alignment harder to recover as distance grows.
 
 <div class='lab wide' id='decay-lab'>
 <div class='lab-head'><span class='name'>Lab 1 · how far RoPE can still see</span><span class='hint'>raise the base and watch the usable range move</span></div>
@@ -209,33 +214,35 @@ vectors does.
 </div>
 <div class='readout'>
 <div class='stat' style='--stat-hue:var(--w-student)'><span class='k'>score at this distance</span><span class='v' id='dec-stat-score'></span></div>
-<div class='stat' style='--stat-hue:var(--w-pruned)'><span class='k'>noise floor</span><span class='v' id='dec-stat-floor'></span></div>
+<div class='stat' style='--stat-hue:var(--w-pruned)'><span class='k'>typical noise scale</span><span class='v' id='dec-stat-floor'></span></div>
 <div class='stat' style='--stat-hue:var(--w-kept)'><span class='k'>usable range</span><span class='v' id='dec-stat-range'></span></div>
 </div>
 <div class='verdict' id='dec-verdict'></div>
 <svg viewBox='0 0 700 268' role='img'></svg>
-<p class='cap'>Computed from the real bank. Violet is a query and key that <b>agree</b>; clay is where an <b>unrelated</b> pair sits. Once violet is inside clay, the score says nothing.</p>
+<p class='cap'>Computed from the RoPE frequency bank. Violet shows an initially aligned query and key; clay shows the typical variation of an unrelated pair. When the two overlap, this simplified score alone no longer separates them reliably.</p>
 </div>
 </div>
 
 ### iRoPE: stop encoding position in some layers
 
-Here is the fix I did not see coming, and the one the field converged on:
-**in some layers, encode no position at all.**
+The most surprising response I found was to **omit explicit positional
+encoding from some layers**.
 
-A layer with no positional encoding is still not orderless. Causal masking
-leaks position on its own: a token at index 5 sees five things, one at 5,000
-sees five thousand, and that is learnable. This is **NoPE**, where order is
-*implicit*.
+Such a layer is not blind to order. The causal mask lets each token attend
+only to its prefix, and earlier layers may already carry order-sensitive
+features. A model can therefore learn position indirectly. This is commonly
+called **NoPE**: no explicit positional encoding.
 
-So interleave them. Most layers keep RoPE and work locally; every fourth
-gets nothing and carries the long range. That is **iRoPE**, *i* for
-interleaved, and what Llama 4 Scout uses to claim 10M.
+**iRoPE** interleaves RoPE and NoPE layers. I think of RoPE layers as adding
+an explicit relative-position bias and NoPE layers as providing a path
+without RoPE's distance-dependent rotation. A common pattern is three RoPE
+layers followed by one NoPE layer, although the schedule is a design choice.
+Llama 4 Scout uses iRoPE in its reported 10-million-token context window.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 700 292' role='img' aria-label='A stack of layers where most carry rotary position and every fourth carries none, with information hopping locally in the first and jumping far in the second'>
-<text x='16' y='24' class='lbl sm'>a token's information moving up the stack: short hops where position is encoded, one long jump where it is not</text>
+<svg viewBox='0 0 700 292' role='img' aria-label='A stack that interleaves three RoPE layers with one NoPE layer'>
+<text x='16' y='24' class='lbl sm'>a simplified view: RoPE layers encode relative position, while NoPE layers provide a path without rotary decay</text>
 <rect x='34' y='56' width='46' height='140' rx='6' fill='var(--w-student)' fill-opacity='0.16' class='a-pop' style='--d:0.05s'/>
 <text x='57' y='48' class='lbl sm mid a-fade' style='--d:0.20s;fill:var(--w-student)'>RoPE</text>
 <text x='57' y='214' class='lbl sm mid a-fade' style='--d:0.25s'>1</text>
@@ -288,58 +295,71 @@ interleaved, and what Llama 4 Scout uses to claim 10M.
 <circle cx='651' cy='174' r='5' fill='var(--w-teacher)' class='a-travel' style='--dur:2.6s;--fx:0px;--tx:0px'></circle>
 <path d='M651 174 C651 76, 651 66, 651 72' fill='none' stroke='var(--w-teacher)' stroke-width='2' class='a-flow' style='--dur:1.6s'/>
 <path d='M40 236 L640 236' stroke='var(--w-teacher)' stroke-width='2.4' class='a-flow' style='--dur:2.2s'/>
-<text x='340' y='258' class='lbl sm mid' style='fill:var(--w-teacher)'>the bare layers are the only place two distant tokens can reach each other with nothing decaying in between</text>
+<text x='340' y='258' class='lbl sm mid' style='fill:var(--w-teacher)'>NoPE layers let distant tokens interact without a RoPE rotation between them</text>
 <rect x='34' y='272' width='12' height='12' rx='3' fill='var(--w-student)' fill-opacity='0.16'/>
-<text x='52' y='282' class='lbl sm'>RoPE &#8212; local, and it fades</text>
+<text x='52' y='282' class='lbl sm'>RoPE &#8212; explicit relative position</text>
 <rect x='300' y='272' width='12' height='12' rx='3' fill='var(--w-teacher)' fill-opacity='0.85'/>
-<text x='318' y='282' class='lbl sm'>NoPE &#8212; global, order inferred from the causal mask alone</text>
+<text x='318' y='282' class='lbl sm'>NoPE &#8212; order learned indirectly from context and masking</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 3.</span> The interleave. Most layers carry rotary position and work locally; every fourth carries none, so nothing decays.</div>
+<div class='caption'><span class='caption-label'>Figure 3.</span> A simplified iRoPE pattern. Most layers use rotary position; periodically, a NoPE layer omits the rotation and gives attention a distance-independent path.</div>
 </div>
 
 ### What to carry into the next part
 
-- **Position enters as a rotation and then cancels.** Attention only ever sees $n-m$.
-- **A head is a bank of bands**, whose wavelengths span four orders of magnitude.
-- **Fast bands are the local ruler; slow bands are the only long-range one.**
-- **A matching pair decays to the score an unrelated pair gets** — that is the ceiling, and it is geometry, not a bug.
-- **A NoPE layer has nothing that decays**, because nothing in it depends on distance.
+- **RoPE turns absolute positions into relative rotation.**
+- **Fast bands resolve local offsets; slow bands vary over longer ranges.**
+- **At long distances, the positional signal can approach random score
+  variation.**
+- **NoPE avoids this rotary effect by applying no position-dependent
+  rotation.**
 
 ## Inspire together
 
-I read all of it as one question asked six ways: **what should we do about
-the slow bands?**
+I read these papers as different answers to one question: **what should a
+model do with RoPE's slow bands when the context becomes much longer?**
 
 **Stretch them.**
 
-The first instinct was to squeeze. If a model only saw positions up to
-4,096, map 32,768 down into that range and nothing looks unfamiliar. It
-works, and pays for that safety in the wrong currency.
+One approach maps a longer sequence back into the positions seen during
+training. The angles stay familiar, but positional resolution decreases.
 
-- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595)) — the clean version, and the one that shows the bill: the fast local bands slow down too.
-- **NTK-aware scaling** — the community's answer, never published, used everywhere. Raise the base: the slow end stretches, the fast end barely moves.
-- **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) — the one that actually ships. Fast bands untouched, slow ones interpolated, a ramp between, plus a softmax warmed by $t = 0.1\ln s + 1$. Llama 3.1 uses it, the strongest endorsement here.
-- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) — searches the rescaling rather than deriving it.
+- **Position Interpolation** ([Chen et al., 2023](https://arxiv.org/abs/2306.15595))
+  scales every position uniformly, so fast local bands slow down too.
+- **NTK-aware scaling** raises the RoPE base, stretching slow bands much more
+  than fast ones.
+- **YaRN** ([Peng et al., 2023](https://arxiv.org/abs/2309.00071)) preserves
+  fast bands, interpolates slow ones, and ramps between them. It also adjusts
+  attention scaling; Llama 3.1 adopted a YaRN-style scheme.
+- **LongRoPE2** ([Microsoft, 2025](https://arxiv.org/abs/2502.20082)) searches
+  for a nonuniform rescaling schedule.
 
-**Raise the base.** If you read one paper here, I would make it this one.
+**Raise the base.** I would start with this paper to understand why it works.
 
-- **Base of RoPE Bounds Context Length** ([Men et al., NeurIPS 2024](https://arxiv.org/abs/2405.14591)) — for a target length there is a **lower bound** on the base, below which a model can only *look* like it handles long context. Llama 3's 500,000 is this in production.
+- **Base of RoPE Bounds Context Length** ([Men et al., NeurIPS 2024](https://arxiv.org/abs/2405.14591))
+  derives a **lower bound** on the base for a target length. Below it, a model
+  may accept long input without reliably distinguishing positions. This
+  helped me understand Llama 3's much larger base of 500,000.
 
 **Delete position in some layers.**
 
-Then people asked the question I would never have thought to ask: what if
-some layers are never told where anything is?
+This work asks a question I missed at first: what if some layers receive no
+explicit position?
 
-- **NoPE** ([Kazemnejad et al., NeurIPS 2023](https://arxiv.org/abs/2305.19466)) — decoder-only transformers length-generalise *better* with no positional encoding at all.
-- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) — interleaves the two and shows why: retrieval concentrates in the NoPE layers.
-- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) — same shape plus sliding windows; an existing model converts cheaply.
-- **iRoPE** ([Meta, Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/)) — shipped at scale.
+- **NoPE** ([Kazemnejad et al., NeurIPS 2023](https://arxiv.org/abs/2305.19466))
+  performs surprisingly well on several length-generalization tasks.
+- **RNoPE** ([Cohere, 2025](https://arxiv.org/abs/2501.18795)) interleaves
+  RoPE and NoPE; its analyses find long-range retrieval concentrated in the
+  NoPE layers.
+- **SWAN-GPT** ([NVIDIA, 2025](https://arxiv.org/abs/2504.08719)) combines a
+  similar hybrid with sliding-window attention.
+- **iRoPE** ([Meta, Llama 4](https://ai.meta.com/blog/llama-4-multimodal-intelligence/))
+  brings interleaving into Llama 4.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 700 320' role='img' aria-label='Each long context method shown as what it does to the bank of wavelengths'>
-<text x='16' y='18' class='lbl sm'>every band's wavelength, in tokens.</text>
-<text x='16' y='32' class='lbl sm'>interpolation slides every band; NTK and YaRN slide mostly the slow end.</text>
+<text x='16' y='18' class='lbl sm'>Each dot represents one band's wavelength, measured in tokens.</text>
+<text x='16' y='32' class='lbl sm'>PI moves every band; NTK-aware scaling and YaRN move the slow end more strongly.</text>
 <text x='16' y='82' class='lbl sm a-rise' style='--d:0.20s'>RoPE as trained</text>
 <circle cx='208.0' cy='78' r='3.4' fill='var(--w-student)' fill-opacity='0.35' class='a-pop' style='--d:0.30s'/>
 <circle cx='212.0' cy='78' r='3.4' fill='var(--w-student)' fill-opacity='0.36' class='a-pop' style='--d:0.30s'/>
@@ -601,7 +621,7 @@ some layers are never told where anything is?
 <circle cx='515.6' cy='210' r='3.4' fill='var(--w-kept)' fill-opacity='0.88' class='a-pop' style='--d:1.30s'/>
 <circle cx='519.6' cy='210' r='3.4' fill='var(--w-kept)' fill-opacity='0.89' class='a-pop' style='--d:1.30s'/>
 <text x='16' y='258' class='lbl sm a-rise' style='--d:1.20s'>NoPE</text>
-<text x='176' y='258' class='lbl sm a-fade' style='--d:1.40s;fill:var(--w-pruned)'>no bands at all &#8212; the layer is told nothing about position</text>
+<text x='176' y='258' class='lbl sm a-fade' style='--d:1.40s;fill:var(--w-pruned)'>no frequency bands &#8212; the layer receives no explicit position</text>
 <line x1='389.2' y1='60' x2='389.2' y2='276' stroke='var(--w-loss)' stroke-width='1.5' stroke-dasharray='4 4' class='a-breathe' style='--dur:3.6s;--lo:0.4;--hi:0.95'/>
 <text x='389.2' y='292' class='lbl sm mid' style='fill:var(--w-loss)'>trained</text>
 <line x1='447.3' y1='60' x2='447.3' y2='276' stroke='var(--w-loss)' stroke-width='1.5' stroke-dasharray='4 4' class='a-breathe' style='--dur:3.6s;--lo:0.4;--hi:0.95'/>
@@ -610,40 +630,65 @@ some layers are never told where anything is?
 <text x='349.7' y='54' class='lbl sm mid'>1,000</text>
 <text x='478.5' y='54' class='lbl sm mid'>100,000</text>
 <text x='607.2' y='54' class='lbl sm mid'>10,000,000</text>
-<text x='16' y='312' class='lbl sm'>log scale &#8212; what matters is which end of the bank each method moves</text>
+<text x='16' y='312' class='lbl sm'>The horizontal axis is logarithmic; notice which part of the spectrum each method moves.</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> The same bank under each fix. Interpolation slides everything right; raising the base moves the slow end far more; YaRN moves only the slow end; NoPE removes it.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> The same frequency bank under four approaches. Position Interpolation shifts every wavelength. Raising the base changes the slow end more strongly. YaRN preserves the fast end while stretching the slow end. NoPE removes explicit rotary frequencies from the layer.</div>
 </div>
 
-**Fix the softmax instead.** Everything above moves the encoding; this
-leaves it alone and goes after the other end.
+**Change the softmax instead.** Scalable-Softmax leaves RoPE unchanged and
+modifies how attention logits are normalized.
 
-- **Scalable-Softmax** ([Nakanishi, 2025](https://arxiv.org/abs/2501.19399)) — as $n$ grows, softmax's largest attainable weight shrinks. SSMax scales logits by $s\log n$ to cancel it.
+- **Scalable-Softmax** ([Nakanishi, 2025](https://arxiv.org/abs/2501.19399))
+  observes that, as the number of tokens $n$ grows, a fixed logit advantage
+  produces a smaller maximum attention weight. SSMax scales logits using
+  $\log n$ to offset this dilution.
 
-**Stop treating heads alike.** This attacks the assumption nobody
-questioned: that one frequency schedule suits every head.
+**Let heads use different schedules.** Most implementations give every head
+the same frequencies.
 
-- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) — learnable per-head frequencies and scaling: heads with different jobs want different ranges.
+- **AdaRoPE** ([2026](https://arxiv.org/abs/2607.19363)) learns frequencies
+  and scaling per head. To me, it makes sense that local and retrieval heads
+  may need different ranges.
 
-**Or the whole approach may be wrong.** These unsettled me most.
+**Question RoPE itself.** These results made me doubt that one rescaled
+frequency schedule can solve every long-context problem.
 
-- **RoPE Distinguishes Neither Positions Nor Tokens, Provably** ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) — as context grows RoPE provably loses its locality bias, failure probability approaching chance; and the base **trades distinguishing positions against distinguishing tokens.**
-- **Retrieval heads run on the slow bands** ([June 2026](https://arxiv.org/abs/2606.21249)) — the few heads that copy from far earlier. Mask OLMo-2's 87 and recall goes 1.00 → 0.00; zero their 32 slowest dimensions and it drops to 0.18.
-- **Why decay stops holding** ([ICLR 2025 blogpost](https://iclr-blogposts.github.io/2025/blog/pocp/)) — POCP, the share of obtuse angles between query and key sub-vectors: above ~50% the score fluctuates rather than decays.
+- **RoPE Distinguishes Neither Positions Nor Tokens, Provably**
+  ([Du et al., May 2026](https://arxiv.org/abs/2605.15514)) argues, under its
+  assumptions, that RoPE loses locality as context grows. It also finds that
+  the base trades position discrimination against token discrimination.
+- **Retrieval heads rely heavily on slow bands**
+  ([June 2026](https://arxiv.org/abs/2606.21249)). In OLMo-2, masking 87
+  retrieval heads drops recall from 1.00 to 0.00; zeroing their 32 slowest
+  dimensions drops it to 0.18.
+- **Why long-term decay can break down**
+  ([ICLR 2025 blog post](https://iclr-blogposts.github.io/2025/blog/pocp/))
+  studies POCP, the proportion of query-key subvector pairs with obtuse
+  angles. At high POCP, scores can fluctuate instead of decaying smoothly.
 
 ### Where this could go
 
-Each sits in a gap between two papers above, and I would take any of them.
+I wrote down five questions. I do not yet know whether each is new or
+practical, but they helped me connect the papers:
 
-- **Give the slow bands to the heads that need them.** AdaRoPE *learns* per-head frequencies; the retrieval-head work *identifies* which heads do the copying. Nobody has joined them.
-- **Make POCP an objective, not a diagnostic.** It predicts decay failure before the loss shows it.
-- **Derive the interleave ratio.** RNoPE, SWAN-GPT and iRoPE all pick "every fourth layer" by hand. Predict it from POCP or a head census.
-- **Test whether SSMax and NoPE are redundant.** Same symptom, opposite ends, and Llama 4 ships both.
-- **Build the benchmark the negative result implies.** Du et al. prove *two* failures; needle-in-a-haystack conflates them.
+- **Could slow bands be allocated specifically to retrieval heads?** AdaRoPE
+  learns per-head frequencies; retrieval-head work finds long-range copiers.
+  I have not found a study joining them.
+- **Could POCP become a training objective rather than only a diagnostic?**
+  Perhaps a regularizer could keep selected heads in a useful angular regime.
+- **Can the RoPE/NoPE interleave schedule be chosen systematically?** RNoPE,
+  SWAN-GPT, and iRoPE use fixed patterns. Could model measurements choose the
+  schedule?
+- **Do SSMax and NoPE solve overlapping problems?** They intervene at
+  different points but both preserve long-range attention. I would like to
+  see a joint ablation.
+- **What benchmark would separate position failure from token-content
+  failure?** Du et al. distinguish them theoretically, while a standard
+  needle-in-a-haystack test may mix them.
 
 
 <div class='lab wide' id='spec-lab'>
-<div class='lab-head'><span class='name'>Lab 2 · the four ways to stretch a context</span><span class='hint'>pick a method, then stretch it and read both costs</span></div>
+<div class='lab-head'><span class='name'>Lab 2 · three ways to stretch context</span><span class='hint'>choose a method, increase the length, and compare the costs</span></div>
 <div class='lab-body'>
 <div class='controls'>
 <div class='ctl'>
@@ -671,7 +716,7 @@ Each sits in a gap between two papers above, and I would take any of them.
 </div>
 <div class='verdict' id='spec-verdict'></div>
 <svg viewBox='0 0 700 210' role='img'></svg>
-<p class='cap'>Two costs, and every method trades between them: how far a band is pushed past its trained angles, and what the fastest band gave up. PI buys one with the other; NTK and YaRN get both.</p>
+<p class='cap'>I use this lab to compare how far bands move beyond their training angles and how much local resolution the fastest bands lose. PI trades one cost for the other; NTK-aware scaling and YaRN spread the change unevenly.</p>
 </div>
 </div>
 
@@ -680,34 +725,34 @@ Each sits in a gap between two papers above, and I would take any of them.
 <div class='flashcard'>
 <div class='fc-head'><span class='name'>The takeaways</span><button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>deal again</button></div>
 <div class='fc-body'>
-<div class='card' style='--d:0.08s'><span class='q'>what RoPE does</span><span class='a'>Turns each pair of dimensions by an angle proportional to position. The rotation cancels in the dot product, so attention only sees the <em>difference</em> of two positions.</span></div>
-<div class='card' style='--d:0.21s'><span class='q'>what long-range decay is</span><span class='a'>A head is a bank of dials at different speeds. Two matching tokens start in phase; as they separate the dials fall out of step and cancel, so the score decays with distance.</span></div>
-<div class='card' style='--d:0.34s'><span class='q'>why that is a ceiling</span><span class='a'>It decays <em>to the score an unrelated pair gets</em> — past which "related, far apart" and "unrelated" are one number.</span></div>
-<div class='card' style='--d:0.47s'><span class='q'>the one design surface</span><span class='a'>Every fix is a decision about the slow bands: interpolate them, stretch them unevenly, raise the base, or delete them. That is the whole literature as I read it.</span></div>
-<div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>Interleave. Most layers keep RoPE; every fourth gets none and infers order from the causal mask. Cohere and NVIDIA published it; Llama 4 ships it.</span></div>
-<div class='card' style='--d:0.73s'><span class='q'>what to argue about</span><span class='a'>A 2026 proof says the base trades position-discrimination against token-discrimination and cannot keep both. If it holds, I do not think rescaling ever saves RoPE.</span></div>
+<div class='card' style='--d:0.08s'><span class='q'>what RoPE does</span><span class='a'>RoPE rotates query and key dimensions by angles proportional to position. Their shared absolute position cancels in the dot product, leaving relative position.</span></div>
+<div class='card' style='--d:0.21s'><span class='q'>how I picture long-range decay</span><span class='a'>I picture one head as a bank of dials rotating at different speeds. As two initially aligned tokens move apart, the bands fall out of phase and can partially cancel, weakening the distance-dependent signal.</span></div>
+<div class='card' style='--d:0.34s'><span class='q'>why signal-to-noise matters</span><span class='a'>Unrelated scores fluctuate around zero. When the signal from a distant match becomes comparable to that variation, one head cannot separate the two reliably from this signal alone.</span></div>
+<div class='card' style='--d:0.47s'><span class='q'>the main design choice</span><span class='a'>Long-context methods interpolate slow bands, stretch them unevenly, raise the base, learn them per head, or remove rotation from selected layers.</span></div>
+<div class='card' style='--d:0.60s'><span class='q'>what iRoPE is</span><span class='a'>iRoPE interleaves layers that use RoPE with layers that use no explicit positional encoding. The NoPE layers provide a path that does not depend on rotary distance.</span></div>
+<div class='card' style='--d:0.73s'><span class='q'>what I am still wondering about</span><span class='a'>Changing the RoPE base may trade position discrimination against token discrimination. Could hybrid or head-specific designs avoid that tradeoff?</span></div>
 </div>
 </div>
 
 ## References
 
-Everything cited above, in the order the post meets it. Titles link to the
-paper itself rather than to a summary of it.
+I list the original sources below in the order they appear.
 
-1. Su et al. [RoFormer: Enhanced Transformer with Rotary Position Embedding](https://arxiv.org/abs/2104.09864), 2021 — the original RoPE, and where long-range decay is offered as a feature.
+1. Su et al. [RoFormer: Enhanced Transformer with Rotary Position Embedding](https://arxiv.org/abs/2104.09864), 2021 — the original RoPE paper.
 2. Chen et al. [Extending Context Window of Large Language Models via Positional Interpolation](https://arxiv.org/abs/2306.15595), 2023 — Position Interpolation.
-3. Peng et al. [YaRN: Efficient Context Window Extension of Large Language Models](https://arxiv.org/abs/2309.00071), 2023 — the rescaling Llama 3.1 ships.
-4. Microsoft. [LongRoPE2: Near-Lossless LLM Context Window Scaling](https://arxiv.org/abs/2502.20082), 2025 — searches the rescaling rather than deriving it.
-5. Men et al. [Base of RoPE Bounds Context Length](https://arxiv.org/abs/2405.14591), NeurIPS 2024 — the lower bound on the base for a target length.
+3. Peng et al. [YaRN: Efficient Context Window Extension of Large Language Models](https://arxiv.org/abs/2309.00071), 2023.
+4. Microsoft. [LongRoPE2: Near-Lossless LLM Context Window Scaling](https://arxiv.org/abs/2502.20082), 2025.
+5. Men et al. [Base of RoPE Bounds Context Length](https://arxiv.org/abs/2405.14591), NeurIPS 2024.
 6. Kazemnejad et al. [The Impact of Positional Encoding on Length Generalization in Transformers](https://arxiv.org/abs/2305.19466), NeurIPS 2023 — NoPE.
-7. Cohere. [RoPE to NoPE and Back Again: A New Hybrid Attention Strategy](https://arxiv.org/abs/2501.18795), 2025 — RNoPE, and why retrieval concentrates in the NoPE layers.
+7. Cohere. [RoPE to NoPE and Back Again: A New Hybrid Attention Strategy](https://arxiv.org/abs/2501.18795), 2025 — RNoPE.
 8. NVIDIA. [SWAN-GPT: An Efficient and Scalable Approach for Long-Context Language Modeling](https://arxiv.org/abs/2504.08719), 2025.
-9. Meta. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/), 2025 — iRoPE, shipped at scale.
+9. Meta. [The Llama 4 herd](https://ai.meta.com/blog/llama-4-multimodal-intelligence/), 2025 — iRoPE.
 10. Nakanishi. [Scalable-Softmax Is Superior for Attention](https://arxiv.org/abs/2501.19399), 2025 — SSMax.
 11. [AdaRoPE: Not All Attention Heads Should Rotate and Scale Equally](https://arxiv.org/abs/2607.19363), 2026 — learnable per-head frequencies.
-12. Du et al. [RoPE Distinguishes Neither Positions Nor Tokens in Long Contexts, Provably](https://arxiv.org/abs/2605.15514), 2026 — the negative result, and the one I would read first.
-13. [Does RoPE Prevent or Degrade Retrieval Heads? A Mechanistic Analysis](https://arxiv.org/abs/2606.21249), 2026 — retrieval heads run on the slow bands.
+12. Du et al. [RoPE Distinguishes Neither Positions Nor Tokens in Long Contexts, Provably](https://arxiv.org/abs/2605.15514), 2026.
+13. [Does RoPE Prevent or Degrade Retrieval Heads? A Mechanistic Analysis](https://arxiv.org/abs/2606.21249), 2026.
 14. [Why RoPE Struggles to Maintain Long-Term Decay in Long Sequences?](https://iclr-blogposts.github.io/2025/blog/pocp/) ICLR 2025 blogpost — POCP.
 
-NTK-aware scaling is the one method here with no paper: it was proposed in a
-community thread, never written up, and is used everywhere regardless.
+NTK-aware scaling is the one method here without a conventional paper
+citation. It originated in a community discussion and was later adopted in
+many implementations.
