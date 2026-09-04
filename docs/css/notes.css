@@ -4,9 +4,11 @@
    Loaded only on /notes/ pages (site.json gives the section a `css` list), so
    nothing here can reach the blog. Two jobs:
 
-   1. Put the whole section in Excalifont, the hand-drawn face the figures
-      already use. Code and math opt back out -- a monospace column and a
-      MathJax glyph run are both unreadable in a hand face.
+   1. Set the prose in the same system stack the rest of the web uses, so a
+      note reads like something you read rather than something you decorate.
+      The hand-drawn face is kept for the figures and the labs only, where it
+      belongs to the drawing; it lives in widgets.css. Code and math opt out
+      into a monospace stack and MathJax's own metrics.
    2. Carry a saturated Morandi palette. The blog's lavender is deliberately
       quiet; a research note is a place to think out loud, so the same hues are
       pushed until they hold their own against white *and* against #16171C,
@@ -106,13 +108,14 @@
 .notes-note .front-matter h4,
 .notes-note .article,
 .notes-note .credit {
-  font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* The bar across the top is the same navigation every page of the site has,
-   so it stays in the site's own face even where the page under it does not.
-   It has to be restated because the rule above sets the face on the element
-   itself, which the nav's links would otherwise inherit. */
+/* The bar across the top is the same navigation every page of the site has.
+   The rule above sets the face on the elements themselves, which the nav's
+   links would otherwise inherit, so it is restated here. Both are system
+   stacks now, so this is belt and braces rather than a visible change. */
 .notes-note .nav,
 .notes-note .nav a,
 .notes-note .nav li {
@@ -366,12 +369,14 @@
    all live in widgets.css, which is loaded before this file. Only the notes'
    own palette and page furniture are left here.
 
-   The one thing that has to be taken back: widgets.css puts figure captions
-   in the site's body face, which is right on a blog post and wrong on a note,
-   where the whole page is already hand-drawn. */
+   Figure and lab captions are deliberately NOT taken back into the hand face.
+   A caption is prose about a drawing rather than part of it, so it belongs
+   with the rest of the prose; widgets.css already puts it in the body stack
+   and that is now the right answer here too. */
 .notes-note .article .nfig > .caption,
 .notes-note .article .lab .cap {
-  font-family: 'Excalifont', 'Chalkboard SE', 'Comic Sans MS', cursive;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+      Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 /* --------------------------------------------------------------------------
