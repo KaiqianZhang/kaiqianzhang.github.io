@@ -350,28 +350,22 @@ The field annotates cells before it looks at genetics. We invert the order. Cell
 
 The observation model is the latent-context form used by SURGE. For a reference pair $s = (v, g)$ and cell or metacell $i$:
 
-$$
-y_{ig} \;=\; m_{ig} \;+\; b_{d(i)g} \;+\; x_{d(i)v}\bigl(\beta_{vg} + \mathbf{u}_i^{\top}\boldsymbol{\lambda}_{vg}\bigr) \;+\; \varepsilon_{ig}
-$$
+$$y_{ig} = m_{ig} + b_{d(i)g} + x_{d(i)v}\,(\beta_{vg} + u_i^\top \lambda_{vg}) + \epsilon_{ig}$$
 
-where $m_{ig}$ is the genotype-independent mean carrying covariates and expression factors, $b_{d(i)g}\sim N(0,\tau_g^2)$ is a donor-by-gene random intercept, $x_{d(i)v}$ is centred allele dosage, and $\varepsilon_{ig}\sim N(0,\sigma_g^2)$.
+where $m_{ig}$ is the genotype-independent mean carrying covariates and expression factors, $b_{d(i)g} \sim N(0, \tau_g^2)$ is a donor-by-gene random intercept, $x_{d(i)v}$ is centred allele dosage, and $\epsilon_{ig} \sim N(0, \sigma_g^2)$.
 
 The first three terms are the standard cis-eQTL model. The fourth term is the one that matters here.
 
 
 The coefficient multiplying dosage is the cell-resolved cis effect:
 
-$$
-r_{vgi} \;=\; \beta_{vg} \;+\; \mathbf{u}_i^{\top}\boldsymbol{\lambda}_{vg}
-$$
+$$r_{vgi} = \beta_{vg} + u_i^\top \lambda_{vg}$$
 
 Collecting these over $S$ reference pairs and $I$ cells gives the matrix the project is about:
 
-$$
-R \;=\; \boldsymbol{\beta}\mathbf{1}_I^{\top} + \Lambda U^{\top} \;\in\; \mathbb{R}^{S \times I}
-$$
+$$R = \beta \mathbf{1}_I^\top + \Lambda U^\top \in \mathbb{R}^{S \times I}$$
 
-where $U \in \mathbb{R}^{I \times K}$ holds the cellular coordinates and $\Lambda \in \mathbb{R}^{S \times K}$ holds the pair loadings. Column $R_{:i}$ is the regulotype of cell $i$. Row $(v,g)$ is one pair's cis-effect profile across all cells.
+where $U \in \mathbb{R}^{I \times K}$ holds the cellular coordinates and $\Lambda \in \mathbb{R}^{S \times K}$ holds the pair loadings. Column $R_{:i}$ is the regulotype of cell $i$, and row $(v,g)$ is one pair's cis-effect profile across all cells.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -615,32 +609,61 @@ The column that matters is the last one. Most of these methods are excellent at 
 <div class='caption'><span class='caption-label'>Figure 5.</span> Where the methods sit on two axes: whether the cellular context is supplied or learned from genotype-dependent expression, and whether the primary output is a locus test or a cellular map. The upper right is the position this project targets.</div>
 </div>
 
-| Method | Context comes from | Primary output | How it relates to this project |
-|---|---|---|---|
-| **Pseudobulk cell-type eQTL** <br><small>van der Wijst 2018; OneK1K 2022</small> | supplied labels | one effect and *P* value per pair and label | The origin of cell-type eQTL mapping and still the cheapest, best-calibrated thing to run first. It recovers any effect constant within a label, which makes it the honest floor comparator. It cannot represent a gradient inside a label, nor tell you whether the labelling was right. |
-| **CellRegMap** <br><small>Cuomo 2022</small> | supplied kernel $\Sigma$ | G×C score test, plus per-cell effects | The right tool for asking whether one nominated eQTL varies over a cell-state covariance you have chosen in advance, and the first method to get the within-donor repeat structure right. But $\Sigma$ is an input, and the interaction is estimated separately at every locus. |
-| **PICALO** <br><small>Vochteloo 2024</small> | learned from G×expression | principal interaction components, ieQTLs | The precedent for learning a context from recurrent genetic responses rather than supplying it. It is also a standing warning: 62–64% of its interactions were with *technical* components. It is a bulk method, so its contexts are per-sample scalars with no cellular resolution. |
-| **SURGE** <br><small>Strober 2024</small> | learned from G×expression | latent contexts, loadings, interaction eQTLs | The direct parent of this model and the exact likelihood we reuse. What it lacks is a prior that can read cellular or pair-level features, a defence against rotation invariance, and headroom past about 50,000 measurements. |
-| **Nathan et al.** <br><small>Nathan 2022</small> | supplied CITE-seq canonical variates | interaction eQTLs, plus a per-cell effect | The closest prior art. It computes $\beta_G + \sum_k \lambda_k u_{ik}$ per cell, which is our model with $U$ held fixed. It is therefore the mandatory comparator, and the reason the claim must be "$U$ is learned, not supplied", demonstrated rather than asserted. |
-| **sn-spMF** <br><small>He 2020</small> | learned from effect sizes | sparse factors of an effect matrix | The precedent that factorising an eQTL effect matrix recovers interpretable shared-versus-specific structure. It factorises point estimates post hoc across 49 predefined tissues, carrying no uncertainty into the factorisation and having no cell to place. |
-| **FastGxC** <br><small>Krockenberger 2026</small> | supplied discrete contexts | shared and context-specific effects | The efficient way to split an effect into a pleiotropic part and a per-context residual, roughly $10^6$ times faster than the LMM alternatives. Contexts must be discrete and sampled in overlapping donors, and "shared" is defined as the arithmetic mean across contexts. |
-| **CASTIE** <br><small>Liu 2026, preprint</small> | supplied contexts | genome-wide G×C score tests on counts | The strongest current answer to scanning supplied contexts genome-wide on raw counts, with a Poisson mixed model and a second context-dependent random effect that keeps the test calibrated. Every context is supplied, so it tests axes you have already named. |
-| **CIGMA** <br><small>Chen 2026</small> | supplied labels | cell-type genetic variance components | The cleanest estimate of how much cis regulation is label-specific at all, needing no eQTL to be selected. It reports cis effects as largely shared across coarse labels and trans effects as not. See below: this is either the strongest argument against this project or the strongest argument for it. |
-| **CASE** <br><small>Lin 2026</small> | supplied labels | per-cell-type PIPs and credible sets | The method to use once you want to name causal variants rather than describe effect structure, and it fixes the real bug that mashr-style sharing patterns are confounded with LD. It consumes per-cell-type summary statistics, so its resolution is bounded by the labelling that produced them. |
-| **airqtl** <br><small>Funk 2025</small> | supplied labels | fast cis and trans scans, causal GRNs | The scalability answer, exploiting the donor–cell block structure to make genome-wide single-cell LMM scans runnable, about $10^5$ times faster than CellRegMap. Its cell-type-specific mapping still keys off supplied labels, so it makes existing questions fast rather than asking a new one. |
-| **LIVI** <br><small>Vagiaki 2026, preprint</small> | learned from expression, genotype-blind | donor-level factor associations | A genotype-blind latent-variable model of cell state, and the clearest independent statement of the anti-circularity principle our leakage discipline rests on. It is trans rather than cis, and inference is at the factor level with no per-gene *P* value. |
-| **Regulotype** <br><small>this project</small> | learned from recurrent cis effects | $R$, and projections onto it | Estimates $U$ and $\Lambda$ jointly under one likelihood, treats $R$ as the deliverable, and places new pairs, new donors and new risk variants onto it. Must still prove held-out prediction, biological novelty and disease actionability. |
+<div class='table-wide'>
+
+| Method | Cellular context | Primary output |
+|---|---|---|
+| **Pseudobulk cell-type eQTL** <br><small>van der Wijst 2018; OneK1K 2022</small> | supplied labels | one effect and *P* value per pair and label |
+| **CellRegMap** <br><small>Cuomo 2022</small> | supplied kernel | G&times;C score test, plus per-cell effects |
+| **PICALO** <br><small>Vochteloo 2024</small> | learned from G&times;expression, in bulk | principal interaction components, ieQTLs |
+| **SURGE** <br><small>Strober 2024</small> | learned from G&times;expression | latent contexts, loadings, interaction eQTLs |
+| **Nathan et al.** <br><small>Nathan 2022</small> | supplied CITE-seq variates | interaction eQTLs, plus a per-cell effect |
+| **sn-spMF** <br><small>He 2020</small> | learned from effect sizes, across tissues | sparse factors of an effect matrix |
+| **FastGxC** <br><small>Krockenberger 2026</small> | supplied discrete contexts | shared and context-specific effects |
+| **CASTIE** <br><small>Liu 2026, preprint</small> | supplied contexts | genome-wide G&times;C score tests on counts |
+| **CIGMA** <br><small>Chen 2026</small> | supplied labels | cell-type genetic variance components |
+| **CASE** <br><small>Lin 2026</small> | supplied labels | per-cell-type PIPs and credible sets |
+| **airqtl** <br><small>Funk 2025</small> | supplied labels | fast cis and trans scans, causal GRNs |
+| **LIVI** <br><small>Vagiaki 2026, preprint</small> | learned from expression, genotype-blind | donor-level factor associations |
+| **Regulotype** <br><small>this project</small> | learned from recurrent cis effects | $R$, and projections onto it |
+
+</div>
 
 
-Two entries in that table deserve more than a row.
+### How each relates to this project
 
-**Nathan et al. is the closest prior art, and the comparison is quantitative rather than rhetorical.** Their per-cell effect is our $r_{vgi}$ with $U$ fixed to supplied canonical variates. So "we learn $U$" is a claim that has to be tested against exactly that alternative, which is why supplied expression coordinates are the comparator our simulations already run against.
+**Pseudobulk cell-type eQTL.** The origin of cell-type eQTL mapping and still the cheapest, best-calibrated thing to run first. It recovers any effect that is constant within a label, which makes it the honest floor comparator. It cannot represent a gradient inside a label, nor tell you whether the labelling was the right one.
 
-**CIGMA's result is the one a reviewer will open with.** It reports that cis eQTLs are mostly shared across cell types, around 30% specific, while trans eQTLs are 60% specific. If cis effects are largely shared, why model their heterogeneity at all?
+**CellRegMap.** The right tool for asking whether one nominated eQTL varies over a cell-state covariance you have chosen in advance. It was also the first method to get the within-donor repeat structure right, through a relatedness component that keeps the test calibrated when many cells come from one donor. The covariance is an input, and the interaction is estimated separately at every locus.
 
-The answer is that CIGMA measures specificity across coarse predefined labels, which is the resolution at which within-label cis heterogeneity is invisible by construction. That makes CIGMA's finding a prediction we can test rather than a refutation we must dodge. If regulotype axes recover cis heterogeneity that coarse labels miss, the two results reconcile. If they do not, CIGMA is right and the question is settled, which is also worth knowing.
+**PICALO.** The precedent for learning a context from recurrent genetic responses rather than supplying it. It is also a standing warning: 62&ndash;64% of the eQTL interactions it found were with *technical* components. It operates on bulk expression, so its contexts are per-sample scalars with no cellular resolution.
 
-PICALO supplies the other warning worth carrying. When it learned contexts from recurrent genetic responses in bulk data, 62–64% of the resulting interactions were with technical components. Any method that learns an axis from genotype-dependent signal inherits that risk, and the design has to answer it with donor-level permutation, cell-resolved covariates, and null simulations rather than with assurance.
+**SURGE.** The direct parent of this model, and the exact likelihood we reuse. What it does not have is a prior that can read cellular or pair-level features, a defence against rotation invariance, or headroom past roughly 50,000 measurements. Its inference is also restricted to one variant per eGene.
+
+**Nathan et al.** The closest prior art. It computes $\beta_{vg} + \sum_k \lambda_k u_{ik}$ for every cell, which is this model with $U$ held fixed to supplied CITE-seq canonical variates. That makes it the mandatory comparator, and the reason the claim has to be that $U$ is learned rather than supplied, demonstrated rather than asserted.
+
+**sn-spMF.** The precedent that factorising an eQTL effect matrix recovers interpretable shared-versus-specific structure. It factorises point estimates post hoc across 49 predefined tissues, so no uncertainty enters the factorisation and there is no cell to place.
+
+**FastGxC.** The efficient way to split an effect into a pleiotropic part and a per-context residual, roughly $10^6$ times faster than the mixed-model alternatives. Contexts must be discrete and sampled in overlapping donors, and "shared" is defined as the arithmetic mean across contexts rather than inferred.
+
+**CASTIE.** The strongest current answer to scanning supplied contexts genome-wide on raw counts, using a Poisson mixed model with a second context-dependent random effect that keeps the interaction test calibrated. It avoids pre-screening for a static eQTL, recovering 2,022 eGenes with no detectable static effect. Every context is supplied, so it tests axes you have already named.
+
+**CIGMA.** The cleanest estimate of how much cis regulation is label-specific at all, and it needs no eQTL to be selected. It reports cis effects as largely shared across coarse labels and trans effects as not. This is the result the next paragraphs have to answer.
+
+**CASE.** The method to use once you want to name causal variants rather than describe effect structure, and it fixes the real problem that mashr-style sharing patterns are confounded with LD. It consumes per-cell-type summary statistics, so its resolution is bounded by whatever labelling produced them.
+
+**airqtl.** The scalability answer, exploiting the donor-cell block structure to make genome-wide single-cell mixed-model scans runnable, around $10^5$ times faster than CellRegMap. Its cell-type-specific mapping still keys off supplied labels, so it makes existing questions fast rather than asking a new one.
+
+**LIVI.** A genotype-blind latent-variable model of cell state, and the clearest independent statement of the anti-circularity principle our leakage discipline rests on. It is trans rather than cis, and inference is at the factor level with no per-gene *P* value.
+
+
+### Two results the note has to answer
+
+**CIGMA's finding is the one a reviewer will open with.** It reports cis eQTLs as roughly 30% cell-type-specific, against 60% for trans. If cis effects are largely shared, why model their heterogeneity at all?
+
+Because CIGMA measures specificity across coarse predefined labels, which is the resolution at which within-label cis heterogeneity is invisible by construction. That makes its result a prediction we can test rather than a refutation we have to dodge. If regulotype axes recover cis heterogeneity that coarse labels miss, the two results reconcile. If they do not, CIGMA is right and the question is settled, which is also worth knowing.
+
+**PICALO supplies the other warning.** When it learned contexts from recurrent genetic responses in bulk data, most of the resulting interactions were technical rather than biological. Any method that learns an axis from genotype-dependent signal inherits that risk. The design has to answer it with donor-level permutation, cell-resolved covariates in the mean, and null simulations with all loadings set to zero.
 
 
 ## What this could contribute
