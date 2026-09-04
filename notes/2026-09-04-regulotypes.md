@@ -214,8 +214,6 @@ Now consider an Alzheimer's disease risk allele and a nearby candidate target ge
 </div>
 
 
-The example is about conditions reproduced across donors, not about estimating a genetic effect from two cells in one person. Cells from the same donor carry the same germline genotype. The slope is learned across genotyped donors while their cells tell us where along the cellular continuum that slope changes.
-
 The comparison is therefore:
 
 - ordinary expression: **which cells look similar at the sampled moment?**
