@@ -1239,6 +1239,351 @@
   }
 
   // =========================================================================
+  // 3a. Lab: what one number hides
+  // =========================================================================
+
+  /* Pure arithmetic on the model in Note 1. A study that reports one effect
+     per variant-gene pair reports the cell-weighted average; these sliders
+     set the two underlying effects and show what that average costs. No
+     fitted quantity appears anywhere -- the reader supplies the truth. */
+
+  function initAvgLab() {
+    var root = document.getElementById('rg-avg-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var e1 = $(root, '#rg-e1'), e2 = $(root, '#rg-e2'), mix = $(root, '#rg-mix');
+
+    function draw() {
+      var a = parseFloat(e1.value), b = parseFloat(e2.value);
+      var w = parseFloat(mix.value);
+      var avg = w * a + (1 - w) * b;
+
+      $(root, '#rg-e1-v').textContent = (a >= 0 ? '+' : '') + a.toFixed(2);
+      $(root, '#rg-e2-v').textContent = (b >= 0 ? '+' : '') + b.toFixed(2);
+      $(root, '#rg-mix-v').textContent = Math.round(w * 100) + '% in setting 1';
+
+      $(root, '#rg-stat-avg').textContent = (avg >= 0 ? '+' : '') + avg.toFixed(2);
+      $(root, '#rg-stat-miss1').textContent = Math.abs(a - avg).toFixed(2);
+      $(root, '#rg-stat-miss2').textContent = Math.abs(b - avg).toFixed(2);
+
+      var verdict = $(root, '#rg-avg-verdict');
+      var opposed = (a > 0.05 && b < -0.05) || (a < -0.05 && b > 0.05);
+      if (opposed && Math.abs(avg) < 0.08) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'The two settings cancel. A study that reports ' +
+            'one number reports about zero, and concludes the letter does ' +
+            'nothing — while it is doing a great deal in both.';
+      } else if (Math.max(Math.abs(a - avg), Math.abs(b - avg)) > 0.35) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'The single reported number is wrong by more ' +
+            'than a third of a unit somewhere. It is an average of two ' +
+            'things, and it describes neither.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'The two settings agree closely, so one number ' +
+            'is a fair summary. This is the regime in which the usual ' +
+            'approach loses nothing.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var W = 700, H = 250, mid = 150, scale = 92;
+
+      svg.appendChild(el('line', {
+        x1: 40, y1: mid, x2: W - 40, y2: mid,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4
+      }));
+      svg.appendChild(el('text', {
+        x: 32, y: mid + 5, class: 'lbl sm end', fill: 'var(--n-dim)'
+      }, '0'));
+
+      var cols = [
+        { x: 150, v: a, name: 'setting 1', hue: 'var(--n-kept)' },
+        { x: 400, v: b, name: 'setting 2', hue: 'var(--n-student)' }
+      ];
+      cols.forEach(function (c) {
+        var h = Math.abs(c.v) * scale;
+        svg.appendChild(el('rect', {
+          x: c.x - 46, y: c.v >= 0 ? mid - h : mid,
+          width: 92, height: Math.max(h, 1), rx: 5, fill: c.hue, opacity: 0.9
+        }));
+        svg.appendChild(el('text', {
+          x: c.x, y: c.v >= 0 ? mid - h - 12 : mid + h + 22,
+          class: 'lbl mid', fill: c.hue
+        }, (c.v >= 0 ? '+' : '') + c.v.toFixed(2)));
+        svg.appendChild(el('text', {
+          x: c.x, y: H - 14, class: 'lbl sm mid', fill: 'var(--n-dim)'
+        }, c.name));
+      });
+
+      // The reported average, drawn straight through both.
+      var ay = mid - avg * scale;
+      svg.appendChild(el('line', {
+        x1: 70, y1: ay, x2: 560, y2: ay, stroke: 'var(--n-loss)',
+        'stroke-width': 2.6, 'stroke-dasharray': '7 5', 'stroke-linecap': 'round'
+      }));
+      svg.appendChild(el('text', {
+        x: 574, y: ay + 5, class: 'lbl', fill: 'var(--n-loss)'
+      }, 'reported'));
+      svg.appendChild(el('text', {
+        x: 574, y: ay + 25, class: 'lbl sm', fill: 'var(--n-loss)'
+      }, (avg >= 0 ? '+' : '') + avg.toFixed(2)));
+
+      // What the average misses, as a bracket on each bar.
+      cols.forEach(function (c) {
+        var ty = mid - c.v * scale;
+        if (Math.abs(ty - ay) < 6) { return; }
+        svg.appendChild(el('line', {
+          x1: c.x + 58, y1: ty, x2: c.x + 58, y2: ay,
+          stroke: 'var(--n-loss)', 'stroke-width': 1.6, 'stroke-linecap': 'round'
+        }));
+        svg.appendChild(el('text', {
+          x: c.x + 66, y: (ty + ay) / 2 + 4, class: 'lbl sm',
+          fill: 'var(--n-loss)'
+        }, Math.abs(c.v - avg).toFixed(2)));
+      });
+    }
+
+    onInput(e1, draw); onInput(e2, draw); onInput(mix, draw);
+    paintRange(e1); paintRange(e2); paintRange(mix);
+    draw();
+  }
+
+  // =========================================================================
+  // 3b. Lab: what splitting buys and what it cannot
+  // =========================================================================
+
+  /* Division, and nothing else. Cells per person per group is cells/groups;
+     the number of independent genomes is the number of people, whatever the
+     grouping does. The 100-cell line is the threshold Alegbe et al. report
+     against, not a fitted value. */
+
+  var CELL_FLOOR = 100;
+
+  function initSplitLab() {
+    var root = document.getElementById('rg-split-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var donors = $(root, '#rg-donors');
+    var cells = $(root, '#rg-cells');
+    var groups = $(root, '#rg-groups');
+
+    function draw() {
+      var D = parseInt(donors.value, 10);
+      var N = parseInt(cells.value, 10);
+      var K = parseInt(groups.value, 10);
+
+      // Real taxonomies are lopsided, so an even split flatters the design.
+      // A simple decaying share keeps the point honest without inventing data.
+      var shares = [], total = 0, i;
+      for (i = 0; i < K; i++) { var s = Math.pow(0.78, i); shares.push(s); total += s; }
+      for (i = 0; i < K; i++) { shares[i] = shares[i] / total; }
+
+      var perGroup = shares.map(function (s) { return N * s; });
+      var usable = perGroup.filter(function (v) { return v >= CELL_FLOOR; }).length;
+
+      $(root, '#rg-donors-v').textContent = commas(D) + ' people';
+      $(root, '#rg-cells-v').textContent = commas(N) + ' cells each';
+      $(root, '#rg-groups-v').textContent = K + (K === 1 ? ' group' : ' groups');
+
+      $(root, '#rg-stat-largest').textContent = commas(perGroup[0]);
+      $(root, '#rg-stat-usable').innerHTML =
+          usable + ' <small>of ' + K + '</small>';
+      $(root, '#rg-stat-genomes').textContent = commas(D);
+
+      var verdict = $(root, '#rg-split-verdict');
+      if (K === 1) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'One group. Every cell contributes, and every ' +
+            'difference between cells is averaged away.';
+      } else if (usable < K) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = (K - usable) + ' of the ' + K + ' groups fall ' +
+            'below ' + CELL_FLOOR + ' cells per person. Splitting further ' +
+            'creates groups faster than it creates evidence — and the ' +
+            'number of independent genomes has not moved.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'Every group still clears ' + CELL_FLOOR +
+            ' cells per person. There is room to split further — but ' +
+            'note that the genome count on the right has not changed.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var W = 700, H = 250, base = 196, top = 40;
+      var span = W - 80;
+      var bw = Math.max(2, Math.min(46, span / K - 4));
+      var gap = K > 1 ? (span - bw * K) / (K - 1) : 0;
+      var maxv = perGroup[0];
+
+      var floorY = base - (CELL_FLOOR / maxv) * (base - top);
+      if (CELL_FLOOR <= maxv) {
+        svg.appendChild(el('line', {
+          x1: 40, y1: floorY, x2: W - 40, y2: floorY,
+          stroke: 'var(--n-loss)', 'stroke-width': 1.6,
+          'stroke-dasharray': '6 5', 'stroke-linecap': 'round'
+        }));
+        svg.appendChild(el('text', {
+          x: W - 40, y: floorY - 8, class: 'lbl sm end', fill: 'var(--n-loss)'
+        }, CELL_FLOOR + ' cells per person'));
+      }
+
+      perGroup.forEach(function (v, gi) {
+        var h = Math.max(1.5, (v / maxv) * (base - top));
+        var ok = v >= CELL_FLOOR;
+        svg.appendChild(el('rect', {
+          x: 40 + gi * (bw + gap), y: base - h, width: bw, height: h, rx: 3,
+          fill: ok ? 'var(--n-student)' : 'var(--n-pruned)',
+          opacity: ok ? 0.9 : 0.55
+        }));
+      });
+
+      svg.appendChild(el('line', {
+        x1: 40, y1: base, x2: W - 40, y2: base,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4
+      }));
+      svg.appendChild(el('text', {
+        x: 40, y: base + 24, class: 'lbl sm', fill: 'var(--n-dim)'
+      }, 'one bar per group, tallest first'));
+      svg.appendChild(el('text', {
+        x: 40, y: 24, class: 'lbl sm', fill: 'var(--n-dim)'
+      }, 'cells per person in each group'));
+    }
+
+    onInput(donors, draw); onInput(cells, draw); onInput(groups, draw);
+    paintRange(donors); paintRange(cells); paintRange(groups);
+    draw();
+  }
+
+  // =========================================================================
+  // 3c. Lab: the landscape, one method at a time
+  // =========================================================================
+
+  /* A browsing widget over the published record. Every row is a fact from the
+     cited paper: where its cellular coordinates come from, what resolution it
+     delivers, and what object it returns. Nothing here is computed. */
+
+  var METHODS = [
+    { id: 'cellregmap', name: 'CellRegMap', year: 2022, col: 0, row: 3,
+      coord: 'supplied by the analyst',
+      deliver: 'a test per variant–gene pair',
+      note: 'The cellular axes are expression components you hand it. A per-cell effect can be read off afterwards, as a characterisation step.' },
+    { id: 'nathan', name: 'Nathan et al.', year: 2022, col: 0, row: 3,
+      coord: 'supplied by the analyst',
+      deliver: 'tests, plus a per-cell effect',
+      note: 'Already computes an effect for every cell and plots it. The axes are canonical variates fixed before the genetic model, and each pair is fitted alone.' },
+    { id: 'fastgxc', name: 'FastGxC', year: 2026, col: 0, row: 2,
+      coord: 'supplied, and discrete',
+      deliver: 'a shared and a per-setting effect',
+      note: 'Splits each gene into a person-average and a per-setting deviation. Fast and powerful, but the settings must be named in advance.' },
+    { id: 'livi', name: 'LIVI', year: 2026, col: 1, row: 3,
+      coord: 'learned from appearance',
+      deliver: 'tests at the level of a person',
+      note: 'Learns cell state without ever seeing genotypes, which sidesteps the circularity. Its answers are about distant effects and cannot be pinned to one gene.' },
+    { id: 'snspmf', name: 'sn-spMF', year: 2020, col: 2, row: 0,
+      coord: 'learned from genetic effects',
+      deliver: 'factors of an effect matrix',
+      note: 'Factorises a matrix of effect sizes across forty-nine tissues. The same idea as this project, three rungs up the ladder.' },
+    { id: 'picalo', name: 'PICALO', year: 2024, col: 2, row: 1,
+      coord: 'learned from genetic effects',
+      deliver: 'components, and tests along them',
+      note: 'Invents the context that makes the most effects look context-dependent. One coordinate per sample, from bulk tissue.' },
+    { id: 'surge', name: 'SURGE', year: 2024, col: 2, row: 3,
+      coord: 'learned from genetic effects',
+      deliver: 'contexts, and tests along them',
+      note: 'The likelihood this project builds on. Learns the axes at cell resolution and then returns a test; there is no mechanism for a person it has not seen.' },
+    { id: 'ours', name: 'this work', year: null, col: 2, row: 3,
+      coord: 'learned from genetic effects',
+      deliver: 'the matrix itself, and a way onto it',
+      note: 'Same likelihood as SURGE. What changes is the deliverable: a map you can place a new gene, a new person and a new risk variant onto.' }
+  ];
+
+  var LADDER_ROWS = ['tissues', 'whole samples', 'given cell types', 'single cells'];
+  var LADDER_COLS = ['supplied', 'from appearance', 'from genetics'];
+
+  function initLadderLab() {
+    var root = document.getElementById('rg-ladder-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var getPick = segment(root, '.seg-method', function () { draw(); });
+
+    function draw() {
+      var id = getPick() || 'surge';
+      var m = null;
+      METHODS.forEach(function (x) { if (x.id === id) { m = x; } });
+      if (!m) { return; }
+
+      $(root, '#rg-stat-coord').textContent = m.coord;
+      $(root, '#rg-stat-res').textContent = LADDER_ROWS[m.row];
+      $(root, '#rg-stat-out').textContent = m.deliver;
+
+      var verdict = $(root, '#rg-ladder-verdict');
+      verdict.className = m.id === 'ours' ? 'verdict' : 'verdict warn';
+      verdict.textContent = m.note;
+
+      clear(svg);
+      var x0 = 150, y0 = 46, cw = 168, rh = 44, W = 700;
+
+      LADDER_COLS.forEach(function (name, ci) {
+        svg.appendChild(el('text', {
+          x: x0 + ci * cw + cw / 2, y: 26, class: 'lbl sm mid',
+          fill: 'var(--n-dim)'
+        }, name));
+      });
+      LADDER_ROWS.forEach(function (name, ri) {
+        svg.appendChild(el('text', {
+          x: x0 - 14, y: y0 + ri * rh + rh / 2 + 5, class: 'lbl sm end',
+          fill: 'var(--n-ink)'
+        }, name));
+      });
+      var ri, ci;
+      for (ri = 0; ri <= 4; ri++) {
+        svg.appendChild(el('line', {
+          x1: x0, y1: y0 + ri * rh, x2: x0 + cw * 3, y2: y0 + ri * rh,
+          stroke: 'var(--n-grid)', 'stroke-width': 1.2
+        }));
+      }
+      for (ci = 0; ci <= 3; ci++) {
+        svg.appendChild(el('line', {
+          x1: x0 + ci * cw, y1: y0, x2: x0 + ci * cw, y2: y0 + rh * 4,
+          stroke: 'var(--n-grid)', 'stroke-width': 1.2
+        }));
+      }
+
+      // Every other method as a quiet dot, so the reader sees the field.
+      METHODS.forEach(function (x) {
+        if (x.id === id) { return; }
+        svg.appendChild(el('circle', {
+          cx: x0 + x.col * cw + cw / 2 + (x.id.charCodeAt(0) % 5 - 2) * 13,
+          cy: y0 + x.row * rh + rh / 2 + (x.id.charCodeAt(1) % 3 - 1) * 9,
+          r: 4, fill: 'var(--n-dim)', opacity: 0.4
+        }));
+      });
+
+      var cx = x0 + m.col * cw + cw / 2, cy = y0 + m.row * rh + rh / 2;
+      var hue = m.id === 'ours' ? 'var(--n-student)' : 'var(--n-teacher)';
+      svg.appendChild(el('rect', {
+        x: x0 + m.col * cw + 3, y: y0 + m.row * rh + 3,
+        width: cw - 6, height: rh - 6, rx: 7, fill: hue, opacity: 0.16
+      }));
+      svg.appendChild(el('circle', { cx: cx, cy: cy, r: 8, fill: hue }));
+      svg.appendChild(el('text', {
+        x: cx, y: y0 + rh * 4 + 26, class: 'lbl mid', fill: hue
+      }, m.name + (m.year ? ' · ' + m.year : '')));
+
+      svg.appendChild(el('text', {
+        x: W - 8, y: y0 + rh * 4 + 26, class: 'lbl sm end', fill: 'var(--n-dim)'
+      }, 'faint dots are the other methods'));
+    }
+
+    draw();
+  }
+
+  // =========================================================================
 
   initTokenLab();
   initPruneLab();
@@ -1249,4 +1594,7 @@
   initTempLab();
   initSSMaxLab();
   initDecoderRoadmap();
+  initAvgLab();
+  initSplitLab();
+  initLadderLab();
 }());
