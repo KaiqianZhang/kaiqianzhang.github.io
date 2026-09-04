@@ -1,119 +1,115 @@
 ---
 title: 'Regulotypes: redefining cells by what genetics does in them'
-subtitle: We sort cells by what they look like, then ask whether the genetics agrees. This note argues for the other order, and works out what is actually new about it.
+subtitle: Two cells can carry the same label and behave completely differently when it comes to inherited variation. This note is about describing cells by that behaviour instead.
 date: 2026-09-04
 tags: regulotype
-keywords: regulotype, cis-regulatory effects, single-cell genetics, eQTL, cell state, blood-brain barrier, Alzheimer's disease, latent context, matrix factorization
+keywords: regulotype, cis-regulatory effects, single-cell genetics, eQTL, cell type, cell state, blood-brain barrier, Alzheimer's disease
 ---
 
-<p class='lede'>Alzheimer's disease has ninety-one known places in the genome where inherited differences change a person's risk. For many of them the gene that carries the effect is contested, and the cells in which the variant acts are unknown. Part of the reason is a habit twenty years old: when genetics records that an inherited difference changes a gene, it records <b>one number</b> &mdash; and the same difference does different things in different cells. This note is about describing a cell by what genetics does inside it. That description is the <b>regulotype</b>.</p>
+<p class='lede'>Genetic studies have found many regions of the genome linked to Alzheimer&#39;s disease, but often we do not know which gene is affected, or in which cells the effect appears. The blood&ndash;brain barrier makes this especially hard: its cells are not a few fixed types, but change continuously with location, age and disease. <b>If we classify them first, we may average away the genetic signal we are looking for.</b></p>
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 392' role='img' aria-label='The seven sections of this note.'>
-<text x='14.0' y='184.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-student)'>Note</text>
-<text x='14.0' y='206.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-student)'>one</text>
-<path d='M138 54.0 C134.7 54.0, 134.7 190.0, 116 190.0 C134.7 190.0, 134.7 318.0, 138 318.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.22s;--dur:0.90s;stroke:var(--n-student);stroke-width:2.4'/>
-<a href='#two-cells-that-look-the-same-and-are-not' class='rm-row'>
+<svg viewBox='0 0 720 348' role='img' aria-label='The six sections of this note.'>
+<text x='14.0' y='162.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-student)'>Note</text>
+<text x='14.0' y='184.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-student)'>one</text>
+<path d='M138 54.0 C134.7 54.0, 134.7 168.0, 116 168.0 C134.7 168.0, 134.7 274.0, 138 274.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.22s;--dur:0.90s;stroke:var(--n-student);stroke-width:2.4'/>
+<a href='#two-endothelial-cells' class='rm-row'>
 <rect x='128' y='32.0' width='576' height='34' rx='8' fill='transparent'/>
 <circle cx='148.0' cy='49.0' r='4.0' class='a-beat' style='--d:0.45s;--dur:2.00s;fill:var(--n-student)'/>
-<text x='164.0' y='54.0' class='lbl a-rise' style='--d:0.45s;fill:var(--n-student)'>Two cells that look the same</text>
-<text x='704.0' y='54.0' class='lbl sm end a-rise' style='--d:0.55s;fill:var(--n-dim)'>the whole idea, in one picture</text>
+<text x='164.0' y='54.0' class='lbl a-rise' style='--d:0.45s;fill:var(--n-student)'>Two endothelial cells</text>
+<text x='704.0' y='54.0' class='lbl sm end a-rise' style='--d:0.55s;fill:var(--n-dim)'>the example, and what a regulotype is</text>
 </a>
-<a href='#why-one-gene-is-not-enough' class='rm-row'>
+<a href='#what-is-usually-done' class='rm-row'>
 <rect x='128' y='76.0' width='576' height='34' rx='8' fill='transparent'/>
 <circle cx='148.0' cy='93.0' r='4.0' class='a-beat' style='--d:0.52s;--dur:2.00s;fill:var(--n-teacher)'/>
-<text x='164.0' y='98.0' class='lbl a-rise' style='--d:0.52s;fill:var(--n-teacher)'>Why one gene is not enough</text>
-<text x='704.0' y='98.0' class='lbl sm end a-rise' style='--d:0.62s;fill:var(--n-dim)'>a number is not a description</text>
+<text x='164.0' y='98.0' class='lbl a-rise' style='--d:0.52s;fill:var(--n-teacher)'>What is usually done</text>
+<text x='704.0' y='98.0' class='lbl sm end a-rise' style='--d:0.62s;fill:var(--n-dim)'>fixed cell types, and what they cost</text>
 </a>
-<a href='#the-trouble-with-sorting-cells-first' class='rm-row'>
+<a href='#defining-cells-by-genetic-response' class='rm-row'>
 <rect x='128' y='120.0' width='576' height='34' rx='8' fill='transparent'/>
-<circle cx='148.0' cy='137.0' r='4.0' class='a-beat' style='--d:0.59s;--dur:2.00s;fill:var(--n-loss)'/>
-<text x='164.0' y='142.0' class='lbl a-rise' style='--d:0.59s;fill:var(--n-loss)'>The trouble with sorting first</text>
-<text x='704.0' y='142.0' class='lbl sm end a-rise' style='--d:0.69s;fill:var(--n-dim)'>no level of sorting is the right one</text>
+<circle cx='148.0' cy='137.0' r='4.0' class='a-beat' style='--d:0.59s;--dur:2.00s;fill:var(--n-kept)'/>
+<text x='164.0' y='142.0' class='lbl a-rise' style='--d:0.59s;fill:var(--n-kept)'>Defining cells by response</text>
+<text x='704.0' y='142.0' class='lbl sm end a-rise' style='--d:0.69s;fill:var(--n-dim)'>the classification, and its constraints</text>
 </a>
-<a href='#inverting-the-order' class='rm-row'>
+<a href='#what-has-been-done' class='rm-row'>
 <rect x='128' y='164.0' width='576' height='34' rx='8' fill='transparent'/>
-<circle cx='148.0' cy='181.0' r='4.0' class='a-beat' style='--d:0.66s;--dur:2.00s;fill:var(--n-kept)'/>
-<text x='164.0' y='186.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-kept)'>Inverting the order</text>
-<text x='704.0' y='186.0' class='lbl sm end a-rise' style='--d:0.76s;fill:var(--n-dim)'>let the genetics do the sorting</text>
+<circle cx='148.0' cy='181.0' r='4.0' class='a-beat' style='--d:0.66s;--dur:2.00s;fill:var(--n-data)'/>
+<text x='164.0' y='186.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-data)'>What has been done</text>
+<text x='704.0' y='186.0' class='lbl sm end a-rise' style='--d:0.76s;fill:var(--n-dim)'>the existing methods, conceded</text>
 </a>
-<a href='#is-this-not-already-done' class='rm-row'>
+<a href='#what-we-add' class='rm-row'>
 <rect x='128' y='208.0' width='576' height='34' rx='8' fill='transparent'/>
-<circle cx='148.0' cy='225.0' r='4.0' class='a-beat' style='--d:0.73s;--dur:2.00s;fill:var(--n-data)'/>
-<text x='164.0' y='230.0' class='lbl a-rise' style='--d:0.73s;fill:var(--n-data)'>Is this not already done?</text>
-<text x='704.0' y='230.0' class='lbl sm end a-rise' style='--d:0.83s;fill:var(--n-dim)'>conceded, in detail, then the gap</text>
-</a>
-<a href='#but-surely-the-contribution-is-limited' class='rm-row'>
-<rect x='128' y='252.0' width='576' height='34' rx='8' fill='transparent'/>
-<circle cx='148.0' cy='269.0' r='4.0' class='a-beat' style='--d:0.80s;--dur:2.00s;fill:var(--n-pruned)'/>
-<text x='164.0' y='274.0' class='lbl a-rise' style='--d:0.80s;fill:var(--n-pruned)'>Surely it is limited?</text>
-<text x='704.0' y='274.0' class='lbl sm end a-rise' style='--d:0.90s;fill:var(--n-dim)'>the objection that turns around</text>
+<circle cx='148.0' cy='225.0' r='4.0' class='a-beat' style='--d:0.73s;--dur:2.00s;fill:var(--n-pruned)'/>
+<text x='164.0' y='230.0' class='lbl a-rise' style='--d:0.73s;fill:var(--n-pruned)'>What we add</text>
+<text x='704.0' y='230.0' class='lbl sm end a-rise' style='--d:0.83s;fill:var(--n-dim)'>what the project is, and is not</text>
 </a>
 <a href='#what-would-make-this-fail' class='rm-row'>
-<rect x='128' y='296.0' width='576' height='34' rx='8' fill='transparent'/>
-<circle cx='148.0' cy='313.0' r='4.0' class='a-beat' style='--d:0.87s;--dur:2.00s;fill:var(--n-dim)'/>
-<text x='164.0' y='318.0' class='lbl a-rise' style='--d:0.87s;fill:var(--n-dim)'>What would make this fail</text>
-<text x='704.0' y='318.0' class='lbl sm end a-rise' style='--d:0.97s;fill:var(--n-dim)'>three ways to be wrong</text>
+<rect x='128' y='252.0' width='576' height='34' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='269.0' r='4.0' class='a-beat' style='--d:0.80s;--dur:2.00s;fill:var(--n-loss)'/>
+<text x='164.0' y='274.0' class='lbl a-rise' style='--d:0.80s;fill:var(--n-loss)'>What would make this fail</text>
+<text x='704.0' y='274.0' class='lbl sm end a-rise' style='--d:0.90s;fill:var(--n-dim)'>four ways to be wrong</text>
 </a>
 </svg>
 </div>
 
-## Two cells that look the same and are not
+## Two endothelial cells
 
-Every person carries two copies of each gene, and people differ from one another at single letters of DNA. Geneticists call such a letter a **variant**. Suppose that near gene A there is a variant, and that carrying one version rather than the other makes gene A somewhat more active. That is an inherited effect on gene A, and it is the kind of thing genetics has catalogued since the early 2000s.
+Endothelial cells line the blood vessels of the brain and form the barrier between the blood and the brain tissue. Take two of them from one person, a short distance apart in the same vessel. Call them **cell A** and **cell B**. Every analysis in current use gives them the same name: endothelial.
 
-The catalogue records one number for it. The trouble is that the number is not the same everywhere. Every cell in your body carries the same DNA, so the letter is identical in all of them, and yet in one cell it raises gene A considerably and in another it does almost nothing.
+Near gene 1 there is a single letter of DNA that differs between people; such a letter is called a **variant**. In cell A, carrying one version of it rather than the other raises gene 1 considerably. In cell B it does nothing. Near gene 2 there is another variant, and the pattern is reversed: nothing in cell A, a great deal in cell B.
 
-The reason is that the letter does nothing on its own. It sits beside a switch that controls the gene, and whether that switch is being read depends on which molecular machinery the cell currently has running. A cell that is not reading the switch is unaffected by which version it carries. A cell reading it hard is affected a great deal.
+Both cells carry identical DNA, so the letters themselves are the same in both. The difference is that a variant does nothing on its own. It sits beside a switch that controls the gene, and whether that switch is being read depends on what machinery the cell currently has running &mdash; and an endothelial cell near an artery is running different machinery from one near a vein. A cell that is not reading the switch is unaffected by which version it carries; a cell reading it hard is affected a great deal.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 536' role='img' aria-label='Two cells with identical baselines and opposite genetic effects.'>
+<svg viewBox='0 0 720 578' role='img' aria-label='Two endothelial cells with identical baselines and opposite genetic effects, sharing one label.'>
 <text x='24.0' y='58.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>how much of each gene the cell makes</text>
 <text x='24.0' y='286.0' class='lbl sm a-rise' style='--d:0.90s;fill:var(--n-dim)'>what the inherited letter does to each gene</text>
-<text x='196.0' y='30.0' class='lbl bg mid a-pop' style='--d:0.05s;fill:var(--n-ink)'>cell 1</text>
+<text x='196.0' y='30.0' class='lbl bg mid a-pop' style='--d:0.05s;fill:var(--n-ink)'>cell A</text>
 <rect x='64.0' y='72.0' width='264.0' height='180.0' rx='14' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-edge)'/>
 <path d='M84.0 212.0 L308.0 212.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.30s;--dur:0.50s;stroke:var(--n-edge);stroke-width:1.4'/>
 <rect x='110.0' y='138.0' width='66.0' height='74.0' rx='3' class='a-grow' style='--d:0.45s;--dur:0.60s;fill:var(--n-teacher);transform-origin:143.0px 212.0px'/>
-<text x='143.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.55s;fill:var(--n-dim)'>gene A</text>
+<text x='143.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.55s;fill:var(--n-dim)'>gene 1</text>
 <rect x='228.0' y='158.0' width='66.0' height='54.0' rx='3' class='a-grow' style='--d:0.55s;--dur:0.60s;fill:var(--n-teacher);transform-origin:261.0px 212.0px'/>
-<text x='261.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.65s;fill:var(--n-dim)'>gene B</text>
+<text x='261.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.65s;fill:var(--n-dim)'>gene 2</text>
 <rect x='64.0' y='300.0' width='264.0' height='180.0' rx='14' class='box a-pop' style='--d:0.95s;fill:var(--n-panel);stroke:var(--n-edge)'/>
 <path d='M84.0 440.0 L308.0 440.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.15s;--dur:0.50s;stroke:var(--n-edge);stroke-width:1.4'/>
 <rect x='110.0' y='360.0' width='66.0' height='80.0' rx='3' class='a-grow' style='--d:1.30s;--dur:0.60s;fill:var(--n-kept);transform-origin:143.0px 440.0px'/>
-<text x='143.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.40s;fill:var(--n-dim)'>gene A</text>
+<text x='143.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.40s;fill:var(--n-dim)'>gene 1</text>
 <rect x='228.0' y='433.0' width='66.0' height='7.0' rx='3' class='a-grow' style='--d:1.40s;--dur:0.60s;fill:var(--n-pruned);transform-origin:261.0px 440.0px'/>
-<text x='261.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.50s;fill:var(--n-dim)'>gene B</text>
-<text x='524.0' y='30.0' class='lbl bg mid a-pop' style='--d:0.25s;fill:var(--n-ink)'>cell 2</text>
+<text x='261.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.50s;fill:var(--n-dim)'>gene 2</text>
+<text x='524.0' y='30.0' class='lbl bg mid a-pop' style='--d:0.25s;fill:var(--n-ink)'>cell B</text>
 <rect x='392.0' y='72.0' width='264.0' height='180.0' rx='14' class='box a-pop' style='--d:0.30s;fill:var(--n-panel);stroke:var(--n-edge)'/>
 <path d='M412.0 212.0 L636.0 212.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.50s;--dur:0.50s;stroke:var(--n-edge);stroke-width:1.4'/>
 <rect x='438.0' y='138.0' width='66.0' height='74.0' rx='3' class='a-grow' style='--d:0.65s;--dur:0.60s;fill:var(--n-teacher);transform-origin:471.0px 212.0px'/>
-<text x='471.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.75s;fill:var(--n-dim)'>gene A</text>
+<text x='471.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.75s;fill:var(--n-dim)'>gene 1</text>
 <rect x='556.0' y='158.0' width='66.0' height='54.0' rx='3' class='a-grow' style='--d:0.75s;--dur:0.60s;fill:var(--n-teacher);transform-origin:589.0px 212.0px'/>
-<text x='589.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.85s;fill:var(--n-dim)'>gene B</text>
+<text x='589.0' y='234.0' class='lbl sm mid a-rise' style='--d:0.85s;fill:var(--n-dim)'>gene 2</text>
 <rect x='392.0' y='300.0' width='264.0' height='180.0' rx='14' class='box a-pop' style='--d:1.15s;fill:var(--n-panel);stroke:var(--n-edge)'/>
 <path d='M412.0 440.0 L636.0 440.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.35s;--dur:0.50s;stroke:var(--n-edge);stroke-width:1.4'/>
 <rect x='438.0' y='433.0' width='66.0' height='7.0' rx='3' class='a-grow' style='--d:1.50s;--dur:0.60s;fill:var(--n-pruned);transform-origin:471.0px 440.0px'/>
-<text x='471.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.60s;fill:var(--n-dim)'>gene A</text>
+<text x='471.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.60s;fill:var(--n-dim)'>gene 1</text>
 <rect x='556.0' y='360.0' width='66.0' height='80.0' rx='3' class='a-grow' style='--d:1.60s;--dur:0.60s;fill:var(--n-kept);transform-origin:589.0px 440.0px'/>
-<text x='589.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.70s;fill:var(--n-dim)'>gene B</text>
+<text x='589.0' y='462.0' class='lbl sm mid a-rise' style='--d:1.70s;fill:var(--n-dim)'>gene 2</text>
 <text x='360.0' y='162.0' class='lbl bg mid a-pop' style='--d:1.55s;fill:var(--n-teacher)'>=</text>
 <text x='360.0' y='390.0' class='lbl bg mid a-pop' style='--d:2.30s;fill:var(--n-loss)'>&#8800;</text>
-<text x='360.0' y='514.0' class='lbl mid a-pop' style='--d:2.50s;fill:var(--n-student)'>same contents, opposite genetics</text>
+<rect x='246.0' y='494.0' width='228.0' height='30.0' rx='8' class='box a-pop' style='--d:2.40s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
+<text x='360.0' y='514.0' class='lbl sm mid a-pop' style='--d:2.46s;fill:var(--n-teacher)'>both are called endothelial</text>
+<text x='360.0' y='556.0' class='lbl mid a-pop' style='--d:2.56s;fill:var(--n-student)'>same contents, same label, opposite genetics</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> Two cells from one person. Above, what each would produce in someone carrying neither variant &mdash; the baseline, identical in both. Below, how far that baseline shifts per copy of the inherited letter: for gene A it moves a great deal in the first cell and not at all in the second, and for gene B the pattern is flipped. The upper description cannot separate these cells. The lower one calls them opposites.</div>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Cell A and cell B, from one person, both called endothelial. Above, what each would make in someone carrying neither variant &mdash; the baseline, identical in both. Below, how far that baseline shifts per copy of the inherited letter: gene 1 moves a great deal in cell A and not at all in cell B, and for gene 2 the pattern is reversed. The label cannot separate these two cells. The lower description calls them opposites.</div>
 </div>
 
-Now take two genes, A and B, each with a variant beside it, and two cells from one person. Ask what each cell would produce in a person carrying neither variant &mdash; its baseline &mdash; and the two cells are identical. Ask how much that baseline shifts per copy of the inherited letter, and they are opposites: in the first cell the letter near A moves the gene a great deal and the letter near B does nothing, and in the second the reverse.
+Now write down, for cell A and for cell B, what every variant does to its neighbouring gene &mdash; a large effect, a small one, none at all, or an effect in the opposite direction. Do it not for two genes but for hundreds.
 
-That second description is the regulotype: a cell described by the list of effects that inherited differences have inside it, one number for each variant and the gene beside it. Two cells share a regulotype when the same inherited differences do the same thing in them, whatever their contents look like.
+**That list is the cell&#39;s regulotype.** It describes a cell not by what it contains, but by what inherited differences do inside it. Two cells share a regulotype when the same variants have the same effects in them, whatever their contents look like.
 
-This is not a hypothetical arrangement. Nathan and colleagues found loci where two independent variants near the same gene shift its expression in **opposite directions** along the same cellular axis, which is exactly the pattern above.
+By that description, cell A and cell B are opposites. By the label they both carry, they are the same cell.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 428' role='img' aria-label='A heatmap of twenty variant-gene pairs by sixty-four cells, with one column outlined.'>
+<svg viewBox='0 0 720 428' role='img' aria-label='A heatmap of variant-gene pairs by cells, with one column outlined as a regulotype.'>
 <text x='24.0' y='44.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>the fitted effect matrix, one row per reference pair</text>
 <g class='a-fade' style='--d:0.30s'><rect x='196.0' y='76.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.92)'/><rect x='196.0' y='91.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.92)'/><rect x='196.0' y='106.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.75)'/><rect x='196.0' y='121.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.90)'/><rect x='196.0' y='136.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.66)'/><rect x='196.0' y='151.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.10)'/><rect x='196.0' y='166.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.92)'/><rect x='196.0' y='181.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.92)'/><rect x='196.0' y='196.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.92)'/><rect x='196.0' y='211.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.92)'/><rect x='196.0' y='226.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.89)'/><rect x='196.0' y='241.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.13)'/><rect x='196.0' y='256.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.80)'/><rect x='196.0' y='271.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.12)'/><rect x='196.0' y='286.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.14)'/><rect x='196.0' y='301.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.14)'/><rect x='196.0' y='316.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.08)'/><rect x='196.0' y='331.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.92)'/><rect x='196.0' y='346.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.29)'/><rect x='196.0' y='361.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.92)'/></g>
 <g class='a-fade' style='--d:0.31s'><rect x='201.4' y='76.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.78)'/><rect x='201.4' y='91.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.67)'/><rect x='201.4' y='106.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.22)'/><rect x='201.4' y='121.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.80)'/><rect x='201.4' y='136.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.18)'/><rect x='201.4' y='151.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.19)'/><rect x='201.4' y='166.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.90)'/><rect x='201.4' y='181.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.76)'/><rect x='201.4' y='196.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.59)'/><rect x='201.4' y='211.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.87)'/><rect x='201.4' y='226.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.92)'/><rect x='201.4' y='241.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.08)'/><rect x='201.4' y='256.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.85)'/><rect x='201.4' y='271.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.56)'/><rect x='201.4' y='286.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.10)'/><rect x='201.4' y='301.0' width='5.8' height='15.4' fill='rgba(var(--n-violet-rgb), 0.16)'/><rect x='201.4' y='316.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.10)'/><rect x='201.4' y='331.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.48)'/><rect x='201.4' y='346.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.61)'/><rect x='201.4' y='361.0' width='5.8' height='15.4' fill='rgba(var(--n-clay-rgb), 0.69)'/></g>
@@ -191,10 +187,10 @@ This is not a hypothetical arrangement. Nathan and colleagues found loci where t
 <text x='595.6' y='231.0' class='lbl sm a-rise' style='--d:2.08s;fill:var(--n-dim)'>near zero</text>
 <text x='595.6' y='371.0' class='lbl sm a-rise' style='--d:2.11s;fill:var(--n-dim)'>lowers</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> Twenty reference pairs by sixty-four cells. Each row is one variant and the gene beside it; each column is one cell. Colour is the direction and size of the effect &mdash; violet where the letter raises the gene, clay where it lowers it &mdash; standardised within each row, and the cells are ordered along the strongest coordinate so the structure reads left to right. Several rows are nearly blank, because most pairs do not vary much with cell state. A single column is one cell&#39;s regulotype. Simulated from the model at rank three; no data from any analysis appears here.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> A regulotype, drawn for many cells at once. Each row is one variant and the gene beside it; each column is one cell. Colour is the direction and size of the effect &mdash; violet where the variant raises the gene, clay where it lowers it &mdash; standardised within each row, with the cells ordered so the structure reads left to right. Several rows are nearly blank, because most pairs do not vary much with cell state. One column is one cell&#39;s regulotype. Simulated from the model; no data from any analysis appears here.</div>
 </div>
 
-The cost of ignoring it is easy to state. A study reporting one number per variant and gene reports a weighted average over whatever cellular mixture each donor contributed. When the underlying effects point the same way, the average is a fair summary. When they oppose, the average falls towards zero &mdash; reaching it only when the opposing contributions match both in size and in how many cells carry them &mdash; and the conclusion drawn from it, that there is nothing here to find, is wrong.
+An analysis that works within the label averages cell A and cell B together and reports one effect for endothelial cells. When the underlying effects point the same way, the average is a fair summary. When they oppose, it falls towards zero, and the conclusion drawn from it &mdash; that there is nothing here to find &mdash; is wrong.
 
 <div class='lab wide' id='rg-avg-lab'>
 <div class='lab-head'><span class='name'>Lab 1 &middot; what one number hides</span><span class='hint'>drag the two effects apart and watch the reported value</span></div>
@@ -224,22 +220,128 @@ The cost of ignoring it is easy to state. A study reporting one number per varia
 </div>
 </div>
 
-## Why one gene is not enough
+## What is usually done
 
-One gene gives one number per cell, and that is not enough to place the cell. The obstacle is not noise. It is that a cell's position has more than one unknown behind it, and one measurement gives one equation: the position is not merely imprecise, it is undetermined.
+Cells are given labels from what they look like: which genes they are making, and how much. The labels come first, before any genetics is examined. Then the genetic effect is estimated inside each label.
 
-Ten variant-and-gene pairs give ten equations for the same unknowns, and the position becomes estimable. That fixed list of pairs &mdash; the same list for every cell, drawn from regions of the genome far enough apart that what happens at one says nothing about another &mdash; is the **reference set**. Lay the results out as a grid, one row per pair and one column per cell, and each cell now carries a column rather than a single number. Columns can be compared.
+That works when the cells sharing a label really do behave alike. It fails in two ways when they do not.
 
+**The variation inside a label is averaged away.** That is the example above, and it is the failure that matters most in a tissue whose cells vary continuously.
 
-It is worth being explicit about where the information comes from, because the puzzle is real: every cell in one person carries the same DNA, so what could possibly distinguish them genetically?
+**And there is no correct level of detail.** A study of inflammatory bowel disease published in 2026 measured both directions at once. Treating every cell as one pool found the most genes with a detectable effect: 15,713, or 77.1 per cent of everything the study found anywhere. But 25,980 individual effects &mdash; 29.3 per cent &mdash; appeared only once cells were separated by type, and were invisible in the pool. Dividing further does not fix it, because the cells run out: in that same study, 57 per cent of the cell types were left with fewer than a hundred cells per person.
 
-The answer is an assumption, not a fact. The model supposes that a cell's genetic behaviour depends on the cell **only through its position** &mdash; two cells at the same position, in different people, respond alike. That is what makes a per-cell quantity estimable at all. Given it, the pieces come from different places: the average effect of a variant comes only from differences between people; how strongly a pair responds to position comes from comparing people who differ in dosage; and a cell's own position comes from its readings across the whole reference set, so it sharpens as the reference set grows rather than as the cohort does.
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 324' role='img' aria-label='Three horizontal bars showing 77.1 percent, 29.3 percent and 57 percent.'>
+<text x='360.0' y='40.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-ink)'>the same study, counted two ways</text>
+<text x='34.0' y='76.0' class='lbl sm a-rise' style='--d:0.30s;fill:var(--n-ink)'>genes with an effect found when all cells are pooled</text>
+<rect x='34.0' y='88.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.35s;fill:var(--n-grid);stroke:none'/>
+<rect x='34.0' y='88.0' width='323.8' height='26' rx='6' class='a-wide' style='--d:0.45s;--dur:0.9s;fill:var(--n-teacher);transform-origin:34.0px 101.0px'/>
+<text x='470.0' y='108.0' class='lbl bg a-pop' style='--d:0.85s;fill:var(--n-teacher)'>77.1%</text>
+<text x='34.0' y='150.0' class='lbl sm a-rise' style='--d:0.60s;fill:var(--n-ink)'>effects visible only after cells are split by type</text>
+<rect x='34.0' y='162.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.65s;fill:var(--n-grid);stroke:none'/>
+<rect x='34.0' y='162.0' width='123.1' height='26' rx='6' class='a-wide' style='--d:0.75s;--dur:0.9s;fill:var(--n-student);transform-origin:34.0px 175.0px'/>
+<text x='470.0' y='182.0' class='lbl bg a-pop' style='--d:1.15s;fill:var(--n-student)'>29.3%</text>
+<text x='34.0' y='224.0' class='lbl sm a-rise' style='--d:0.90s;fill:var(--n-ink)'>cell types left with under 100 cells per person</text>
+<rect x='34.0' y='236.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.95s;fill:var(--n-grid);stroke:none'/>
+<rect x='34.0' y='236.0' width='239.4' height='26' rx='6' class='a-wide' style='--d:1.05s;--dur:0.9s;fill:var(--n-loss);transform-origin:34.0px 249.0px'/>
+<text x='470.0' y='256.0' class='lbl bg a-pop' style='--d:1.45s;fill:var(--n-loss)'>57.0%</text>
+<rect x='556.0' y='72.0' width='148.0' height='206.0' rx='12' class='box a-pop' style='--d:1.55s;fill:none;stroke:var(--n-dim)'/>
+<text x='630.0' y='116.0' class='lbl sm mid a-rise' style='--d:1.65s;fill:var(--n-dim)'>coarse and fine</text>
+<text x='630.0' y='138.0' class='lbl sm mid a-rise' style='--d:1.70s;fill:var(--n-dim)'>each find things</text>
+<text x='630.0' y='160.0' class='lbl sm mid a-rise' style='--d:1.75s;fill:var(--n-dim)'>the other misses,</text>
+<text x='630.0' y='188.0' class='lbl sm mid a-rise' style='--d:1.82s;fill:var(--n-loss)'>so every choice</text>
+<text x='630.0' y='210.0' class='lbl sm mid a-rise' style='--d:1.87s;fill:var(--n-loss)'>of level throws</text>
+<text x='630.0' y='232.0' class='lbl sm mid a-rise' style='--d:1.92s;fill:var(--n-loss)'>something away</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 3.</span> The cost of choosing a level of detail, in one published study, counted two ways. Pooling every cell finds the most <i>genes</i> with any detectable effect. Separating cells by type reveals a large minority of individual <i>effects</i> that pooling cannot see. And separating further is self-limiting: most of the resulting types are left with too few cells per person to support an estimate. Counts from Alegbe <i>et al.</i> 2026; the two percentages have different denominators, named in the text.</div>
+</div>
+
+Coarse labels find more in total. Fine labels find things coarse labels cannot see. Every choice discards what the other would have found &mdash; and where cells change continuously rather than falling into a few kinds, no choice is right.
+
+<div class='lab wide' id='rg-split-lab'>
+<div class='lab-head'><span class='name'>Lab 2 &middot; what splitting buys, and what it cannot</span><span class='hint'>divide the same cells more finely and watch two things diverge</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='rg-donors'>people in the study <span class='val' id='rg-donors-v'></span></label>
+<input type='range' id='rg-donors' min='20' max='1500' step='1' value='424'>
+</div>
+<div class='ctl'>
+<label for='rg-cells'>cells measured per person <span class='val' id='rg-cells-v'></span></label>
+<input type='range' id='rg-cells' min='100' max='20000' step='10' value='3500'>
+</div>
+<div class='ctl'>
+<label for='rg-groups'>cell types they are divided into <span class='val' id='rg-groups-v'></span></label>
+<input type='range' id='rg-groups' min='1' max='80' step='1' value='7'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>cells per person, largest group</span><span class='v' id='rg-stat-largest'></span></div>
+<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>groups above the floor</span><span class='v' id='rg-stat-usable'></span></div>
+<div class='stat' style='--stat-hue:var(--n-data)'><span class='k'>independent genomes</span><span class='v' id='rg-stat-genomes'></span></div>
+</div>
+<div class='verdict' id='rg-split-verdict'></div>
+<svg viewBox='0 0 700 250' role='img'></svg>
+<p class='cap'>Division, and nothing else. Real taxonomies are lopsided, so the types here follow a decaying share rather than an even split, which is the honest case. The hundred-cell line is the threshold Alegbe <i>et al.</i> report against. Watch the third number while you move the third slider: it never changes.</p>
+</div>
+</div>
+
+## Defining cells by genetic response
+
+The alternative is to reverse the order: instead of defining cells only by how they look, define them by **how they respond to inherited genetic differences**, and use appearance afterwards to describe what the resulting groups turned out to be.
+
+This is a cell classification in the same sense that a cell type is one. What differs is the quantity being compared: genotype-dependent expression rather than ordinary expression.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 404' role='img' aria-label='Two three-step workflows, one above the other, with the first and last steps exchanged.'>
+<text x='24.0' y='54.0' class='lbl a-pop' style='--d:0.05s;fill:var(--n-teacher)'>the usual order</text>
+<rect x='24.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
+<text x='122.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.28s;fill:var(--n-ink)'>measure what</text>
+<text x='122.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.33s;fill:var(--n-ink)'>cells look like</text>
+<path d='M226.0 114.0 L244.0 114.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.50s;--dur:0.70s;stroke:var(--n-teacher);stroke-width:2.2'/>
+<polygon points='250.0,114.0 244.0,117.3 244.0,110.7' class='a-pop' style='--d:0.99s;fill:var(--n-teacher)'/>
+<rect x='256.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.38s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
+<text x='354.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.46s;fill:var(--n-ink)'>call them fixed</text>
+<text x='354.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.51s;fill:var(--n-ink)'>cell types</text>
+<path d='M458.0 114.0 L476.0 114.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.68s;--dur:0.70s;stroke:var(--n-teacher);stroke-width:2.2'/>
+<polygon points='482.0,114.0 476.0,117.3 476.0,110.7' class='a-pop' style='--d:1.17s;fill:var(--n-teacher)'/>
+<rect x='488.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.56s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
+<text x='586.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.64s;fill:var(--n-ink)'>test the genetics</text>
+<text x='586.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.69s;fill:var(--n-ink)'>inside each group</text>
+<text x='24.0' y='216.0' class='lbl a-pop' style='--d:0.90s;fill:var(--n-student)'>the other order</text>
+<rect x='24.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.05s;fill:var(--n-panel);stroke:var(--n-student)'/>
+<text x='122.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.13s;fill:var(--n-ink)'>measure what the</text>
+<text x='122.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.18s;fill:var(--n-ink)'>genetics does</text>
+<path d='M226.0 276.0 L244.0 276.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.35s;--dur:0.70s;stroke:var(--n-student);stroke-width:2.2'/>
+<polygon points='250.0,276.0 244.0,279.3 244.0,272.7' class='a-pop' style='--d:1.84s;fill:var(--n-student)'/>
+<rect x='256.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.23s;fill:var(--n-panel);stroke:var(--n-student)'/>
+<text x='354.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.31s;fill:var(--n-ink)'>let that define</text>
+<text x='354.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.36s;fill:var(--n-ink)'>the groups</text>
+<path d='M458.0 276.0 L476.0 276.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.53s;--dur:0.70s;stroke:var(--n-student);stroke-width:2.2'/>
+<polygon points='482.0,276.0 476.0,279.3 476.0,272.7' class='a-pop' style='--d:2.02s;fill:var(--n-student)'/>
+<rect x='488.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.41s;fill:var(--n-panel);stroke:var(--n-student)'/>
+<text x='586.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.49s;fill:var(--n-ink)'>describe the groups</text>
+<text x='586.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.54s;fill:var(--n-ink)'>by how they look</text>
+<text x='360.0' y='384.0' class='lbl mid a-pop' style='--d:1.95s;fill:var(--n-ink)'>nothing about the measurements changes; only which one defines the groups</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 4.</span> The two orders. Above, the usual one: appearance defines the cell types and genetics is examined inside them. Below, the proposal: genetic response defines the groups, and appearance is used afterwards to say what they turned out to be. The measurements are identical in both rows. Only the question asked first has changed.</div>
+</div>
+
+Three things make it work, and each is a real constraint.
+
+**Many pairs, not one.** A single variant gives one number per cell, and one number cannot place a cell &mdash; there is more than one unknown behind it. Effects measured across many independent regions of the genome can. That fixed list of variant-and-gene pairs, the same for every cell, is the **reference set**.
+
+**People, not cells, are the sample size.** Every cell in one person carries the same genome, so measuring more cells sharpens the picture within that person and adds nothing to the genetic evidence. Cells buy resolution; people buy the floor beneath it.
+
+**The map has no meaningful axes.** The cellular positions and the per-pair responses are recovered together, and can be rotated freely without changing a single effect. So nothing here interprets an axis or names a factor. What is interpreted is the matrix of effects, the distances between its columns, and predictions in data the model never saw.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 412' role='img' aria-label='Two scatter plots of the same sixty cells, with two cells adjacent in one and distant in the other.'>
 <rect x='48.0' y='84.0' width='280.0' height='236.0' rx='14' class='box a-pop' style='--d:0.08s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<text x='188.0' y='40.0' class='lbl mid a-pop' style='--d:0.04s;fill:var(--n-teacher)'>sorted by appearance</text>
+<text x='188.0' y='40.0' class='lbl mid a-pop' style='--d:0.04s;fill:var(--n-teacher)'>grouped by appearance</text>
 <path d='M118.0 92.0 L118.0 312.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.20s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
 <path d='M56.0 143.0 L320.0 143.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.20s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
 <path d='M188.0 92.0 L188.0 312.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.20s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
@@ -306,12 +408,12 @@ The answer is an assumption, not a fact. The model supposes that a cell's geneti
 <circle cx='250.3' cy='221.9' r='4.6' class='a-pop' style='--d:0.67s;fill:var(--n-pruned)'/>
 <circle cx='127.7' cy='217.0' r='7.0' class='a-pop' style='--d:0.95s;fill:var(--n-kept)'/>
 <path d='M127.7 208.0 L127.7 88.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.00s;--dur:0.40s;stroke:var(--n-kept);stroke-width:1.4'/>
-<text x='127.7' y='82.0' class='lbl sm mid a-pop' style='--d:1.06s;fill:var(--n-kept)'>cell 2</text>
+<text x='127.7' y='82.0' class='lbl sm mid a-pop' style='--d:1.06s;fill:var(--n-kept)'>cell B</text>
 <circle cx='134.0' cy='221.1' r='7.0' class='a-pop' style='--d:0.95s;fill:var(--n-student)'/>
 <path d='M134.0 230.1 L134.0 328.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.00s;--dur:0.40s;stroke:var(--n-student);stroke-width:1.4'/>
-<text x='134.0' y='342.0' class='lbl sm mid a-pop' style='--d:1.06s;fill:var(--n-student)'>cell 1</text>
+<text x='134.0' y='342.0' class='lbl sm mid a-pop' style='--d:1.06s;fill:var(--n-student)'>cell A</text>
 <rect x='392.0' y='84.0' width='280.0' height='236.0' rx='14' class='box a-pop' style='--d:0.63s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<text x='532.0' y='40.0' class='lbl mid a-pop' style='--d:0.59s;fill:var(--n-student)'>sorted by genetic response</text>
+<text x='532.0' y='40.0' class='lbl mid a-pop' style='--d:0.59s;fill:var(--n-student)'>grouped by genetic response</text>
 <path d='M462.0 92.0 L462.0 312.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
 <path d='M400.0 143.0 L664.0 143.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
 <path d='M532.0 92.0 L532.0 312.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.40s;stroke:var(--n-grid);stroke-width:1.0'/>
@@ -378,19 +480,14 @@ The answer is an assumption, not a fact. The model supposes that a cell's geneti
 <circle cx='462.7' cy='205.2' r='4.6' class='a-pop' style='--d:1.22s;fill:var(--n-pruned)'/>
 <circle cx='455.4' cy='114.3' r='7.0' class='a-pop' style='--d:1.50s;fill:var(--n-student)'/>
 <path d='M455.4 105.3 L455.4 88.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.55s;--dur:0.40s;stroke:var(--n-student);stroke-width:1.4'/>
-<text x='455.4' y='82.0' class='lbl sm mid a-pop' style='--d:1.61s;fill:var(--n-student)'>cell 1</text>
+<text x='455.4' y='82.0' class='lbl sm mid a-pop' style='--d:1.61s;fill:var(--n-student)'>cell A</text>
 <circle cx='518.3' cy='272.6' r='7.0' class='a-pop' style='--d:1.50s;fill:var(--n-kept)'/>
 <path d='M518.3 281.6 L518.3 328.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.55s;--dur:0.40s;stroke:var(--n-kept);stroke-width:1.4'/>
-<text x='518.3' y='342.0' class='lbl sm mid a-pop' style='--d:1.61s;fill:var(--n-kept)'>cell 2</text>
+<text x='518.3' y='342.0' class='lbl sm mid a-pop' style='--d:1.61s;fill:var(--n-kept)'>cell B</text>
 <text x='360.0' y='392.0' class='lbl mid a-pop' style='--d:2.10s;fill:var(--n-ink)'>the same sixty cells, arranged twice</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 3.</span> Sixty cells placed twice. On the left, by how similar their contents are &mdash; and they fall into the overlapping groups a real embedding shows. On the right, by how similarly inherited differences act in them. Cells 1 and 2 are the pair the two arrangements most disagree about: neighbours on the left, opposite corners on the right. Neither placement is wrong; they answer different questions. Both sets of coordinates are simulated from the model, with the two independent of one another.</div>
+<div class='caption'><span class='caption-label'>Figure 5.</span> Sixty cells placed twice. On the left, by how similar their contents are &mdash; and they fall into the overlapping groups a real embedding shows. On the right, by how similarly inherited differences act in them. Cells A and B are the pair the two arrangements most disagree about: neighbours on the left, opposite corners on the right. Neither placement is wrong; they answer different questions. Both sets of coordinates are simulated from the model, independent of one another.</div>
 </div>
-
-Which brings up the constraint that governs the rest. **Donors are the independent unit for the average effect.** No number of cells lowers its uncertainty below the floor set by how many people were sequenced, and it is people, not cells, that a significance test can be permuted over.
-
-Cells are not worthless for the rest of it. The contrast within one person, between a cell high on a coordinate and one low on it, is real evidence about how effects vary. But that evidence is bounded by how much people differ from one another in the same relationship, so it saturates. Cells buy resolution; people buy the floor.
-
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 398' role='img' aria-label='Three people with many cells each, then the same cells split into smaller groups; the number of people is unchanged.'>
@@ -557,136 +654,16 @@ Cells are not worthless for the rest of it. The contrast within one person, betw
 <circle cx='646.0' cy='316.0' r='5.0' class='a-pop' style='--d:1.68s;fill:var(--n-pruned)'/>
 <text x='360.0' y='376.0' class='lbl mid a-pop' style='--d:2.05s;fill:var(--n-loss)'>the number of independent genomes is still three</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> Cells multiply and people do not. Sorting the same measurements more finely divides each person&#39;s cells into smaller piles, which buys specificity and costs precision, because each pile now rests on fewer cells. What does not move is the number of independent genomes. That is the constraint that stops finer and finer labelling from working.</div>
+<div class='caption'><span class='caption-label'>Figure 6.</span> Cells multiply and people do not. Dividing the same measurements more finely splits each person&#39;s cells into smaller groups, which buys specificity and costs precision, because each group now rests on fewer cells. What does not move is the number of independent genomes.</div>
 </div>
 
-One more step, and it is the one the whole method turns on. A column with hundreds of numbers in it is not something a person can hold, and those numbers are not free to vary independently. If two cells differ in one underlying respect &mdash; how hard some piece of machinery is running &mdash; then the effects of many different variants shift together, in a pattern set by that single difference. So hundreds of numbers usually collapse to a handful. Those few numbers are a position on a map, and nearby cells are cells in which genetics behaves alike. Finding that map, without being told in advance what the underlying respects are, is the computational problem.
+## What has been done
 
+A good deal, and it is worth being exact about which parts already belong to someone else.
 
-## The trouble with sorting cells first
+That genetic effects vary along continuous cellular axes is established, not proposed. **CellRegMap** tests for that variation along an axis the researcher supplies, and can return a per-cell effect afterwards. **Nathan and colleagues** computed an effect for every single cell in 2022 and plotted it, along coordinates fixed before the genetic model. **sn-spMF** factorised a matrix of effect sizes across forty-nine tissues. **PICALO** learns the axis that best explains effect variation, from bulk tissue.
 
-Biologists sort cells into named kinds &mdash; this one lines a blood vessel, that one is an immune cell &mdash; using what the cells look like and which genes they are making. The standard genetic analysis averages within each kind and looks for effects inside each average. The difficulty is choosing how finely to sort.
-
-A study of inflammatory bowel disease published in 2026 measured both directions at once. Counting **genes** with any detectable effect, pooling all cells together found the most: 15,713 of them, 77.1 per cent of everything the study found anywhere. But counting **individual effects**, 25,980 of them &mdash; 29.3 per cent &mdash; showed up only once cells were separated by type, and were invisible in the pool. Splitting further does not rescue this, because it runs into the constraint above: in the same study, 57 per cent of the cell types were left with fewer than a hundred cells per person.
-
-<div class='nfig wide'>
-<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 324' role='img' aria-label='Three horizontal bars showing 77.1 percent, 29.3 percent and 57 percent.'>
-<text x='360.0' y='40.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-ink)'>the same study, counted two ways</text>
-<text x='34.0' y='76.0' class='lbl sm a-rise' style='--d:0.30s;fill:var(--n-ink)'>genes with an effect found when all cells are pooled</text>
-<rect x='34.0' y='88.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.35s;fill:var(--n-grid);stroke:none'/>
-<rect x='34.0' y='88.0' width='323.8' height='26' rx='6' class='a-wide' style='--d:0.45s;--dur:0.9s;fill:var(--n-teacher);transform-origin:34.0px 101.0px'/>
-<text x='470.0' y='108.0' class='lbl bg a-pop' style='--d:0.85s;fill:var(--n-teacher)'>77.1%</text>
-<text x='34.0' y='150.0' class='lbl sm a-rise' style='--d:0.60s;fill:var(--n-ink)'>effects visible only after cells are split by type</text>
-<rect x='34.0' y='162.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.65s;fill:var(--n-grid);stroke:none'/>
-<rect x='34.0' y='162.0' width='123.1' height='26' rx='6' class='a-wide' style='--d:0.75s;--dur:0.9s;fill:var(--n-student);transform-origin:34.0px 175.0px'/>
-<text x='470.0' y='182.0' class='lbl bg a-pop' style='--d:1.15s;fill:var(--n-student)'>29.3%</text>
-<text x='34.0' y='224.0' class='lbl sm a-rise' style='--d:0.90s;fill:var(--n-ink)'>cell types left with under 100 cells per person</text>
-<rect x='34.0' y='236.0' width='420.0' height='26.0' rx='6' class='box a-pop' style='--d:0.95s;fill:var(--n-grid);stroke:none'/>
-<rect x='34.0' y='236.0' width='239.4' height='26' rx='6' class='a-wide' style='--d:1.05s;--dur:0.9s;fill:var(--n-loss);transform-origin:34.0px 249.0px'/>
-<text x='470.0' y='256.0' class='lbl bg a-pop' style='--d:1.45s;fill:var(--n-loss)'>57.0%</text>
-<rect x='556.0' y='72.0' width='148.0' height='206.0' rx='12' class='box a-pop' style='--d:1.55s;fill:none;stroke:var(--n-dim)'/>
-<text x='630.0' y='116.0' class='lbl sm mid a-rise' style='--d:1.65s;fill:var(--n-dim)'>coarse and fine</text>
-<text x='630.0' y='138.0' class='lbl sm mid a-rise' style='--d:1.70s;fill:var(--n-dim)'>each find things</text>
-<text x='630.0' y='160.0' class='lbl sm mid a-rise' style='--d:1.75s;fill:var(--n-dim)'>the other misses,</text>
-<text x='630.0' y='188.0' class='lbl sm mid a-rise' style='--d:1.82s;fill:var(--n-loss)'>so every choice</text>
-<text x='630.0' y='210.0' class='lbl sm mid a-rise' style='--d:1.87s;fill:var(--n-loss)'>of level throws</text>
-<text x='630.0' y='232.0' class='lbl sm mid a-rise' style='--d:1.92s;fill:var(--n-loss)'>something away</text>
-</svg>
-<div class='caption'><span class='caption-label'>Figure 5.</span> The resolution trade-off in one published study, counted two ways. Pooling every cell finds the most <i>genes</i> with any detectable effect. Splitting by type reveals a large minority of individual <i>effects</i> that pooling cannot see. And splitting is self-limiting: most of the resulting types are left with too few cells per person to support an estimate. Counts from Alegbe <i>et al.</i> 2026; the two percentages have different denominators, named in the text.</div>
-</div>
-
-So coarse grouping finds more in total, fine grouping finds things coarse grouping cannot see, and each level discards what the other would have found. There is a second reason the two are hard to have at once, and it is economic rather than statistical: across published studies, resolution and sample size are inversely related, because sequencing single cells costs more than sequencing tissue.
-
-None of this proves that sorting is the wrong move. It could equally argue for choosing the resolution per locus, which is what several methods do. It does mean that a scheme in which no single level is right invites asking whether the scheme is the right one.
-
-<div class='lab wide' id='rg-split-lab'>
-<div class='lab-head'><span class='name'>Lab 2 &middot; what splitting buys, and what it cannot</span><span class='hint'>sort the same cells more finely and watch two things diverge</span></div>
-<div class='lab-body'>
-<div class='controls'>
-<div class='ctl'>
-<label for='rg-donors'>people in the study <span class='val' id='rg-donors-v'></span></label>
-<input type='range' id='rg-donors' min='20' max='1500' step='1' value='424'>
-</div>
-<div class='ctl'>
-<label for='rg-cells'>cells measured per person <span class='val' id='rg-cells-v'></span></label>
-<input type='range' id='rg-cells' min='100' max='20000' step='10' value='3500'>
-</div>
-<div class='ctl'>
-<label for='rg-groups'>groups they are sorted into <span class='val' id='rg-groups-v'></span></label>
-<input type='range' id='rg-groups' min='1' max='80' step='1' value='7'>
-</div>
-</div>
-<div class='readout'>
-<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>cells per person, largest group</span><span class='v' id='rg-stat-largest'></span></div>
-<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>groups above the floor</span><span class='v' id='rg-stat-usable'></span></div>
-<div class='stat' style='--stat-hue:var(--n-data)'><span class='k'>independent genomes</span><span class='v' id='rg-stat-genomes'></span></div>
-</div>
-<div class='verdict' id='rg-split-verdict'></div>
-<svg viewBox='0 0 700 250' role='img'></svg>
-<p class='cap'>Division, and nothing else. Real taxonomies are lopsided, so the groups here follow a decaying share rather than an even split, which is the honest case. The hundred-cell line is the threshold Alegbe <i>et al.</i> report against. Watch the third number while you move the third slider: it never changes.</p>
-</div>
-</div>
-
-## Inverting the order
-
-The proposal is to reverse the two steps: let the genetic effects do the grouping, and use appearance afterwards to describe what the groups turned out to be.
-
-Fit a single model to all the cells at once, without telling it what kind of cell any of them is. The model gives each cell a position &mdash; a small handful of numbers &mdash; and gives each pair a rule for how its effect changes as you move across that map. Multiply the two, **add the pair's own average effect**, and you have the effect of every variant in every cell. That grid is the matrix of regulotypes. The average effect matters: it is usually the larger part, and dropping it would discard exactly the quantity the previous section said was misleading on its own.
-
-<div class='nfig wide'>
-<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 404' role='img' aria-label='Two three-step workflows, one above the other, with the first and last steps exchanged.'>
-<text x='24.0' y='54.0' class='lbl a-pop' style='--d:0.05s;fill:var(--n-teacher)'>the usual order</text>
-<rect x='24.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
-<text x='122.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.28s;fill:var(--n-ink)'>measure what</text>
-<text x='122.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.33s;fill:var(--n-ink)'>cells look like</text>
-<path d='M226.0 114.0 L244.0 114.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.50s;--dur:0.70s;stroke:var(--n-teacher);stroke-width:2.2'/>
-<polygon points='250.0,114.0 244.0,117.3 244.0,110.7' class='a-pop' style='--d:0.99s;fill:var(--n-teacher)'/>
-<rect x='256.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.38s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
-<text x='354.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.46s;fill:var(--n-ink)'>sort them into</text>
-<text x='354.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.51s;fill:var(--n-ink)'>groups</text>
-<path d='M458.0 114.0 L476.0 114.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.68s;--dur:0.70s;stroke:var(--n-teacher);stroke-width:2.2'/>
-<polygon points='482.0,114.0 476.0,117.3 476.0,110.7' class='a-pop' style='--d:1.17s;fill:var(--n-teacher)'/>
-<rect x='488.0' y='70.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:0.56s;fill:var(--n-panel);stroke:var(--n-teacher)'/>
-<text x='586.0' y='106.0' class='lbl sm mid a-rise' style='--d:0.64s;fill:var(--n-ink)'>test the genetics</text>
-<text x='586.0' y='128.0' class='lbl sm mid a-rise' style='--d:0.69s;fill:var(--n-ink)'>inside each group</text>
-<text x='24.0' y='216.0' class='lbl a-pop' style='--d:0.90s;fill:var(--n-student)'>the other order</text>
-<rect x='24.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.05s;fill:var(--n-panel);stroke:var(--n-student)'/>
-<text x='122.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.13s;fill:var(--n-ink)'>measure what the</text>
-<text x='122.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.18s;fill:var(--n-ink)'>genetics does</text>
-<path d='M226.0 276.0 L244.0 276.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.35s;--dur:0.70s;stroke:var(--n-student);stroke-width:2.2'/>
-<polygon points='250.0,276.0 244.0,279.3 244.0,272.7' class='a-pop' style='--d:1.84s;fill:var(--n-student)'/>
-<rect x='256.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.23s;fill:var(--n-panel);stroke:var(--n-student)'/>
-<text x='354.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.31s;fill:var(--n-ink)'>let that sort them</text>
-<text x='354.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.36s;fill:var(--n-ink)'>into groups</text>
-<path d='M458.0 276.0 L476.0 276.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.53s;--dur:0.70s;stroke:var(--n-student);stroke-width:2.2'/>
-<polygon points='482.0,276.0 476.0,279.3 476.0,272.7' class='a-pop' style='--d:2.02s;fill:var(--n-student)'/>
-<rect x='488.0' y='232.0' width='196.0' height='88.0' rx='12' class='box a-pop' style='--d:1.41s;fill:var(--n-panel);stroke:var(--n-student)'/>
-<text x='586.0' y='268.0' class='lbl sm mid a-rise' style='--d:1.49s;fill:var(--n-ink)'>describe the groups</text>
-<text x='586.0' y='290.0' class='lbl sm mid a-rise' style='--d:1.54s;fill:var(--n-ink)'>by how they look</text>
-<text x='360.0' y='384.0' class='lbl mid a-pop' style='--d:1.95s;fill:var(--n-ink)'>nothing about the measurements changes; only which one sorts</text>
-</svg>
-<div class='caption'><span class='caption-label'>Figure 6.</span> The two orders. Above, the usual one: appearance defines the groups and genetics is tested inside them. Below, the proposal: genetics defines the arrangement and appearance is used afterwards to say what it turned out to be. The measurements are identical in both rows. Only the question asked first has changed.</div>
-</div>
-
-Two things must be said immediately, because both bear on how the result may be read.
-
-**The map's axes mean nothing.** Any rotation of the coordinates, with the pair rules rotated to match, produces the identical set of effects. Nothing here interprets an axis, or a factor. What is interpreted is the effect matrix itself, the distances between its columns, and predictions in data the model never saw &mdash; the three quantities a rotation leaves untouched.
-
-**Measured features do enter, in a specific place.** Observed covariates and expression summaries sit in the genotype-independent part of the model, and a second contribution of this approach is that measured cellular and pair-level features also inform the **priors** &mdash; the probability that a given cell participates in a given factor at all is a function of what was measured about that cell. That is a real difference from the method this builds on, and note 2 works through it. So the honest version of the claim is not that annotation is absent. It is that **no supplied categorical label defines a group within which effects are held constant**.
-
-
-There is also a scope question worth settling. Fitting across all cells at once, rather than one compartment at a time, means the leading coordinates will spend themselves rediscovering the obvious split between broad cell kinds. That is a test rather than a waste: a map that recovers a known grouping it was never shown is finding real structure. But it is a cost too, since a fixed number of coordinates then has fewer left for the finer variation that is the actual target.
-
-
-## Is this not already done?
-
-Mostly, yes. Sort the existing methods by one question &mdash; where do the cellular coordinates come from? &mdash; and the picture is clear.
-
-Coordinates supplied by the researcher: CellRegMap tests for effect variation along an axis you hand it, and can return a per-cell effect afterwards. Nathan and colleagues computed an effect for every single cell in 2022 and plotted it, along coordinates fixed before the genetic model. Coordinates learned from the genetics itself: sn-spMF factorised a matrix of effect sizes across forty-nine tissues in 2020, from the same senior author who later produced SURGE; PICALO learns the axis that best explains effect variation, from bulk tissue.
-
-SURGE goes furthest. It learns the axes and the per-pair responses together, over pseudocells of about twenty cells each, and its own paper says it identifies contexts whose *linear* interaction with genotype explains the most variation in expression. That is the reversal described above, already published, and SURGE also supplies the statistical machinery this project builds on &mdash; so there is no version of this where that claim is mine. LIVI, a 2026 preprint, learns cell state without using genotypes at all, which sidesteps the circularity neatly, and tests at the level of a person.
+**SURGE** goes furthest: it learns the cellular axes and the per-pair responses together, over pseudocells of about twenty cells each, and its own paper says it identifies contexts whose *linear* interaction with genotype explains the most variation in expression. That is the reversal described above, already published &mdash; and SURGE also supplies the statistical machinery this project builds on, so there is no version of this where that claim is mine. **LIVI**, a 2026 preprint, learns cell state without using genotypes at all, and tests at the level of a person.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -769,14 +746,19 @@ SURGE goes furthest. It learns the axes and the per-pair responses together, ove
 </div>
 </div>
 
-What is left is narrow. Every method above either supplies the coordinates or learns them and hands back a hypothesis test. None delivers the matrix as the product, with a route for placing a new pair, a new person, or a new disease variant onto it &mdash; and none does so under partitions that keep the test honest.
+## What we add
 
-That last clause is the load-bearing one, and it is worth stating as something that can fail. Divide the people into training and test; inside the training people, divide the genome's regions into those used to build the map and those held back. Build the map on training regions in training people. Project the held-back pairs onto it. Locate a held-out person's cells using only the training regions. Then predict genotype-dependent expression for held-back pairs in held-out people, and compare against a plain average effect, against fixed labels, and against effect variation along supplied expression coordinates. That last comparator is the one that decides it.
+**What the project is.** It estimates, for each cell or metacell, a vector of conditional cis-regulatory effects across many variant-and-gene pairs. That vector is the regulotype. Cells are considered similar when the same alleles have similar effects in them, even if their average expression profiles are not identical.
+
+**What it is not.** It is not a principal-component analysis of genotype, and it is not a new broad cell-type taxonomy &mdash; it works inside the existing labels rather than replacing them. At the likelihood level it is a low-rank genotype-by-context model in the same class as SURGE. The covariate-moderated priors, in which measured cellular and pair-level features inform how likely each cell and each pair is to participate in a factor, change the prior and the regularisation rather than the scientific quantity being estimated. Note 2 works through both.
 
 
-One caution about what pooling buys, since it is easy to overclaim. Sharing across many regions is what makes the shared coordinates estimable; it does nothing for any single pair's own rule, which still rests on differences between people at that one locus. So placing a new disease variant on the map is a low-powered operation per locus. That is precisely why the interesting question is whether *independent* loci converge on the same region of the map, rather than how confident one can be about any one of them.
+So the claim has to be narrow, and it is. Every method above either takes the cellular coordinates as given, or learns them and returns a hypothesis test. **None delivers the matrix of effects as the product, with a route for placing a new variant-and-gene pair, a new person and a new disease variant onto it &mdash; and none does so under partitions that keep the test honest.**
 
-The difference between a test and a map is the argument for building this. A test says a variant behaves differently in different cells. It does not say which cells, does not let you compare two cells, and gives you nothing to place a new variant onto.
+That last clause is where the work is. Build the map on some regions of the genome in some people. Project the held-back pairs onto it. Locate a held-out person&#39;s cells using only the regions the map was built from. Then predict genotype-dependent expression for held-back pairs in held-out people, and compare against a plain average effect, against fixed labels, and against effect variation along supplied expression coordinates. The last of those is the comparator that decides it.
+
+
+The reason to want a map rather than a test is what can be placed on it. A test says a variant behaves differently in different cells. It does not say which cells, does not let two cells be compared, and offers nothing to place a new variant onto. Placing a disease variant is the point: it returns the cellular conditions in which the risk allele is predicted to act, which is a specification for an experiment. And because any single locus is estimated from differences between people at that locus alone, the question worth asking is not confidence about one variant but whether *independent* variants converge on the same region of the map.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -864,49 +846,30 @@ The difference between a test and a map is the argument for building this. A tes
 <text x='624.0' y='262.0' class='lbl sm mid a-rise' style='--d:2.15s;fill:var(--n-student)'>where it is, and</text>
 <text x='624.0' y='284.0' class='lbl sm mid a-rise' style='--d:2.20s;fill:var(--n-student)'>lets you go back</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 8.</span> What a map allows that a test does not. Once the coordinates exist, three things can be placed onto them: a variant-and-gene pair the map was not built from, a person the map has never seen, and a disease-associated pair, which returns the cellular conditions in which that allele is predicted to act. The first two are how the map is tested. The third is why it is worth building.</div>
+<div class='caption'><span class='caption-label'>Figure 8.</span> What a map allows that a test does not. Once the coordinates exist, three things can be placed onto them: a variant-and-gene pair the map was not built from, a person the map has never seen, and a disease-associated pair, which returns the cellular conditions in which the risk allele is predicted to act. The first two are how the map is tested. The third is why it is worth building.</div>
 </div>
-
-## But surely the contribution is limited?
-
-The sharpest objection: many cell kinds are defined by genes that are simply switched off everywhere else. Where that is true the existing labels are correct, and there is nothing to rediscover.
-
-The first half is right and I would concede it first. What follows is not that the exercise is pointless but that the map should **reproduce** those labels. That needs a threshold declared in advance, because the same result read two ways is both the success and the failure criterion: agreement above chance says the method finds real structure, while agreement so complete that regulotype distances are a monotone function of appearance distances says the labels were sufficient and this was unnecessary. It also needs a null that accounts for the fact that expression summaries are already inside the model, so some agreement is guaranteed by construction.
-
-The second half carries a real cost. A gene switched off in a cell says nothing about genetics in that cell, so the reference set must hold genes expressed across whatever cells are being compared. Fitting all cells at once, rather than one kind at a time, shrinks that list, and the list is what the method depends on most.
-
-
-The conclusion is where the objection turns. A marker gene earns its place in a label **because** it is off nearly everywhere, and where it is off it contributes nothing about genetics. That does not make it uninformative &mdash; inside the cells that do express it, it may be among the best-powered genes in the study. It makes it unusable for a coordinate that has to span both populations at once, which is the coordinate this method needs. The regime where labels work well is the regime where genetic information is scarcest *for a shared coordinate*.
-
 
 ## What would make this fail
 
-Four things, stated now rather than discovered later.
+**If the map is a composition artefact.** Cellular state the model does not account for has only one place to go: the genotype-interaction term. A factor manufactured that way predicts held-out genotype-dependent expression correctly and is still not a regulotype. The guards are modelling that state cell by cell rather than as a per-person summary, permuting at the level of people, and null simulations with every response set to zero.
 
-**If the map is a composition artefact.** This is the likeliest failure and the hardest to see. Cellular state that is not in the model's genotype-independent part has only one place to go: the genotype-interaction term. A factor manufactured that way will predict held-out genotype-dependent expression correctly and still not be a regulotype. Held-out prediction is no guard against it. The guards are modelling that state cell by cell rather than as a per-person summary, permuting at the level of people, and null simulations with every pair rule set to zero.
+**If it cannot beat the comparator that matters.** Beating a plain average effect is table stakes. If the map cannot also beat effect variation along supplied expression coordinates, on held-back pairs in held-out people, the premise of this note is wrong.
 
-**If predicting genes and people the model never saw beats nothing.** If the map cannot beat both a plain average effect *and* effect variation along supplied expression coordinates, under the partitions above, there is no cellular variation worth modelling this way. The second comparator is the one that matters; beating the first is table stakes.
+**If the map turns out to be the appearance map.** Then the two agree, the existing labels were sufficient, and the honest report is to say so. Nobody has measured that for any tissue, so it is a publishable outcome &mdash; but it removes the reason to prefer this.
 
-**If the map is reproducible but is the appearance map.** Then the two geometries agree, supplied labels were sufficient, and the honest report is to say so. Nobody has measured that for any tissue, so it is a publishable outcome rather than a wasted one &mdash; but it removes the reason to prefer this.
+**If independent disease variants do not converge.** With few coordinates some convergence is guaranteed by construction, so this can only be asked against a matched null.
 
-**If independent disease variants do not converge.** With a small number of coordinates, every pair of loci converges somewhat by construction, so this can only be asked against a matched null: convergence among disease-associated pairs against convergence among pairs matched for frequency, expression and effect size, at the same number of coordinates.
-
-
-And a precondition that behaves like a failure mode, because it is the most probable reason this does not work. The cells the project is aimed at &mdash; those lining the blood vessels of the brain &mdash; are a fraction of a per cent of what a standard brain experiment recovers, somewhere between four and eight parts in a thousand across the cohorts that have reported it, which is roughly fifty to ninety cells per person. That is thin enough that grouping cells into stable units may not be possible at all.
-
-It is not hopeless, and the recent record is worth stating precisely. A 424-person study could test only the endothelial cells &mdash; the other vascular kinds were annotated and then dropped &mdash; and reported that it could not interpret the result because they were undersampled. A 983-donor meta-analysis has since recovered 4,258 genes with detectable effects in endothelium, and still reports it as the least-powered cell type in the study, as a single lumped category with none of the internal structure this method is for.
-
-What is missing is one experiment. Protocols that enrich for vascular cells before sequencing exist and have been run on thirty people, in a cohort where more than a thousand already have their genomes sequenced. Nobody has run the enrichment on the sequenced ones.
+And a precondition that behaves like a failure mode. The vascular cells of the brain are between four and eight parts in a thousand of what a standard brain experiment recovers, roughly fifty to ninety per person. A 424-person study could test only the endothelial cells &mdash; the other vascular kinds were annotated and then dropped &mdash; and reported that it could not interpret the result because they were undersampled. A 983-donor meta-analysis has since recovered 4,258 genes with detectable effects in endothelium, still as one lumped category with none of the internal structure this method is for. Protocols that enrich for vascular cells exist and have been run on thirty people, in a cohort where more than a thousand already have their genomes sequenced. Nobody has run the enrichment on the sequenced ones.
 
 
 <div class='figure'>
-<img src='/images/regulotype-figure1.png' alt='A five-panel figure: two cells with identical contents and opposite genetic responses; a cell as a column of effects; the same cells arranged by appearance and by genetic response; the resolution trade-off; and the landscape of methods with one empty position.'>
+<img src='/images/regulotype-figure1.png' alt='A five-panel figure: two endothelial cells with identical baselines and opposite genetic effects; the effect matrix; the published resolution trade-off; the same cells grouped by appearance and by genetic response; and the landscape of methods.'>
 <div class='caption'>
-<span class='caption-label'>Figure 9.</span> The five panels above, assembled as they would appear in a paper. This is a sketch of a figure, not a result: no panel contains data from any analysis, and the two panels showing arrangements of cells are drawn rather than computed. Panel <b>c</b> reports published counts from Alegbe <i>et al.</i> 2026, and panel <b>e</b> places published methods by what their own papers say they do.
+<span class='caption-label'>Figure 9.</span> The argument as a single figure: two cells that share a label and behave oppositely (<b>a</b>), the matrix of effects that separates them (<b>b</b>), the published cost of choosing a level of detail (<b>c</b>), the same cells grouped two ways (<b>d</b>), and where the existing methods sit (<b>e</b>). A sketch, not a result. Panels <b>a</b>, <b>b</b> and <b>d</b> are simulated from the model; <b>c</b> reports published counts from Alegbe <i>et al.</i> 2026; <b>e</b> places published methods by what their own papers claim.
 </div>
 </div>
 
-The parts that can be settled without new data are being settled first: the model is implemented, and whether it recovers structure that is genuinely there can be tested on simulated data where the answer is known. What cannot be settled that way is whether the brain's blood vessels yield enough cells to support the fit. The next notes take these in order &mdash; the model, the evidence that it works, and the tissue.
+If cells are reclassified by genetic response, how would anyone know the classification is real? Note 2 gives the model; note 3 is about nothing but that question.
 
 
 ## Sources
