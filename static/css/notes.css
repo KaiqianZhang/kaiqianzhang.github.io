@@ -36,6 +36,10 @@
   --n-rose: #B0537F;
   --n-rose-rgb: 176, 83, 127;
   --n-ochre: #A8811A;
+  /* A diverging pair for effect heatmaps. Red raises, blue lowers,
+     which is the convention the field reads without a legend. */
+  --n-red-rgb: 178, 58, 52;
+  --n-blue-rgb: 47, 92, 150;
 
   /* Roles. Every figure in the section uses these, not the hues above. */
   --n-teacher: var(--n-teal);
@@ -71,6 +75,8 @@
   --n-rose: #F08CBB;
   --n-rose-rgb: 240, 140, 187;
   --n-ochre: #E3C158;
+  --n-red-rgb: 226, 110, 100;
+  --n-blue-rgb: 116, 158, 214;
 
   --n-chip-ink: #9B9B9B;
   --n-chip-edge: #3E3E3E;
