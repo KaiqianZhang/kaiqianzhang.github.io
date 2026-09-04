@@ -537,93 +537,157 @@ $$R=\beta\mathbf 1_I^{\mathsf T}+\Lambda U^{\mathsf T} \in\mathbb R^{|S|\times I
 <p>For example, suppose cells with high $u_{i2}$ are subsequently found to have an NF-$\kappa$B expression program, inflammatory chromatin accessibility and an experimental stimulation response. We may then describe coordinate 2 as inflammation-related. After fixing an orientation, $\lambda_{s2}>0$ means the effect of pair $s$ becomes more positive as $u_{i2}$ increases; $\lambda_{s2}<0$ means it becomes more negative; and $\lambda_{s2}\approx0$ means the pair is largely unaffected by that coordinate.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 388' role='img' aria-label='Cells placed on two response coordinates, and three signs of the pair loading.'>
-<text x='165.0' y='52.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-pruned)'>U &#8212; each cell gets a position</text>
-<rect x='40.0' y='92.0' width='250.0' height='216.0' rx='14' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<path d='M66.0 282.0 L262.0 282.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.25s;--dur:0.70s;stroke:var(--n-dim);stroke-width:1.6'/>
-<polygon points='268.0,282.0 262.0,285.3 262.0,278.7' class='a-pop' style='--d:0.74s;fill:var(--n-dim)'/>
-<path d='M66.0 282.0 L66.0 118.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.30s;--dur:0.70s;stroke:var(--n-dim);stroke-width:1.6'/>
-<polygon points='66.0,112.0 69.3,118.0 62.7,118.0' class='a-pop' style='--d:0.79s;fill:var(--n-dim)'/>
-<text x='270.0' y='300.0' class='lbl sm end a-rise' style='--d:0.40s;fill:var(--n-dim)'>u&#8321;</text>
-<text x='74.0' y='108.0' class='lbl sm a-rise' style='--d:0.44s;fill:var(--n-dim)'>u&#8322;</text>
-<circle cx='211.2' cy='201.3' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-pruned)'/>
-<circle cx='197.3' cy='172.8' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-pruned)'/>
-<circle cx='108.3' cy='261.2' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-pruned)'/>
-<circle cx='203.9' cy='161.3' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-pruned)'/>
-<circle cx='202.8' cy='176.3' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-pruned)'/>
-<circle cx='189.8' cy='176.2' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-pruned)'/>
-<circle cx='189.8' cy='155.1' r='4.4' class='a-pop' style='--d:0.55s;fill:var(--n-pruned)'/>
-<circle cx='145.7' cy='198.4' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-pruned)'/>
-<circle cx='97.8' cy='232.5' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-pruned)'/>
-<circle cx='154.1' cy='182.7' r='4.4' class='a-pop' style='--d:0.57s;fill:var(--n-pruned)'/>
-<circle cx='213.5' cy='168.3' r='4.4' class='a-pop' style='--d:0.58s;fill:var(--n-pruned)'/>
-<circle cx='208.2' cy='189.5' r='4.4' class='a-pop' style='--d:0.59s;fill:var(--n-pruned)'/>
-<circle cx='218.0' cy='149.8' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-pruned)'/>
-<circle cx='134.0' cy='186.2' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-pruned)'/>
-<circle cx='155.6' cy='141.7' r='4.4' class='a-pop' style='--d:0.61s;fill:var(--n-pruned)'/>
-<circle cx='97.5' cy='232.2' r='4.4' class='a-pop' style='--d:0.62s;fill:var(--n-pruned)'/>
-<circle cx='211.8' cy='151.5' r='4.4' class='a-pop' style='--d:0.63s;fill:var(--n-pruned)'/>
-<circle cx='94.1' cy='225.4' r='4.4' class='a-pop' style='--d:0.64s;fill:var(--n-pruned)'/>
-<circle cx='132.8' cy='205.6' r='4.4' class='a-pop' style='--d:0.64s;fill:var(--n-pruned)'/>
-<circle cx='179.7' cy='182.1' r='4.4' class='a-pop' style='--d:0.65s;fill:var(--n-pruned)'/>
-<circle cx='148.5' cy='199.4' r='4.4' class='a-pop' style='--d:0.66s;fill:var(--n-pruned)'/>
-<circle cx='152.9' cy='163.0' r='4.4' class='a-pop' style='--d:0.67s;fill:var(--n-pruned)'/>
-<circle cx='148.4' cy='229.8' r='4.4' class='a-pop' style='--d:0.68s;fill:var(--n-pruned)'/>
-<circle cx='140.0' cy='213.4' r='4.4' class='a-pop' style='--d:0.68s;fill:var(--n-pruned)'/>
-<circle cx='146.0' cy='158.3' r='4.4' class='a-pop' style='--d:0.69s;fill:var(--n-pruned)'/>
-<circle cx='148.6' cy='181.7' r='4.4' class='a-pop' style='--d:0.70s;fill:var(--n-pruned)'/>
-<circle cx='150.9' cy='224.0' r='4.4' class='a-pop' style='--d:0.71s;fill:var(--n-pruned)'/>
-<circle cx='210.1' cy='159.9' r='4.4' class='a-pop' style='--d:0.72s;fill:var(--n-pruned)'/>
-<circle cx='160.0' cy='220.1' r='4.4' class='a-pop' style='--d:0.72s;fill:var(--n-pruned)'/>
-<circle cx='195.4' cy='150.9' r='4.4' class='a-pop' style='--d:0.73s;fill:var(--n-pruned)'/>
-<circle cx='126.4' cy='235.6' r='4.4' class='a-pop' style='--d:0.74s;fill:var(--n-pruned)'/>
-<circle cx='173.0' cy='146.9' r='4.4' class='a-pop' style='--d:0.75s;fill:var(--n-pruned)'/>
-<circle cx='218.9' cy='213.7' r='4.4' class='a-pop' style='--d:0.76s;fill:var(--n-pruned)'/>
-<circle cx='154.1' cy='211.1' r='4.4' class='a-pop' style='--d:0.76s;fill:var(--n-pruned)'/>
-<circle cx='166.3' cy='150.5' r='4.4' class='a-pop' style='--d:0.77s;fill:var(--n-pruned)'/>
-<circle cx='234.3' cy='150.7' r='4.4' class='a-pop' style='--d:0.78s;fill:var(--n-pruned)'/>
-<circle cx='156.4' cy='179.0' r='4.4' class='a-pop' style='--d:0.79s;fill:var(--n-pruned)'/>
-<circle cx='155.1' cy='215.9' r='4.4' class='a-pop' style='--d:0.80s;fill:var(--n-pruned)'/>
-<circle cx='133.1' cy='219.2' r='4.4' class='a-pop' style='--d:0.80s;fill:var(--n-pruned)'/>
-<circle cx='245.1' cy='174.6' r='4.4' class='a-pop' style='--d:0.81s;fill:var(--n-pruned)'/>
-<circle cx='198.5' cy='156.5' r='4.4' class='a-pop' style='--d:0.82s;fill:var(--n-pruned)'/>
-<circle cx='108.4' cy='228.8' r='4.4' class='a-pop' style='--d:0.83s;fill:var(--n-pruned)'/>
-<circle cx='188.5' cy='185.1' r='4.4' class='a-pop' style='--d:0.84s;fill:var(--n-pruned)'/>
-<circle cx='175.8' cy='188.8' r='4.4' class='a-pop' style='--d:0.84s;fill:var(--n-pruned)'/>
-<circle cx='117.1' cy='236.2' r='4.4' class='a-pop' style='--d:0.85s;fill:var(--n-pruned)'/>
-<circle cx='211.9' cy='156.5' r='4.4' class='a-pop' style='--d:0.86s;fill:var(--n-pruned)'/>
-<circle cx='208.3' cy='182.6' r='4.4' class='a-pop' style='--d:0.87s;fill:var(--n-pruned)'/>
-<circle cx='196.6' cy='204.8' r='4.4' class='a-pop' style='--d:0.88s;fill:var(--n-pruned)'/>
-<circle cx='126.4' cy='240.1' r='4.4' class='a-pop' style='--d:0.88s;fill:var(--n-pruned)'/>
-<circle cx='163.0' cy='199.0' r='4.4' class='a-pop' style='--d:0.89s;fill:var(--n-pruned)'/>
-<circle cx='126.3' cy='221.1' r='4.4' class='a-pop' style='--d:0.90s;fill:var(--n-pruned)'/>
-<circle cx='205.1' cy='128.8' r='4.4' class='a-pop' style='--d:0.91s;fill:var(--n-pruned)'/>
-<circle cx='86.9' cy='221.8' r='4.4' class='a-pop' style='--d:0.92s;fill:var(--n-pruned)'/>
-<circle cx='191.0' cy='161.5' r='4.4' class='a-pop' style='--d:0.92s;fill:var(--n-pruned)'/>
-<circle cx='213.0' cy='175.1' r='4.4' class='a-pop' style='--d:0.93s;fill:var(--n-pruned)'/>
-<circle cx='90.0' cy='233.3' r='4.4' class='a-pop' style='--d:0.94s;fill:var(--n-pruned)'/>
-<circle cx='107.4' cy='236.0' r='4.4' class='a-pop' style='--d:0.95s;fill:var(--n-pruned)'/>
-<circle cx='178.9' cy='203.8' r='4.4' class='a-pop' style='--d:0.96s;fill:var(--n-pruned)'/>
-<circle cx='232.1' cy='166.4' r='4.4' class='a-pop' style='--d:0.96s;fill:var(--n-pruned)'/>
-<circle cx='113.7' cy='192.6' r='4.4' class='a-pop' style='--d:0.97s;fill:var(--n-pruned)'/>
-<text x='165.0' y='334.0' class='lbl sm mid a-rise' style='--d:1.30s;fill:var(--n-dim)'>high u&#8322; turns out to be inflammatory &#8212;</text>
-<text x='165.0' y='354.0' class='lbl sm mid a-rise' style='--d:1.34s;fill:var(--n-dim)'>discovered after fitting, never supplied</text>
-<text x='545.0' y='52.0' class='lbl mid a-pop' style='--d:0.60s;fill:var(--n-student)'>&#923; &#8212; each pair gets a response</text>
-<rect x='390.0' y='108.0' width='310.0' height='58.0' rx='10' class='box a-pop' style='--d:0.75s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<text x='406.0' y='134.0' class='lbl a-rise' style='--d:0.80s;fill:var(--n-student)'>&#955;&#8321;&#8322; &gt; 0</text>
-<text x='406.0' y='154.0' class='lbl sm a-rise' style='--d:0.84s;fill:var(--n-dim)'>effect becomes more positive</text>
-<path d='M632.0 154.0 L684.0 122.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.90s;--dur:0.50s;stroke:var(--n-student);stroke-width:2.6'/>
-<rect x='390.0' y='182.0' width='310.0' height='58.0' rx='10' class='box a-pop' style='--d:0.95s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<text x='406.0' y='208.0' class='lbl a-rise' style='--d:1.00s;fill:var(--n-pruned)'>&#955;&#8322;&#8322; &lt; 0</text>
-<text x='406.0' y='228.0' class='lbl sm a-rise' style='--d:1.04s;fill:var(--n-dim)'>effect becomes more negative</text>
-<path d='M632.0 196.0 L684.0 228.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.10s;--dur:0.50s;stroke:var(--n-pruned);stroke-width:2.6'/>
-<rect x='390.0' y='256.0' width='310.0' height='58.0' rx='10' class='box a-pop' style='--d:1.15s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<text x='406.0' y='282.0' class='lbl a-rise' style='--d:1.20s;fill:var(--n-dim)'>&#955;&#8323;&#8322; &#8776; 0</text>
-<text x='406.0' y='302.0' class='lbl sm a-rise' style='--d:1.24s;fill:var(--n-dim)'>effect barely moves</text>
-<path d='M632.0 286.0 L684.0 286.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.30s;--dur:0.40s;stroke:var(--n-dim);stroke-width:2.4'/>
-<text x='545.0' y='340.0' class='lbl sm mid a-rise' style='--d:1.50s;fill:var(--n-dim)'>as a cell moves along u&#8322;</text>
+<svg viewBox='0 0 720 418' role='img' aria-label='Cells coloured by a withheld programme, and three pairs whose effect lines have different slopes against coordinate two.'>
+<text x='159.0' y='46.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-pruned)'>U &#8212; a cell&#39;s coordinates</text>
+<text x='159.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.10s;fill:var(--n-dim)'>colour: a withheld inflammatory programme</text>
+<rect x='34.0' y='108.0' width='250.0' height='200.0' rx='14' class='box a-pop' style='--d:0.16s;fill:var(--n-panel);stroke:var(--n-edge)'/>
+<path d='M64.0 284.0 L258.0 284.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.24s;--dur:0.70s;stroke:var(--n-dim);stroke-width:1.5'/>
+<polygon points='264.0,284.0 258.0,287.3 258.0,280.7' class='a-pop' style='--d:0.73s;fill:var(--n-dim)'/>
+<path d='M64.0 284.0 L64.0 132.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.28s;--dur:0.70s;stroke:var(--n-dim);stroke-width:1.5'/>
+<polygon points='64.0,126.0 67.3,132.0 60.7,132.0' class='a-pop' style='--d:0.77s;fill:var(--n-dim)'/>
+<text x='266.0' y='300.0' class='lbl sm end a-rise' style='--d:0.36s;fill:var(--n-dim)'>u&#8321;</text>
+<text x='72.0' y='122.0' class='lbl sm a-rise' style='--d:0.40s;fill:var(--n-dim)'>u&#8322;</text>
+<circle cx='208.2' cy='208.6' r='4.8' class='a-pop' style='--d:0.46s;fill:rgba(var(--n-clay-rgb), 0.62)'/>
+<circle cx='194.6' cy='183.1' r='4.8' class='a-pop' style='--d:0.47s;fill:rgba(var(--n-clay-rgb), 0.66)'/>
+<circle cx='107.5' cy='262.3' r='4.8' class='a-pop' style='--d:0.48s;fill:rgba(var(--n-clay-rgb), 0.12)'/>
+<circle cx='201.0' cy='172.8' r='4.8' class='a-pop' style='--d:0.48s;fill:rgba(var(--n-clay-rgb), 0.68)'/>
+<circle cx='200.0' cy='186.2' r='4.8' class='a-pop' style='--d:0.49s;fill:rgba(var(--n-clay-rgb), 0.70)'/>
+<circle cx='187.2' cy='186.1' r='4.8' class='a-pop' style='--d:0.50s;fill:rgba(var(--n-clay-rgb), 0.58)'/>
+<circle cx='187.3' cy='167.3' r='4.8' class='a-pop' style='--d:0.51s;fill:rgba(var(--n-clay-rgb), 0.71)'/>
+<circle cx='144.2' cy='206.0' r='4.8' class='a-pop' style='--d:0.52s;fill:rgba(var(--n-clay-rgb), 0.44)'/>
+<circle cx='97.3' cy='236.6' r='4.8' class='a-pop' style='--d:0.52s;fill:rgba(var(--n-clay-rgb), 0.36)'/>
+<circle cx='152.3' cy='192.0' r='4.8' class='a-pop' style='--d:0.53s;fill:rgba(var(--n-clay-rgb), 0.53)'/>
+<circle cx='210.4' cy='179.0' r='4.8' class='a-pop' style='--d:0.54s;fill:rgba(var(--n-clay-rgb), 0.68)'/>
+<circle cx='205.2' cy='198.1' r='4.8' class='a-pop' style='--d:0.55s;fill:rgba(var(--n-clay-rgb), 0.54)'/>
+<circle cx='214.9' cy='162.5' r='4.8' class='a-pop' style='--d:0.56s;fill:rgba(var(--n-clay-rgb), 0.81)'/>
+<circle cx='132.7' cy='195.1' r='4.8' class='a-pop' style='--d:0.56s;fill:rgba(var(--n-clay-rgb), 0.62)'/>
+<circle cx='153.9' cy='155.2' r='4.8' class='a-pop' style='--d:0.57s;fill:rgba(var(--n-clay-rgb), 0.88)'/>
+<circle cx='97.0' cy='236.3' r='4.8' class='a-pop' style='--d:0.58s;fill:rgba(var(--n-clay-rgb), 0.33)'/>
+<circle cx='208.8' cy='164.0' r='4.8' class='a-pop' style='--d:0.59s;fill:rgba(var(--n-clay-rgb), 0.77)'/>
+<circle cx='93.7' cy='230.3' r='4.8' class='a-pop' style='--d:0.60s;fill:rgba(var(--n-clay-rgb), 0.42)'/>
+<circle cx='131.6' cy='212.5' r='4.8' class='a-pop' style='--d:0.60s;fill:rgba(var(--n-clay-rgb), 0.51)'/>
+<circle cx='177.4' cy='191.4' r='4.8' class='a-pop' style='--d:0.61s;fill:rgba(var(--n-clay-rgb), 0.68)'/>
+<circle cx='146.9' cy='207.0' r='4.8' class='a-pop' style='--d:0.62s;fill:rgba(var(--n-clay-rgb), 0.51)'/>
+<circle cx='151.2' cy='174.4' r='4.8' class='a-pop' style='--d:0.63s;fill:rgba(var(--n-clay-rgb), 0.81)'/>
+<circle cx='146.8' cy='234.2' r='4.8' class='a-pop' style='--d:0.64s;fill:rgba(var(--n-clay-rgb), 0.37)'/>
+<circle cx='138.5' cy='219.5' r='4.8' class='a-pop' style='--d:0.64s;fill:rgba(var(--n-clay-rgb), 0.43)'/>
+<circle cx='144.5' cy='170.2' r='4.8' class='a-pop' style='--d:0.65s;fill:rgba(var(--n-clay-rgb), 0.67)'/>
+<circle cx='147.0' cy='191.1' r='4.8' class='a-pop' style='--d:0.66s;fill:rgba(var(--n-clay-rgb), 0.58)'/>
+<circle cx='149.3' cy='229.0' r='4.8' class='a-pop' style='--d:0.67s;fill:rgba(var(--n-clay-rgb), 0.33)'/>
+<circle cx='207.1' cy='171.6' r='4.8' class='a-pop' style='--d:0.68s;fill:rgba(var(--n-clay-rgb), 0.83)'/>
+<circle cx='158.2' cy='225.5' r='4.8' class='a-pop' style='--d:0.68s;fill:rgba(var(--n-clay-rgb), 0.38)'/>
+<circle cx='192.8' cy='163.4' r='4.8' class='a-pop' style='--d:0.69s;fill:rgba(var(--n-clay-rgb), 0.70)'/>
+<circle cx='125.3' cy='239.4' r='4.8' class='a-pop' style='--d:0.70s;fill:rgba(var(--n-clay-rgb), 0.34)'/>
+<circle cx='170.8' cy='159.9' r='4.8' class='a-pop' style='--d:0.71s;fill:rgba(var(--n-clay-rgb), 0.85)'/>
+<circle cx='215.8' cy='219.8' r='4.8' class='a-pop' style='--d:0.72s;fill:rgba(var(--n-clay-rgb), 0.45)'/>
+<circle cx='152.4' cy='217.4' r='4.8' class='a-pop' style='--d:0.72s;fill:rgba(var(--n-clay-rgb), 0.52)'/>
+<circle cx='164.3' cy='163.2' r='4.8' class='a-pop' style='--d:0.73s;fill:rgba(var(--n-clay-rgb), 0.76)'/>
+<circle cx='230.8' cy='163.3' r='4.8' class='a-pop' style='--d:0.74s;fill:rgba(var(--n-clay-rgb), 0.82)'/>
+<circle cx='154.6' cy='188.7' r='4.8' class='a-pop' style='--d:0.75s;fill:rgba(var(--n-clay-rgb), 0.54)'/>
+<circle cx='153.4' cy='221.7' r='4.8' class='a-pop' style='--d:0.76s;fill:rgba(var(--n-clay-rgb), 0.41)'/>
+<circle cx='131.8' cy='224.7' r='4.8' class='a-pop' style='--d:0.76s;fill:rgba(var(--n-clay-rgb), 0.36)'/>
+<circle cx='241.4' cy='184.7' r='4.8' class='a-pop' style='--d:0.77s;fill:rgba(var(--n-clay-rgb), 0.60)'/>
+<circle cx='195.8' cy='168.5' r='4.8' class='a-pop' style='--d:0.78s;fill:rgba(var(--n-clay-rgb), 0.85)'/>
+<circle cx='107.7' cy='233.3' r='4.8' class='a-pop' style='--d:0.79s;fill:rgba(var(--n-clay-rgb), 0.45)'/>
+<circle cx='186.0' cy='194.1' r='4.8' class='a-pop' style='--d:0.80s;fill:rgba(var(--n-clay-rgb), 0.69)'/>
+<circle cx='173.6' cy='197.5' r='4.8' class='a-pop' style='--d:0.80s;fill:rgba(var(--n-clay-rgb), 0.64)'/>
+<circle cx='116.1' cy='239.9' r='4.8' class='a-pop' style='--d:0.81s;fill:rgba(var(--n-clay-rgb), 0.26)'/>
+<circle cx='208.9' cy='168.5' r='4.8' class='a-pop' style='--d:0.82s;fill:rgba(var(--n-clay-rgb), 0.81)'/>
+<circle cx='205.4' cy='191.9' r='4.8' class='a-pop' style='--d:0.83s;fill:rgba(var(--n-clay-rgb), 0.62)'/>
+<circle cx='193.9' cy='211.8' r='4.8' class='a-pop' style='--d:0.84s;fill:rgba(var(--n-clay-rgb), 0.58)'/>
+<circle cx='125.2' cy='243.4' r='4.8' class='a-pop' style='--d:0.84s;fill:rgba(var(--n-clay-rgb), 0.38)'/>
+<circle cx='161.0' cy='206.5' r='4.8' class='a-pop' style='--d:0.85s;fill:rgba(var(--n-clay-rgb), 0.50)'/>
+<circle cx='125.2' cy='226.4' r='4.8' class='a-pop' style='--d:0.86s;fill:rgba(var(--n-clay-rgb), 0.44)'/>
+<circle cx='202.2' cy='143.7' r='4.8' class='a-pop' style='--d:0.87s;fill:rgba(var(--n-clay-rgb), 0.94)'/>
+<circle cx='86.6' cy='227.1' r='4.8' class='a-pop' style='--d:0.88s;fill:rgba(var(--n-clay-rgb), 0.38)'/>
+<circle cx='188.4' cy='173.0' r='4.8' class='a-pop' style='--d:0.88s;fill:rgba(var(--n-clay-rgb), 0.79)'/>
+<circle cx='209.9' cy='185.2' r='4.8' class='a-pop' style='--d:0.89s;fill:rgba(var(--n-clay-rgb), 0.62)'/>
+<circle cx='89.7' cy='237.4' r='4.8' class='a-pop' style='--d:0.90s;fill:rgba(var(--n-clay-rgb), 0.33)'/>
+<circle cx='106.6' cy='239.7' r='4.8' class='a-pop' style='--d:0.91s;fill:rgba(var(--n-clay-rgb), 0.29)'/>
+<circle cx='176.6' cy='210.9' r='4.8' class='a-pop' style='--d:0.92s;fill:rgba(var(--n-clay-rgb), 0.40)'/>
+<circle cx='228.6' cy='177.4' r='4.8' class='a-pop' style='--d:0.92s;fill:rgba(var(--n-clay-rgb), 0.72)'/>
+<circle cx='112.9' cy='200.8' r='4.8' class='a-pop' style='--d:0.93s;fill:rgba(var(--n-clay-rgb), 0.66)'/>
+<text x='159.0' y='334.0' class='lbl sm mid a-rise' style='--d:1.20s;fill:var(--n-dim)'>cells high on u&#8322; carry the programme</text>
+<text x='159.0' y='354.0' class='lbl sm mid a-rise' style='--d:1.26s;fill:var(--n-dim)'>so we may call u&#8322; inflammation-related</text>
+<text x='526.0' y='46.0' class='lbl mid a-pop' style='--d:0.55s;fill:var(--n-student)'>&#923; &#8212; how each pair responds</text>
+<text x='526.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.60s;fill:var(--n-dim)'>the cis effect, plotted against u&#8322;</text>
+<rect x='380.0' y='108.0' width='292.0' height='200.0' rx='14' class='box a-pop' style='--d:0.66s;fill:var(--n-panel);stroke:var(--n-edge)'/>
+<path d='M422.0 202.0 L596.0 202.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.72s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M422.0 124.0 L422.0 278.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.74s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='414.0' y='207.0' class='lbl sm end a-rise' style='--d:0.78s;fill:var(--n-dim)'>0</text>
+<text x='388.0' y='138.0' class='lbl sm a-rise' style='--d:0.80s;fill:var(--n-dim)'>effect</text>
+<text x='388.0' y='156.0' class='lbl sm a-rise' style='--d:0.83s;fill:var(--n-dim)'>r</text>
+<circle cx='498.0' cy='207.2' r='2.4' class='a-pop' style='--d:0.90s;fill:var(--n-student)'/>
+<circle cx='548.8' cy='167.0' r='2.4' class='a-pop' style='--d:0.91s;fill:var(--n-student)'/>
+<circle cx='556.6' cy='163.8' r='2.4' class='a-pop' style='--d:0.92s;fill:var(--n-student)'/>
+<circle cx='521.6' cy='186.9' r='2.4' class='a-pop' style='--d:0.93s;fill:var(--n-student)'/>
+<circle cx='563.3' cy='153.4' r='2.4' class='a-pop' style='--d:0.94s;fill:var(--n-student)'/>
+<circle cx='458.8' cy='237.7' r='2.4' class='a-pop' style='--d:0.95s;fill:var(--n-student)'/>
+<circle cx='492.5' cy='214.7' r='2.4' class='a-pop' style='--d:0.95s;fill:var(--n-student)'/>
+<circle cx='546.5' cy='172.9' r='2.4' class='a-pop' style='--d:0.96s;fill:var(--n-student)'/>
+<circle cx='552.5' cy='165.8' r='2.4' class='a-pop' style='--d:0.97s;fill:var(--n-student)'/>
+<circle cx='550.5' cy='166.6' r='2.4' class='a-pop' style='--d:0.98s;fill:var(--n-student)'/>
+<circle cx='454.4' cy='243.6' r='2.4' class='a-pop' style='--d:0.99s;fill:var(--n-student)'/>
+<circle cx='485.6' cy='219.7' r='2.4' class='a-pop' style='--d:1.00s;fill:var(--n-student)'/>
+<circle cx='526.3' cy='181.1' r='2.4' class='a-pop' style='--d:1.01s;fill:var(--n-student)'/>
+<circle cx='531.8' cy='176.3' r='2.4' class='a-pop' style='--d:1.02s;fill:var(--n-student)'/>
+<circle cx='518.6' cy='190.1' r='2.4' class='a-pop' style='--d:1.03s;fill:var(--n-student)'/>
+<circle cx='554.9' cy='162.3' r='2.4' class='a-pop' style='--d:1.04s;fill:var(--n-student)'/>
+<circle cx='448.8' cy='244.9' r='2.4' class='a-pop' style='--d:1.04s;fill:var(--n-student)'/>
+<circle cx='590.0' cy='133.4' r='2.4' class='a-pop' style='--d:1.05s;fill:var(--n-student)'/>
+<circle cx='531.2' cy='180.4' r='2.4' class='a-pop' style='--d:1.06s;fill:var(--n-student)'/>
+<circle cx='494.8' cy='207.5' r='2.4' class='a-pop' style='--d:1.07s;fill:var(--n-student)'/>
+<path d='M422.0 269.3 L590.0 132.4' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.00s;--dur:0.50s;stroke:var(--n-student);stroke-width:2.4'/>
+<text x='598.0' y='136.4' class='lbl sm a-rise' style='--d:1.06s;fill:var(--n-student)'>pair 1</text>
+<circle cx='498.0' cy='198.2' r='2.4' class='a-pop' style='--d:1.12s;fill:var(--n-pruned)'/>
+<circle cx='548.8' cy='234.5' r='2.4' class='a-pop' style='--d:1.13s;fill:var(--n-pruned)'/>
+<circle cx='556.6' cy='238.1' r='2.4' class='a-pop' style='--d:1.14s;fill:var(--n-pruned)'/>
+<circle cx='521.6' cy='213.3' r='2.4' class='a-pop' style='--d:1.15s;fill:var(--n-pruned)'/>
+<circle cx='563.3' cy='243.5' r='2.4' class='a-pop' style='--d:1.16s;fill:var(--n-pruned)'/>
+<circle cx='458.8' cy='164.2' r='2.4' class='a-pop' style='--d:1.17s;fill:var(--n-pruned)'/>
+<circle cx='492.5' cy='190.8' r='2.4' class='a-pop' style='--d:1.17s;fill:var(--n-pruned)'/>
+<circle cx='546.5' cy='231.6' r='2.4' class='a-pop' style='--d:1.18s;fill:var(--n-pruned)'/>
+<circle cx='552.5' cy='235.6' r='2.4' class='a-pop' style='--d:1.19s;fill:var(--n-pruned)'/>
+<circle cx='550.5' cy='231.7' r='2.4' class='a-pop' style='--d:1.20s;fill:var(--n-pruned)'/>
+<circle cx='454.4' cy='166.4' r='2.4' class='a-pop' style='--d:1.21s;fill:var(--n-pruned)'/>
+<circle cx='485.6' cy='189.5' r='2.4' class='a-pop' style='--d:1.22s;fill:var(--n-pruned)'/>
+<circle cx='526.3' cy='217.0' r='2.4' class='a-pop' style='--d:1.23s;fill:var(--n-pruned)'/>
+<circle cx='531.8' cy='217.2' r='2.4' class='a-pop' style='--d:1.24s;fill:var(--n-pruned)'/>
+<circle cx='518.6' cy='213.1' r='2.4' class='a-pop' style='--d:1.25s;fill:var(--n-pruned)'/>
+<circle cx='554.9' cy='234.7' r='2.4' class='a-pop' style='--d:1.26s;fill:var(--n-pruned)'/>
+<circle cx='448.8' cy='158.3' r='2.4' class='a-pop' style='--d:1.26s;fill:var(--n-pruned)'/>
+<circle cx='590.0' cy='257.3' r='2.4' class='a-pop' style='--d:1.27s;fill:var(--n-pruned)'/>
+<circle cx='531.2' cy='218.8' r='2.4' class='a-pop' style='--d:1.28s;fill:var(--n-pruned)'/>
+<circle cx='494.8' cy='193.2' r='2.4' class='a-pop' style='--d:1.29s;fill:var(--n-pruned)'/>
+<path d='M422.0 140.3 L590.0 261.7' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.22s;--dur:0.50s;stroke:var(--n-pruned);stroke-width:2.4'/>
+<text x='598.0' y='265.7' class='lbl sm a-rise' style='--d:1.28s;fill:var(--n-pruned)'>pair 2</text>
+<circle cx='498.0' cy='195.9' r='2.4' class='a-pop' style='--d:1.34s;fill:var(--n-dim)'/>
+<circle cx='548.8' cy='190.7' r='2.4' class='a-pop' style='--d:1.35s;fill:var(--n-dim)'/>
+<circle cx='556.6' cy='194.2' r='2.4' class='a-pop' style='--d:1.36s;fill:var(--n-dim)'/>
+<circle cx='521.6' cy='190.0' r='2.4' class='a-pop' style='--d:1.37s;fill:var(--n-dim)'/>
+<circle cx='563.3' cy='190.2' r='2.4' class='a-pop' style='--d:1.38s;fill:var(--n-dim)'/>
+<circle cx='458.8' cy='195.1' r='2.4' class='a-pop' style='--d:1.39s;fill:var(--n-dim)'/>
+<circle cx='492.5' cy='192.0' r='2.4' class='a-pop' style='--d:1.39s;fill:var(--n-dim)'/>
+<circle cx='546.5' cy='191.0' r='2.4' class='a-pop' style='--d:1.40s;fill:var(--n-dim)'/>
+<circle cx='552.5' cy='187.3' r='2.4' class='a-pop' style='--d:1.41s;fill:var(--n-dim)'/>
+<circle cx='550.5' cy='188.2' r='2.4' class='a-pop' style='--d:1.42s;fill:var(--n-dim)'/>
+<circle cx='454.4' cy='191.0' r='2.4' class='a-pop' style='--d:1.43s;fill:var(--n-dim)'/>
+<circle cx='485.6' cy='190.6' r='2.4' class='a-pop' style='--d:1.44s;fill:var(--n-dim)'/>
+<circle cx='526.3' cy='188.9' r='2.4' class='a-pop' style='--d:1.45s;fill:var(--n-dim)'/>
+<circle cx='531.8' cy='190.2' r='2.4' class='a-pop' style='--d:1.46s;fill:var(--n-dim)'/>
+<circle cx='518.6' cy='194.4' r='2.4' class='a-pop' style='--d:1.47s;fill:var(--n-dim)'/>
+<circle cx='554.9' cy='189.2' r='2.4' class='a-pop' style='--d:1.48s;fill:var(--n-dim)'/>
+<circle cx='448.8' cy='196.2' r='2.4' class='a-pop' style='--d:1.48s;fill:var(--n-dim)'/>
+<circle cx='590.0' cy='187.2' r='2.4' class='a-pop' style='--d:1.49s;fill:var(--n-dim)'/>
+<circle cx='531.2' cy='193.1' r='2.4' class='a-pop' style='--d:1.50s;fill:var(--n-dim)'/>
+<circle cx='494.8' cy='191.0' r='2.4' class='a-pop' style='--d:1.51s;fill:var(--n-dim)'/>
+<path d='M422.0 194.1 L590.0 187.5' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.44s;--dur:0.50s;stroke:var(--n-dim);stroke-width:2.4'/>
+<text x='598.0' y='191.5' class='lbl sm a-rise' style='--d:1.50s;fill:var(--n-dim)'>pair 3</text>
+<text x='526.0' y='300.0' class='lbl sm mid a-rise' style='--d:1.60s;fill:var(--n-dim)'>u&#8322;</text>
+<text x='526.0' y='322.0' class='lbl sm mid a-rise' style='--d:1.66s;fill:var(--n-dim)'>the slope of each line is &#955;&#8202;&#8322; for that pair</text>
+<text x='360.0' y='396.0' class='lbl mid a-pop' style='--d:1.90s;fill:var(--n-ink)'>one coordinate, three pairs: up, down, and barely at all</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> Each row $u_i$ places a cell on $K$ response coordinates, and a coordinate is named only from evidence not used to create it. Each $\lambda_{vg}$ says how one pair responds along those coordinates.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> Left: cells at their coordinates, coloured by an inflammatory programme that never entered the fit. Coordinate 2 earns a name because a withheld measurement lines up with it. Right: the cell-resolved effect against that same coordinate, one line per reference pair. The slope of each line is $\lambda_{s2}$, which is what it means for pairs to differ.</div>
 </div>
 <p>The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret $R$, regulotype distances and held-out predictions. A biological name is assigned to a factor only when it is supported by information not used to create the factor.</p>
 <p>The analysis begins with one nominated cis variant for each selected gene, with reference pairs drawn from approximately independent regions. Once the coordinates are learned, a new pair is projected by fixing $U$ and estimating its $\beta_{vg}$ and $\lambda_{vg}$. Fine-mapping is introduced after this nominated-variant model is calibrated.</p>
