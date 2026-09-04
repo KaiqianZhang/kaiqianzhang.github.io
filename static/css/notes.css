@@ -595,3 +595,17 @@
   .notes-note .article .decoder-map.playing .dm-loopback,
   .notes-note .article .decoder-map.playing .dm-out { animation: none; }
 }
+
+/* -- figure type, sized against the body ----------------------------------
+   widgets.css sets figure labels at 11/13/15px, which was chosen for the
+   blog. A wide figure in a note renders 788 CSS px against a 720-unit
+   viewBox, so a 11px label arrives at about 12px next to 15px body text and
+   reads as fine print. These sizes put a figure label at roughly body size
+   and a heading label a little above it. Scoped to a note, so blog figures
+   keep the sizes they were drawn for.
+   -------------------------------------------------------------------------- */
+.notes-note .article .nfig .lbl,
+.notes-note .article .lab .lbl { font-size: 15px; }
+.notes-note .article .nfig .lbl.sm,
+.notes-note .article .lab .lbl.sm { font-size: 14px; }
+.notes-note .article .nfig .lbl.bg { font-size: 18px; }
