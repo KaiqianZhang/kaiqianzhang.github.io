@@ -6,7 +6,7 @@ tags: regulotype
 keywords: regulotype, cis-eQTL, context-specific eQTL, cell state, latent factor model, blood-brain barrier, Alzheimer's disease, single-cell genetics
 ---
 
-<p class='lede'>A <b>regulotype</b> is a cell&#39;s profile of <i>cis</i>-regulatory effects across a fixed reference set of variant&ndash;gene pairs. Two cells share a regulotype when the same alleles have the same effects in them, whatever their expression profiles look like. Single-cell eQTL analysis fixes the cell labels before it estimates any effect; we estimate the cellular coordinates from the <i>cis</i> effects instead, and treat the resulting matrix as the object of inference rather than as a route to a per-locus test. This note covers the motivation, the model, where the idea sits among twelve context-specific eQTL methods, and twelve claims it could support. The simulations and the validation design are not here; they are the subject of the next note.</p>
+<p class='lede'>A <b>regulotype</b> is a cell&#39;s <i>cis</i>-regulatory response identity: what each of many alleles does to its target gene in that cell. It is <i>learned from</i> a reference set of variant&ndash;gene pairs, drawn from approximately independent regions, which supplies the recurrent genetic signal the shared cellular coordinates are estimated from. The reference set is the instrument rather than the definition, and once the coordinates exist a pair outside the set can be projected onto them. Single-cell eQTL analysis fixes the cell labels before it estimates any effect; we estimate the cellular coordinates from the <i>cis</i> effects instead, and treat the resulting matrix as the object of inference rather than as a route to a per-locus test. This note covers the motivation, the model, where the idea sits among twelve context-specific eQTL methods, and twelve claims it could support. The simulations and the validation design are the subject of the next note.</p>
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -54,6 +54,8 @@ Genetic studies have found many regions linked to Alzheimer's disease, but often
 Our project reverses the usual approach. Instead of defining cells only by how they look, we define them by how they respond to inherited genetic differences. We call this a regulotype. Learning these patterns across many genes and people will create a continuous map of genetic vulnerability in the blood-brain barrier.
 
 We can then place Alzheimer's risk variants onto this map and ask where they act, which genes they affect, and whether different variants converge on the same vulnerable condition. This will identify precise cells and mechanisms for experimental follow-up.
+
+A second use appears later. Single-cell foundation models are trained and evaluated on expression alone, and none has been tested against a cellular label derived from genetics. A regulotype map supplies one, so two cells a model embeds together can be checked against whether the same alleles actually act the same way in them. That makes it a benchmark rather than a source of more training data.
 
 
 ## Two endothelial cells
@@ -190,19 +192,19 @@ The cis effect is not a property of the allele alone. It is a property of the al
 
 An analysis that estimates one effect per cell type averages cell A and cell B together. When the two directions are balanced, the average is near zero, and the locus is reported as having no effect in endothelium.
 
-This is not a hypothetical failure mode. Nathan et al. found loci where two independent variants near the same gene have opposing relationships with the same cell-state axis.
 
+The problem is not that the labels are wrong. It is that the label has to be chosen before any effect can be estimated, and no single choice is right for every gene.
 
-The problem is not that the labels are wrong. It is that no single labelling is right for every gene, and the label has to be chosen before any effect can be estimated.
-
-Alegbe et al. measured both directions of this in one study. Pooling all cells found the most eGenes, 15,713 of them, or 77.1% of everything the study found anywhere. But 25,980 individual eQTLs, 29.3% of the total, were detectable only after cells were split by type.
-
-Splitting further does not resolve it. In the same study, 57% of the cell types were left with fewer than a hundred cells per donor.
+Recent work measures both sides of that. Pooling all cells finds the most eGenes, but nearly a third of the individual eQTLs are detectable only after cells are separated by type. Splitting further does not rescue it, because more than half of the resulting types are left with too few cells per donor to support an estimate.
 
 
 ## The regulotype
 
-A regulotype is the vector of cell-resolved cis effects for one cell, taken across a fixed reference set of variant-gene pairs. Two cells share a regulotype when the same alleles have the same effects in them, whatever their expression profiles look like.
+A regulotype is a cell's cis-regulatory response identity. Two cells share a regulotype when the same alleles have the same effects in them, whatever their expression profiles look like.
+
+It is estimated from a reference set $\mathcal{S}$ of variant-gene pairs, one nominated variant per selected gene, drawn from approximately independent cis regions. Independence is what lets the model pool information: a cellular coordinate shared across many unlinked loci is identifiable in a way that any single locus is not.
+
+The reference set is an instrument, not the definition. Column $R_{:i}$ is that cell's profile over $\mathcal{S}$, but the coordinate $u_i$ it encodes is what transfers, and a pair outside $\mathcal{S}$ can be projected onto the fitted coordinates afterwards. If the method works, two disjoint reference sets should recover the same cellular geometry, which is a testable requirement rather than an assumption.
 
 The field annotates cells before it looks at genetics. We invert the order. Cells are compared according to genotype-dependent expression rather than ordinary expression, and expression-defined identities are overlaid after fitting rather than supplied to it.
 
@@ -644,7 +646,7 @@ The column that matters is the last one. Most of these methods are excellent at 
 
 **sn-spMF.** The precedent that factorising an eQTL effect matrix recovers interpretable shared-versus-specific structure. It factorises point estimates post hoc across 49 predefined tissues, so no uncertainty enters the factorisation and there is no cell to place.
 
-**FastGxC.** The efficient way to split an effect into a pleiotropic part and a per-context residual, roughly $10^6$ times faster than the mixed-model alternatives. Contexts must be discrete and sampled in overlapping donors, and "shared" is defined as the arithmetic mean across contexts rather than inferred.
+**FastGxC.** The efficient way to split an effect into a pleiotropic part and a per-context residual, roughly $10^6$ times faster than existing approaches. Contexts must be discrete and sampled in overlapping donors, and "shared" is defined as the arithmetic mean across contexts rather than inferred.
 
 **CASTIE.** The strongest current answer to scanning supplied contexts genome-wide on raw counts, using a Poisson mixed model with a second context-dependent random effect that keeps the interaction test calibrated. It avoids pre-screening for a static eQTL, recovering 2,022 eGenes with no detectable static effect. Every context is supplied, so it tests axes you have already named.
 
@@ -695,7 +697,7 @@ Four additions I would argue for, none of which is in the current specification.
 
 **11. A principled separation of technical from biological axes.** PICALO's 62–64% technical finding is the field's most honest result and it has no accepted remedy. Donor-level permutation, cell-resolved covariates in the mean, and null simulations with all loadings set to zero form a testable protocol, and it would be reusable by anyone learning latent contexts from genotype-dependent signal.
 
-**12. The reference set as a designed instrument.** Which variant-gene pairs enter $\mathcal{S}$ determines what the map can resolve, and our own sweeps suggest reference pairs buy more than donors over the range we tested. Nobody treats the reference set as a design variable to be optimised, and doing so changes study design advice for every project of this kind.
+**12. The reference set as a designed instrument.** Which variant-gene pairs enter $\mathcal{S}$ determines what the map can resolve, and in our unpublished simulations reference pairs buy more than donors over the range tested. Nobody treats the reference set as a design variable to be optimised, and doing so changes study design advice for every project of this kind.
 
 
 ## Sources
