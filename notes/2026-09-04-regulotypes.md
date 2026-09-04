@@ -6,7 +6,7 @@ tags: regulotype
 keywords: regulotype, cis-eQTL, context-specific eQTL, cell state, latent factor model, blood-brain barrier, Alzheimer's disease, single-cell genetics
 ---
 
-<p class='lede'>Genetic studies have found many regions linked to Alzheimer&#39;s disease, but often we do not know which gene is affected or in which blood-vessel cells the effect appears. The blood-brain barrier makes this especially difficult: its cells are not a few fixed types, but change continuously with location, aging, and disease. If we classify them first, we may average away important genetic signals.</p>
+<p class='lede'>A <b>regulotype</b> is a cell&#39;s profile of <i>cis</i>-regulatory effects across a fixed reference set of variant&ndash;gene pairs. Two cells share a regulotype when the same alleles have the same effects in them, whatever their expression profiles look like. Single-cell eQTL analysis fixes the cell labels before it estimates any effect; we estimate the cellular coordinates from the <i>cis</i> effects instead, and treat the resulting matrix as the object of inference rather than as a route to a per-locus test. This note covers the motivation, the model, where the idea sits among twelve context-specific eQTL methods, and twelve claims it could support. The simulations and the validation design are not here; they are the subject of the next note.</p>
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -49,11 +49,11 @@ keywords: regulotype, cis-eQTL, context-specific eQTL, cell state, latent factor
 
 ## The project in one minute
 
-Our project reverses the usual approach. Instead of defining cells only by how they look, we define them by how they respond to inherited genetic differences. We call this a **regulotype**.
+Genetic studies have found many regions linked to Alzheimer's disease, but often we do not know which gene is affected or in which blood-vessel cells the effect appears. The blood-brain barrier makes this especially difficult: its cells are not a few fixed types, but change continuously with location, aging, and disease. If we classify them first, we may average away important genetic signals.
 
-Learning these patterns across many genes and people will create a continuous map of genetic vulnerability in the blood-brain barrier. We can then place Alzheimer's risk variants onto this map and ask where they act, which genes they affect, and whether different variants converge on the same vulnerable condition.
+Our project reverses the usual approach. Instead of defining cells only by how they look, we define them by how they respond to inherited genetic differences. We call this a regulotype. Learning these patterns across many genes and people will create a continuous map of genetic vulnerability in the blood-brain barrier.
 
-The output is meant to be usable. Each entry names an allele, a target gene, a cellular condition and a direction, which is the specification an experimentalist needs.
+We can then place Alzheimer's risk variants onto this map and ask where they act, which genes they affect, and whether different variants converge on the same vulnerable condition. This will identify precise cells and mechanisms for experimental follow-up.
 
 
 ## Two endothelial cells
