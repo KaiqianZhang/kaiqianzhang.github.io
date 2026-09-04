@@ -62,6 +62,158 @@ Imagine two endothelial cells, A and B. Their expression profiles are similar en
 
 Now consider an Alzheimer's disease risk allele and a nearby candidate target gene. Across donors, the allele increases expression of the target gene in A-like cells but has little effect—or the opposite effect—in B-like cells. Estimating one effect for the whole endothelial group averages the two slopes and can make the locus appear inactive.
 
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 404' role='img' aria-label='Two annotated cell types with cells A and B in the same one, and two opposite dosage-to-expression slopes.'>
+<text x='159.0' y='46.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-teacher)'>expression, as annotated</text>
+<circle cx='40.0' cy='68.0' r='4.6' class='a-pop' style='--d:0.10s;fill:var(--n-teacher)'/>
+<text x='50.0' y='73.0' class='lbl sm a-rise' style='--d:0.13s;fill:var(--n-teacher)'>annotated type 1</text>
+<circle cx='164.0' cy='68.0' r='4.6' class='a-pop' style='--d:0.18s;fill:var(--n-dim)'/>
+<text x='174.0' y='73.0' class='lbl sm a-rise' style='--d:0.21s;fill:var(--n-dim)'>annotated type 2</text>
+<rect x='34.0' y='108.0' width='250.0' height='206.0' rx='14' class='box a-pop' style='--d:0.16s;fill:var(--n-panel);stroke:var(--n-edge)'/>
+<circle cx='132.5' cy='205.4' r='4.4' class='a-pop' style='--d:0.28s;fill:var(--n-teacher)'/>
+<circle cx='118.9' cy='223.5' r='4.4' class='a-pop' style='--d:0.29s;fill:var(--n-teacher)'/>
+<circle cx='108.8' cy='196.6' r='4.4' class='a-pop' style='--d:0.30s;fill:var(--n-teacher)'/>
+<circle cx='81.1' cy='264.9' r='4.4' class='a-pop' style='--d:0.30s;fill:var(--n-teacher)'/>
+<circle cx='119.2' cy='194.0' r='4.4' class='a-pop' style='--d:0.31s;fill:var(--n-teacher)'/>
+<circle cx='119.2' cy='226.9' r='4.4' class='a-pop' style='--d:0.32s;fill:var(--n-teacher)'/>
+<circle cx='90.8' cy='222.2' r='4.4' class='a-pop' style='--d:0.32s;fill:var(--n-teacher)'/>
+<circle cx='92.5' cy='244.6' r='4.4' class='a-pop' style='--d:0.33s;fill:var(--n-teacher)'/>
+<circle cx='144.0' cy='225.2' r='4.4' class='a-pop' style='--d:0.33s;fill:var(--n-teacher)'/>
+<circle cx='72.7' cy='229.0' r='4.4' class='a-pop' style='--d:0.34s;fill:var(--n-teacher)'/>
+<circle cx='73.8' cy='244.7' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-teacher)'/>
+<circle cx='67.0' cy='233.1' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-teacher)'/>
+<circle cx='86.9' cy='213.1' r='4.4' class='a-pop' style='--d:0.36s;fill:var(--n-teacher)'/>
+<circle cx='110.4' cy='221.1' r='4.4' class='a-pop' style='--d:0.37s;fill:var(--n-teacher)'/>
+<circle cx='125.1' cy='232.0' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-teacher)'/>
+<circle cx='82.3' cy='252.5' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-teacher)'/>
+<circle cx='140.6' cy='220.4' r='4.4' class='a-pop' style='--d:0.39s;fill:var(--n-teacher)'/>
+<circle cx='85.7' cy='258.9' r='4.4' class='a-pop' style='--d:0.39s;fill:var(--n-teacher)'/>
+<circle cx='122.7' cy='189.5' r='4.4' class='a-pop' style='--d:0.40s;fill:var(--n-teacher)'/>
+<circle cx='81.7' cy='214.4' r='4.4' class='a-pop' style='--d:0.41s;fill:var(--n-teacher)'/>
+<circle cx='94.1' cy='229.5' r='4.4' class='a-pop' style='--d:0.41s;fill:var(--n-teacher)'/>
+<circle cx='101.7' cy='211.9' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-teacher)'/>
+<circle cx='163.5' cy='166.3' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-dim)'/>
+<circle cx='156.8' cy='152.5' r='4.4' class='a-pop' style='--d:0.43s;fill:var(--n-dim)'/>
+<circle cx='188.4' cy='161.8' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-dim)'/>
+<circle cx='154.6' cy='171.8' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-dim)'/>
+<circle cx='135.8' cy='153.6' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-dim)'/>
+<circle cx='159.0' cy='180.1' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-dim)'/>
+<circle cx='125.1' cy='158.3' r='4.4' class='a-pop' style='--d:0.46s;fill:var(--n-dim)'/>
+<circle cx='154.6' cy='152.4' r='4.4' class='a-pop' style='--d:0.47s;fill:var(--n-dim)'/>
+<circle cx='121.6' cy='162.7' r='4.4' class='a-pop' style='--d:0.47s;fill:var(--n-dim)'/>
+<circle cx='165.8' cy='200.8' r='4.4' class='a-pop' style='--d:0.48s;fill:var(--n-dim)'/>
+<circle cx='161.0' cy='192.1' r='4.4' class='a-pop' style='--d:0.48s;fill:var(--n-dim)'/>
+<circle cx='165.3' cy='207.5' r='4.4' class='a-pop' style='--d:0.49s;fill:var(--n-dim)'/>
+<circle cx='194.9' cy='161.6' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-dim)'/>
+<circle cx='159.3' cy='160.6' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-dim)'/>
+<circle cx='165.8' cy='146.0' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-dim)'/>
+<circle cx='160.7' cy='164.2' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-dim)'/>
+<circle cx='157.5' cy='173.0' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-dim)'/>
+<circle cx='137.0' cy='174.0' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
+<circle cx='176.9' cy='136.2' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
+<circle cx='166.9' cy='149.7' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
+<circle cx='204.2' cy='150.6' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
+<circle cx='160.4' cy='162.8' r='4.4' class='a-pop' style='--d:0.55s;fill:var(--n-dim)'/>
+<circle cx='205.3' cy='217.5' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
+<circle cx='205.7' cy='245.2' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
+<circle cx='206.5' cy='239.8' r='4.4' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
+<circle cx='185.7' cy='245.3' r='4.4' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
+<circle cx='197.0' cy='214.7' r='4.4' class='a-pop' style='--d:0.58s;fill:var(--n-dim)'/>
+<circle cx='220.5' cy='244.2' r='4.4' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
+<circle cx='157.9' cy='285.8' r='4.4' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
+<circle cx='214.3' cy='244.2' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
+<circle cx='251.0' cy='226.8' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
+<circle cx='207.9' cy='227.5' r='4.4' class='a-pop' style='--d:0.61s;fill:var(--n-dim)'/>
+<circle cx='152.4' cy='272.7' r='4.4' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
+<circle cx='205.7' cy='232.9' r='4.4' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
+<circle cx='151.4' cy='236.6' r='4.4' class='a-pop' style='--d:0.63s;fill:var(--n-dim)'/>
+<circle cx='213.6' cy='227.9' r='4.4' class='a-pop' style='--d:0.63s;fill:var(--n-dim)'/>
+<circle cx='98.6' cy='227.3' r='7.5' class='a-pop' style='--d:1.10s;fill:var(--n-teacher)'/>
+<circle cx='98.6' cy='227.3' r='10' fill='none' class='a-pop' style='--d:1.14s;stroke:var(--n-student);stroke-width:2.2'/>
+<path d='M98.6 216.3 L98.6 107.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.18s;--dur:0.30s;stroke:var(--n-student);stroke-width:1.4'/>
+<text x='98.6' y='102.0' class='lbl sm mid a-pop' style='--d:1.24s;fill:var(--n-student)'>cell A</text>
+<circle cx='119.2' cy='223.8' r='7.5' class='a-pop' style='--d:1.10s;fill:var(--n-teacher)'/>
+<circle cx='119.2' cy='223.8' r='10' fill='none' class='a-pop' style='--d:1.14s;stroke:var(--n-kept);stroke-width:2.2'/>
+<path d='M119.2 234.8 L119.2 324.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.18s;--dur:0.30s;stroke:var(--n-kept);stroke-width:1.4'/>
+<text x='119.2' y='338.0' class='lbl sm mid a-pop' style='--d:1.24s;fill:var(--n-kept)'>cell B</text>
+<text x='159.0' y='362.0' class='lbl sm mid a-rise' style='--d:1.34s;fill:var(--n-dim)'>both fall in the same annotated type</text>
+<text x='427.0' y='46.0' class='lbl mid a-pop' style='--d:0.20s;fill:var(--n-student)'>cell A</text>
+<text x='427.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.24s;fill:var(--n-dim)'>inflammatory state</text>
+<rect x='352.0' y='96.0' width='150.0' height='152.0' rx='10' class='box a-pop' style='--d:0.30s;fill:var(--n-panel);stroke:var(--n-edge)'/>
+<path d='M382.0 218.0 L486.0 218.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.38s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M382.0 218.0 L382.0 120.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.40s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='376.0' y='108.0' class='lbl sm a-rise' style='--d:0.42s;fill:var(--n-dim)'>target gene</text>
+<path d='M408.0 203.0 L476.0 151.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.88s;--dur:0.60s;stroke:var(--n-student);stroke-width:2.6'/>
+<circle cx='408.0' cy='191.6' r='2.6' class='a-pop' style='--d:0.52s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='195.4' r='2.6' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='199.2' r='2.6' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='203.0' r='2.6' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='206.8' r='2.6' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='210.6' r='2.6' class='a-pop' style='--d:0.58s;fill:var(--n-dim)'/>
+<circle cx='408.0' cy='214.4' r='2.6' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
+<text x='408.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.62s;fill:var(--n-dim)'>0</text>
+<circle cx='442.0' cy='173.2' r='2.6' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='177.0' r='2.6' class='a-pop' style='--d:0.61s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='180.8' r='2.6' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='184.6' r='2.6' class='a-pop' style='--d:0.64s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='188.4' r='2.6' class='a-pop' style='--d:0.65s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='167.5' r='2.6' class='a-pop' style='--d:0.66s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='171.3' r='2.6' class='a-pop' style='--d:0.67s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='175.1' r='2.6' class='a-pop' style='--d:0.68s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='178.9' r='2.6' class='a-pop' style='--d:0.70s;fill:var(--n-dim)'/>
+<circle cx='442.0' cy='182.7' r='2.6' class='a-pop' style='--d:0.71s;fill:var(--n-dim)'/>
+<text x='442.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.67s;fill:var(--n-dim)'>1</text>
+<circle cx='476.0' cy='154.8' r='2.6' class='a-pop' style='--d:0.68s;fill:var(--n-dim)'/>
+<circle cx='476.0' cy='158.6' r='2.6' class='a-pop' style='--d:0.69s;fill:var(--n-dim)'/>
+<circle cx='476.0' cy='162.4' r='2.6' class='a-pop' style='--d:0.70s;fill:var(--n-dim)'/>
+<circle cx='476.0' cy='141.5' r='2.6' class='a-pop' style='--d:0.72s;fill:var(--n-dim)'/>
+<circle cx='476.0' cy='145.3' r='2.6' class='a-pop' style='--d:0.73s;fill:var(--n-dim)'/>
+<circle cx='476.0' cy='149.1' r='2.6' class='a-pop' style='--d:0.74s;fill:var(--n-dim)'/>
+<text x='476.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.72s;fill:var(--n-dim)'>2</text>
+<text x='427.0' y='258.0' class='lbl sm mid a-rise' style='--d:0.95s;fill:var(--n-dim)'>copies of the risk allele</text>
+<text x='427.0' y='276.0' class='lbl sm mid a-rise' style='--d:1.00s;fill:var(--n-dim)'>one point per donor</text>
+<text x='619.0' y='46.0' class='lbl mid a-pop' style='--d:0.55s;fill:var(--n-kept)'>cell B</text>
+<text x='619.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.59s;fill:var(--n-dim)'>quiescent state</text>
+<rect x='544.0' y='96.0' width='150.0' height='152.0' rx='10' class='box a-pop' style='--d:0.65s;fill:var(--n-panel);stroke:var(--n-edge)'/>
+<path d='M574.0 218.0 L678.0 218.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.73s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M574.0 218.0 L574.0 120.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='568.0' y='108.0' class='lbl sm a-rise' style='--d:0.77s;fill:var(--n-dim)'>target gene</text>
+<path d='M600.0 151.0 L668.0 203.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.23s;--dur:0.60s;stroke:var(--n-kept);stroke-width:2.6'/>
+<circle cx='600.0' cy='139.6' r='2.6' class='a-pop' style='--d:0.87s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='143.4' r='2.6' class='a-pop' style='--d:0.88s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='147.2' r='2.6' class='a-pop' style='--d:0.89s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='151.0' r='2.6' class='a-pop' style='--d:0.91s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='154.8' r='2.6' class='a-pop' style='--d:0.92s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='158.6' r='2.6' class='a-pop' style='--d:0.93s;fill:var(--n-dim)'/>
+<circle cx='600.0' cy='162.4' r='2.6' class='a-pop' style='--d:0.94s;fill:var(--n-dim)'/>
+<text x='600.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.97s;fill:var(--n-dim)'>0</text>
+<circle cx='634.0' cy='173.2' r='2.6' class='a-pop' style='--d:0.95s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='177.0' r='2.6' class='a-pop' style='--d:0.96s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='180.8' r='2.6' class='a-pop' style='--d:0.97s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='184.6' r='2.6' class='a-pop' style='--d:0.99s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='188.4' r='2.6' class='a-pop' style='--d:1.00s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='167.5' r='2.6' class='a-pop' style='--d:1.01s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='171.3' r='2.6' class='a-pop' style='--d:1.02s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='175.1' r='2.6' class='a-pop' style='--d:1.03s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='178.9' r='2.6' class='a-pop' style='--d:1.05s;fill:var(--n-dim)'/>
+<circle cx='634.0' cy='182.7' r='2.6' class='a-pop' style='--d:1.06s;fill:var(--n-dim)'/>
+<text x='634.0' y='236.0' class='lbl sm mid a-rise' style='--d:1.02s;fill:var(--n-dim)'>1</text>
+<circle cx='668.0' cy='206.8' r='2.6' class='a-pop' style='--d:1.03s;fill:var(--n-dim)'/>
+<circle cx='668.0' cy='210.6' r='2.6' class='a-pop' style='--d:1.04s;fill:var(--n-dim)'/>
+<circle cx='668.0' cy='214.4' r='2.6' class='a-pop' style='--d:1.05s;fill:var(--n-dim)'/>
+<circle cx='668.0' cy='193.5' r='2.6' class='a-pop' style='--d:1.07s;fill:var(--n-dim)'/>
+<circle cx='668.0' cy='197.3' r='2.6' class='a-pop' style='--d:1.08s;fill:var(--n-dim)'/>
+<circle cx='668.0' cy='201.1' r='2.6' class='a-pop' style='--d:1.09s;fill:var(--n-dim)'/>
+<text x='668.0' y='236.0' class='lbl sm mid a-rise' style='--d:1.07s;fill:var(--n-dim)'>2</text>
+<text x='619.0' y='258.0' class='lbl sm mid a-rise' style='--d:1.30s;fill:var(--n-dim)'>copies of the risk allele</text>
+<text x='619.0' y='276.0' class='lbl sm mid a-rise' style='--d:1.35s;fill:var(--n-dim)'>one point per donor</text>
+<text x='508.0' y='384.0' class='lbl sm mid a-pop' style='--d:1.55s;fill:var(--n-loss)'>same allele, same target gene, opposite direction</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Cells A and B fall in the same annotated type, yet the same allele moves the target gene in opposite directions in each. Pooling them attenuates the slope towards zero. They are expression neighbours, so they are drawn slightly apart. Simulated from the model.</div>
+</div>
+
+
 The example is about conditions reproduced across donors, not about estimating a genetic effect from two cells in one person. Cells from the same donor carry the same germline genotype. The slope is learned across genotyped donors while their cells tell us where along the cellular continuum that slope changes.
 
 The comparison is therefore:
@@ -216,160 +368,9 @@ This does not mean that expression-defined labels are wrong. It means that no si
 <text x='360.0' y='362.0' class='lbl mid a-pop' style='--d:2.05s;fill:var(--n-ink)'>same cells, same positions, only the colour changes</text>
 <text x='360.0' y='386.0' class='lbl sm mid a-pop' style='--d:2.15s;fill:var(--n-dim)'>A and B share a colour on the left and oppose on the right</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 1.</span> The same sixty cells in the same positions, coloured twice. Position is the expression embedding in both panels, so a cell can be followed from left to right; only the colour changes. On the left, what the cell is making. On the right, the predicted effect of one reference pair per copy of the allele, red positive and blue negative. The expression colour follows position, because the embedding was built from expression. The effect colour does not. Cells A and B are neighbours here and are drawn slightly apart to be legible: they share a colour on the left and oppose on the right. The right-hand colour is $r_{vgi}$, not observed expression and not $x_{d(i)v} r_{vgi}$. Simulated from the model.</div>
+<div class='caption'><span class='caption-label'>Figure 2.</span> The same cells in the same positions, coloured twice. Expression colour follows position, because the embedding was built from expression. The fitted cis effect does not, and cells A and B share a colour on the left while opposing on the right. The right-hand colour is $r_{vgi}$, not observed expression and not $x_{d(i)v} r_{vgi}$.</div>
 </div>
 
-
-<div class='nfig wide'>
-<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
-<svg viewBox='0 0 720 404' role='img' aria-label='Two annotated cell types, with cells A and B in the same one, and two opposite dosage-to-expression slopes.'>
-<text x='159.0' y='46.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-teacher)'>expression, as annotated</text>
-<circle cx='40.0' cy='68.0' r='4.6' class='a-pop' style='--d:0.10s;fill:var(--n-teacher)'/>
-<text x='50.0' y='73.0' class='lbl sm a-rise' style='--d:0.13s;fill:var(--n-teacher)'>annotated type 1</text>
-<circle cx='164.0' cy='68.0' r='4.6' class='a-pop' style='--d:0.18s;fill:var(--n-dim)'/>
-<text x='174.0' y='73.0' class='lbl sm a-rise' style='--d:0.21s;fill:var(--n-dim)'>annotated type 2</text>
-<rect x='34.0' y='108.0' width='250.0' height='206.0' rx='14' class='box a-pop' style='--d:0.16s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<circle cx='132.5' cy='205.4' r='4.4' class='a-pop' style='--d:0.28s;fill:var(--n-teacher)'/>
-<circle cx='118.9' cy='223.5' r='4.4' class='a-pop' style='--d:0.29s;fill:var(--n-teacher)'/>
-<circle cx='108.8' cy='196.6' r='4.4' class='a-pop' style='--d:0.30s;fill:var(--n-teacher)'/>
-<circle cx='81.1' cy='264.9' r='4.4' class='a-pop' style='--d:0.30s;fill:var(--n-teacher)'/>
-<circle cx='119.2' cy='194.0' r='4.4' class='a-pop' style='--d:0.31s;fill:var(--n-teacher)'/>
-<circle cx='119.2' cy='226.9' r='4.4' class='a-pop' style='--d:0.32s;fill:var(--n-teacher)'/>
-<circle cx='90.8' cy='222.2' r='4.4' class='a-pop' style='--d:0.32s;fill:var(--n-teacher)'/>
-<circle cx='92.5' cy='244.6' r='4.4' class='a-pop' style='--d:0.33s;fill:var(--n-teacher)'/>
-<circle cx='144.0' cy='225.2' r='4.4' class='a-pop' style='--d:0.33s;fill:var(--n-teacher)'/>
-<circle cx='72.7' cy='229.0' r='4.4' class='a-pop' style='--d:0.34s;fill:var(--n-teacher)'/>
-<circle cx='73.8' cy='244.7' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-teacher)'/>
-<circle cx='67.0' cy='233.1' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-teacher)'/>
-<circle cx='86.9' cy='213.1' r='4.4' class='a-pop' style='--d:0.36s;fill:var(--n-teacher)'/>
-<circle cx='110.4' cy='221.1' r='4.4' class='a-pop' style='--d:0.37s;fill:var(--n-teacher)'/>
-<circle cx='125.1' cy='232.0' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-teacher)'/>
-<circle cx='82.3' cy='252.5' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-teacher)'/>
-<circle cx='140.6' cy='220.4' r='4.4' class='a-pop' style='--d:0.39s;fill:var(--n-teacher)'/>
-<circle cx='85.7' cy='258.9' r='4.4' class='a-pop' style='--d:0.39s;fill:var(--n-teacher)'/>
-<circle cx='122.7' cy='189.5' r='4.4' class='a-pop' style='--d:0.40s;fill:var(--n-teacher)'/>
-<circle cx='81.7' cy='214.4' r='4.4' class='a-pop' style='--d:0.41s;fill:var(--n-teacher)'/>
-<circle cx='94.1' cy='229.5' r='4.4' class='a-pop' style='--d:0.41s;fill:var(--n-teacher)'/>
-<circle cx='101.7' cy='211.9' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-teacher)'/>
-<circle cx='163.5' cy='166.3' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-dim)'/>
-<circle cx='156.8' cy='152.5' r='4.4' class='a-pop' style='--d:0.43s;fill:var(--n-dim)'/>
-<circle cx='188.4' cy='161.8' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-dim)'/>
-<circle cx='154.6' cy='171.8' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-dim)'/>
-<circle cx='135.8' cy='153.6' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-dim)'/>
-<circle cx='159.0' cy='180.1' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-dim)'/>
-<circle cx='125.1' cy='158.3' r='4.4' class='a-pop' style='--d:0.46s;fill:var(--n-dim)'/>
-<circle cx='154.6' cy='152.4' r='4.4' class='a-pop' style='--d:0.47s;fill:var(--n-dim)'/>
-<circle cx='121.6' cy='162.7' r='4.4' class='a-pop' style='--d:0.47s;fill:var(--n-dim)'/>
-<circle cx='165.8' cy='200.8' r='4.4' class='a-pop' style='--d:0.48s;fill:var(--n-dim)'/>
-<circle cx='161.0' cy='192.1' r='4.4' class='a-pop' style='--d:0.48s;fill:var(--n-dim)'/>
-<circle cx='165.3' cy='207.5' r='4.4' class='a-pop' style='--d:0.49s;fill:var(--n-dim)'/>
-<circle cx='194.9' cy='161.6' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-dim)'/>
-<circle cx='159.3' cy='160.6' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-dim)'/>
-<circle cx='165.8' cy='146.0' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-dim)'/>
-<circle cx='160.7' cy='164.2' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-dim)'/>
-<circle cx='157.5' cy='173.0' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-dim)'/>
-<circle cx='137.0' cy='174.0' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
-<circle cx='176.9' cy='136.2' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
-<circle cx='166.9' cy='149.7' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
-<circle cx='204.2' cy='150.6' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
-<circle cx='160.4' cy='162.8' r='4.4' class='a-pop' style='--d:0.55s;fill:var(--n-dim)'/>
-<circle cx='205.3' cy='217.5' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
-<circle cx='205.7' cy='245.2' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
-<circle cx='206.5' cy='239.8' r='4.4' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
-<circle cx='185.7' cy='245.3' r='4.4' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
-<circle cx='197.0' cy='214.7' r='4.4' class='a-pop' style='--d:0.58s;fill:var(--n-dim)'/>
-<circle cx='220.5' cy='244.2' r='4.4' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
-<circle cx='157.9' cy='285.8' r='4.4' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
-<circle cx='214.3' cy='244.2' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
-<circle cx='251.0' cy='226.8' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
-<circle cx='207.9' cy='227.5' r='4.4' class='a-pop' style='--d:0.61s;fill:var(--n-dim)'/>
-<circle cx='152.4' cy='272.7' r='4.4' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
-<circle cx='205.7' cy='232.9' r='4.4' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
-<circle cx='151.4' cy='236.6' r='4.4' class='a-pop' style='--d:0.63s;fill:var(--n-dim)'/>
-<circle cx='213.6' cy='227.9' r='4.4' class='a-pop' style='--d:0.63s;fill:var(--n-dim)'/>
-<circle cx='98.6' cy='227.3' r='7.5' class='a-pop' style='--d:1.10s;fill:var(--n-teacher)'/>
-<circle cx='98.6' cy='227.3' r='10' fill='none' class='a-pop' style='--d:1.14s;stroke:var(--n-student);stroke-width:2.2'/>
-<path d='M98.6 216.3 L98.6 107.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.18s;--dur:0.30s;stroke:var(--n-student);stroke-width:1.4'/>
-<text x='98.6' y='102.0' class='lbl sm mid a-pop' style='--d:1.24s;fill:var(--n-student)'>cell A</text>
-<circle cx='119.2' cy='223.8' r='7.5' class='a-pop' style='--d:1.10s;fill:var(--n-teacher)'/>
-<circle cx='119.2' cy='223.8' r='10' fill='none' class='a-pop' style='--d:1.14s;stroke:var(--n-kept);stroke-width:2.2'/>
-<path d='M119.2 234.8 L119.2 324.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.18s;--dur:0.30s;stroke:var(--n-kept);stroke-width:1.4'/>
-<text x='119.2' y='338.0' class='lbl sm mid a-pop' style='--d:1.24s;fill:var(--n-kept)'>cell B</text>
-<text x='159.0' y='362.0' class='lbl sm mid a-rise' style='--d:1.34s;fill:var(--n-dim)'>both fall in the same annotated type</text>
-<text x='427.0' y='46.0' class='lbl mid a-pop' style='--d:0.20s;fill:var(--n-student)'>cell A</text>
-<text x='427.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.24s;fill:var(--n-dim)'>inflammatory state</text>
-<rect x='352.0' y='96.0' width='150.0' height='152.0' rx='10' class='box a-pop' style='--d:0.30s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<path d='M382.0 218.0 L486.0 218.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.38s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
-<path d='M382.0 218.0 L382.0 120.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.40s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
-<text x='376.0' y='108.0' class='lbl sm a-rise' style='--d:0.42s;fill:var(--n-dim)'>target gene</text>
-<path d='M408.0 203.0 L476.0 151.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.88s;--dur:0.60s;stroke:var(--n-student);stroke-width:2.6'/>
-<circle cx='408.0' cy='191.6' r='2.6' class='a-pop' style='--d:0.52s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='195.4' r='2.6' class='a-pop' style='--d:0.53s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='199.2' r='2.6' class='a-pop' style='--d:0.54s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='203.0' r='2.6' class='a-pop' style='--d:0.56s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='206.8' r='2.6' class='a-pop' style='--d:0.57s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='210.6' r='2.6' class='a-pop' style='--d:0.58s;fill:var(--n-dim)'/>
-<circle cx='408.0' cy='214.4' r='2.6' class='a-pop' style='--d:0.59s;fill:var(--n-dim)'/>
-<text x='408.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.62s;fill:var(--n-dim)'>0</text>
-<circle cx='442.0' cy='173.2' r='2.6' class='a-pop' style='--d:0.60s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='177.0' r='2.6' class='a-pop' style='--d:0.61s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='180.8' r='2.6' class='a-pop' style='--d:0.62s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='184.6' r='2.6' class='a-pop' style='--d:0.64s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='188.4' r='2.6' class='a-pop' style='--d:0.65s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='167.5' r='2.6' class='a-pop' style='--d:0.66s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='171.3' r='2.6' class='a-pop' style='--d:0.67s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='175.1' r='2.6' class='a-pop' style='--d:0.68s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='178.9' r='2.6' class='a-pop' style='--d:0.70s;fill:var(--n-dim)'/>
-<circle cx='442.0' cy='182.7' r='2.6' class='a-pop' style='--d:0.71s;fill:var(--n-dim)'/>
-<text x='442.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.67s;fill:var(--n-dim)'>1</text>
-<circle cx='476.0' cy='154.8' r='2.6' class='a-pop' style='--d:0.68s;fill:var(--n-dim)'/>
-<circle cx='476.0' cy='158.6' r='2.6' class='a-pop' style='--d:0.69s;fill:var(--n-dim)'/>
-<circle cx='476.0' cy='162.4' r='2.6' class='a-pop' style='--d:0.70s;fill:var(--n-dim)'/>
-<circle cx='476.0' cy='141.5' r='2.6' class='a-pop' style='--d:0.72s;fill:var(--n-dim)'/>
-<circle cx='476.0' cy='145.3' r='2.6' class='a-pop' style='--d:0.73s;fill:var(--n-dim)'/>
-<circle cx='476.0' cy='149.1' r='2.6' class='a-pop' style='--d:0.74s;fill:var(--n-dim)'/>
-<text x='476.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.72s;fill:var(--n-dim)'>2</text>
-<text x='427.0' y='258.0' class='lbl sm mid a-rise' style='--d:0.95s;fill:var(--n-dim)'>copies of the risk allele</text>
-<text x='427.0' y='276.0' class='lbl sm mid a-rise' style='--d:1.00s;fill:var(--n-dim)'>one point per donor</text>
-<text x='619.0' y='46.0' class='lbl mid a-pop' style='--d:0.55s;fill:var(--n-kept)'>cell B</text>
-<text x='619.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.59s;fill:var(--n-dim)'>quiescent state</text>
-<rect x='544.0' y='96.0' width='150.0' height='152.0' rx='10' class='box a-pop' style='--d:0.65s;fill:var(--n-panel);stroke:var(--n-edge)'/>
-<path d='M574.0 218.0 L678.0 218.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.73s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
-<path d='M574.0 218.0 L574.0 120.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.40s;stroke:var(--n-edge);stroke-width:1.4'/>
-<text x='568.0' y='108.0' class='lbl sm a-rise' style='--d:0.77s;fill:var(--n-dim)'>target gene</text>
-<path d='M600.0 151.0 L668.0 203.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.23s;--dur:0.60s;stroke:var(--n-kept);stroke-width:2.6'/>
-<circle cx='600.0' cy='139.6' r='2.6' class='a-pop' style='--d:0.87s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='143.4' r='2.6' class='a-pop' style='--d:0.88s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='147.2' r='2.6' class='a-pop' style='--d:0.89s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='151.0' r='2.6' class='a-pop' style='--d:0.91s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='154.8' r='2.6' class='a-pop' style='--d:0.92s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='158.6' r='2.6' class='a-pop' style='--d:0.93s;fill:var(--n-dim)'/>
-<circle cx='600.0' cy='162.4' r='2.6' class='a-pop' style='--d:0.94s;fill:var(--n-dim)'/>
-<text x='600.0' y='236.0' class='lbl sm mid a-rise' style='--d:0.97s;fill:var(--n-dim)'>0</text>
-<circle cx='634.0' cy='173.2' r='2.6' class='a-pop' style='--d:0.95s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='177.0' r='2.6' class='a-pop' style='--d:0.96s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='180.8' r='2.6' class='a-pop' style='--d:0.97s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='184.6' r='2.6' class='a-pop' style='--d:0.99s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='188.4' r='2.6' class='a-pop' style='--d:1.00s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='167.5' r='2.6' class='a-pop' style='--d:1.01s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='171.3' r='2.6' class='a-pop' style='--d:1.02s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='175.1' r='2.6' class='a-pop' style='--d:1.03s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='178.9' r='2.6' class='a-pop' style='--d:1.05s;fill:var(--n-dim)'/>
-<circle cx='634.0' cy='182.7' r='2.6' class='a-pop' style='--d:1.06s;fill:var(--n-dim)'/>
-<text x='634.0' y='236.0' class='lbl sm mid a-rise' style='--d:1.02s;fill:var(--n-dim)'>1</text>
-<circle cx='668.0' cy='206.8' r='2.6' class='a-pop' style='--d:1.03s;fill:var(--n-dim)'/>
-<circle cx='668.0' cy='210.6' r='2.6' class='a-pop' style='--d:1.04s;fill:var(--n-dim)'/>
-<circle cx='668.0' cy='214.4' r='2.6' class='a-pop' style='--d:1.05s;fill:var(--n-dim)'/>
-<circle cx='668.0' cy='193.5' r='2.6' class='a-pop' style='--d:1.07s;fill:var(--n-dim)'/>
-<circle cx='668.0' cy='197.3' r='2.6' class='a-pop' style='--d:1.08s;fill:var(--n-dim)'/>
-<circle cx='668.0' cy='201.1' r='2.6' class='a-pop' style='--d:1.09s;fill:var(--n-dim)'/>
-<text x='668.0' y='236.0' class='lbl sm mid a-rise' style='--d:1.07s;fill:var(--n-dim)'>2</text>
-<text x='619.0' y='258.0' class='lbl sm mid a-rise' style='--d:1.30s;fill:var(--n-dim)'>copies of the risk allele</text>
-<text x='619.0' y='276.0' class='lbl sm mid a-rise' style='--d:1.35s;fill:var(--n-dim)'>one point per donor</text>
-<text x='508.0' y='384.0' class='lbl sm mid a-pop' style='--d:1.55s;fill:var(--n-loss)'>same allele, same target gene, opposite direction</text>
-</svg>
-<div class='caption'><span class='caption-label'>Figure 2.</span> On the left, cells coloured by the two labels an ordinary annotation would assign. Cells A and B fall in the same one, drawn slightly apart to be legible; they are the same two cells, with the same colours, in the next figure. On the right, target-gene expression against allele dosage: one point per donor, stacked at 0, 1 or 2 copies, with the vertical spread being between-donor variation. The slope is positive in A-like cells and negative in B-like cells, and pooling the two attenuates it towards zero. Illustrative; coordinates simulated from the model.</div>
-</div>
 
 
 
@@ -487,8 +488,9 @@ Each row $R_{s:}$ is one pair's cis-effect profile across cells. Each column $R_
 <text x='618.0' y='376.0' class='lbl sm a-rise' style='--d:2.24s;fill:var(--n-dim)'>too little</text>
 <text x='618.0' y='394.0' class='lbl sm a-rise' style='--d:2.28s;fill:var(--n-dim)'>information</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 3.</span> The matrix $R$. Rows are reference variant-gene pairs, columns are cells or metacells. One column is marked as one cell&#39;s regulotype and one row as one pair&#39;s cell-resolved effect profile. Red is a positive effect, blue negative, white near zero. Rows are standardised for display only, so the matrix shown is $\widetilde R$. Entries carrying too little information to estimate are drawn as uncertain rather than as an effect of zero. Simulated from the model at rank three.</div>
+<div class='caption'><span class='caption-label'>Figure 3.</span> Rows are reference variant-gene pairs, columns are cells. Red means the allele raises the target gene, blue lowers it. Rows are standardised for display, so this is $\widetilde R$. Hatched entries carry too little information to estimate, which is not the same as an effect of zero. Simulated from the model at rank three.</div>
 </div>
+
 
 
 $U$ and $\Lambda$ explain how the low-rank structure is shared. Each row $u_i$ places a cell on $K$ response coordinates. Each row $\lambda_{vg}$ tells us how one variant–gene pair responds along those coordinates.
@@ -583,7 +585,7 @@ For example, suppose cells with high $u_{i2}$ are subsequently found to have an 
 <path d='M632.0 286.0 L684.0 286.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.30s;--dur:0.40s;stroke:var(--n-dim);stroke-width:2.4'/>
 <text x='545.0' y='340.0' class='lbl sm mid a-rise' style='--d:1.50s;fill:var(--n-dim)'>as a cell moves along u&#8322;</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 4.</span> What the two factor matrices carry. Each row $u_i$ places a cell on $K$ response coordinates, and a coordinate is named only from evidence not used to create it. Each $\lambda_{vg}$ says how one pair responds along those coordinates.</div>
+<div class='caption'><span class='caption-label'>Figure 4.</span> Each row $u_i$ places a cell on $K$ response coordinates, and a coordinate is named only from evidence not used to create it. Each $\lambda_{vg}$ says how one pair responds along those coordinates.</div>
 </div>
 
 
@@ -668,8 +670,9 @@ The closest method is SURGE. The novelty is therefore not a new genotype-by-late
 <circle cx='554.4' cy='123.2' r='7.0' class='a-pop' style='--d:1.54s;fill:var(--n-student)'/>
 <text x='543.4' y='128.2' class='lbl sm end a-rise' style='--d:1.58s;fill:var(--n-student)'>regulotype</text>
 </svg>
-<div class='caption'><span class='caption-label'>Figure 5.</span> Methods organised by whether the cellular context is supplied or learned from genotype-dependent expression, and by whether the primary output is a locus test or a cellular representation. SURGE sits next to the regulotype model on the likelihood side while differing in its primary scientific output.</div>
+<div class='caption'><span class='caption-label'>Figure 5.</span> Methods organised by whether the cellular context is supplied or learned from genotype-dependent expression, and by whether the primary output is a locus test or a cellular representation. SURGE sits beside the regulotype model while differing in its primary output.</div>
 </div>
+
 
 
 
