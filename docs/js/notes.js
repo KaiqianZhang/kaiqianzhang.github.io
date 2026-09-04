@@ -1584,6 +1584,197 @@
   }
 
   // =========================================================================
+  // 4a. Lab: build one row of the matrix
+  // =========================================================================
+
+  /* r = beta + u * lambda, evaluated across cells whose position runs from
+     -2 to +2. Nothing is fitted; the reader supplies beta and lambda and the
+     line is arithmetic. The point is the sign change: once |u*lambda| exceeds
+     |beta|, the same allele raises the gene in some cells and lowers it in
+     others, and the average reports neither. */
+
+  function initBuildLab() {
+    var root = document.getElementById('rg2-build-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var b = $(root, '#rg2-beta'), l = $(root, '#rg2-lam');
+
+    function draw() {
+      var beta = parseFloat(b.value), lam = parseFloat(l.value);
+      var N = 40, us = [], rs = [];
+      var i;
+      for (i = 0; i < N; i++) {
+        var u = -2 + 4 * i / (N - 1);
+        us.push(u); rs.push(beta + u * lam);
+      }
+      var lo = rs[0], hi = rs[N - 1];
+      if (lo > hi) { var t = lo; lo = hi; hi = t; }
+      var flips = (rs[0] > 0) !== (rs[N - 1] > 0);
+
+      $(root, '#rg2-beta-v').textContent = (beta >= 0 ? '+' : '') + beta.toFixed(2);
+      $(root, '#rg2-lam-v').textContent = (lam >= 0 ? '+' : '') + lam.toFixed(2);
+
+      $(root, '#rg2-stat-avg').textContent = (beta >= 0 ? '+' : '') + beta.toFixed(2);
+      $(root, '#rg2-stat-lo').textContent = (lo >= 0 ? '+' : '') + lo.toFixed(2);
+      $(root, '#rg2-stat-hi').textContent = (hi >= 0 ? '+' : '') + hi.toFixed(2);
+
+      var v = $(root, '#rg2-build-verdict');
+      if (flips) {
+        v.className = 'verdict bad';
+        v.textContent = 'The allele raises the gene in some cells and lowers ' +
+            'it in others. The single reported number is ' +
+            (beta >= 0 ? '+' : '') + beta.toFixed(2) +
+            ', which is the effect in no cell in particular.';
+      } else if (Math.abs(lam) < 0.06) {
+        v.className = 'verdict';
+        v.textContent = 'The pair does not respond to position at all. Its row ' +
+            'is flat, one number describes it completely, and nothing is lost ' +
+            'by reporting that number.';
+      } else {
+        v.className = 'verdict warn';
+        v.textContent = 'The effect varies across cells but keeps its sign. ' +
+            'One number is a summary rather than a fiction &mdash; it is still ' +
+            'wrong by up to ' + Math.max(Math.abs(hi - beta),
+                                         Math.abs(lo - beta)).toFixed(2) + '.';
+      }
+
+      clear(svg);
+      var W = 700, H = 250, mid = 132, sc = 46;
+      var span = Math.max(2.2, Math.abs(lo), Math.abs(hi));
+      sc = 92 / span;
+
+      svg.appendChild(el('line', { x1: 56, y1: mid, x2: W - 150, y2: mid,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+      svg.appendChild(el('text', { x: 48, y: mid + 5, class: 'lbl sm end',
+        fill: 'var(--n-dim)' }, '0'));
+
+      // beta, the flat line a one-number study would report
+      svg.appendChild(el('line', { x1: 56, y1: mid - beta * sc, x2: W - 150,
+        y2: mid - beta * sc, stroke: 'var(--n-loss)', 'stroke-width': 2.2,
+        'stroke-dasharray': '7 5', 'stroke-linecap': 'round' }));
+      svg.appendChild(el('text', { x: W - 142, y: mid - beta * sc + 5,
+        class: 'lbl sm', fill: 'var(--n-loss)' }, 'reported'));
+
+      for (i = 0; i < N; i++) {
+        var x = 56 + (W - 206) * i / (N - 1);
+        var y = mid - rs[i] * sc;
+        var h = Math.abs(rs[i]) * sc;
+        svg.appendChild(el('rect', {
+          x: x - 5, y: rs[i] >= 0 ? y : mid, width: 10,
+          height: Math.max(h, 0.8), rx: 2,
+          fill: rs[i] >= 0 ? 'var(--n-student)' : 'var(--n-clay)', opacity: 0.9
+        }));
+      }
+      svg.appendChild(el('text', { x: 56, y: H - 46, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'cells, ordered by position'));
+      svg.appendChild(el('text', { x: W - 150, y: H - 46,
+        class: 'lbl sm end', fill: 'var(--n-dim)' }, 'one bar per cell'));
+    }
+
+    onInput(b, draw); onInput(l, draw);
+    paintRange(b); paintRange(l);
+    draw();
+  }
+
+  // =========================================================================
+  // 4b. Lab: rotate the answer, and watch the answer not change
+  // =========================================================================
+
+  /* Two coordinates and two loadings at rank 2. Rotating U by theta and
+     Lambda by the same theta leaves Lambda U' exactly where it was. The
+     readouts show both sides moving while every effect stays put -- which is
+     why an axis in this model means nothing and only R may be interpreted. */
+
+  var RG2_U = [[1.20, 0.35], [-0.80, 0.95], [0.20, -1.10], [-1.05, -0.45]];
+  var RG2_L = [[0.90, -0.40], [-0.55, 0.85], [1.10, 0.25]];
+
+  function initRotLab() {
+    var root = document.getElementById('rg2-rot-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var th = $(root, '#rg2-theta');
+
+    function rot(v, c, s) { return [v[0] * c - v[1] * s, v[0] * s + v[1] * c]; }
+
+    function draw() {
+      var deg = parseFloat(th.value), a = deg * Math.PI / 180;
+      var c = Math.cos(a), s = Math.sin(a);
+      // U -> U Q,  Lambda -> Lambda Q,  so Lambda Q (U Q)' = Lambda U'
+      var U = RG2_U.map(function (v) { return rot(v, c, s); });
+      var L = RG2_L.map(function (v) { return rot(v, c, s); });
+
+      $(root, '#rg2-theta-v').textContent = Math.round(deg) + '°';
+      $(root, '#rg2-stat-u').textContent =
+          '(' + U[0][0].toFixed(2) + ', ' + U[0][1].toFixed(2) + ')';
+      $(root, '#rg2-stat-l').textContent =
+          '(' + L[0][0].toFixed(2) + ', ' + L[0][1].toFixed(2) + ')';
+      var r00 = L[0][0] * U[0][0] + L[0][1] * U[0][1];
+      $(root, '#rg2-stat-r').textContent = (r00 >= 0 ? '+' : '') + r00.toFixed(4);
+
+      var v = $(root, '#rg2-rot-verdict');
+      v.className = 'verdict';
+      v.textContent = 'Both the coordinate and the loading have moved. Every ' +
+          'effect in the matrix is unchanged to four decimal places, and will ' +
+          'stay unchanged at any angle. That is why no axis here can be given ' +
+          'a meaning, and why only the matrix, distances on it, and ' +
+          'predictions are interpreted.';
+
+      clear(svg);
+      var W = 700, H = 250;
+
+      function panel(ox, title, vecs, hue) {
+        var cx = ox + 84, cy = 118, rr = 74;
+        svg.appendChild(el('text', { x: cx, y: 24, class: 'lbl sm mid',
+          fill: 'var(--n-dim)' }, title));
+        svg.appendChild(el('circle', { cx: cx, cy: cy, r: rr, fill: 'none',
+          stroke: 'var(--n-grid)', 'stroke-width': 1.2 }));
+        vecs.forEach(function (p, k) {
+          var m = Math.max(1e-6, Math.hypot(p[0], p[1]));
+          var sx = cx + (p[0] / 1.6) * rr, sy = cy - (p[1] / 1.6) * rr;
+          svg.appendChild(el('line', { x1: cx, y1: cy, x2: sx, y2: sy,
+            stroke: hue, 'stroke-width': 2.2, 'stroke-linecap': 'round',
+            opacity: k === 0 ? 1 : 0.42 }));
+          svg.appendChild(el('circle', { cx: sx, cy: sy, r: k === 0 ? 4.5 : 3,
+            fill: hue, opacity: k === 0 ? 1 : 0.42 }));
+        });
+      }
+
+      panel(24, 'where the cells sit', U, 'var(--n-clay)');
+      panel(212, 'how the pairs respond', L, 'var(--n-student)');
+
+      // the matrix, unmoved
+      var gx = 432, gy = 52, cs = 17;
+      for (var i = 0; i < RG2_L.length; i++) {
+        for (var j = 0; j < RG2_U.length; j++) {
+          var r = L[i][0] * U[j][0] + L[i][1] * U[j][1];
+          svg.appendChild(el('rect', {
+            x: gx + j * cs, y: gy + i * cs, width: cs - 0.8, height: cs - 0.8,
+            fill: r >= 0 ? 'var(--n-student)' : 'var(--n-clay)',
+            opacity: 0.12 + 0.80 * Math.min(Math.abs(r) / 1.8, 1)
+          }));
+        }
+      }
+      svg.appendChild(el('text', { x: gx + RG2_U.length * cs / 2, y: gy - 12,
+        class: 'lbl mid', fill: 'var(--n-student)' }, 'R'));
+      svg.appendChild(el('text', { x: gx + RG2_U.length * cs / 2,
+        y: gy + RG2_L.length * cs + 20, class: 'lbl sm mid',
+        fill: 'var(--n-dim)' }, 'never moves'));
+      svg.appendChild(el('text', { x: 560, y: 118, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'drag the angle'));
+      svg.appendChild(el('text', { x: 560, y: 140, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'and watch the left'));
+      svg.appendChild(el('text', { x: 560, y: 162, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'two panels turn'));
+    }
+
+    onInput(th, draw);
+    paintRange(th);
+    draw();
+  }
+
+  // =========================================================================
 
   initTokenLab();
   initPruneLab();
@@ -1597,4 +1788,6 @@
   initAvgLab();
   initSplitLab();
   initLadderLab();
+  initBuildLab();
+  initRotLab();
 }());
