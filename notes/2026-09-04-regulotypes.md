@@ -6,7 +6,6 @@ tags: regulotype
 keywords: regulotype, cis-regulatory effects, cell-resolved cis effects, context-specific eQTL, latent factor model, blood-brain barrier, Alzheimer's disease, single-cell genetics
 ---
 
-<p class='lede'>Cells can be compared by their ordinary expression profiles or by the pattern of cis-regulatory effects predicted to act in them. We call the second representation a <b>regulotype</b>.</p>
 
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
