@@ -378,7 +378,7 @@ This does not mean that expression-defined labels are wrong. It means that no si
 Let $i$ index a cell or within-donor metacell, $d(i)$ its donor, and $s=(v,g)$ a reference cis variant–gene pair. Following Gao's model,
 
 
-$$y_{ig} =m_{ig}+b_{d(i)g} +x_{d(i)v}\left(\beta_{vg}+u_i^{\mathsf T}\lambda_{vg}\right) +\varepsilon_{ig}.$$
+$$y_{ig} = \underbrace{m_{ig}}_{\substack{\text{mean and}\\\text{covariates}}} \;+\; \underbrace{b_{d(i)g}}_{\substack{\text{donor}\\\text{effect}}} \;+\; \underbrace{x_{d(i)v}}_{\substack{\text{allele}\\\text{dosage}}}\Bigl(\underbrace{\beta_{vg}}_{\substack{\text{average}\\\text{cis effect}}} + \underbrace{u_i^{\mathsf T}\lambda_{vg}}_{\substack{\text{cell-specific}\\\text{deviation}}}\,\Bigr) \;+\; \underbrace{\varepsilon_{ig}}_{\substack{\text{residual}\\\text{noise}}}$$
 
 
 Here $y_{ig}$ is normalized expression of gene $g$; $m_{ig}$ contains genotype-independent molecular variation and additive covariates; $b_{d(i)g}$ is a donor-by-gene random intercept; $x_{d(i)v}$ is centered effect-allele dosage; $\beta_{vg}$ is the average cis effect; $u_i$ is a cellular coordinate; and $\lambda_{vg}$ gives the loading of pair $(v,g)$ on that coordinate.
@@ -651,7 +651,7 @@ For example, suppose cells with high $u_{i2}$ are subsequently found to have an 
 </div>
 
 
-The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret $R$, regulotype distances and held-out predictions. A biological name is assigned to a factor only when it is supported by information not used to create the factor.
+The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret only what a rotation leaves unchanged: $R$ itself, distances between its columns, and predictions at held-out genes and donors. No single factor means anything on its own, so a factor is given a biological name only when a measurement withheld from the fit lines up with it.
 
 The analysis begins with one nominated cis variant for each selected gene, with reference pairs drawn from approximately independent regions. Once the coordinates are learned, a new pair is projected by fixing $U$ and estimating its $\beta_{vg}$ and $\lambda_{vg}$. Fine-mapping is introduced after this nominated-variant model is calibrated.
 

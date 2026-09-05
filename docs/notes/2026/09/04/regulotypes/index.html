@@ -435,7 +435,7 @@
 </div>
 <h2 id='the-regulotype'>The regulotype</h2>
 <p>Let $i$ index a cell or within-donor metacell, $d(i)$ its donor, and $s=(v,g)$ a reference cis variant–gene pair. Following Gao's model,</p>
-$$y_{ig} =m_{ig}+b_{d(i)g} +x_{d(i)v}\left(\beta_{vg}+u_i^{\mathsf T}\lambda_{vg}\right) +\varepsilon_{ig}.$$
+$$y_{ig} = \underbrace{m_{ig}}_{\substack{\text{mean and}\\\text{covariates}}} \;+\; \underbrace{b_{d(i)g}}_{\substack{\text{donor}\\\text{effect}}} \;+\; \underbrace{x_{d(i)v}}_{\substack{\text{allele}\\\text{dosage}}}\Bigl(\underbrace{\beta_{vg}}_{\substack{\text{average}\\\text{cis effect}}} + \underbrace{u_i^{\mathsf T}\lambda_{vg}}_{\substack{\text{cell-specific}\\\text{deviation}}}\,\Bigr) \;+\; \underbrace{\varepsilon_{ig}}_{\substack{\text{residual}\\\text{noise}}}$$
 <p>Here $y_{ig}$ is normalized expression of gene $g$; $m_{ig}$ contains genotype-independent molecular variation and additive covariates; $b_{d(i)g}$ is a donor-by-gene random intercept; $x_{d(i)v}$ is centered effect-allele dosage; $\beta_{vg}$ is the average cis effect; $u_i$ is a cellular coordinate; and $\lambda_{vg}$ gives the loading of pair $(v,g)$ on that coordinate.</p>
 <p>The coefficient multiplying allele dosage is the cell-resolved cis effect:</p>
 $$r_{vgi}=\beta_{vg}+u_i^{\mathsf T}\lambda_{vg}.$$
@@ -688,7 +688,7 @@ $$R=\beta\mathbf 1_I^{\mathsf T}+\Lambda U^{\mathsf T} \in\mathbb R^{|S|\times I
 </svg>
 <div class='caption'><span class='caption-label'>Figure 4.</span> Left: cells at their coordinates, coloured by an inflammatory programme that never entered the fit. Coordinate 2 earns a name because a withheld measurement lines up with it. Right: the cell-resolved effect against that same coordinate, one line per reference pair. The slope of each line is $\lambda_{s2}$, which is what it means for pairs to differ.</div>
 </div>
-<p>The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret $R$, regulotype distances and held-out predictions. A biological name is assigned to a factor only when it is supported by information not used to create the factor.</p>
+<p>The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret only what a rotation leaves unchanged: $R$ itself, distances between its columns, and predictions at held-out genes and donors. No single factor means anything on its own, so a factor is given a biological name only when a measurement withheld from the fit lines up with it.</p>
 <p>The analysis begins with one nominated cis variant for each selected gene, with reference pairs drawn from approximately independent regions. Once the coordinates are learned, a new pair is projected by fixing $U$ and estimating its $\beta_{vg}$ and $\lambda_{vg}$. Fine-mapping is introduced after this nominated-variant model is calibrated.</p>
 <p>All cells enter the primary fit without cell-type, lineage, vessel-segment, disease or spatial labels defining groups. Broad expression variation remains in the additive mean $m_{ig}$; the response coordinates are learned from the genotype-dependent part of the model. Measured cell and pair features may inform covariate-moderated empirical-Bayes priors, but features used for later biological validation must be withheld from prior construction.</p>
 <p>Donors remain the independent genetic units. Metacells, if used, are constructed within donor and reduce molecular noise without increasing the number of genotypes.</p>
