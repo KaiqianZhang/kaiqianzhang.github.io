@@ -653,14 +653,6 @@ For example, suppose cells with high $u_{i2}$ are subsequently found to have an 
 
 The factorization is not unique: $U$ and $\Lambda$ can rotate or rescale without changing $R$. We therefore interpret only what a rotation leaves unchanged: $R$ itself, distances between its columns, and predictions at held-out genes and donors. No single factor means anything on its own, so a factor is given a biological name only when a measurement withheld from the fit lines up with it.
 
-The analysis begins with one nominated cis variant for each selected gene, with reference pairs drawn from approximately independent regions. Once the coordinates are learned, a new pair is projected by fixing $U$ and estimating its $\beta_{vg}$ and $\lambda_{vg}$. Fine-mapping is introduced after this nominated-variant model is calibrated.
-
-All cells enter the primary fit without cell-type, lineage, vessel-segment, disease or spatial labels defining groups. Broad expression variation remains in the additive mean $m_{ig}$; the response coordinates are learned from the genotype-dependent part of the model. Measured cell and pair features may inform covariate-moderated empirical-Bayes priors, but features used for later biological validation must be withheld from prior construction.
-
-Donors remain the independent genetic units. Metacells, if used, are constructed within donor and reduce molecular noise without increasing the number of genotypes.
-
-
-
 ## Where this sits
 
 The field contains several related methods, but they target different outputs. Some test effect heterogeneity along supplied contexts; some discover latent genotype-interacting axes; others improve scalability, variance decomposition or fine-mapping. The regulotype project builds directly on this work rather than replacing it.
