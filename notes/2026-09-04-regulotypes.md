@@ -375,7 +375,7 @@ This does not mean that expression-defined labels are wrong. It means that no si
 
 ## The regulotype
 
-Let $i$ index a cell or within-donor metacell, $d(i)$ its donor, and $s=(v,g)$ a reference cis variant–gene pair. Following Gao's model,
+Let $i$ index a cell or within-donor metacell, $d(i)$ its donor, and $s=(v,g)$ a reference cis variant–gene pair. Following our model,
 
 
 $$y_{ig} = \underbrace{m_{ig}}_{\substack{\text{mean and}\\\text{covariates}}} \;+\; \underbrace{b_{d(i)g}}_{\substack{\text{donor}\\\text{effect}}} \;+\; \underbrace{x_{d(i)v}}_{\substack{\text{allele}\\\text{dosage}}}\Bigl(\underbrace{\beta_{vg}}_{\substack{\text{average}\\\text{cis effect}}} + \underbrace{u_i^{\mathsf T}\lambda_{vg}}_{\substack{\text{cell-specific}\\\text{deviation}}}\,\Bigr) \;+\; \underbrace{\varepsilon_{ig}}_{\substack{\text{residual}\\\text{noise}}}$$
@@ -667,7 +667,7 @@ The field contains several related methods, but they target different outputs. S
 | CellRegMap (2022) | $y=\mu+G\beta+G\odot h(C)+\epsilon$, with supplied context kernel $K_C$ | Testing whether a known eQTL varies over a continuous cellular representation | Genotype-by-context test and estimated effect heterogeneity | Strong supplied-context comparator; it does not learn the context from recurrent genetic effects |
 | Nathan et al. (2022) | $r_i=\beta+u_i^{\mathsf T}\lambda$, with $u_i$ supplied by CITE-seq variates | Resolving dynamic T-cell state dependence | Per-cell effect profiles and disease-locus interpretation | Closest example with supplied cellular coordinates |
 | PICALO (2024) | Iterative $G\times p$ model for an optimized principal interaction component $p$ | Learning hidden sample contexts in bulk eQTL data | PICs and interaction eQTLs | Precedent for genotype-informed context discovery; primarily sample-level and bulk |
-| SURGE (2024) | $y_{is}=\cdots+G_{is}(\beta_s+u_i^{\mathsf T}\lambda_s)+\epsilon_{is}$ | Joint learning of latent contexts and interaction effects | Latent contexts, loadings and interaction eQTLs | The observation likelihood used by Gao's model and the mandatory implementation benchmark |
+| SURGE (2024) | $y_{is}=\cdots+G_{is}(\beta_s+u_i^{\mathsf T}\lambda_s)+\epsilon_{is}$ | Joint learning of latent contexts and interaction effects | Latent contexts, loadings and interaction eQTLs | The observation likelihood used by our model and the mandatory implementation benchmark |
 | airqtl (2025) | Efficient donor-aware single-cell mixed-model scans | Large-scale cis/trans eQTL mapping and eQTL-based causal GRNs | Associations and state-specific regulatory networks | Provides scalability and a downstream network analysis, not a response-defined cell map |
 | CASE (2026) | Empirical-Bayes fine-mapping from cell-type summary statistics, LD and sample overlap | Sharing information across cell types while resolving causal variants | Cell-type PIPs and credible sets | Useful after cellular contexts are fixed and for later fine-mapping |
 | FastGxC (2026) | Shared effect plus context-specific deviations | Efficient mapping across correlated predefined tissues or cell types | Shared and context-specific effect estimates and tests | Strong discrete-context comparator; it does not organize individual cells |
@@ -737,7 +737,7 @@ The project will matter if it does more than produce another embedding or anothe
 
 ### 1. A new estimand: cellular identity defined by cis-effect profiles
 
-Gao's key conceptual step is to make $R$, rather than an individual factor or interaction test, the object of inference. A regulotype is one column of $R$; a locus-specific response map is one row.
+Our key conceptual step is to make $R$, rather than an individual factor or interaction test, the object of inference. A regulotype is one column of $R$; a locus-specific response map is one row.
 
 **Analysis required.** Simulate genotype-independent expression structure and genetic-response structure with varying degrees of alignment. Test null calibration when all $\lambda_{vg}=0$, recovery of $r_{vgi}$, regulotype distances and uncertainty. Then benchmark against average-effect QTL models, fixed-label effects, supplied expression coordinates and the Gaussian-prior SURGE implementation.
 
@@ -747,7 +747,7 @@ Gao's key conceptual step is to make $R$, rather than an individual factor or in
 
 A factorization can always summarize its training data. It becomes a cellular representation only if the learned coordinates predict effects that were not used to estimate them.
 
-**Analysis required.** Use nested partitions exactly as specified by Gao. Training regions in training donors estimate $U$. Test-region pairs in training donors estimate new $\beta_{vg}$ and $\lambda_{vg}$ with $U$ fixed. Training genes locate cells from held-out donors on the map. Expression of the held-out test genes is used only to evaluate the predicted genetic component $x_{d(i)v}r_{vgi}$.
+**Analysis required.** Use nested partitions exactly as specified in our design. Training regions in training donors estimate $U$. Test-region pairs in training donors estimate new $\beta_{vg}$ and $\lambda_{vg}$ with $U$ fixed. Training genes locate cells from held-out donors on the map. Expression of the held-out test genes is used only to evaluate the predicted genetic component $x_{d(i)v}r_{vgi}$.
 
 Compare predictive density and squared error under identical partitions with $K=0$, fixed-label models, supplied expression coordinates and SURGE. Keep all cells from one donor in the same fold and give each donor equal total weight.
 
@@ -765,7 +765,7 @@ If one regulotype region spans several canonical lineages, require it to reprodu
 
 ### 4. Feature-informed estimation of sparse response programs
 
-The number of independent genotypes is the number of donors, not the number of cells. Gao's covariate-moderated empirical-Bayes extension addresses this constraint by allowing cell features $z_i$ to inform the prior for $u_{ik}$ and pair annotations $h_{vg}$ to inform the prior for $\lambda_{vgk}$.
+The number of independent genotypes is the number of donors, not the number of cells. Our covariate-moderated empirical-Bayes extension addresses this constraint by allowing cell features $z_i$ to inform the prior for $u_{ik}$ and pair annotations $h_{vg}$ to inform the prior for $\lambda_{vgk}$.
 
 **Analysis required.** Compare feature-moderated point-normal priors with Gaussian, intercept-only and feature-permuted priors inside the same donor and region partitions. Evaluate held-out prediction, calibration, stability of $R$ and recovery of sparse effects—not only whether the resulting factors are easy to name. Separate the gain from cell features from the gain due to variant–gene annotations.
 
@@ -785,7 +785,7 @@ Next, compare the cell-resolved profiles of independent AD loci. Test whether th
 
 ### 6. Separation of genetic susceptibility from disease remodeling
 
-Gao's design distinguishes three questions that are often conflated:
+Our design distinguishes three questions that are often conflated:
 
 1. where an allele is predicted to alter its target gene;
 2. which cellular conditions become more or less abundant in disease; and
@@ -826,7 +826,7 @@ The strongest Nature Genetics story is one connected chain:
 5. distinguish genetic susceptibility from disease-associated occupancy and remodeling; and
 6. locate the implicated conditions in tissue and nominate precise experiments.
 
-If the work stops after factor fitting, it is an extension of latent-context QTL methodology. If $R$ generalizes, it becomes a new cellular estimand. If AD loci converge on reproducible, spatially supported BBB conditions, it becomes the disease-genetics contribution envisioned in Gao's manuscript.
+If the work stops after factor fitting, it is an extension of latent-context QTL methodology. If $R$ generalizes, it becomes a new cellular estimand. If AD loci converge on reproducible, spatially supported BBB conditions, it becomes the disease-genetics contribution envisioned in our manuscript.
 
 ## Sources
 
