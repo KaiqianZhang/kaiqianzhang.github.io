@@ -826,7 +826,7 @@ The strongest Nature Genetics story is one connected chain:
 5. distinguish genetic susceptibility from disease-associated occupancy and remodeling; and
 6. locate the implicated conditions in tissue and nominate precise experiments.
 
-If the work stops after factor fitting, it is an extension of latent-context QTL methodology. If $R$ generalizes, it becomes a new cellular estimand. If AD loci converge on reproducible, spatially supported BBB conditions, it becomes the disease-genetics contribution envisioned in our manuscript.
+If the work stops after factor fitting, it is an extension of latent-context QTL methodology. If $R$ generalizes, it becomes a new cellular estimand. If AD loci converge on reproducible, spatially supported BBB conditions, it becomes the disease-genetics contribution envisioned in our project plan.
 
 ## Sources
 
