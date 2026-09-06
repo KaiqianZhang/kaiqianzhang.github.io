@@ -78,21 +78,23 @@ keywords: implementation correctness, unit tests, SURGE, variational inference, 
 
 ## Three levels of checking
 
+A method can be wrong in three quite different ways, and the evidence that rules out one of them says almost nothing about the other two. It can be coded incorrectly, so that the program is not computing the thing I wrote down. It can be coded perfectly and still recover nothing, because the statistical problem is too hard at the sample size I have. Or it can recover exactly the structure I asked for and have that structure mean nothing the moment it meets a gene or a donor it has not seen. Keeping these apart is most of what makes a validation plan honest, so before doing any of them it is worth naming them.
+
 There are actually three levels:
 
 ### Level 0 — implementation correctness
 
-Before asking biological questions, make sure the algorithm itself is coded correctly.
+Before asking biological questions, make sure the algorithm itself is coded correctly. This is the only level that needs no data, no truth and no held-out anything — only the code and a problem whose answer is already known.
 
 ### Level 1 — simulation recovery
 
-Because simulations have ground truth, compare estimates against truth.
+Because simulations have ground truth, compare estimates against truth. Here the question stops being about the program and starts being about the estimator: given data generated from the model, at a realistic number of donors and reference pairs, does the fitted map land near the one that generated it?
 
 ### Level 2 — held-out generalization
 
-Ask whether the learned regulotype transfers to unseen genes and donors.
+Ask whether the learned regulotype transfers to unseen genes and donors. This is the only level that can fail for scientific rather than mathematical reasons, and the only one whose verdict a reader outside the project would care about.
 
-These answer different questions.
+These answer different questions, and the order is not negotiable in one direction: a failure at Level 0 makes everything above it uninterpretable, while a success at Level 0 promises nothing at all about the levels above. That asymmetry is the whole reason for starting at the bottom.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -128,33 +130,29 @@ These answer different questions.
 </div>
 
 
-This note focuses entirely on **Level 0**.
-
-At this stage, I am not asking whether the method discovers the correct regulotype, whether the fitted map resembles the generating truth, or whether it predicts effects in a new donor. Those questions require data-generating truth or held-out observations and belong to the next two levels.
+This note focuses entirely on **Level 0**. At this stage I am not asking whether the method discovers the correct regulotype, whether the fitted map resembles the generating truth, or whether it predicts effects in a new donor. Those questions require data-generating truth or held-out observations, and they belong to the next two levels.
 
 The question here is narrower:
 
 > **If I give the program a mathematical problem whose answer I know, does the program perform exactly the mathematical operation that I intended?**
 
-This distinction is important. A model can have poor statistical power even when the implementation is perfect. Conversely, a buggy implementation can occasionally produce attractive simulation results.
+This distinction is worth holding onto, because the two failure modes are easy to confuse in both directions. A model can have poor statistical power even when the implementation is perfect, and reading that as a coding error sends you hunting through correct code. Conversely — and this is the one that actually costs you months — a buggy implementation can produce attractive simulation results. A prior that shrinks too aggressively because of a misplaced factor of two does not look like a bug. It looks like a beautifully sparse recovery, and it will keep looking that way until somebody checks the arithmetic.
 
-Before interpreting any result, I want to establish that each mathematical layer is internally consistent.
-
-The implementation checks fall naturally into three groups:
+So before interpreting any result, I want to establish that each mathematical layer is internally consistent. The checks fall naturally into three groups, and it is useful to know which kind you are running, because they fail in different ways:
 
 1. **Reduction checks:** when our model is reduced to an existing model, do the implementations agree?
 2. **Invariance checks:** do transformations that should preserve an estimand actually preserve it?
 3. **Local update checks:** do individual posterior updates agree with independently calculated answers?
 
-I start with the strongest end-to-end reduction: SURGE.
+Reductions are the broadest and the least specific — they exercise everything and tell you almost nothing about where a failure lives. Local checks are the opposite. I start with the broadest one.
 
 ---
 
 ## 1. Does the Gaussian version reduce to SURGE?
 
-The observation likelihood underlying the regulotype model is the same latent-context QTL likelihood used by SURGE.
+Of the seven checks here this is the one I would run first, and it is the only one whose answer comes from code somebody else wrote. That matters more than it sounds. Every other check on this page compares my implementation against my own reading of the specification, which means a *misreading* of the specification passes all of them cheerfully. SURGE is an independent reading of the same likelihood by different people, released and used by others. Agreement with it is evidence about something my own tests structurally cannot reach.
 
-For $K=1$, on the fitting scale, write
+The observation likelihood underlying the regulotype model is the same latent-context QTL likelihood used by SURGE. For $K=1$, on the fitting scale, write
 
 $$
 \widetilde Y_{is}
@@ -181,15 +179,11 @@ The terms are:
 * $u_i$: latent cellular context;
 * $\lambda_s$: pair-specific loading on that context.
 
-Our new model eventually replaces the Gaussian priors on $u_i$ and $\lambda_s$ with covariate-moderated empirical Bayes priors.
-
-But before making that change, there is a much simpler question:
+Eventually the Gaussian priors on $u_i$ and $\lambda_s$ get replaced with covariate-moderated empirical Bayes priors, and that replacement is the entire contribution of the project. But it is worth pausing before changing anything, because a much simpler question is sitting right here:
 
 > If I turn those new priors off and use exactly the Gaussian priors used by SURGE, does my implementation reproduce SURGE?
 
-It should.
-
-This is an unusually valuable test because it exercises almost the entire computational path at once:
+It should. And the reason to spend effort on this before anything else is that it exercises almost the entire computational path at once:
 
 $$
 Y,X,C,d(i)
@@ -201,11 +195,11 @@ Y,X,C,d(i)
 R.
 $$
 
-If the two implementations disagree here, there is little reason to debug the more complicated empirical-Bayes version yet.
+Scaling, the covariate block, the donor random intercept, every variational update, the precision parameters and the reconstruction of $R$ all sit inside that arrow. If the two implementations disagree here, there is little reason to debug the more complicated empirical-Bayes version yet — whatever is broken is broken further down. The flip side is that a test this wide tells me almost nothing about *where* the problem is, which is why the second half of this section is a procedure for narrowing it.
 
 ### Match the problem before comparing the answers
 
-The two programs must receive the **same mathematical problem**.
+The two programs must receive the **same mathematical problem**, and I want to be pedantic about this, because a mismatch in the inputs produces exactly the same symptom as a bug in the code: two numbers that differ. Hours disappear into debugging an update that was correct all along and had only received a differently centred genotype matrix.
 
 That means matching:
 
@@ -228,9 +222,7 @@ $$
 K=1.
 $$
 
-There is no need to debug factor ordering while debugging the basic likelihood.
-
-I would also use a deliberately small dataset first. For example,
+There is no need to debug factor ordering while debugging the basic likelihood; those are two problems and they should be met one at a time. I would also use a deliberately small dataset first — say
 
 $$
 D=20,\qquad
@@ -238,7 +230,7 @@ I=200,\qquad
 S=30.
 $$
 
-The exact values are not scientifically important. I want the test to run quickly enough that I can inspect every intermediate quantity if necessary.
+The exact values are not scientifically important, and choosing them for scientific realism would be a mistake. I want the test to run quickly enough that I can stop it after a single update and inspect every intermediate quantity by hand.
 
 ### What should agree?
 
@@ -254,11 +246,7 @@ $$
 \hat b_{ds}.
 $$
 
-Then compare the variance or precision parameters used in the likelihood.
-
-But I would not stop with the factors.
-
-The central quantity is
+Then compare the variance or precision parameters used in the likelihood. But I would not stop with the factors, and here is why: the factors are the one place where two *correct* implementations are allowed to disagree. Nothing in the model distinguishes a factor from its negation, so the central quantity to compare is not any individual factor but
 
 $$
 \hat R
@@ -276,9 +264,7 @@ U\rightarrow -U,
 \Lambda\rightarrow-\Lambda
 $$
 
-leaves $R$ unchanged.
-
-So the most useful end-to-end comparison is
+leaves $R$ unchanged. Comparing $\hat u_i$ across implementations can therefore report a catastrophic disagreement that is really a difference in convention, while comparing $\hat R$ reports the thing both programs are actually claiming about the data. So the most useful end-to-end comparison is
 
 $$
 \hat R^{\mathrm{ours}}
@@ -313,13 +299,11 @@ $$
 }.
 $$
 
-Both should be numerically tiny under a fully matched deterministic test.
+Both should be numerically tiny under a fully matched deterministic test. Reporting the maximum alongside the norm is deliberate: a relative Frobenius norm can hide a single badly wrong entry among thousands of correct ones, and a single badly wrong entry is exactly what an off-by-one produces.
 
 ### The ELBO is an independent diagnostic
 
-Posterior means can sometimes look similar even when one update is slightly wrong.
-
-The evidence lower bound,
+Posterior means can sometimes look similar even when one update is slightly wrong, particularly near a fixed point where everything is being pulled towards the same place from both sides. The evidence lower bound,
 
 $$
 \mathcal L(q)
@@ -329,9 +313,7 @@ E_q[\log p(Y,\Theta\mid X,C)]
 E_q[\log q(\Theta)],
 $$
 
-gives another view of the entire variational calculation.
-
-I therefore want to compare both
+gives another view of the entire variational calculation, and it has a property the parameters do not: it is a single number that every update contributes to, so it moves when anything is wrong. I therefore want to compare both
 
 $$
 \mathcal L^{(t)}_{\mathrm{ours}}
@@ -343,13 +325,7 @@ $$
 \mathcal L^{(t)}_{\mathrm{SURGE}}
 $$
 
-throughout optimization.
-
-If both programs start from the same state and execute the same updates, their ELBO trajectories should closely track each other.
-
-A useful diagnostic plot would have iteration on the horizontal axis and ELBO on the vertical axis, with one curve for each implementation.
-
-If disagreement first appears after a particular update, the problem becomes much easier to localize.
+throughout optimization rather than only at convergence. If both programs start from the same state and execute the same updates, their ELBO trajectories should closely track each other, and the iteration at which they stop tracking is worth more than the final gap. A useful diagnostic plot would have iteration on the horizontal axis and ELBO on the vertical axis, with one curve for each implementation. If disagreement first appears after a particular update, the problem becomes much easier to localize.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -527,9 +503,7 @@ If disagreement first appears after a particular update, the problem becomes muc
 
 ### A practical debugging hierarchy
 
-If the final fits disagree, I would not immediately inspect the entire optimizer.
-
-I would work from the smallest difference upward:
+Suppose the final fits disagree. The temptation is to open the optimizer and start reading, which is the least efficient thing available, because the failure could be in any of a dozen places and each one you rule out costs a full run. I would work from the smallest difference upward instead:
 
 1. confirm that the input matrices are identical;
 2. confirm that the initial parameter values are identical;
@@ -541,7 +515,7 @@ I would work from the smallest difference upward:
 8. continue through the random effects and precision updates;
 9. only then compare complete iterations.
 
-This converts
+Each step is cheap, and each one either clears a suspect or hands you the culprit. What the ladder really buys is a change in the shape of the problem. It converts
 
 > “My implementation does not match SURGE”
 
@@ -549,7 +523,7 @@ into something much more specific, such as
 
 > “The second moment used in the $u_i$ update differs after the $\lambda_s$ update.”
 
-That is the level at which a mathematical implementation bug becomes tractable.
+The first sentence is a mood. The second is a line number, and that is the level at which a mathematical implementation bug becomes tractable.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -612,33 +586,27 @@ Passing this check tells me something quite strong:
 
 > **The basic likelihood, Gaussian-prior updates, repeated-donor structure and variational machinery have been implemented consistently with the reference model.**
 
-It still says nothing about whether the empirical-Bayes extension is correct.
-
-That requires more local tests.
+It also tells me nothing whatsoever about the part of the model that is actually new. SURGE has no covariate-moderated prior to disagree with, so the entire empirical-Bayes half of the method is invisible to this test — it was switched off to run it. Everything below is about earning that half back, and it needs smaller, more local checks.
 
 ---
 
 ## 2. Does donor-balanced reparameterization leave $R$ unchanged?
 
-After fitting, we want each latent coordinate to have a donor-balanced mean of zero and variance of one.
+The previous check compared two programs. This one compares a program against itself, before and after a transformation that is supposed to change nothing anybody looks at — and that turns out to be a surprisingly sharp test, because the transformation touches all three of the quantities that make up the fit.
 
-Let
+The reason it exists at all is that $U$ and $\Lambda$ are not identified on their own. Stretch every coordinate by two, halve every loading, and the model makes identical predictions, so the raw numbers coming out of a fit carry an arbitrary scale. A convention has to be imposed before anything can be plotted or compared across runs, and after fitting we want each latent coordinate to have a donor-balanced mean of zero and variance of one. *Donor-balanced* is doing real work in that sentence. Donors are the independent unit for genetic inference, and a donor contributing three hundred cells should not therefore define the centre of the map, so let
 
 $$
 a_i=\frac{1}{D I_{d(i)}},
 $$
 
-where $I_{d(i)}$ is the number of measurements contributed by donor $d(i)$.
-
-These weights satisfy
+where $I_{d(i)}$ is the number of measurements contributed by donor $d(i)$. These weights satisfy
 
 $$
 \sum_i a_i=1,
 $$
 
-and every donor receives the same total weight.
-
-For factor $k$, define
+and every donor receives the same total weight regardless of how many cells survived quality control. For factor $k$, define
 
 $$
 c_k
@@ -680,11 +648,7 @@ $$
 \sum_k c_k\hat\lambda_{sk}.
 $$
 
-Why do we make all three changes?
-
-Because changing $U$ alone would change the fitted effects.
-
-The transformation is designed so that
+Why do we make all three changes? Because changing $U$ alone would change the fitted effects, which is the one thing this transformation must not do. Recentring the coordinate moves a constant amount of signal out of the interaction term, and that constant has to go somewhere — it goes into $\beta$. Rescaling the coordinate has to be undone in the loading. The transformation is designed so that
 
 $$
 \beta^\star_s
@@ -698,9 +662,7 @@ u^\star_{ik}\lambda^\star_{sk}
 \hat u_{ik}\hat\lambda_{sk}.
 $$
 
-It is useful to verify this algebra explicitly.
-
-For one factor,
+It is useful to verify this algebra explicitly rather than trusting the design, because the compensations are exactly the kind of bookkeeping that survives a careless refactor in a broken state. For one factor,
 
 $$
 u^\star_{ik}\lambda^\star_{sk}
@@ -711,7 +673,7 @@ h_k\hat\lambda_{sk}
 (\hat u_{ik}-c_k)\hat\lambda_{sk}.
 $$
 
-Adding the shifted intercept gives
+The scale cancels immediately, leaving a shift. Adding the shifted intercept gives
 
 $$
 \beta^\star_s
@@ -733,13 +695,11 @@ r^\star_{si}=\hat r_{si}.
 }
 $$
 
-The same argument applies factor by factor when $K>1$.
+The same argument applies factor by factor when $K>1$, which is worth checking rather than assuming, since a loop over $k$ is where an implementation is most likely to compensate a shift with the wrong factor's mean.
 
 ### The computational test
 
-This test does not even require simulated expression data.
-
-Generate or take arbitrary fitted values
+This test does not even require simulated expression data, which makes it one of the cheapest strong tests available. Generate or take arbitrary fitted values
 
 $$
 \hat\beta,\hat\Lambda,\hat U.
@@ -796,9 +756,7 @@ $$
 {1+\|R_{\mathrm{before}}\|_F}.
 $$
 
-But there are two additional assertions.
-
-After transformation,
+But an invariance that holds because nothing happened is not evidence of anything, and this is the trap in testing a transformation: the easiest way to leave $R$ untouched is to leave everything untouched. So there are two additional assertions, and they are the ones that give the first assertion its teeth. After transformation,
 
 $$
 \sum_i a_i u^\star_{ik}\approx0
@@ -812,7 +770,7 @@ a_i(u^\star_{ik})^2
 \approx1.
 $$
 
-So one unit test simultaneously checks both the **purpose** of the transformation and its **invariance**.
+Together these say the coordinate really was recentred and rescaled, and that $R$ survived it anyway. So one unit test simultaneously checks both the **purpose** of the transformation and its **invariance**, and neither half means much without the other. On a real rank-two fit the gap between the two is stark: the coordinate moves by nearly four times its own norm while the largest entry of $R$ moves by about $4\times10^{-16}$.
 
 <div class='lab wide' id='l0-reparam-lab'>
 <div class='lab-head'><span class='name'>Lab 1 · the donor-balanced transformation</span><span class='hint'>move the factors, and watch the fitted effects refuse to move</span></div>
@@ -860,13 +818,9 @@ $$
 h_k\approx0,
 $$
 
-the coordinate has essentially no variation.
+the coordinate has essentially no variation, and dividing by $h_k$ would be numerically meaningless — the transformation is not merely inaccurate there, it is undefined. The specification therefore removes factors with numerically zero $h_k$ rather than transforming them, and that case needs its own unit test. It is easy to leave untested precisely because it never arises on well-behaved simulated data, which is also the reason it will eventually arise on real data.
 
-Dividing by $h_k$ would be numerically meaningless. The specification therefore removes factors with numerically zero $h_k$.
-
-That case needs its own unit test.
-
-This check is specifically about the **posterior-mean fitted effect matrix**. It should not be interpreted as claiming that every variational posterior quantity is invariant under the transformation.
+One caveat about what has actually been established. This check is specifically about the **posterior-mean fitted effect matrix**. It should not be interpreted as claiming that every variational posterior quantity is invariant under the transformation; the posterior variances, for instance, are rescaled and have to be carried through separately.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -1387,9 +1341,9 @@ This check is specifically about the **posterior-mean fitted effect matrix**. It
 
 ## 3. Does unscaling return effects to the original phenotype units?
 
-The model is not fitted directly to the raw $Y$ and $X$.
+This is the least glamorous check on the page and possibly the most consequential, because it is the only one whose failure is invisible from inside the model. Everything up to this point can be perfect while the numbers that leave the program are wrong by a factor that varies from gene to gene.
 
-For pair $s$, define donor-balanced phenotype and genotype scales
+The model is not fitted directly to the raw $Y$ and $X$. For pair $s$, define donor-balanced phenotype and genotype scales
 
 $$
 q_s^2
@@ -1422,7 +1376,7 @@ $$
 \frac{X_{is}-\bar x_s}{h_s}.
 $$
 
-Suppose the fitted cis effect on this standardized scale is
+Standardizing is what makes pairs comparable during fitting, and it is what makes the output uninterpretable afterwards: an effect of $0.3$ on the fitting scale means something different for every pair. Suppose the fitted cis effect on this standardized scale is
 
 $$
 \widetilde r_{si}.
@@ -1477,11 +1431,11 @@ $$
 \operatorname{Var}(\widetilde r_{si}).
 $$
 
+That square is easy to drop, and dropping it produces intervals that are wrong by a pair-specific factor while remaining perfectly plausible in width.
+
 ### How I would test this
 
-I would create a tiny synthetic example where the answer is obvious.
-
-Suppose
+I would create a tiny synthetic example where the answer is obvious, because the point of the first test is to catch an inverted ratio, and an inverted ratio is only obvious when the numbers are. Suppose
 
 $$
 q_s=4,
@@ -1501,11 +1455,7 @@ r_{si}
 0.6.
 $$
 
-But testing the formula alone is too weak.
-
-A stronger test checks the contribution to the phenotype.
-
-On the fitting scale,
+But testing the formula alone is too weak, because it only checks that the code computes the formula I wrote in the test — if I have the ratio upside down in my head, both agree and both are wrong. A stronger test checks the contribution to the phenotype, which is a physical quantity that does not care which way up I wrote the ratio. On the fitting scale,
 
 $$
 q_s
@@ -1533,9 +1483,7 @@ q_s
 }
 $$
 
-I would generate many random values of $q_s,h_s,X_{is}$ and $\widetilde r_{si}$, apply both calculations independently, and require numerical agreement.
-
-Then repeat the same test for the posterior variance.
+I would generate many random values of $q_s,h_s,X_{is}$ and $\widetilde r_{si}$, apply both calculations independently, and require numerical agreement. Then repeat the same test for the posterior variance, which is where the forgotten square lives.
 
 <div class='lab wide' id='l0-unscale-lab'>
 <div class='lab-head'><span class='name'>Lab 2 · back to phenotype units</span><span class='hint'>the formula, and the contribution it has to reproduce</span></div>
@@ -1579,27 +1527,21 @@ $$
 h_s=0,
 $$
 
-there is no genotype variation and the pair cannot identify a genetic effect.
-
-If
+there is no genotype variation and the pair cannot identify a genetic effect. If
 
 $$
 q_s=0,
 $$
 
-the molecular phenotype has no variation.
+the molecular phenotype has no variation. Neither is really an unscaling problem. These pairs should be removed before fitting, rather than passed into the unscaling routine, and a separate test should verify that this filtering happens — otherwise the division by zero surfaces much later, wearing the costume of a numerical instability.
 
-These pairs should be removed before fitting, rather than passed into the unscaling routine.
-
-A separate test should verify that this filtering happens.
-
-The reason this check matters is practical. A method can internally estimate perfectly reasonable standardized coefficients while exporting biologically meaningless effect sizes if the final scale conversion is wrong.
+The reason this whole check matters is practical rather than mathematical. A method can internally estimate perfectly reasonable standardized coefficients while exporting biologically meaningless effect sizes if the final scale conversion is wrong, and nothing inside the fit will complain. The objective will decrease monotonically, the diagnostics will look fine, and the effect sizes in the manuscript will be wrong.
 
 ---
 
 ## 4. Does $K=1$ collapse to $K=0$ when $\lambda_s=0$?
 
-The $K=0$ model contains no cellular variation in genetic effects:
+Nested models give the cheapest strong tests available, because the answer is not approximately known, it is exactly known: one model is the other with a parameter switched off. The $K=0$ model contains no cellular variation in genetic effects:
 
 $$
 \widetilde Y_{is}
@@ -1634,9 +1576,7 @@ $$
 \lambda_s=0
 $$
 
-for every pair.
-
-Then
+for every pair. Then
 
 $$
 u_i\lambda_s=0
@@ -1665,6 +1605,8 @@ K=1,\ \lambda_s\equiv0
 K=0.
 }
 $$
+
+There is no tolerance to negotiate here. These are not two models that should give similar answers; they are the same model reached by two code paths, and the right assertion is equality, not closeness.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -1795,19 +1737,13 @@ $$
 
 ### This is a unit test, not a null simulation
 
-There is an important distinction here.
-
-For this Level 0 check, I would **force**
+There is an important distinction here, and it is one I have seen collapse in conversation more than once. For this Level 0 check, I would **force**
 
 $$
 \lambda_s=0
 $$
 
-and prevent the optimizer from changing it.
-
-I am not generating null data and asking whether the method estimates $\lambda_s\approx0$. That would be a Level 1 calibration question.
-
-Here the mathematical model has literally been reduced to $K=0$, so the two computational paths should give the same answer.
+and prevent the optimizer from changing it. I am not generating null data and asking whether the method estimates $\lambda_s\approx0$. That would be a Level 1 calibration question, it has a completely different failure mode, and it can only ever give a statistical answer. Here the mathematical model has literally been reduced to $K=0$, so the two computational paths should give the same answer to the last bit.
 
 Use exactly the same
 
@@ -1815,9 +1751,7 @@ $$
 Y,X,C,d(i)
 $$
 
-and the same hyperparameters.
-
-Then compare:
+and the same hyperparameters. Then compare:
 
 $$
 \hat\beta_s,
@@ -1839,19 +1773,17 @@ $$
 \hat\beta_s
 $$
 
-for every cell $i$.
+for every cell $i$; in other words, every column has the same value for pair $s$, and the map has flattened into a single average effect per pair.
 
-In other words, every column has the same value for pair $s$.
+I would **not** require the $u_i$ values themselves to agree with anything meaningful. Once all $\lambda_s=0$, the likelihood contains no information about $u_i$ whatsoever, so whatever the optimizer reports there is an artefact of the initialization and the prior, and asserting anything about it would be asserting something about the arbitrary. The important statement is the weaker and more useful one: that $u_i$ can no longer affect $R$ or the likelihood.
 
-I would **not** require the $u_i$ values themselves to agree with anything meaningful. Once all $\lambda_s=0$, the likelihood contains no information about $u_i$. The important statement is that $u_i$ can no longer affect $R$ or the likelihood.
-
-This check catches a surprisingly broad class of bugs: stale interaction terms, residual calculations that accidentally retain $u$, or factor contributions that are not properly removed when a loading is zero.
+This check catches a surprisingly broad class of bugs — stale interaction terms, residual calculations that accidentally retain $u$, or factor contributions that are not properly removed when a loading is zero. It also reaches one branch nothing else does. With every loading at zero, the coefficient update for $u$ receives zero precision from the likelihood, which is a division waiting to happen; this is the only path in the whole suite that visits it.
 
 ---
 
 ## 5. Does pair projection reproduce the same pair when nothing is actually new?
 
-The [previous post](/notes/2026/09/05/regulotypes-2-train-test/) introduced pair projection.
+The [previous post](/notes/2026/09/05/regulotypes-2-train-test/) introduced pair projection, and it is the piece of machinery the whole evaluation design leans on: every held-out gene in Level 2 reaches the map through this code. If it is subtly wrong, the generalization result is subtly wrong, and nothing downstream will say so.
 
 Once $U$ has been learned, a new pair can be placed on the map by keeping $U$ fixed and estimating
 
@@ -1890,9 +1822,7 @@ $$
 (u_i^\star)^\mathsf T\hat\lambda_{vg}.
 $$
 
-How do I know that this projection code is correct?
-
-Give it a pair whose answer is already known.
+How do I know that this projection code is correct? There is no truth to compare against for a genuinely new pair — that is the entire point of it being new. So give it a pair whose answer is already known, and the fit itself supplies one.
 
 ### Construct a self-projection test
 
@@ -1914,25 +1844,23 @@ $$
 }
 $$
 
+The pair was in the training set, its coordinates are the ones the fit produced, and so the projection has been handed the answer. Anything it reports other than the answer is its own doing.
+
 ### Matching the design matters
 
-This test only has a clean mathematical interpretation if the two paths solve the same conditional problem.
-
-The projection equation contains an additive term
+This test only has a clean mathematical interpretation if the two paths solve the same conditional problem, and getting them to is fiddlier than it sounds. The projection equation contains an additive term
 
 $$
 (u_i^\star)^\mathsf T\rho_g
 $$
 
-to account for genotype-independent association between the fixed coordinates and expression of the projected gene.
-
-Therefore, when constructing the strict unit test, I would ensure that the reference and projection pathways contain identical additive terms and priors. If one path includes $\rho_g$ and the other does not, exact equality is no longer a valid assertion.
+to account for genotype-independent association between the fixed coordinates and expression of the projected gene. That term belongs there for a new gene, and it does not exist in the reference fit. So when constructing the strict unit test, I would ensure that the reference and projection pathways contain identical additive terms and priors. If one path includes $\rho_g$ and the other does not, exact equality is no longer a valid assertion, and a perfectly correct projection will fail a test that was never entitled to pass.
 
 The cleanest implementation test is therefore:
 
 > Given the same fixed $U$, same pair, same design matrix, same prior specification and same starting values, do the ordinary conditional-fit routine and projection routine return the same $\beta_s,\lambda_s$ and $R_{s:}$?
 
-That isolates the **projection software** rather than confounding it with a modeling difference.
+That isolates the **projection software** rather than confounding it with a modeling difference — which is the recurring theme of this whole page, and the thing that is hardest to hold onto while a test is failing and you want it to pass.
 
 A useful diagnostic plot is simply
 
@@ -1943,6 +1871,8 @@ $$
 $$
 
 Every point should lie on the identity line.
+
+This is the one check here that took real work to get onto that line, and the reason is worth recording because it is a conceptual error rather than a coding one. Holding the coordinates fixed does not mean treating them as known constants. They are posterior quantities, and the precision entering the pair-specific update is a *second* moment, so what the projection needs is $E[(u^\star)^2] = (u^\star)^2 + \operatorname{Var}(u^\star)$ and not the squared mean. Fixed, in this setting, means not re-estimated — it does not mean certain. Using the squared mean alone leaves a 27% error, which is far too large to be rounding and far too small to look like a broken function; with the second moment the same test lands near $10^{-4}$.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -2156,11 +2086,9 @@ Every point should lie on the identity line.
 
 ## 6. Does the cEBNM posterior update agree with direct numerical integration?
 
-This is the most important local test for the new empirical-Bayes machinery.
+Everything so far has compared one piece of my code against another piece of my code, or against SURGE, which has no covariate-moderated prior at all. This is where the new machinery finally gets checked, and it is the most important local test on the page.
 
-The updates for $u_{ik}$ and $\lambda_{sk}$ are both reduced to normal-means problems.
-
-For a generic coefficient $a_j$, the pseudo-observation satisfies
+The updates for $u_{ik}$ and $\lambda_{sk}$ are both reduced to normal-means problems. For a generic coefficient $a_j$, the pseudo-observation satisfies
 
 $$
 \hat a_j\mid a_j
@@ -2187,11 +2115,9 @@ $$
 (\theta_0+q_j^\mathsf T\theta)
 $$
 
-can depend on measured features.
+can depend on measured features, which is the whole idea: a coefficient with informative annotations gets a different prior probability of being nonzero from one without.
 
-The implementation uses closed-form posterior calculations.
-
-Conditional on the coefficient belonging to the nonzero component,
+The implementation uses closed-form posterior calculations. Conditional on the coefficient belonging to the nonzero component,
 
 $$
 m_{j1}
@@ -2244,15 +2170,11 @@ w_j
 (v_{j1}+m_{j1}^2).
 $$
 
-These equations look simple enough that it is tempting to trust them.
-
-I would not.
-
-They sit inside every alternating update for $U$ and $\Lambda$. A small mistake here propagates through the entire model.
+These equations look simple enough that it is tempting to trust them. I would not. They sit inside every alternating update for $U$ and $\Lambda$, so a small mistake here does not stay small — it is applied thousands of times and propagates through the entire model, and it will express itself as a shrinkage that is slightly too strong or too weak, which is indistinguishable from a modelling choice.
 
 ### Build an independent numerical answer
 
-Instead of using the closed-form formulas, calculate the posterior directly from Bayes' rule.
+The way out is to compute the same posterior by a route that shares no algebra with the one being tested. Instead of using the closed-form formulas, calculate the posterior directly from Bayes' rule.
 
 The zero component has unnormalized posterior mass
 
@@ -2320,7 +2242,7 @@ E[a_j^2]_{\mathrm{num}}
 \frac{M_2}{Z_0+Z_1}.
 $$
 
-Now compare these with the analytic implementation.
+Now compare these with the analytic implementation. One warning, learned the hard way, about the checker rather than the code: the integration window has to follow the posterior, not the prior. Integrating over a fixed multiple of $\omega$ looks reasonable and quietly loses the entire integrand once $|\hat a_j|$ is large, because the mass sits near $m_{j1}$ and not near zero. The symptom is a disagreement of order one that appears only in the tails of the parameter space — which reads exactly like a real bug in the update, and sends you to debug code that was correct. Centring the window on $m_{j1}\pm 14\sqrt{v_{j1}}$ makes the problem disappear.
 
 <div class='lab wide' id='l0-cebnm-lab'>
 <div class='lab-head'><span class='name'>Lab 3 · the posterior, computed two ways</span><span class='hint'>closed form on the left of each pair, numerical integration on the right</span></div>
@@ -2358,9 +2280,7 @@ Now compare these with the analytic implementation.
 
 ### Do not test only one friendly case
 
-I would create a grid covering very different posterior regimes.
-
-For example:
+A single well-conditioned setting will pass even with a badly wrong implementation, because near the middle of the parameter space almost everything agrees with almost everything. I would create a grid covering very different posterior regimes. For example:
 
 * $\hat a_j\approx0$ and $|\hat a_j|\gg s_j$;
 * small and large $s_j$;
@@ -2385,10 +2305,10 @@ w_j,
 \qquad
 E[a_j],
 \qquad
-E[a_j^2].
+E[a_j^2],
 $$
 
-I would also compare the marginal likelihood, because that is the quantity used to estimate the prior parameters.
+and I would also compare the marginal likelihood, because that is the quantity used to estimate the prior parameters — an error there is invisible in the posterior moments at fixed $\pi$ and $\omega$, and then corrupts every $\pi$ and $\omega$ the method chooses for itself.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -2485,15 +2405,13 @@ I would also compare the marginal likelihood, because that is the quantity used 
 </div>
 
 
-This is a particularly satisfying implementation check because the numerical integration does not need to know anything about the derivation used by the production code.
-
-Two completely different computational routes should arrive at the same posterior.
+This is a particularly satisfying implementation check, and the satisfaction is not aesthetic. The numerical integration does not need to know anything about the derivation used by the production code; it only needs Bayes' rule and a quadrature routine. Two completely different computational routes arriving at the same posterior is the strongest evidence available that the derivation itself — not just its transcription — is right.
 
 ---
 
 ## 7. Does the point-normal update become the Gaussian update when $\pi=1$?
 
-There is another useful reduction inside the empirical-Bayes update.
+There is another useful reduction inside the empirical-Bayes update, and it does something none of the others do: it connects the new code back to the code that was already checked against SURGE.
 
 Set
 
@@ -2580,9 +2498,7 @@ m
 \hat a_j.
 $$
 
-So the two updates are exactly the same.
-
-This gives another strict identity:
+So the two updates are exactly the same. Written in precisions the Gaussian update looks nothing like the shrinkage factor above, which is part of why the identity is worth stating: the two expressions come from different derivations and it is not obvious by inspection that they agree. This gives another strict identity:
 
 $$
 \boxed{
@@ -2608,9 +2524,7 @@ $$
 \pi_j=1,
 $$
 
-and once using an independent Gaussian update.
-
-Compare the posterior mean and second moment.
+and once using an independent Gaussian update — independent meaning written from $\kappa$ and $p$ rather than by calling the same helper, since a shared helper would make the test agree with itself. Compare the posterior mean and second moment.
 
 <div class='lab wide' id='l0-pi-one-lab'>
 <div class='lab-head'><span class='name'>Lab 4 · the spike disappearing</span><span class='hint'>push π to one and the two updates become the same arithmetic</span></div>
@@ -2646,9 +2560,7 @@ Compare the posterior mean and second moment.
 </div>
 
 
-This test is especially useful because it forms a bridge between the new code and the already checked Gaussian/SURGE path.
-
-Conceptually, the verification chain becomes
+This test earns its place because of where it sits rather than what it proves on its own. It forms a bridge between the new code and the already checked Gaussian/SURGE path. Conceptually the verification chain becomes
 
 $$
 \boxed{
@@ -2662,7 +2574,7 @@ $$
 }
 $$
 
-If every adjacent pair agrees, it becomes much easier to trust the more complicated endpoint.
+If every adjacent pair agrees, it becomes much easier to trust the more complicated endpoint. No single link reaches from SURGE to the covariate-moderated prior — that comparison does not exist, because SURGE has no such prior — but three short links do, and each one is checkable on its own.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -2707,7 +2619,7 @@ If every adjacent pair agrees, it becomes much easier to trust the more complica
 
 ## Putting the checks together
 
-I find it useful to view Level 0 not as seven unrelated tests but as a chain of reductions and invariances.
+Written out one after another these read like seven unrelated chores. I find it more useful to view Level 0 not as seven unrelated tests but as a chain of reductions and invariances, because seen that way it is obvious what each one is buying and, more importantly, what is left over when they all pass.
 
 ### End-to-end reference
 
@@ -2809,7 +2721,7 @@ I would summarize the actual outputs of the Level 0 analysis in one compact tabl
 | cEBNM numerical integration   | $w,E[a],E[a^2]$, marginal likelihood                  |
 | $\pi=1$ reduction           | Gaussian posterior mean and variance                      |
 
-A final Level 0 figure could summarize all seven checks as small panels with identity lines or near-zero residuals. I would prefer that over reporting only “all unit tests passed,” because the plots make the numerical agreement inspectable.
+A final Level 0 figure could summarize all seven checks as small panels with identity lines or near-zero residuals. I would prefer that over reporting only “all unit tests passed,” because the plots make the numerical agreement inspectable, and because the spread between the panels is itself informative. Six of these are exact identities and land where exact identities land, around $10^{-16}$. One does not: the self-projection sits near $10^{-4}$, because it is the only check that re-solves an optimization rather than evaluating a closed form. That gap is not a defect, but it is the kind of thing worth understanding rather than averaging away, since a number that ought to be $10^{-16}$ and is not is the first sign that something is wrong.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -2956,7 +2868,7 @@ A final Level 0 figure could summarize all seven checks as small panels with ide
 
 ## What passing Level 0 means
 
-If all of these checks pass, I can make a fairly precise statement:
+If all of these checks pass, I can make a fairly precise statement, and I want to be careful to make exactly that one and not a larger one:
 
 > **The code appears to implement the mathematical model that I wrote down.**
 
@@ -2970,19 +2882,9 @@ In particular, I have evidence that:
 * the empirical-Bayes posterior moments are numerically correct;
 * and the new prior machinery reduces back to the Gaussian case when it should.
 
-But none of these checks asks whether the estimated regulotype is scientifically meaningful.
+But none of these checks asks whether the estimated regulotype is scientifically meaningful, and it is worth being blunt about how much room that leaves. A perfectly coded algorithm can still fail to recover a weak signal. It can estimate an unstable map when there are too few donors, struggle when there are too few independent reference loci, and recover the wrong cellular geometry when the statistical problem is poorly identified. None of those would register anywhere on this page. Every check here would still pass, and pass at machine precision.
 
-A perfectly coded algorithm can still fail to recover a weak signal.
-
-It can estimate an unstable map when there are too few donors.
-
-It can struggle when there are too few independent reference loci.
-
-And it can recover the wrong cellular geometry when the statistical problem is poorly identified.
-
-Those are different questions.
-
-Level 0 asks:
+Those are different questions. Level 0 asks:
 
 > **Did I implement the mathematics correctly?**
 
