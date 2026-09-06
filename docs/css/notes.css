@@ -141,9 +141,17 @@
 .notes-note .highlight * {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
-.notes-note mjx-container,
-.notes-note mjx-container * {
-  font-family: revert;
+
+/* Maths is left entirely to MathJax. It ships its own author-origin rules
+   setting MJXTEX on every glyph element, and it positions accents from that
+   font's metrics -- so `\hat r` only sits over the r if the r is actually
+   drawn in the TeX face. An earlier `font-family: revert` here outranked
+   those rules and dropped the whole expression to the UA default, which both
+   spoiled the face and slid every hat off its letter. The one thing worth
+   saying is that the container must not inherit the hand face, because
+   \text{} runs fall back to it. */
+.notes-note mjx-container {
+  font-family: 'STIX Two Text', 'Times New Roman', Times, serif;
 }
 
 .notes-site {

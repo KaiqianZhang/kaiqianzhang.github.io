@@ -742,24 +742,27 @@ Or, visually,
 
 $$
 \boxed{
-\begin{array}{c|cc}
+\begin{array}{r|cc}
+\rule{0pt}{3ex}
 &
-\text{training genes}
+\ \ \text{training genes}\ \
 &
-\text{test genes}
-\\
+\ \ \text{test genes}\ \
+\\[0.4ex]
 \hline
-\text{training donors}
+\rule{0pt}{3.2ex}
+\text{training donors}\ \
 &
 \text{learn }R
 &
 \text{add rows}
-\\
-\text{test donors}
+\\[0.6ex]
+\text{test donors}\ \
 &
 \text{add columns}
 &
 \text{evaluate}
+\\[0.5ex]
 \end{array}
 }
 $$
