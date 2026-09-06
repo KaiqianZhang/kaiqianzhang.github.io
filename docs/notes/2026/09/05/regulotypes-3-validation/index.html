@@ -75,7 +75,7 @@
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
-                    <p>38 min read</p>
+                    <p>40 min read</p>
                 </div>
                 <div class='byline'>
                     <h3>Tags</h3>
@@ -226,16 +226,7 @@ b_{d(i)s}
 +
 \epsilon_{is}.
 $$
-<p>The terms are:</p>
-<ul>
-  <li>$\widetilde Y_{is}$: scaled molecular phenotype for measurement $i$ and reference pair $s$;</li>
-  <li>$\widetilde X_{is}$: corresponding scaled donor genotype;</li>
-  <li>$c_i^\mathsf{T}a_s$: additive covariate contribution;</li>
-  <li>$b_{d(i)s}$: donor-specific random intercept;</li>
-  <li>$\beta_s$: average cis effect;</li>
-  <li>$u_i$: latent cellular context;</li>
-  <li>$\lambda_s$: pair-specific loading on that context.</li>
-</ul>
+<p>Here $\widetilde Y_{is}$ is the scaled molecular phenotype for measurement $i$ at reference pair $s$, and $\widetilde X_{is}$ the corresponding scaled donor genotype. The term $c_i^\mathsf{T}a_s$ is the additive covariate contribution and $b_{d(i)s}$ the donor-specific random intercept, both of which exist to absorb variation that has nothing to do with genotype. Everything the method is actually about sits inside the bracket: $\beta_s$ is the average cis effect of the pair, $u_i$ is the latent cellular context of measurement $i$, and $\lambda_s$ says how strongly that particular pair responds to it.</p>
 <p>Eventually the Gaussian priors on $u_i$ and $\lambda_s$ get replaced with covariate-moderated empirical Bayes priors, and that replacement is the entire contribution of the project. But it is worth pausing before changing anything, because a much simpler question is sitting right here:</p>
 <blockquote>
 <p>If I turn those new priors off and use exactly the Gaussian priors used by SURGE, does my implementation reproduce SURGE?</p>
@@ -253,21 +244,7 @@ $$
 <p>Scaling, the covariate block, the donor random intercept, every variational update, the precision parameters and the reconstruction of $R$ all sit inside that arrow. If the two implementations disagree here, there is little reason to debug the more complicated empirical-Bayes version yet — whatever is broken is broken further down. The flip side is that a test this wide tells me almost nothing about <em>where</em> the problem is, which is why the second half of this section is a procedure for narrowing it.</p>
 <h3 id='match-the-problem-before-comparing-the-answers'>Match the problem before comparing the answers</h3>
 <p>The two programs must receive the <strong>same mathematical problem</strong>, and I want to be pedantic about this, because a mismatch in the inputs produces exactly the same symptom as a bug in the code: two numbers that differ. Hours disappear into debugging an update that was correct all along and had only received a differently centred genotype matrix.</p>
-<p>That means matching:</p>
-<ul>
-  <li>the same reference variant–gene pairs;</li>
-  <li>the same $\widetilde Y$;</li>
-  <li>the same $\widetilde X$;</li>
-  <li>the same covariate matrix $C$;</li>
-  <li>the same donor index $d(i)$;</li>
-  <li>the same $K$;</li>
-  <li>the same Gaussian priors;</li>
-  <li>the same hyperparameters;</li>
-  <li>the same treatment of donor random effects;</li>
-  <li>the same initialization when possible;</li>
-  <li>the same update order;</li>
-  <li>the same stopping rule.</li>
-</ul>
+<p>Both programs need the same reference variant–gene pairs, the same $\widetilde Y$ and $\widetilde X$, the same covariate matrix $C$ and donor index $d(i)$, the same $K$, the same Gaussian priors and hyperparameters, and the same treatment of the donor random effect. Where it can be arranged they should also share an initialization, an update order and a stopping rule — those three are not part of the mathematical problem, but they are part of the answer a variational algorithm returns, and leaving them free turns an exact comparison into an approximate one.</p>
 <p>For the implementation comparison, I would begin with</p>
 $$
 K=1.
@@ -683,13 +660,7 @@ u^\star_{ik}\lambda^\star_{sk}
 -
 c_k\hat\lambda_{sk},
 $$
-<p>so</p>
-$$
-\boxed{
-r^\star_{si}=\hat r_{si}.
-}
-$$
-<p>The same argument applies factor by factor when $K>1$, which is worth checking rather than assuming, since a loop over $k$ is where an implementation is most likely to compensate a shift with the wrong factor's mean.</p>
+<p>so <strong>$r^\star_{si}=\hat r_{si}$</strong>: the shift the intercept absorbed is exactly the shift the coordinate lost. The same argument applies factor by factor when $K>1$, which is worth checking rather than assuming, since a loop over $k$ is where an implementation is most likely to compensate a shift with the wrong factor's mean.</p>
 <h3 id='the-computational-test'>The computational test</h3>
 <p>This test does not even require simulated expression data, which makes it one of the cheapest strong tests available. Generate or take arbitrary fitted values</p>
 $$
@@ -719,13 +690,7 @@ R_{\mathrm{after}}
 -
 R_{\mathrm{before}}.
 $$
-<p>The primary assertion is</p>
-$$
-\boxed{
-\Delta_R\approx0.
-}
-$$
-<p>I would test both</p>
+<p>The primary assertion is <strong>$\Delta_R\approx0$</strong>, and I would test both</p>
 $$
 \max |\Delta_R|
 $$
@@ -1348,15 +1313,7 @@ q_s
 \frac{X_{is}-\bar x_s}{h_s}
 \widetilde r_{si}.
 $$
-<p>Therefore the effect measured per unit of the original genotype is</p>
-$$
-\boxed{
-r_{si}
-=
-\frac{q_s}{h_s}
-\widetilde r_{si}.
-}
-$$
+<p>Therefore the effect measured per unit of the original genotype is <strong>$r_{si} = (q_s/h_s)\,\widetilde r_{si}$</strong> — the ratio of the two scales, and nothing more.</p>
 <p>The same transformation applies to the posterior mean:</p>
 $$
 E[r_{si}]
@@ -1403,7 +1360,6 @@ $$
 $$
 <p>That is,</p>
 $$
-\boxed{
 q_s
 \widetilde X_{is}
 \widetilde r_{si}
@@ -1411,7 +1367,6 @@ q_s
 (X_{is}-\bar x_s)
 \frac{q_s}{h_s}
 \widetilde r_{si}.
-}
 $$
 <p>I would generate many random values of $q_s,h_s,X_{is}$ and $\widetilde r_{si}$, apply both calculations independently, and require numerical agreement. Then repeat the same test for the posterior variance, which is where the forgotten square lives.</p>
 <div class='lab wide' id='l0-unscale-lab'>
@@ -1504,14 +1459,7 @@ b_{d(i)s}
 +
 \epsilon_{is}.
 $$
-<p>Therefore</p>
-$$
-\boxed{
-K=1,\ \lambda_s\equiv0
-\quad\Longrightarrow\quad
-K=0.
-}
-$$
+<p>Therefore <strong>$K=1$ with $\lambda_s\equiv0$ is the $K=0$ model</strong>, not an approximation to it.</p>
 <p>There is no tolerance to negotiate here. These are not two models that should give similar answers; they are the same model reached by two code paths, and the right assertion is equality, not closeness.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -1714,14 +1662,7 @@ $$
   <li>Fit its pair-specific coefficients.</li>
   <li>Compare the resulting cis-effect profile with the reference-pair calculation.</li>
 </ol>
-<p>The target is</p>
-$$
-\boxed{
-\hat R^{\mathrm{projection}}_{s:}
-\approx
-\hat R^{\mathrm{reference}}_{s:}.
-}
-$$
+<p>The target is <strong>$\hat R^{\mathrm{projection}}_{s:} \approx \hat R^{\mathrm{reference}}_{s:}$</strong>.</p>
 <p>The pair was in the training set, its coordinates are the ones the fit produced, and so the projection has been handed the answer. Anything it reports other than the answer is its own doing.</p>
 <h3 id='matching-the-design-matters'>Matching the design matters</h3>
 <p>This test only has a clean mathematical interpretation if the two paths solve the same conditional problem, and getting them to is fiddlier than it sounds. The projection equation contains an additive term</p>
@@ -2105,25 +2046,15 @@ $$
 </div>
 </div>
 <h3 id='do-not-test-only-one-friendly-case'>Do not test only one friendly case</h3>
-<p>A single well-conditioned setting will pass even with a badly wrong implementation, because near the middle of the parameter space almost everything agrees with almost everything. I would create a grid covering very different posterior regimes. For example:</p>
+<p>A single well-conditioned setting will pass even with a badly wrong implementation, because near the middle of the parameter space almost everything agrees with almost everything. I would sweep a grid instead: $\hat a_j$ near zero and $\hat a_j$ far out past $s_j$, small and large $s_j$, small and large $\omega$, $\pi_j$ at $0.01$, $0.5$ and $0.99$, and both signs of $\hat a_j$. The settings are not the point, though. What I am covering is the <em>posterior</em>, and between them those choices produce one that is</p>
 <ul>
-  <li>$\hat a_j\approx0$ and $|\hat a_j|\gg s_j$;</li>
-  <li>small and large $s_j$;</li>
-  <li>small and large $\omega$;</li>
-  <li>$\pi_j=0.01$;</li>
-  <li>$\pi_j=0.5$;</li>
-  <li>$\pi_j=0.99$;</li>
-  <li>positive and negative $\hat a_j$.</li>
-</ul>
-<p>This produces cases where the posterior is:</p>
-<ul>
-  <li>almost entirely zero;</li>
-  <li>uncertain between zero and nonzero;</li>
+  <li>almost entirely the point mass at zero;</li>
+  <li>genuinely undecided between zero and nonzero;</li>
   <li>almost certainly nonzero;</li>
   <li>strongly shrunk;</li>
-  <li>weakly shrunk.</li>
+  <li>barely shrunk at all.</li>
 </ul>
-<p>For every case, compare</p>
+<p>Those five are where two implementations part company, and the middle one most of all, because that is where the weight $w_j$ is doing real work rather than saturating. For every case, compare</p>
 $$
 w_j,
 \qquad
@@ -2293,14 +2224,7 @@ m
 {\omega^2+s_j^2}
 \hat a_j.
 $$
-<p>So the two updates are exactly the same. Written in precisions the Gaussian update looks nothing like the shrinkage factor above, which is part of why the identity is worth stating: the two expressions come from different derivations and it is not obvious by inspection that they agree. This gives another strict identity:</p>
-$$
-\boxed{
-\text{point-normal cEBNM with }\pi=1
-=
-\text{Gaussian normal-means update}.
-}
-$$
+<p>So the two updates are exactly the same. Written in precisions the Gaussian update looks nothing like the shrinkage factor above, which is part of why the identity is worth stating: the two expressions come from different derivations and it is not obvious by inspection that they agree. This gives another strict identity: <strong>the point-normal cEBNM at $\pi=1$ is the Gaussian normal-means update</strong>, not an approximation of it.</p>
 <h3 id='computational-test'>Computational test</h3>
 <p>Generate many combinations of</p>
 $$
@@ -2347,7 +2271,6 @@ $$
 </div>
 <p>This test earns its place because of where it sits rather than what it proves on its own. It forms a bridge between the new code and the already checked Gaussian/SURGE path. Conceptually the verification chain becomes</p>
 $$
-\boxed{
 \text{SURGE}
 \longleftrightarrow
 \text{our Gaussian update}
@@ -2355,7 +2278,6 @@ $$
 \text{cEBNM at }\pi=1
 \longleftrightarrow
 \text{general point-normal cEBNM}.
-}
 $$
 <p>If every adjacent pair agrees, it becomes much easier to trust the more complicated endpoint. No single link reaches from SURGE to the covariate-moderated prior — that comparison does not exist, because SURGE has no such prior — but three short links do, and each one is checkable on its own.</p>
 <div class='nfig wide'>
@@ -2398,73 +2320,9 @@ $$
 <hr>
 <h2 id='putting-the-checks-together'>Putting the checks together</h2>
 <p>Written out one after another these read like seven unrelated chores. I find it more useful to view Level 0 not as seven unrelated tests but as a chain of reductions and invariances, because seen that way it is obvious what each one is buying and, more importantly, what is left over when they all pass.</p>
-<h3 id='end-to-end-reference'>End-to-end reference</h3>
-$$
-\boxed{
-\text{Gaussian regulotype implementation}
-\approx
-\text{released SURGE implementation}
-}
-$$
-<p>This checks the basic likelihood and variational machinery.</p>
-<h3 id='parameterization-invariant'>Parameterization invariant</h3>
-$$
-\boxed{
-(\beta,\Lambda,U)
-\rightarrow
-(\beta^\star,\Lambda^\star,U^\star)
-\quad\text{but}\quad
-R^\star=R
-}
-$$
-<p>This checks donor-balanced reparameterization.</p>
-<h3 id='unit-conversion-invariant'>Unit conversion invariant</h3>
-$$
-\boxed{
-\widetilde r_{si}
-\rightarrow
-r_{si}
-=
-\frac{q_s}{h_s}\widetilde r_{si}
-}
-$$
-<p>This checks that reported effects return to the original molecular phenotype units.</p>
-<h3 id='nested-model-reduction'>Nested-model reduction</h3>
-$$
-\boxed{
-K=1,\lambda=0
-\rightarrow
-K=0
-}
-$$
-<p>This checks that the interaction component disappears exactly when it should.</p>
-<h3 id='projection-self-consistency'>Projection self-consistency</h3>
-$$
-\boxed{
-\text{project an existing pair using its existing coordinates}
-\rightarrow
-\text{recover the same cis-effect profile}
-}
-$$
-<p>This checks the machinery that will later be used for held-out genes.</p>
-<h3 id='local-posterior-correctness'>Local posterior correctness</h3>
-$$
-\boxed{
-\text{analytic cEBNM posterior}
-=
-\text{numerically integrated posterior}
-}
-$$
-<p>This checks the new empirical-Bayes calculation directly.</p>
-<h3 id='prior-family-reduction'>Prior-family reduction</h3>
-$$
-\boxed{
-\pi=1
-\rightarrow
-\text{Gaussian update}
-}
-$$
-<p>This connects the empirical-Bayes implementation back to the Gaussian implementation.</p>
+<p>Three of them are reductions to something already trusted. The Gaussian fit reducing to the released SURGE implementation covers the basic likelihood and the variational machinery, and it is the only link on this page that reaches outside my own code. The point-normal prior reducing to the Gaussian update at $\pi=1$ covers the new prior machinery, and it earns its place mostly through where it attaches: it hands the empirical-Bayes half of the method back to the half SURGE has already checked. The third, $K=1$ with $\lambda=0$ collapsing to $K=0$, stays inside my own code but is exact, and it says the interaction component disappears precisely when it should rather than merely becoming small.</p>
+<p>Three are invariances, and each one guards a different kind of arbitrariness. Donor-balanced reparameterization moves $(\beta,\Lambda,U)$ a long way and has to leave $R$ exactly where it was, which is what makes the coordinates safe to plot. Unscaling carries an effect from the fitting scale back into phenotype units and has to reproduce the same contribution to the phenotype by either route, which is what makes the numbers safe to report. Self-projection re-solves a pair the fit already knows and has to return the profile the fit already assigned it — the same machinery that will later carry held-out genes onto the map, tested in the one place where the answer happens to be available.</p>
+<p>The seventh belongs to neither group. Comparing the analytic cEBNM posterior against a numerical integration of the same posterior is the only check here where a second, genuinely independent computation of the same quantity exists. Every other test on this page would still pass if I had misread the specification and implemented my misreading consistently. That one would not.</p>
 <p>I would summarize the actual outputs of the Level 0 analysis in one compact table:</p>
 <table>
 <thead><tr><th>Check</th><th>Quantity that should agree</th></tr></thead>
@@ -2624,17 +2482,8 @@ $$
 <blockquote>
 <p><strong>The code appears to implement the mathematical model that I wrote down.</strong></p>
 </blockquote>
-<p>In particular, I have evidence that:</p>
-<ul>
-  <li>the baseline likelihood agrees with its SURGE reference implementation;</li>
-  <li>the factor reparameterization does not alter $R$;</li>
-  <li>fitted effects are returned to the correct phenotype scale;</li>
-  <li>the low-rank model reduces correctly when its interaction disappears;</li>
-  <li>the projection machinery solves the intended conditional problem;</li>
-  <li>the empirical-Bayes posterior moments are numerically correct;</li>
-  <li>and the new prior machinery reduces back to the Gaussian case when it should.</li>
-</ul>
-<p>But none of these checks asks whether the estimated regulotype is scientifically meaningful, and it is worth being blunt about how much room that leaves. A perfectly coded algorithm can still fail to recover a weak signal. It can estimate an unstable map when there are too few donors, struggle when there are too few independent reference loci, and recover the wrong cellular geometry when the statistical problem is poorly identified. None of those would register anywhere on this page. Every check here would still pass, and pass at machine precision.</p>
+<p>That sentence covers a great deal and promises very little. The baseline likelihood agrees with an implementation somebody else wrote; the reparameterization leaves $R$ alone; effects come back in the right phenotype units; the interaction term empties exactly when it should; the projection solves the conditional problem it claims to; the empirical-Bayes moments are what two unrelated computations both say they are; and the new prior collapses onto the old one where the two are supposed to meet.</p>
+<p>None of that asks whether the estimated regulotype is scientifically meaningful, and it is worth being blunt about how much room that leaves. A perfectly coded algorithm can still fail to recover a weak signal. It can estimate an unstable map when there are too few donors, struggle when there are too few independent reference loci, and recover the wrong cellular geometry when the statistical problem is poorly identified. None of those would register anywhere on this page. Every check here would still pass, and pass at machine precision.</p>
 <p>Those are different questions. Level 0 asks:</p>
 <blockquote>
 <p><strong>Did I implement the mathematics correctly?</strong></p>
