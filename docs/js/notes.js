@@ -1775,6 +1775,868 @@
   }
 
   // =========================================================================
+  // L0a. Lab: the donor-balanced transformation
+  // =========================================================================
+
+  /* (S20) written out. The weights are a_i = 1/(D * I_{d(i)}), so every donor
+     carries total weight 1/D whatever its size; c_k and h_k are that weighted
+     mean and spread; and the three substitutions are constructed so that
+     beta* + u* lambda* reproduces beta + u lambda entry for entry. Nothing is
+     read from a table -- R is rebuilt both ways on every drag and differenced. */
+
+  var L0R_SIZES = {
+    equal:   [6, 6, 6, 6, 6],
+    uneven:  [2, 4, 6, 8, 10],
+    extreme: [1, 1, 2, 4, 22]
+  };
+
+  function initL0ReparamLab() {
+    var root = document.getElementById('l0-reparam-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var beta = $(root, '#l0r-beta'), lam = $(root, '#l0r-lam');
+    var centre = $(root, '#l0r-centre'), spread = $(root, '#l0r-spread');
+    var sizes = segment(root, '.seg-l0r-sizes', function () { draw(); });
+
+    function shape(i) {
+      // deterministic, so the same cell sits in the same place on every reload
+      return Math.sin(i * 1.7) + 0.42 * Math.cos(i * 0.93) + 0.18 * Math.sin(i * 3.1);
+    }
+
+    function draw() {
+      var counts = L0R_SIZES[sizes() || 'equal'] || L0R_SIZES.equal;
+      var D = counts.length, i, k;
+      var donor = [];
+      for (k = 0; k < D; k++) {
+        for (i = 0; i < counts[k]; i++) { donor.push(k); }
+      }
+      var I = donor.length;
+      var b = parseFloat(beta.value), l = parseFloat(lam.value);
+      var c0 = parseFloat(centre.value), sp = parseFloat(spread.value);
+
+      var a = [], u = [];
+      for (i = 0; i < I; i++) {
+        a.push(1 / (D * counts[donor[i]]));
+        u.push(c0 + sp * shape(i));
+      }
+      // (S20): the donor-balanced mean and spread of the coordinate
+      var c = 0;
+      for (i = 0; i < I; i++) { c += a[i] * u[i]; }
+      var h2 = 0;
+      for (i = 0; i < I; i++) { h2 += a[i] * (u[i] - c) * (u[i] - c); }
+      var h = Math.sqrt(h2);
+      var degenerate = !(h > 1e-9);
+
+      var us = [], Rb = [], Ra = [], dmax = 0, mAfter = 0, vAfter = 0, move = 0, un = 0;
+      var ls = h * l, bs = b + c * l;
+      for (i = 0; i < I; i++) {
+        us.push(degenerate ? 0 : (u[i] - c) / h);
+        Rb.push(b + u[i] * l);
+        Ra.push(bs + us[i] * ls);
+        dmax = Math.max(dmax, Math.abs(Ra[i] - Rb[i]));
+        mAfter += a[i] * us[i];
+        vAfter += a[i] * us[i] * us[i];
+        move += (us[i] - u[i]) * (us[i] - u[i]);
+        un += u[i] * u[i];
+      }
+      move = un > 0 ? Math.sqrt(move / un) : 0;
+
+      function fmt(v) {
+        if (Math.abs(v) < 1e-12) { return v === 0 ? '0.0e+00' : v.toExponential(1); }
+        return Math.abs(v) < 1e-4 ? v.toExponential(1) : v.toFixed(4);
+      }
+      $(root, '#l0r-beta-v').textContent = b.toFixed(2);
+      $(root, '#l0r-lam-v').textContent = l.toFixed(2);
+      $(root, '#l0r-centre-v').textContent = c0.toFixed(2);
+      $(root, '#l0r-spread-v').textContent = sp.toFixed(2);
+      $(root, '#l0r-dr').textContent = fmt(dmax);
+      $(root, '#l0r-mean').textContent = degenerate ? '—' : fmt(mAfter);
+      $(root, '#l0r-var').textContent = degenerate ? '—' : vAfter.toFixed(4);
+      $(root, '#l0r-move').textContent = degenerate ? '—' : (move.toFixed(2) + '×');
+
+      var verdict = $(root, '#l0r-verdict');
+      if (degenerate) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'h is numerically zero: the coordinate has no donor-balanced ' +
+            'variation at all, so dividing by it is meaningless. The specification drops ' +
+            'a factor in this state rather than transforming it, and this is the case ' +
+            'that needs its own unit test.';
+      } else if (dmax > 1e-9) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'R moved by ' + dmax.toExponential(1) + ', which is far ' +
+            'above floating point. On real code that is a failed invariance test.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'U moved by ' + move.toFixed(2) + '× its own norm and λ ' +
+            'absorbed the inverse, yet every entry of R is unchanged to ' +
+            dmax.toExponential(1) + '. The coordinate now has donor-balanced mean 0 and ' +
+            'variance 1, which is the whole purpose of the transformation.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var Wd = 700, x0 = 92, x1 = 664;
+      var HUE = ['var(--n-teacher)', 'var(--n-student)', 'var(--n-data)',
+                 'var(--n-kept)', 'var(--n-pruned)'];
+
+      var span = 0.001, j;
+      for (i = 0; i < I; i++) {
+        span = Math.max(span, Math.abs(u[i]), Math.abs(us[i]));
+      }
+      span *= 1.12;
+      function px(v) { return (x0 + x1) / 2 + v / span * (x1 - x0) / 2; }
+
+      [[u, 62, 'u  before', 'var(--n-pruned)'],
+       [us, 116, 'u*  after', 'var(--n-kept)']].forEach(function (row) {
+        var vals = row[0], yy = row[1];
+        svg.appendChild(el('line', { x1: x0, y1: yy, x2: x1, y2: yy,
+          stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+        svg.appendChild(el('line', { x1: px(0), y1: yy - 13, x2: px(0), y2: yy + 13,
+          stroke: 'var(--n-dim)', 'stroke-width': 1.2, 'stroke-dasharray': '3 4' }));
+        svg.appendChild(el('text', { x: x0 - 10, y: yy + 5, class: 'lbl sm end',
+          fill: row[3] }, row[2]));
+        for (j = 0; j < I; j++) {
+          svg.appendChild(el('circle', { cx: px(vals[j]), cy: yy, r: 4.2,
+            fill: HUE[donor[j] % HUE.length], opacity: 0.85 }));
+        }
+      });
+      svg.appendChild(el('text', { x: x0, y: 32, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'one dot per measurement, coloured by donor'));
+      svg.appendChild(el('text', { x: x1, y: 32, class: 'lbl sm end',
+        fill: 'var(--n-dim)' }, 'donor sizes ' + counts.join(', ')));
+
+      // R, both ways, on one baseline
+      var base = 268, top = 176, rmax = 0.001;
+      for (i = 0; i < I; i++) { rmax = Math.max(rmax, Math.abs(Rb[i]), Math.abs(Ra[i])); }
+      var mid = (base + top) / 2, sc = (base - top) / 2 / (rmax * 1.15);
+      svg.appendChild(el('line', { x1: x0, y1: mid, x2: x1, y2: mid,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+      svg.appendChild(el('text', { x: x0 - 10, y: mid + 5, class: 'lbl sm end',
+        fill: 'var(--n-dim)' }, 'r_si'));
+      var bw = (x1 - x0) / I;
+      for (i = 0; i < I; i++) {
+        var cx = x0 + (i + 0.5) * bw;
+        var yb = mid - Rb[i] * sc, ya = mid - Ra[i] * sc;
+        svg.appendChild(el('rect', {
+          x: cx - bw * 0.34, y: Math.min(yb, mid), width: bw * 0.68,
+          height: Math.max(Math.abs(yb - mid), 1), rx: 2,
+          fill: 'var(--n-pruned)', opacity: 0.55 }));
+        svg.appendChild(el('line', { x1: cx - bw * 0.40, y1: ya, x2: cx + bw * 0.40, y2: ya,
+          stroke: 'var(--n-kept)', 'stroke-width': 2.4, 'stroke-linecap': 'round' }));
+      }
+      svg.appendChild(el('text', { x: x0, y: 292, class: 'lbl sm',
+        fill: 'var(--n-pruned)' }, 'bars: before'));
+      svg.appendChild(el('text', { x: 190, y: 292, class: 'lbl sm',
+        fill: 'var(--n-kept)' }, 'rules: after'));
+      svg.appendChild(el('text', { x: x1, y: 292, class: 'lbl sm end',
+        fill: degenerate ? 'var(--n-loss)' : 'var(--n-kept)' },
+        degenerate ? 'undefined — h ≈ 0' : 'max |ΔR| = ' + dmax.toExponential(1)));
+    }
+
+    [beta, lam, centre, spread].forEach(function (s) { onInput(s, draw); paintRange(s); });
+    draw();
+  }
+
+  // =========================================================================
+  // L0b. Lab: back to phenotype units
+  // =========================================================================
+
+  /* (S3). r = (q_s/h_s) r-tilde, and the check that matters is not the formula
+     but the contribution: q_s * X-tilde * r-tilde has to equal (X - xbar) * r,
+     computed independently. Both are built here from the sliders. */
+
+  function initL0UnscaleLab() {
+    var root = document.getElementById('l0-unscale-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var q = $(root, '#l0u-q'), h = $(root, '#l0u-h');
+    var xc = $(root, '#l0u-x'), rt = $(root, '#l0u-rt');
+
+    function draw() {
+      var Q = parseFloat(q.value), H = parseFloat(h.value);
+      var X = parseFloat(xc.value), RT = parseFloat(rt.value);
+      var dead = Q < 1e-6 || H < 1e-6;
+
+      var r = dead ? NaN : Q / H * RT;
+      var xt = dead ? NaN : X / H;
+      var lhs = dead ? NaN : Q * xt * RT;
+      var rhs = dead ? NaN : X * r;
+      var vs = dead ? NaN : (Q / H) * (Q / H);
+      var gap = dead ? NaN : Math.abs(lhs - rhs);
+
+      function f(v, n) { return isFinite(v) ? v.toFixed(n === undefined ? 4 : n) : '—'; }
+      $(root, '#l0u-q-v').textContent = Q.toFixed(2);
+      $(root, '#l0u-h-v').textContent = H.toFixed(2);
+      $(root, '#l0u-x-v').textContent = X.toFixed(2);
+      $(root, '#l0u-rt-v').textContent = RT.toFixed(2);
+      $(root, '#l0u-r').textContent = f(r);
+      $(root, '#l0u-lhs').textContent = f(lhs);
+      $(root, '#l0u-rhs').textContent = f(rhs);
+      $(root, '#l0u-var').textContent = isFinite(vs) ? '×' + vs.toFixed(3) : '—';
+
+      var verdict = $(root, '#l0u-verdict');
+      if (H < 1e-6) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'h_s = 0: the genotype does not vary across donors, so no ' +
+            'genetic effect is identified at this pair. It has to be filtered out before ' +
+            'fitting rather than divided by here.';
+      } else if (Q < 1e-6) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'q_s = 0: the molecular phenotype does not vary at all. ' +
+            'Same conclusion — remove the pair, do not unscale it.';
+      } else if (gap > 1e-9) {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'The two routes differ by ' + gap.toExponential(1) +
+            '. That is a scale-conversion bug, and it exports biologically meaningless ' +
+            'effect sizes while every internal coefficient still looks reasonable.';
+      } else {
+        verdict.className = 'verdict';
+        verdict.textContent = 'The fitting-scale contribution and the original-unit ' +
+            'contribution agree to ' + (gap === 0 ? '0' : gap.toExponential(1)) +
+            '. The posterior variance carries the square of the same factor, ×' +
+            vs.toFixed(3) + '.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      function chip(x, y, w, txt, sub, hue) {
+        svg.appendChild(el('rect', { x: x, y: y, width: w, height: 44, rx: 9,
+          fill: 'var(--n-panel)', stroke: hue, 'stroke-width': 1.8 }));
+        svg.appendChild(el('text', { x: x + w / 2, y: y + 21, class: 'lbl mid',
+          fill: hue }, txt));
+        svg.appendChild(el('text', { x: x + w / 2, y: y + 38, class: 'lbl sm mid',
+          fill: 'var(--n-dim)' }, sub));
+      }
+      function arrow(x, y) {
+        svg.appendChild(el('path', { d: 'M' + x + ' ' + y + ' l18 0 m-6 -5 l6 5 l-6 5',
+          fill: 'none', stroke: 'var(--n-dim)', 'stroke-width': 1.6,
+          'stroke-linecap': 'round' }));
+      }
+      svg.appendChild(el('text', { x: 24, y: 26, class: 'lbl sm',
+        fill: 'var(--n-teacher)' }, 'the fitting scale'));
+      chip(24, 40, 122, isFinite(xt) ? xt.toFixed(3) : '—', 'X̃ = (X−x̄)/h',
+           'var(--n-teacher)');
+      arrow(150, 62);
+      chip(176, 40, 108, RT.toFixed(2), 'r̃', 'var(--n-teacher)');
+      arrow(288, 62);
+      chip(314, 40, 108, Q.toFixed(2), 'q_s', 'var(--n-teacher)');
+      arrow(426, 62);
+      chip(452, 40, 152, isFinite(lhs) ? lhs.toFixed(4) : '—', 'q X̃ r̃',
+           'var(--n-teacher)');
+
+      svg.appendChild(el('text', { x: 24, y: 130, class: 'lbl sm',
+        fill: 'var(--n-student)' }, 'the original units'));
+      chip(24, 144, 122, X.toFixed(2), 'X − x̄', 'var(--n-student)');
+      arrow(150, 166);
+      chip(176, 144, 232, isFinite(r) ? r.toFixed(4) : '—', 'r = (q/h) r̃',
+           'var(--n-student)');
+      arrow(412, 166);
+      chip(452, 144, 152, isFinite(rhs) ? rhs.toFixed(4) : '—', '(X − x̄) r',
+           'var(--n-student)');
+
+      // the two contributions, drawn as bars that have to reach the same height
+      var base = 262;
+      var m = Math.max(Math.abs(lhs) || 0, Math.abs(rhs) || 0, 0.4);
+      var sc = 78 / m;
+      [[lhs, 634, 'var(--n-teacher)'], [rhs, 668, 'var(--n-student)']].forEach(function (t) {
+        if (!isFinite(t[0])) { return; }
+        var hh = Math.abs(t[0]) * sc;
+        svg.appendChild(el('rect', { x: t[1] - 13, y: t[0] >= 0 ? base - hh : base,
+          width: 26, height: Math.max(hh, 1.5), rx: 3, fill: t[2], opacity: 0.85 }));
+      });
+      svg.appendChild(el('line', { x1: 612, y1: base, x2: 690, y2: base,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+      svg.appendChild(el('text', { x: 651, y: base + 20, class: 'lbl sm mid',
+        fill: isFinite(gap) && gap <= 1e-9 ? 'var(--n-kept)' : 'var(--n-loss)' },
+        isFinite(gap) && gap <= 1e-9 ? 'equal' : 'differ'));
+      svg.appendChild(el('text', { x: 604, y: 118, class: 'lbl sm end',
+        fill: 'var(--n-dim)' }, 'these two must be the same number'));
+    }
+
+    [q, h, xc, rt].forEach(function (s) { onInput(s, draw); paintRange(s); });
+    draw();
+  }
+
+  // =========================================================================
+  // L0c. Lab: the posterior, computed two ways
+  // =========================================================================
+
+  /* S1.14 check 5, made draggable. The left number in each pair is (S17)/(S18)
+     in closed form; the right is a composite 5-point Gauss-Legendre quadrature
+     of the same posterior, sharing none of that algebra. The integration window
+     is m1 +/- 14 sqrt(v1) rather than a fixed multiple of omega -- a fixed
+     window silently loses the spike once |ahat| is large, which is a bug in the
+     checker that reads as a bug in the code. */
+
+  var GL5_X = [0, -0.5384693101056831, 0.5384693101056831,
+               -0.9061798459386640, 0.9061798459386640];
+  var GL5_W = [0.5688888888888889, 0.4786286704993665, 0.4786286704993665,
+               0.2369268850561891, 0.2369268850561891];
+
+  function ndens(x, mu, varr) {
+    return Math.exp(-0.5 * (x - mu) * (x - mu) / varr) / Math.sqrt(2 * Math.PI * varr);
+  }
+
+  /* Closed form: (S17) for the conditional moments, (S18) for the weight. */
+  function pointNormalAnalytic(ahat, s, pi, om) {
+    var s2 = s * s, o2 = om * om;
+    var v1 = o2 * s2 / (o2 + s2);
+    var m1 = o2 / (o2 + s2) * ahat;
+    var lik0 = ndens(ahat, 0, s2);
+    var lik1 = ndens(ahat, 0, s2 + o2);
+    var num = pi * lik1, den = (1 - pi) * lik0 + num;
+    var w = den > 0 ? num / den : 0;
+    return { w: w, mean: w * m1, second: w * (v1 + m1 * m1), m1: m1, v1: v1 };
+  }
+
+  /* Bayes' rule, integrated. No reuse of the block above. */
+  function pointNormalQuadrature(ahat, s, pi, om) {
+    var s2 = s * s, o2 = om * om;
+    var v1 = o2 * s2 / (o2 + s2), m1 = o2 / (o2 + s2) * ahat;
+    var sd = Math.sqrt(v1);
+    var lo = m1 - 14 * sd, hi = m1 + 14 * sd;
+    var n = 64, step = (hi - lo) / n;
+    var z1 = 0, mm1 = 0, mm2 = 0, i, k;
+    for (i = 0; i < n; i++) {
+      var a0 = lo + i * step, half = step / 2, mid = a0 + half;
+      for (k = 0; k < 5; k++) {
+        var a = mid + half * GL5_X[k];
+        var fw = GL5_W[k] * half * pi * ndens(ahat, a, s2) * ndens(a, 0, o2);
+        z1 += fw; mm1 += a * fw; mm2 += a * a * fw;
+      }
+    }
+    var z0 = (1 - pi) * ndens(ahat, 0, s2);
+    var den = z0 + z1;
+    if (!(den > 0) || !isFinite(den)) { return { w: 0, mean: 0, second: 0 }; }
+    return { w: z1 / den, mean: mm1 / den, second: mm2 / den };
+  }
+
+  function initL0CebnmLab() {
+    var root = document.getElementById('l0-cebnm-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var ah = $(root, '#l0c-ahat'), sn = $(root, '#l0c-s');
+    var om = $(root, '#l0c-omega'), pp = $(root, '#l0c-pi');
+
+    function draw() {
+      var A = parseFloat(ah.value), S = parseFloat(sn.value);
+      var O = parseFloat(om.value), PI = parseFloat(pp.value);
+      var an = pointNormalAnalytic(A, S, PI, O);
+      var nu = pointNormalQuadrature(A, S, PI, O);
+      var gap = Math.max(Math.abs(an.w - nu.w), Math.abs(an.mean - nu.mean),
+                         Math.abs(an.second - nu.second));
+
+      $(root, '#l0c-ahat-v').textContent = A.toFixed(2);
+      $(root, '#l0c-s-v').textContent = S.toFixed(2);
+      $(root, '#l0c-omega-v').textContent = O.toFixed(2);
+      $(root, '#l0c-pi-v').textContent = PI.toFixed(2);
+      $(root, '#l0c-w').textContent = an.w.toFixed(6) + ' / ' + nu.w.toFixed(6);
+      $(root, '#l0c-m').textContent = an.mean.toFixed(6) + ' / ' + nu.mean.toFixed(6);
+      $(root, '#l0c-m2').textContent = an.second.toFixed(6) + ' / ' + nu.second.toFixed(6);
+      $(root, '#l0c-gap').textContent = gap === 0 ? '0.0e+00' : gap.toExponential(1);
+
+      var verdict = $(root, '#l0c-verdict');
+      if (gap > 1e-9) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'The two routes differ by ' + gap.toExponential(1) +
+            '. One of them is wrong, and the point of running both is that the ' +
+            'quadrature cannot reproduce a mistake made in the derivation.';
+      } else {
+        var regime = an.w < 0.05 ? 'the posterior is almost entirely the point mass'
+          : an.w > 0.95 ? 'the posterior is almost certainly nonzero'
+          : 'the posterior is genuinely undecided between zero and nonzero';
+        verdict.className = 'verdict';
+        verdict.textContent = 'Closed form and quadrature agree to ' +
+            (gap === 0 ? 'the last bit' : gap.toExponential(1)) + '; ' + regime +
+            ', and the shrinkage factor ω²/(ω²+s²) is ' +
+            (O * O / (O * O + S * S)).toFixed(3) + '.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var x0 = 46, x1 = 470, base = 236, top = 44, lim = 4.4;
+      function px(v) { return x0 + (v + lim) / (2 * lim) * (x1 - x0); }
+      svg.appendChild(el('line', { x1: x0, y1: base, x2: x1, y2: base,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+      var t;
+      for (t = -4; t <= 4; t += 2) {
+        svg.appendChild(el('line', { x1: px(t), y1: base, x2: px(t), y2: base + 6,
+          stroke: 'var(--n-edge)', 'stroke-width': 1.2 }));
+        svg.appendChild(el('text', { x: px(t), y: base + 22, class: 'lbl sm mid',
+          fill: 'var(--n-dim)' }, String(t)));
+      }
+      // the continuous part, scaled by its own mass
+      var pts = [], peak = 0, xx, dv;
+      for (xx = -lim; xx <= lim + 1e-9; xx += 0.06) {
+        dv = an.w * ndens(xx, an.m1, an.v1);
+        peak = Math.max(peak, dv);
+        pts.push([xx, dv]);
+      }
+      var spikeH = (1 - an.w) * (base - top);
+      // keep the spike and the curve on one comparable vertical scale
+      var vmax = Math.max(peak, 1e-9);
+      var d = 'M' + pts.map(function (p) {
+        return px(p[0]).toFixed(1) + ' ' + (base - p[1] / vmax * (base - top) * 0.92).toFixed(1);
+      }).join(' L');
+      svg.appendChild(el('path', { d: d, fill: 'none', stroke: 'var(--n-student)',
+        'stroke-width': 2.6, 'stroke-linejoin': 'round' }));
+      svg.appendChild(el('line', { x1: px(0), y1: base, x2: px(0), y2: base - spikeH,
+        stroke: 'var(--n-loss)', 'stroke-width': 4.4, 'stroke-linecap': 'round' }));
+      svg.appendChild(el('circle', { cx: px(0), cy: base - spikeH, r: 5.4,
+        fill: 'var(--n-loss)' }));
+      // keep the spike label clear of the density, which leans the same way as â
+      var lblRight = A < 0;
+      svg.appendChild(el('text', {
+        x: px(0) + (lblRight ? 12 : -12), y: base - spikeH - 10,
+        class: 'lbl sm' + (lblRight ? '' : ' end'),
+        fill: 'var(--n-loss)' }, 'mass at 0: ' + (1 - an.w).toFixed(3)));
+      // where the observation sits, and where the two means land
+      svg.appendChild(el('line', { x1: px(A), y1: top - 6, x2: px(A), y2: base,
+        stroke: 'var(--n-data)', 'stroke-width': 1.6, 'stroke-dasharray': '5 5' }));
+      svg.appendChild(el('text', { x: px(A), y: top - 12, class: 'lbl sm mid',
+        fill: 'var(--n-data)' }, 'â'));
+      svg.appendChild(el('circle', { cx: px(an.mean), cy: base + 34, r: 5.0,
+        fill: 'var(--n-teacher)' }));
+      svg.appendChild(el('circle', { cx: px(nu.mean), cy: base + 34, r: 8.4,
+        fill: 'none', stroke: 'var(--n-kept)', 'stroke-width': 2.0 }));
+      svg.appendChild(el('text', { x: x0, y: base + 56, class: 'lbl sm',
+        fill: 'var(--n-teacher)' }, 'dot: closed-form E[a]'));
+      svg.appendChild(el('text', { x: 214, y: base + 56, class: 'lbl sm',
+        fill: 'var(--n-kept)' }, 'ring: quadrature E[a]'));
+      svg.appendChild(el('text', { x: x0, y: 26, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'the point-normal posterior'));
+
+      // the three quantities, analytic against numerical
+      var bx = 512, by = 52, bw = 160;
+      svg.appendChild(el('text', { x: bx, y: 26, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'agreement, per quantity'));
+      [['w', an.w, nu.w, 'var(--n-teacher)'],
+       ['E[a]', an.mean, nu.mean, 'var(--n-student)'],
+       ['E[a²]', an.second, nu.second, 'var(--n-data)']].forEach(function (row, ix) {
+        var yy = by + ix * 62;
+        svg.appendChild(el('rect', { x: bx, y: yy, width: bw, height: 48, rx: 9,
+          fill: 'var(--n-panel)', stroke: 'var(--n-edge)', 'stroke-width': 1.6 }));
+        svg.appendChild(el('text', { x: bx + 12, y: yy + 20, class: 'lbl sm',
+          fill: row[3] }, row[0]));
+        svg.appendChild(el('text', { x: bx + bw - 12, y: yy + 20, class: 'lbl sm end',
+          fill: 'var(--n-ink)' }, row[1].toFixed(6)));
+        var g = Math.abs(row[1] - row[2]);
+        svg.appendChild(el('text', { x: bx + bw - 12, y: yy + 40, class: 'lbl sm end',
+          fill: g > 1e-9 ? 'var(--n-loss)' : 'var(--n-kept)' },
+          'gap ' + (g === 0 ? '0.0e+00' : g.toExponential(1))));
+      });
+      svg.appendChild(el('text', { x: bx, y: 262, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, '320 quadrature nodes,'));
+      svg.appendChild(el('text', { x: bx, y: 282, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'recomputed on every drag'));
+    }
+
+    [ah, sn, om, pp].forEach(function (s) { onInput(s, draw); paintRange(s); });
+    draw();
+  }
+
+  // =========================================================================
+  // L0d. Lab: the spike disappearing
+  // =========================================================================
+
+  /* S1.14 check 6. The Gaussian column is written straight from
+     v^-1 = kappa + p and m = v p ahat, so it shares nothing with the
+     point-normal block above; at pi = 1 the two have to be the same number. */
+
+  function initL0PiOneLab() {
+    var root = document.getElementById('l0-pi-one-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var pi = $(root, '#l0p-pi'), ah = $(root, '#l0p-ahat');
+    var sn = $(root, '#l0p-s'), om = $(root, '#l0p-omega');
+
+    function draw() {
+      var PI = parseFloat(pi.value), A = parseFloat(ah.value);
+      var S = parseFloat(sn.value), O = parseFloat(om.value);
+      var an = pointNormalAnalytic(A, S, PI, O);
+      var pnVar = an.second - an.mean * an.mean;
+      // the ordinary Gaussian normal-means update, from precisions
+      var kappa = 1 / (O * O), prec = 1 / (S * S);
+      var v = 1 / (kappa + prec), m = v * prec * A;
+      var gap = Math.max(Math.abs(an.mean - m), Math.abs(pnVar - v));
+
+      $(root, '#l0p-pi-v').textContent = PI.toFixed(2);
+      $(root, '#l0p-ahat-v').textContent = A.toFixed(2);
+      $(root, '#l0p-s-v').textContent = S.toFixed(2);
+      $(root, '#l0p-omega-v').textContent = O.toFixed(2);
+      $(root, '#l0p-pn').textContent = an.mean.toFixed(4) + ' / ' + pnVar.toFixed(4);
+      $(root, '#l0p-gauss').textContent = m.toFixed(4) + ' / ' + v.toFixed(4);
+      $(root, '#l0p-gap').textContent = gap === 0 ? '0.0e+00' : gap.toExponential(1);
+      $(root, '#l0p-spike').textContent = (1 - an.w).toFixed(4);
+
+      var verdict = $(root, '#l0p-verdict');
+      if (PI >= 0.9999) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'π = 1, so w = 1, the point mass is gone and the prior is ' +
+            'just N(0, ω²). The two routes agree to ' +
+            (gap === 0 ? 'the last bit' : gap.toExponential(1)) +
+            ', which is the bridge from the new prior back to the checked Gaussian path.';
+      } else {
+        verdict.className = 'verdict warn';
+        verdict.textContent = 'At π = ' + PI.toFixed(2) + ' there is still ' +
+            (1 - an.w).toFixed(3) + ' of posterior mass at zero, so the two updates ' +
+            'differ by ' + gap.toExponential(1) + '. That difference is the whole ' +
+            'content of the spike — it is not a bug, and it is why the reduction has to ' +
+            'be tested exactly at one.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var x0 = 46, x1 = 470, base = 214, top = 42, lim = 4.4;
+      function px(val) { return x0 + (val + lim) / (2 * lim) * (x1 - x0); }
+      svg.appendChild(el('line', { x1: x0, y1: base, x2: x1, y2: base,
+        stroke: 'var(--n-edge)', 'stroke-width': 1.4 }));
+      var pts = [], peak = 0, xx, dv;
+      for (xx = -lim; xx <= lim + 1e-9; xx += 0.06) {
+        dv = an.w * ndens(xx, an.m1, an.v1);
+        peak = Math.max(peak, dv);
+        pts.push([xx, dv]);
+      }
+      var vmax = Math.max(peak, 1e-9);
+      svg.appendChild(el('path', { d: 'M' + pts.map(function (p) {
+        return px(p[0]).toFixed(1) + ' ' +
+          (base - p[1] / vmax * (base - top) * 0.90).toFixed(1); }).join(' L'),
+        fill: 'none', stroke: 'var(--n-student)', 'stroke-width': 2.6,
+        'stroke-linejoin': 'round' }));
+      var spikeH = (1 - an.w) * (base - top);
+      if (spikeH > 0.4) {
+        svg.appendChild(el('line', { x1: px(0), y1: base, x2: px(0), y2: base - spikeH,
+          stroke: 'var(--n-loss)', 'stroke-width': 4.4, 'stroke-linecap': 'round' }));
+        svg.appendChild(el('circle', { cx: px(0), cy: base - spikeH, r: 5.4,
+          fill: 'var(--n-loss)' }));
+      } else {
+        svg.appendChild(el('text', { x: px(0), y: base - 14, class: 'lbl sm mid',
+          fill: 'var(--n-kept)' }, 'no spike left'));
+      }
+      svg.appendChild(el('circle', { cx: px(an.mean), cy: base + 30, r: 5.0,
+        fill: 'var(--n-student)' }));
+      svg.appendChild(el('circle', { cx: px(m), cy: base + 30, r: 8.6, fill: 'none',
+        stroke: 'var(--n-teacher)', 'stroke-width': 2.0 }));
+      svg.appendChild(el('text', { x: x0, y: base + 52, class: 'lbl sm',
+        fill: 'var(--n-student)' }, 'dot: point-normal E[a]'));
+      svg.appendChild(el('text', { x: 230, y: base + 52, class: 'lbl sm',
+        fill: 'var(--n-teacher)' }, 'ring: Gaussian m'));
+      svg.appendChild(el('text', { x: x0, y: 26, class: 'lbl sm',
+        fill: 'var(--n-dim)' }, 'prior mass at zero: ' + (1 - PI).toFixed(2) +
+        '  →  posterior mass at zero: ' + (1 - an.w).toFixed(3)));
+
+      // the two routes, side by side
+      var bx = 512, bw = 160;
+      [['point-normal', an.mean, pnVar, 'var(--n-student)'],
+       ['Gaussian', m, v, 'var(--n-teacher)']].forEach(function (row, ix) {
+        var yy = 52 + ix * 74;
+        svg.appendChild(el('rect', { x: bx, y: yy, width: bw, height: 60, rx: 9,
+          fill: 'var(--n-panel)', stroke: row[3], 'stroke-width': 1.8 }));
+        svg.appendChild(el('text', { x: bx + 12, y: yy + 20, class: 'lbl sm',
+          fill: row[3] }, row[0]));
+        svg.appendChild(el('text', { x: bx + bw - 12, y: yy + 38, class: 'lbl sm end',
+          fill: 'var(--n-ink)' }, 'E[a] ' + row[1].toFixed(4)));
+        svg.appendChild(el('text', { x: bx + bw - 12, y: yy + 54, class: 'lbl sm end',
+          fill: 'var(--n-ink)' }, 'Var ' + row[2].toFixed(4)));
+      });
+      svg.appendChild(el('text', { x: bx + bw / 2, y: 212, class: 'lbl mid',
+        fill: gap > 1e-9 ? 'var(--n-loss)' : 'var(--n-kept)' },
+        gap === 0 ? '0.0e+00' : gap.toExponential(1)));
+      svg.appendChild(el('text', { x: bx + bw / 2, y: 232, class: 'lbl sm mid',
+        fill: 'var(--n-dim)' }, '|difference|'));
+    }
+
+    [pi, ah, sn, om].forEach(function (s) { onInput(s, draw); paintRange(s); });
+    draw();
+  }
+
+  // =========================================================================
+
+
+  // =========================================================================
+  // 3f. Lab: split the loci -- does the same geometry come back?
+  // =========================================================================
+
+  /* The reproducibility experiment from note 5, made draggable. A rank-two
+     cellular coordinate is fixed; two reference sets of cis pairs are drawn
+     over it, each with its own loadings and its own estimation noise. What
+     the reader compares is never a factor and never an entry of R -- it is
+     the Eq (12) distance matrix each fit induces on the same cells.
+
+     Two anchors are exact and are asserted in the verification pass:
+       - split = 'same'  ->  both fits are literally the same fit, so the
+         agreement is 1.000 and neighbour overlap is 100%;
+       - responding pairs = 0 and noise = 0  ->  every column of R is the
+         same, so every distance is exactly 0 and there is no geometry. */
+
+  var RG_CELLS = 26;
+  var RG_K = 5;                       // neighbours compared
+
+  function rgCoords() {
+    var U = [], i;
+    for (i = 0; i < RG_CELLS; i++) {
+      var t = 1.45 * Math.PI * i / (RG_CELLS - 1);
+      U.push([Math.cos(t), Math.sin(t)]);
+    }
+    return U;
+  }
+
+  /* Box-Muller over the shared seeded stream, so the whole lab is a pure
+     function of (seed, controls) and never shifts under the reader. */
+  function rgGauss(rnd) {
+    var spare = null;
+    return function () {
+      if (spare !== null) { var s = spare; spare = null; return s; }
+      var u = Math.max(rnd(), 1e-12), v = rnd();
+      var r = Math.sqrt(-2 * Math.log(u));
+      spare = r * Math.sin(2 * Math.PI * v);
+      return r * Math.cos(2 * Math.PI * v);
+    };
+  }
+
+  function rgFitHalf(U, nPairs, pRespond, sigma, seed) {
+    var rnd = seeded(seed), g = rgGauss(rnd);
+    var R = [], responding = 0, s, i;
+    for (s = 0; s < nPairs; s++) {
+      var responds = rnd() < pRespond;
+      if (responds) { responding++; }
+      var l0 = responds ? g() : 0, l1 = responds ? g() : 0;
+      var beta = 0.5 * g();
+      var row = [];
+      for (i = 0; i < RG_CELLS; i++) {
+        row.push(beta + U[i][0] * l0 + U[i][1] * l1 + sigma * g());
+      }
+      R.push(row);
+    }
+    return { R: R, responding: responding };
+  }
+
+  /* Eq (12) with s_g = 1: the mean over pairs of the squared difference.
+     Dividing by the number of pairs is what lets two reference sets of
+     different size be compared at all. */
+  function rgDistances(R) {
+    var S = R.length, d = [], i, j, s;
+    for (i = 0; i < RG_CELLS; i++) {
+      d.push(new Array(RG_CELLS));
+      d[i][i] = 0;
+    }
+    for (i = 0; i < RG_CELLS; i++) {
+      for (j = i + 1; j < RG_CELLS; j++) {
+        var acc = 0;
+        for (s = 0; s < S; s++) { var e = R[s][i] - R[s][j]; acc += e * e; }
+        var v = S ? acc / S : 0;
+        d[i][j] = v;
+        d[j][i] = v;
+      }
+    }
+    return d;
+  }
+
+  function rgOffDiag(d) {
+    var out = [], i, j;
+    for (i = 0; i < RG_CELLS; i++) {
+      for (j = i + 1; j < RG_CELLS; j++) { out.push(d[i][j]); }
+    }
+    return out;
+  }
+
+  function rgRanks(a) {
+    var idx = a.map(function (v, i) { return i; });
+    idx.sort(function (x, y) { return a[x] - a[y]; });
+    var r = new Array(a.length);
+    idx.forEach(function (orig, pos) { r[orig] = pos; });
+    return r;
+  }
+
+  function rgPearson(a, b) {
+    var n = a.length, i, ma = 0, mb = 0;
+    if (!n) { return NaN; }
+    for (i = 0; i < n; i++) { ma += a[i]; mb += b[i]; }
+    ma /= n; mb /= n;
+    var sab = 0, sa = 0, sb = 0;
+    for (i = 0; i < n; i++) {
+      var da = a[i] - ma, db = b[i] - mb;
+      sab += da * db; sa += da * da; sb += db * db;
+    }
+    if (sa <= 1e-18 || sb <= 1e-18) { return NaN; }
+    return sab / Math.sqrt(sa * sb);
+  }
+
+  function rgSpearman(a, b) { return rgPearson(rgRanks(a), rgRanks(b)); }
+
+  function rgNeighbours(d, i) {
+    var order = [], j;
+    for (j = 0; j < RG_CELLS; j++) { if (j !== i) { order.push(j); } }
+    order.sort(function (x, y) { return d[i][x] - d[i][y]; });
+    return order.slice(0, RG_K);
+  }
+
+  function rgOverlap(dA, dB) {
+    var out = [], i;
+    for (i = 0; i < RG_CELLS; i++) {
+      var na = rgNeighbours(dA, i), nb = rgNeighbours(dB, i), hit = 0;
+      na.forEach(function (x) { if (nb.indexOf(x) >= 0) { hit++; } });
+      out.push(hit / RG_K);
+    }
+    return out;
+  }
+
+  function initReproLab() {
+    var root = document.getElementById('rg-repro-lab');
+    if (!root) { return; }
+
+    var svg = $(root, 'svg');
+    var pairs = $(root, '#rg-pairs');
+    var resp = $(root, '#rg-resp');
+    var noise = $(root, '#rg-noise');
+    var U = rgCoords();
+    var getSplit = segment(root, '.seg-split', function () { draw(); });
+
+    function draw() {
+      var nPairs = parseInt(pairs.value, 10);
+      var p = parseInt(resp.value, 10) / 100;
+      var sigma = parseInt(noise.value, 10) / 100;
+      var same = getSplit() === 'same';
+
+      var A = rgFitHalf(U, nPairs, p, sigma, 20260906);
+      var B = same ? A : rgFitHalf(U, nPairs, p, sigma, 77712345);
+      var dA = rgDistances(A.R), dB = rgDistances(B.R);
+      var a = rgOffDiag(dA), b = rgOffDiag(dB);
+
+      var amax = Math.max.apply(null, a), bmax = Math.max.apply(null, b);
+      var degenerate = amax < 1e-12 || bmax < 1e-12;
+
+      var rho = degenerate ? NaN : (same ? 1 : rgSpearman(a, b));
+      var ov = rgOverlap(dA, dB);
+      var meanOv = ov.reduce(function (s, v) { return s + v; }, 0) / ov.length;
+
+      $(root, '#rg-pairs-v').textContent = nPairs + ' per set';
+      $(root, '#rg-resp-v').textContent = Math.round(p * 100) + '% respond';
+      $(root, '#rg-noise-v').textContent = sigma.toFixed(2) + ' sd';
+
+      $(root, '#rg-stat-rho').textContent =
+          degenerate ? '—' : rho.toFixed(3);
+      $(root, '#rg-stat-nn').textContent =
+          degenerate ? '—' : Math.round(meanOv * 100) + '%';
+      $(root, '#rg-stat-resp').innerHTML =
+          A.responding + ' <small>of ' + nPairs + '</small>';
+
+      var verdict = $(root, '#rg-repro-verdict');
+      if (degenerate) {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'No pair responds and nothing is noisy, so ' +
+            'every cell has the same cis-effect profile. Every distance is ' +
+            'exactly zero: there is no cellular organization to reproduce, ' +
+            'and a reproducibility statistic is undefined rather than good.';
+      } else if (same) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'Nothing changed between the two fits, so the ' +
+            'agreement is 1.000 by construction. This is the ceiling to ' +
+            'read the disjoint-loci number against, not a result.';
+      } else if (rho >= 0.85 && meanOv >= 0.6) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'Two disjoint sets of cis regions place the ' +
+            'same cells in nearly the same relative positions. That is the ' +
+            'evidence a recurrent response structure exists — no single ' +
+            'locus set is carrying it.';
+      } else if (rho >= 0.5) {
+        verdict.className = 'verdict';
+        verdict.textContent = 'The broad geometry survives but local ' +
+            'neighbourhoods do not. Distances would be reportable here; a ' +
+            'discrete grouping built on these neighbours would not be.';
+      } else {
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'The two locus sets disagree about how the ' +
+            'cells are arranged. Either too few pairs respond to the map, ' +
+            'or each pair is estimated too noisily for a shared structure ' +
+            'to show through.';
+      }
+
+      // -- stage ------------------------------------------------------------
+      clear(svg);
+      var px = 46, py = 30, pw = 302, ph = 200;
+
+      svg.appendChild(el('rect', { x: px, y: py, width: pw, height: ph, rx: 6,
+                                   fill: 'var(--n-panel)',
+                                   stroke: 'var(--n-edge)', 'stroke-width': 1.2 }));
+      var g;
+      for (g = 1; g < 4; g++) {
+        svg.appendChild(el('line', { x1: px + pw * g / 4, y1: py + 5,
+                                     x2: px + pw * g / 4, y2: py + ph - 5,
+                                     stroke: 'var(--n-grid)', 'stroke-width': 1 }));
+        svg.appendChild(el('line', { x1: px + 5, y1: py + ph * g / 4,
+                                     x2: px + pw - 5, y2: py + ph * g / 4,
+                                     stroke: 'var(--n-grid)', 'stroke-width': 1 }));
+      }
+      var lo = Math.min.apply(null, a.concat(b));
+      var hi = Math.max.apply(null, a.concat(b));
+      var span = hi - lo > 1e-12 ? hi - lo : 1;
+      var fx = function (v) { return px + 14 + (pw - 28) * (v - lo) / span; };
+      var fy = function (v) { return py + ph - 14 - (ph - 28) * (v - lo) / span; };
+      if (!degenerate) {
+        svg.appendChild(el('line', { x1: fx(lo), y1: fy(lo),
+                                     x2: fx(hi), y2: fy(hi),
+                                     stroke: 'var(--n-edge)', 'stroke-width': 1.2,
+                                     'stroke-dasharray': '5 4' }));
+      }
+      var t;
+      for (t = 0; t < a.length; t++) {
+        svg.appendChild(el('circle', { cx: fx(a[t]), cy: fy(b[t]), r: 2.4,
+                                       fill: 'rgba(var(--n-violet-rgb), 0.40)' }));
+      }
+      svg.appendChild(el('text', { x: px + pw / 2, y: py + ph + 22,
+                                   'class': 'lbl sm mid',
+                                   fill: 'var(--n-student)' },
+                         'distance under set A'));
+      svg.appendChild(el('text', { x: px - 14, y: py + ph / 2,
+                                   'class': 'lbl sm mid',
+                                   fill: 'var(--n-teacher)',
+                                   transform: 'rotate(-90 ' + (px - 14) + ' ' +
+                                              (py + ph / 2) + ')' },
+                         'distance under set B'));
+      svg.appendChild(el('text', { x: px, y: py - 10, 'class': 'lbl sm',
+                                   fill: 'var(--n-dim)' },
+                         a.length + ' pairs of cells'));
+
+      // neighbour agreement, one bar per cell
+      var qx = 400, qw = 232, base = py + ph, bh = ph - 16;
+      svg.appendChild(el('text', { x: qx, y: py - 10, 'class': 'lbl sm',
+                                   fill: 'var(--n-dim)' },
+                         'shared nearest neighbours, per cell'));
+      svg.appendChild(el('line', { x1: qx, y1: base, x2: qx + qw, y2: base,
+                                   stroke: 'var(--n-edge)', 'stroke-width': 1.2 }));
+      var bw = qw / RG_CELLS;
+      for (t = 0; t < RG_CELLS; t++) {
+        var h = Math.max(1.5, bh * ov[t]);
+        var hue = ov[t] >= 0.6 ? 'var(--n-kept)'
+                : (ov[t] >= 0.3 ? 'var(--n-data)' : 'var(--n-loss)');
+        svg.appendChild(el('rect', { x: qx + t * bw + 1, y: base - h,
+                                     width: Math.max(1.5, bw - 2), height: h,
+                                     rx: 2, fill: hue, 'fill-opacity': 0.85 }));
+      }
+      [[1, '5 of 5'], [0.6, '3 of 5'], [0.2, '1 of 5']].forEach(function (pair) {
+        var yy = base - bh * pair[0];
+        svg.appendChild(el('line', { x1: qx, y1: yy, x2: qx + qw, y2: yy,
+                                     stroke: 'var(--n-grid)', 'stroke-width': 1 }));
+        svg.appendChild(el('text', { x: qx + qw + 6, y: yy + 4,
+                                     'class': 'lbl sm',
+                                     fill: 'var(--n-dim)' }, pair[1]));
+      });
+      svg.appendChild(el('text', { x: qx + qw / 2, y: base + 22,
+                                   'class': 'lbl sm mid',
+                                   fill: 'var(--n-dim)' },
+                         'each of the ' + RG_CELLS + ' cells'));
+    }
+
+    onInput(pairs, draw);
+    onInput(resp, draw);
+    onInput(noise, draw);
+    draw();
+  }
 
   initTokenLab();
   initPruneLab();
@@ -1790,4 +2652,9 @@
   initLadderLab();
   initBuildLab();
   initRotLab();
+  initReproLab();
+  initL0ReparamLab();
+  initL0UnscaleLab();
+  initL0CebnmLab();
+  initL0PiOneLab();
 }());

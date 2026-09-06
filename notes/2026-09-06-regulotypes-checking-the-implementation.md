@@ -1,0 +1,3000 @@
+---
+title: 'Regulotypes: checking the implementation before checking the biology'
+subtitle: Before asking whether a method finds the right answer, ask whether the program performs the mathematical operation you intended. Seven reductions and invariances that need no ground truth.
+date: 2026-09-06
+tags: regulotype
+keywords: implementation correctness, unit tests, SURGE, variational inference, ELBO, covariate-moderated empirical Bayes, point-normal prior, cEBNM, donor-balanced reparameterization, numerical integration
+---
+
+<div class='nfig wide roadmap'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 361' role='img' aria-label='The ten sections of this note.'>
+<text x='14.0' y='176.5' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-student)'>Level 0</text>
+<text x='14.0' y='198.5' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-student)'>checks</text>
+<path d='M138 37.0 C134.7 37.0, 134.7 185.5, 116 185.5 C134.7 185.5, 134.7 334.0, 138 334.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.22s;--dur:0.90s;stroke:var(--n-student);stroke-width:2.4'/>
+<a href='#three-levels-of-checking' class='rm-row'>
+<rect x='128' y='22.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='37.0' r='4.00' class='a-beat' style='--d:0.45s;--dur:2.00s;fill:var(--n-data)'/>
+<text x='164.0' y='42.0' class='lbl a-rise' style='--d:0.45s;fill:var(--n-data)'>Three levels of checking</text>
+<text x='704.0' y='42.0' class='lbl sm end a-rise' style='--d:0.55s;fill:var(--n-dim)'>what Level 0 is, and is not</text>
+</a>
+<a href='#1-does-the-gaussian-version-reduce-to-surge' class='rm-row'>
+<rect x='128' y='55.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='70.0' r='4.00' class='a-beat' style='--d:0.52s;--dur:2.00s;fill:var(--n-student)'/>
+<text x='164.0' y='75.0' class='lbl a-rise' style='--d:0.52s;fill:var(--n-student)'>1 · Reduce to SURGE</text>
+<text x='704.0' y='75.0' class='lbl sm end a-rise' style='--d:0.62s;fill:var(--n-dim)'>the strongest end-to-end reduction</text>
+</a>
+<a href='#2-does-donor-balanced-reparameterization-leave-unchanged' class='rm-row'>
+<rect x='128' y='88.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='103.0' r='4.00' class='a-beat' style='--d:0.59s;--dur:2.00s;fill:var(--n-teacher)'/>
+<text x='164.0' y='108.0' class='lbl a-rise' style='--d:0.59s;fill:var(--n-teacher)'>2 · Reparameterization</text>
+<text x='704.0' y='108.0' class='lbl sm end a-rise' style='--d:0.69s;fill:var(--n-dim)'>R must not move when U does</text>
+</a>
+<a href='#3-does-unscaling-return-effects-to-the-original-phenotype-units' class='rm-row'>
+<rect x='128' y='121.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='136.0' r='4.00' class='a-beat' style='--d:0.66s;--dur:2.00s;fill:var(--n-kept)'/>
+<text x='164.0' y='141.0' class='lbl a-rise' style='--d:0.66s;fill:var(--n-kept)'>3 · Unscaling</text>
+<text x='704.0' y='141.0' class='lbl sm end a-rise' style='--d:0.76s;fill:var(--n-dim)'>effects back in phenotype units</text>
+</a>
+<a href='#4-does-collapse-to-when' class='rm-row'>
+<rect x='128' y='154.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='169.0' r='4.00' class='a-beat' style='--d:0.73s;--dur:2.00s;fill:var(--n-loss)'/>
+<text x='164.0' y='174.0' class='lbl a-rise' style='--d:0.73s;fill:var(--n-loss)'>4 · K = 1 collapses to K = 0</text>
+<text x='704.0' y='174.0' class='lbl sm end a-rise' style='--d:0.83s;fill:var(--n-dim)'>the interaction must disappear</text>
+</a>
+<a href='#5-does-pair-projection-reproduce-the-same-pair-when-nothing-is-actually-new' class='rm-row'>
+<rect x='128' y='187.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='202.0' r='4.00' class='a-beat' style='--d:0.80s;--dur:2.00s;fill:var(--n-pruned)'/>
+<text x='164.0' y='207.0' class='lbl a-rise' style='--d:0.80s;fill:var(--n-pruned)'>5 · Self-projection</text>
+<text x='704.0' y='207.0' class='lbl sm end a-rise' style='--d:0.90s;fill:var(--n-dim)'>project a pair already in the fit</text>
+</a>
+<a href='#6-does-the-cebnm-posterior-update-agree-with-direct-numerical-integration' class='rm-row'>
+<rect x='128' y='220.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='235.0' r='4.00' class='a-beat' style='--d:0.87s;--dur:2.00s;fill:var(--n-data)'/>
+<text x='164.0' y='240.0' class='lbl a-rise' style='--d:0.87s;fill:var(--n-data)'>6 · cEBNM vs. integration</text>
+<text x='704.0' y='240.0' class='lbl sm end a-rise' style='--d:0.97s;fill:var(--n-dim)'>the same posterior, two ways</text>
+</a>
+<a href='#7-does-the-point-normal-update-become-the-gaussian-update-when' class='rm-row'>
+<rect x='128' y='253.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='268.0' r='4.00' class='a-beat' style='--d:0.94s;--dur:2.00s;fill:var(--n-student)'/>
+<text x='164.0' y='273.0' class='lbl a-rise' style='--d:0.94s;fill:var(--n-student)'>7 · π = 1 → Gaussian</text>
+<text x='704.0' y='273.0' class='lbl sm end a-rise' style='--d:1.04s;fill:var(--n-dim)'>the new prior meets the old one</text>
+</a>
+<a href='#putting-the-checks-together' class='rm-row'>
+<rect x='128' y='286.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='301.0' r='4.00' class='a-beat' style='--d:1.01s;--dur:2.00s;fill:var(--n-teacher)'/>
+<text x='164.0' y='306.0' class='lbl a-rise' style='--d:1.01s;fill:var(--n-teacher)'>Putting the checks together</text>
+<text x='704.0' y='306.0' class='lbl sm end a-rise' style='--d:1.11s;fill:var(--n-dim)'>reductions, invariances, one local test</text>
+</a>
+<a href='#what-passing-level-0-means' class='rm-row'>
+<rect x='128' y='319.0' width='576' height='30.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='334.0' r='4.00' class='a-beat' style='--d:1.08s;--dur:2.00s;fill:var(--n-kept)'/>
+<text x='164.0' y='339.0' class='lbl a-rise' style='--d:1.08s;fill:var(--n-kept)'>What passing Level 0 means</text>
+<text x='704.0' y='339.0' class='lbl sm end a-rise' style='--d:1.18s;fill:var(--n-dim)'>and what it still does not mean</text>
+</a>
+</svg>
+</div>
+
+
+## Three levels of checking
+
+There are actually three levels:
+
+### Level 0 — implementation correctness
+
+Before asking biological questions, make sure the algorithm itself is coded correctly.
+
+### Level 1 — simulation recovery
+
+Because simulations have ground truth, compare estimates against truth.
+
+### Level 2 — held-out generalization
+
+Ask whether the learned regulotype transfers to unseen genes and donors.
+
+These answer different questions.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 316' role='img' aria-label='Three stacked levels of checking, with the bottom one lit.'>
+<path d='M96.0 288.0 L96.0 26.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.10s;--dur:0.90s;stroke:var(--n-edge);stroke-width:2.0'/>
+<path d='M96.0 66.0 L124.0 66.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.40s;--dur:0.50s;stroke:var(--n-edge);stroke-width:2.0'/>
+<circle cx='96.0' cy='66.0' r='5.20' class='a-pop' style='--d:0.45s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:2.0'/>
+<g class='a-breathe' style='--d:0.90s;--dur:5.00s;--lo:0.30;--hi:0.62'><rect x='124.0' y='34.0' width='520.0' height='64.0' rx='10' class='box' style='fill:none;stroke:var(--n-edge);stroke-width:1.8'/></g>
+<text x='150.0' y='62.0' class='lbl a-rise' style='--d:0.48s;fill:var(--n-ink)'>Level 2 — held-out generalization</text>
+<text x='150.0' y='84.0' class='lbl sm a-rise' style='--d:0.54s;fill:var(--n-dim)'>does it transfer to new genes and donors?</text>
+<rect x='478.0' y='53.0' width='152.0' height='26.0' rx='13' class='box a-pop' style='--d:0.60s;fill:none;stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='554.0' y='70.0' class='lbl sm mid a-rise' style='--d:0.64s;fill:var(--n-dim)'>needs held-out data</text>
+<path d='M96.0 152.0 L124.0 152.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.30s;--dur:0.50s;stroke:var(--n-edge);stroke-width:2.0'/>
+<circle cx='96.0' cy='152.0' r='5.20' class='a-pop' style='--d:0.35s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:2.0'/>
+<g class='a-breathe' style='--d:0.80s;--dur:5.00s;--lo:0.30;--hi:0.62'><rect x='124.0' y='120.0' width='520.0' height='64.0' rx='10' class='box' style='fill:none;stroke:var(--n-edge);stroke-width:1.8'/></g>
+<text x='150.0' y='148.0' class='lbl a-rise' style='--d:0.38s;fill:var(--n-ink)'>Level 1 — simulation recovery</text>
+<text x='150.0' y='170.0' class='lbl sm a-rise' style='--d:0.44s;fill:var(--n-dim)'>does the estimate match a known truth?</text>
+<rect x='478.0' y='139.0' width='152.0' height='26.0' rx='13' class='box a-pop' style='--d:0.50s;fill:none;stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='554.0' y='156.0' class='lbl sm mid a-rise' style='--d:0.54s;fill:var(--n-dim)'>needs a known truth</text>
+<path d='M96.0 238.0 L124.0 238.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.20s;--dur:0.50s;stroke:var(--n-kept);stroke-width:2.0'/>
+<circle cx='96.0' cy='238.0' r='6.40' class='a-pop' style='--d:0.25s;fill:var(--n-kept)'/>
+<g class='a-glow' style='--d:0.70s;--dur:2.60s'><rect x='124.0' y='206.0' width='520.0' height='64.0' rx='10' class='box' style='fill:var(--n-panel);stroke:var(--n-kept);stroke-width:3.0'/></g>
+<rect x='124.0' y='206.0' width='520.0' height='64.0' rx='10' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:2.4'/>
+<text x='150.0' y='234.0' class='lbl a-rise' style='--d:0.28s;fill:var(--n-kept)'>Level 0 — implementation correctness</text>
+<text x='150.0' y='256.0' class='lbl sm a-rise' style='--d:0.34s;fill:var(--n-dim)'>does the program do what I intended?</text>
+<rect x='478.0' y='225.0' width='152.0' height='26.0' rx='13' class='box a-pop' style='--d:0.40s;fill:none;stroke:var(--n-kept);stroke-width:1.6'/>
+<text x='554.0' y='242.0' class='lbl sm mid a-rise' style='--d:0.44s;fill:var(--n-kept)'>needs neither</text>
+<path d='M676 238 L662 238 L662 250' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.75s;--dur:0.50s;stroke:var(--n-kept);stroke-width:2.0'/>
+<g class='a-rise' style='--d:0.80s'><text x='710.0' y='224.0' class='lbl sm end' style='fill:var(--n-kept)'>this note</text></g>
+<text x='710.0' y='300.0' class='lbl sm end a-rise' style='--d:0.95s;fill:var(--n-dim)'>each level needs evidence the one below it does not</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Three questions, three kinds of evidence. Level 1 needs a truth I generated and Level 2 needs data the fit never saw; Level 0 needs only the code and a problem whose answer is known in closed form. That is why it comes first, and why everything below is Level 0.</div>
+</div>
+
+
+This note focuses entirely on **Level 0**.
+
+At this stage, I am not asking whether the method discovers the correct regulotype, whether the fitted map resembles the generating truth, or whether it predicts effects in a new donor. Those questions require data-generating truth or held-out observations and belong to the next two levels.
+
+The question here is narrower:
+
+> **If I give the program a mathematical problem whose answer I know, does the program perform exactly the mathematical operation that I intended?**
+
+This distinction is important. A model can have poor statistical power even when the implementation is perfect. Conversely, a buggy implementation can occasionally produce attractive simulation results.
+
+Before interpreting any result, I want to establish that each mathematical layer is internally consistent.
+
+The implementation checks fall naturally into three groups:
+
+1. **Reduction checks:** when our model is reduced to an existing model, do the implementations agree?
+2. **Invariance checks:** do transformations that should preserve an estimand actually preserve it?
+3. **Local update checks:** do individual posterior updates agree with independently calculated answers?
+
+I start with the strongest end-to-end reduction: SURGE.
+
+---
+
+## 1. Does the Gaussian version reduce to SURGE?
+
+The observation likelihood underlying the regulotype model is the same latent-context QTL likelihood used by SURGE.
+
+For $K=1$, on the fitting scale, write
+
+$$
+\widetilde Y_{is}
+=
+c_i^\mathsf{T}a_s
++
+b_{d(i)s}
++
+\widetilde X_{is}
+\left(
+\beta_s+u_i\lambda_s
+\right)
++
+\epsilon_{is}.
+$$
+
+The terms are:
+
+* $\widetilde Y_{is}$: scaled molecular phenotype for measurement $i$ and reference pair $s$;
+* $\widetilde X_{is}$: corresponding scaled donor genotype;
+* $c_i^\mathsf{T}a_s$: additive covariate contribution;
+* $b_{d(i)s}$: donor-specific random intercept;
+* $\beta_s$: average cis effect;
+* $u_i$: latent cellular context;
+* $\lambda_s$: pair-specific loading on that context.
+
+Our new model eventually replaces the Gaussian priors on $u_i$ and $\lambda_s$ with covariate-moderated empirical Bayes priors.
+
+But before making that change, there is a much simpler question:
+
+> If I turn those new priors off and use exactly the Gaussian priors used by SURGE, does my implementation reproduce SURGE?
+
+It should.
+
+This is an unusually valuable test because it exercises almost the entire computational path at once:
+
+$$
+Y,X,C,d(i)
+\rightarrow
+\text{variational updates}
+\rightarrow
+\beta,\Lambda,U,b,\phi,\psi
+\rightarrow
+R.
+$$
+
+If the two implementations disagree here, there is little reason to debug the more complicated empirical-Bayes version yet.
+
+### Match the problem before comparing the answers
+
+The two programs must receive the **same mathematical problem**.
+
+That means matching:
+
+* the same reference variant–gene pairs;
+* the same $\widetilde Y$;
+* the same $\widetilde X$;
+* the same covariate matrix $C$;
+* the same donor index $d(i)$;
+* the same $K$;
+* the same Gaussian priors;
+* the same hyperparameters;
+* the same treatment of donor random effects;
+* the same initialization when possible;
+* the same update order;
+* the same stopping rule.
+
+For the implementation comparison, I would begin with
+
+$$
+K=1.
+$$
+
+There is no need to debug factor ordering while debugging the basic likelihood.
+
+I would also use a deliberately small dataset first. For example,
+
+$$
+D=20,\qquad
+I=200,\qquad
+S=30.
+$$
+
+The exact values are not scientifically important. I want the test to run quickly enough that I can inspect every intermediate quantity if necessary.
+
+### What should agree?
+
+First compare the posterior means of the parameters that have direct mappings between implementations:
+
+$$
+\hat\beta_s,
+\qquad
+\hat\lambda_s,
+\qquad
+\hat u_i,
+\qquad
+\hat b_{ds}.
+$$
+
+Then compare the variance or precision parameters used in the likelihood.
+
+But I would not stop with the factors.
+
+The central quantity is
+
+$$
+\hat R
+=
+\hat\beta\mathbf 1^\mathsf T
++
+\hat\Lambda\hat U^\mathsf T.
+$$
+
+Even if a sign convention differs,
+
+$$
+U\rightarrow -U,
+\qquad
+\Lambda\rightarrow-\Lambda
+$$
+
+leaves $R$ unchanged.
+
+So the most useful end-to-end comparison is
+
+$$
+\hat R^{\mathrm{ours}}
+\quad\text{vs.}\quad
+\hat R^{\mathrm{SURGE}}.
+$$
+
+I would calculate at least
+
+$$
+\max_{s,i}
+\left|
+\hat r^{\mathrm{ours}}_{si}
+-
+\hat r^{\mathrm{SURGE}}_{si}
+\right|
+$$
+
+and
+
+$$
+\frac{
+\left\|
+\hat R^{\mathrm{ours}}
+-
+\hat R^{\mathrm{SURGE}}
+\right\|_F
+}{
+1+\left\|
+\hat R^{\mathrm{SURGE}}
+\right\|_F
+}.
+$$
+
+Both should be numerically tiny under a fully matched deterministic test.
+
+### The ELBO is an independent diagnostic
+
+Posterior means can sometimes look similar even when one update is slightly wrong.
+
+The evidence lower bound,
+
+$$
+\mathcal L(q)
+=
+E_q[\log p(Y,\Theta\mid X,C)]
+-
+E_q[\log q(\Theta)],
+$$
+
+gives another view of the entire variational calculation.
+
+I therefore want to compare both
+
+$$
+\mathcal L^{(t)}_{\mathrm{ours}}
+$$
+
+and
+
+$$
+\mathcal L^{(t)}_{\mathrm{SURGE}}
+$$
+
+throughout optimization.
+
+If both programs start from the same state and execute the same updates, their ELBO trajectories should closely track each other.
+
+A useful diagnostic plot would have iteration on the horizontal axis and ELBO on the vertical axis, with one curve for each implementation.
+
+If disagreement first appears after a particular update, the problem becomes much easier to localize.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 430' role='img' aria-label='Five panels comparing a matched Gaussian fit with SURGE: four identity scatterplots and two ELBO traces.'>
+<text x='26.0' y='48.0' class='lbl bg a-rise' style='--d:0.05s;fill:var(--n-student)'>A</text>
+<text x='46.0' y='48.0' class='lbl a-rise' style='--d:0.08s;fill:var(--n-ink)'>β̂_s</text>
+<rect x='24.0' y='62.0' width='158.0' height='138.0' rx='10' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M42.0 182.0 L166.0 78.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.30s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='44.1' cy='180.3' r='3.40' class='a-pop' style='--d:0.42s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='48.2' cy='176.7' r='3.40' class='a-pop' style='--d:0.43s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='52.3' cy='172.6' r='3.40' class='a-pop' style='--d:0.44s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='56.5' cy='169.9' r='3.40' class='a-pop' style='--d:0.46s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='60.6' cy='166.4' r='3.40' class='a-pop' style='--d:0.47s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='64.7' cy='162.8' r='3.40' class='a-pop' style='--d:0.48s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='68.9' cy='160.0' r='3.40' class='a-pop' style='--d:0.49s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='73.0' cy='156.0' r='3.40' class='a-pop' style='--d:0.50s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='77.1' cy='152.3' r='3.40' class='a-pop' style='--d:0.52s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='81.3' cy='148.6' r='3.40' class='a-pop' style='--d:0.53s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='85.4' cy='146.3' r='3.40' class='a-pop' style='--d:0.54s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='89.5' cy='142.5' r='3.40' class='a-pop' style='--d:0.55s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='93.7' cy='139.3' r='3.40' class='a-pop' style='--d:0.56s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='97.8' cy='134.7' r='3.40' class='a-pop' style='--d:0.58s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='101.9' cy='131.4' r='3.40' class='a-pop' style='--d:0.59s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='106.1' cy='129.0' r='3.40' class='a-pop' style='--d:0.60s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='110.2' cy='124.0' r='3.40' class='a-pop' style='--d:0.61s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='114.3' cy='120.6' r='3.40' class='a-pop' style='--d:0.62s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='118.5' cy='117.6' r='3.40' class='a-pop' style='--d:0.64s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='122.6' cy='114.2' r='3.40' class='a-pop' style='--d:0.65s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='126.7' cy='111.5' r='3.40' class='a-pop' style='--d:0.66s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='130.9' cy='108.3' r='3.40' class='a-pop' style='--d:0.67s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='135.0' cy='104.0' r='3.40' class='a-pop' style='--d:0.68s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='139.1' cy='101.3' r='3.40' class='a-pop' style='--d:0.70s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='143.3' cy='97.6' r='3.40' class='a-pop' style='--d:0.71s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='147.4' cy='94.0' r='3.40' class='a-pop' style='--d:0.72s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='151.5' cy='90.9' r='3.40' class='a-pop' style='--d:0.73s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='155.7' cy='86.7' r='3.40' class='a-pop' style='--d:0.74s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='159.8' cy='83.3' r='3.40' class='a-pop' style='--d:0.76s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='163.9' cy='79.2' r='3.40' class='a-pop' style='--d:0.77s;fill:var(--n-teacher);opacity:0.9'/>
+<text x='174.0' y='194.0' class='lbl sm end a-rise' style='--d:0.55s;fill:var(--n-dim)'>ours →</text>
+<text x='32.0' y='74.0' class='lbl sm a-rise' style='--d:0.55s;fill:var(--n-dim)'>↑ SURGE</text>
+<text x='204.0' y='48.0' class='lbl bg a-rise' style='--d:0.10s;fill:var(--n-student)'>B</text>
+<text x='224.0' y='48.0' class='lbl a-rise' style='--d:0.13s;fill:var(--n-ink)'>λ̂_s</text>
+<rect x='202.0' y='62.0' width='158.0' height='138.0' rx='10' class='box a-pop' style='--d:0.15s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M220.0 182.0 L344.0 78.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.35s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='222.1' cy='180.2' r='3.40' class='a-pop' style='--d:0.47s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='226.2' cy='176.6' r='3.40' class='a-pop' style='--d:0.48s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='230.3' cy='173.3' r='3.40' class='a-pop' style='--d:0.49s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='234.5' cy='169.6' r='3.40' class='a-pop' style='--d:0.51s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='238.6' cy='166.5' r='3.40' class='a-pop' style='--d:0.52s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='242.7' cy='163.3' r='3.40' class='a-pop' style='--d:0.53s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='246.9' cy='158.6' r='3.40' class='a-pop' style='--d:0.54s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='251.0' cy='155.2' r='3.40' class='a-pop' style='--d:0.55s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='255.1' cy='152.0' r='3.40' class='a-pop' style='--d:0.57s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='259.3' cy='148.7' r='3.40' class='a-pop' style='--d:0.58s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='263.4' cy='145.9' r='3.40' class='a-pop' style='--d:0.59s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='267.5' cy='142.6' r='3.40' class='a-pop' style='--d:0.60s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='271.7' cy='139.0' r='3.40' class='a-pop' style='--d:0.61s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='275.8' cy='135.9' r='3.40' class='a-pop' style='--d:0.63s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='279.9' cy='131.3' r='3.40' class='a-pop' style='--d:0.64s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='284.1' cy='128.4' r='3.40' class='a-pop' style='--d:0.65s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='288.2' cy='124.2' r='3.40' class='a-pop' style='--d:0.66s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='292.3' cy='121.5' r='3.40' class='a-pop' style='--d:0.67s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='296.5' cy='117.1' r='3.40' class='a-pop' style='--d:0.69s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='300.6' cy='113.8' r='3.40' class='a-pop' style='--d:0.70s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='304.7' cy='111.8' r='3.40' class='a-pop' style='--d:0.71s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='308.9' cy='107.9' r='3.40' class='a-pop' style='--d:0.72s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='313.0' cy='103.3' r='3.40' class='a-pop' style='--d:0.73s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='317.1' cy='100.6' r='3.40' class='a-pop' style='--d:0.75s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='321.3' cy='96.3' r='3.40' class='a-pop' style='--d:0.76s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='325.4' cy='93.8' r='3.40' class='a-pop' style='--d:0.77s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='329.5' cy='90.8' r='3.40' class='a-pop' style='--d:0.78s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='333.7' cy='86.5' r='3.40' class='a-pop' style='--d:0.79s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='337.8' cy='82.7' r='3.40' class='a-pop' style='--d:0.81s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='341.9' cy='80.1' r='3.40' class='a-pop' style='--d:0.82s;fill:var(--n-student);opacity:0.9'/>
+<text x='352.0' y='194.0' class='lbl sm end a-rise' style='--d:0.60s;fill:var(--n-dim)'>ours →</text>
+<text x='210.0' y='74.0' class='lbl sm a-rise' style='--d:0.60s;fill:var(--n-dim)'>↑ SURGE</text>
+<text x='382.0' y='48.0' class='lbl bg a-rise' style='--d:0.15s;fill:var(--n-student)'>C</text>
+<text x='402.0' y='48.0' class='lbl a-rise' style='--d:0.18s;fill:var(--n-ink)'>û_i</text>
+<rect x='380.0' y='62.0' width='158.0' height='138.0' rx='10' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M398.0 182.0 L522.0 78.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.40s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='400.4' cy='180.7' r='3.40' class='a-pop' style='--d:0.52s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='405.2' cy='176.3' r='3.40' class='a-pop' style='--d:0.53s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='409.9' cy='171.2' r='3.40' class='a-pop' style='--d:0.54s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='414.7' cy='167.6' r='3.40' class='a-pop' style='--d:0.56s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='419.5' cy='164.6' r='3.40' class='a-pop' style='--d:0.57s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='424.2' cy='160.4' r='3.40' class='a-pop' style='--d:0.58s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='429.0' cy='156.7' r='3.40' class='a-pop' style='--d:0.59s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='433.8' cy='152.7' r='3.40' class='a-pop' style='--d:0.60s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='438.5' cy='147.5' r='3.40' class='a-pop' style='--d:0.62s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='443.3' cy='144.5' r='3.40' class='a-pop' style='--d:0.63s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='448.1' cy='139.9' r='3.40' class='a-pop' style='--d:0.64s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='452.8' cy='136.1' r='3.40' class='a-pop' style='--d:0.65s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='457.6' cy='132.5' r='3.40' class='a-pop' style='--d:0.66s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='462.4' cy='127.6' r='3.40' class='a-pop' style='--d:0.68s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='467.2' cy='124.6' r='3.40' class='a-pop' style='--d:0.69s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='471.9' cy='119.8' r='3.40' class='a-pop' style='--d:0.70s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='476.7' cy='116.6' r='3.40' class='a-pop' style='--d:0.71s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='481.5' cy='112.1' r='3.40' class='a-pop' style='--d:0.72s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='486.2' cy='108.5' r='3.40' class='a-pop' style='--d:0.74s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='491.0' cy='104.4' r='3.40' class='a-pop' style='--d:0.75s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='495.8' cy='99.2' r='3.40' class='a-pop' style='--d:0.76s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='500.5' cy='95.5' r='3.40' class='a-pop' style='--d:0.77s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='505.3' cy='92.3' r='3.40' class='a-pop' style='--d:0.78s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='510.1' cy='87.4' r='3.40' class='a-pop' style='--d:0.80s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='514.8' cy='84.5' r='3.40' class='a-pop' style='--d:0.81s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='519.6' cy='80.2' r='3.40' class='a-pop' style='--d:0.82s;fill:var(--n-teacher);opacity:0.9'/>
+<text x='530.0' y='194.0' class='lbl sm end a-rise' style='--d:0.65s;fill:var(--n-dim)'>ours →</text>
+<text x='388.0' y='74.0' class='lbl sm a-rise' style='--d:0.65s;fill:var(--n-dim)'>↑ SURGE</text>
+<text x='560.0' y='48.0' class='lbl bg a-rise' style='--d:0.20s;fill:var(--n-student)'>D</text>
+<text x='580.0' y='48.0' class='lbl a-rise' style='--d:0.23s;fill:var(--n-ink)'>vec(R̂)</text>
+<rect x='558.0' y='62.0' width='158.0' height='138.0' rx='10' class='box a-pop' style='--d:0.25s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M576.0 182.0 L700.0 78.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.45s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='577.4' cy='180.2' r='3.40' class='a-pop' style='--d:0.57s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='580.2' cy='178.2' r='3.40' class='a-pop' style='--d:0.58s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='583.0' cy='176.8' r='3.40' class='a-pop' style='--d:0.59s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='585.9' cy='172.9' r='3.40' class='a-pop' style='--d:0.61s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='588.7' cy='171.8' r='3.40' class='a-pop' style='--d:0.62s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='591.5' cy='169.4' r='3.40' class='a-pop' style='--d:0.63s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='594.3' cy='166.2' r='3.40' class='a-pop' style='--d:0.64s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='597.1' cy='164.6' r='3.40' class='a-pop' style='--d:0.65s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='600.0' cy='162.2' r='3.40' class='a-pop' style='--d:0.67s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='602.8' cy='160.3' r='3.40' class='a-pop' style='--d:0.68s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='605.6' cy='157.9' r='3.40' class='a-pop' style='--d:0.69s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='608.4' cy='154.7' r='3.40' class='a-pop' style='--d:0.70s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='611.2' cy='152.9' r='3.40' class='a-pop' style='--d:0.71s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='614.0' cy='149.9' r='3.40' class='a-pop' style='--d:0.73s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='616.9' cy='147.9' r='3.40' class='a-pop' style='--d:0.74s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='619.7' cy='145.4' r='3.40' class='a-pop' style='--d:0.75s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='622.5' cy='142.2' r='3.40' class='a-pop' style='--d:0.76s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='625.3' cy='140.7' r='3.40' class='a-pop' style='--d:0.77s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='628.1' cy='138.1' r='3.40' class='a-pop' style='--d:0.79s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='631.0' cy='135.3' r='3.40' class='a-pop' style='--d:0.80s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='633.8' cy='134.1' r='3.40' class='a-pop' style='--d:0.81s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='636.6' cy='131.8' r='3.40' class='a-pop' style='--d:0.82s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='639.4' cy='128.1' r='3.40' class='a-pop' style='--d:0.83s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='642.2' cy='125.9' r='3.40' class='a-pop' style='--d:0.85s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='645.0' cy='124.5' r='3.40' class='a-pop' style='--d:0.86s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='647.9' cy='122.2' r='3.40' class='a-pop' style='--d:0.87s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='650.7' cy='119.0' r='3.40' class='a-pop' style='--d:0.88s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='653.5' cy='116.3' r='3.40' class='a-pop' style='--d:0.89s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='656.3' cy='115.1' r='3.40' class='a-pop' style='--d:0.91s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='659.1' cy='111.5' r='3.40' class='a-pop' style='--d:0.92s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='662.0' cy='109.3' r='3.40' class='a-pop' style='--d:0.93s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='664.8' cy='107.4' r='3.40' class='a-pop' style='--d:0.94s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='667.6' cy='105.3' r='3.40' class='a-pop' style='--d:0.95s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='670.4' cy='103.5' r='3.40' class='a-pop' style='--d:0.97s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='673.2' cy='101.2' r='3.40' class='a-pop' style='--d:0.98s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='676.0' cy='97.3' r='3.40' class='a-pop' style='--d:0.99s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='678.9' cy='96.2' r='3.40' class='a-pop' style='--d:1.00s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='681.7' cy='93.0' r='3.40' class='a-pop' style='--d:1.01s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='684.5' cy='91.4' r='3.40' class='a-pop' style='--d:1.03s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='687.3' cy='88.1' r='3.40' class='a-pop' style='--d:1.04s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='690.1' cy='86.1' r='3.40' class='a-pop' style='--d:1.05s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='693.0' cy='84.3' r='3.40' class='a-pop' style='--d:1.06s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='695.8' cy='82.1' r='3.40' class='a-pop' style='--d:1.07s;fill:var(--n-student);opacity:0.9'/>
+<circle cx='698.6' cy='78.8' r='3.40' class='a-pop' style='--d:1.09s;fill:var(--n-student);opacity:0.9'/>
+<text x='708.0' y='194.0' class='lbl sm end a-rise' style='--d:0.70s;fill:var(--n-dim)'>ours →</text>
+<text x='566.0' y='74.0' class='lbl sm a-rise' style='--d:0.70s;fill:var(--n-dim)'>↑ SURGE</text>
+<text x='26.0' y='230.0' class='lbl bg a-rise' style='--d:0.30s;fill:var(--n-student)'>E</text>
+<text x='46.0' y='230.0' class='lbl a-rise' style='--d:0.33s;fill:var(--n-ink)'>ELBO against iteration, both implementations</text>
+<rect x='24.0' y='244.0' width='678.0' height='172.0' rx='10' class='box a-pop' style='--d:0.35s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M34.0 287.0 L692.0 287.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.45s;--dur:0.60s;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M34.0 330.0 L692.0 330.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.45s;--dur:0.60s;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M34.0 373.0 L692.0 373.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.45s;--dur:0.60s;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M46.0 394.0 L56.4 387.6 L66.8 381.5 L77.2 375.5 L87.6 369.6 L98.0 363.8 L108.4 358.2 L118.8 352.6 L129.2 347.1 L139.6 341.8 L150.0 336.6 L160.4 331.6 L170.8 326.8 L181.2 322.2 L191.6 317.9 L202.0 313.8 L212.4 310.0 L222.8 306.4 L233.2 303.2 L243.6 300.2 L254.0 297.5 L264.4 295.1 L274.8 292.9 L285.2 291.0 L295.6 289.2 L306.0 287.7 L316.4 286.4 L326.8 285.2 L337.2 284.1 L347.6 283.2 L358.0 282.3 L368.4 281.6 L378.8 280.9 L389.2 280.2 L399.6 279.6 L410.0 279.0 L420.4 278.5 L430.8 277.9 L441.2 277.4 L451.6 276.8 L462.0 276.3 L472.4 275.8 L482.8 275.3 L493.2 274.8 L503.6 274.4 L514.0 273.9 L524.4 273.5 L534.8 273.0 L545.2 272.6 L555.6 272.3 L566.0 271.9 L576.4 271.6 L586.8 271.3 L597.2 271.0 L607.6 270.7 L618.0 270.5 L628.4 270.3 L638.8 270.1 L649.2 270.0 L659.6 269.8 L670.0 269.7' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.55s;--dur:1.50s;stroke:var(--n-teacher);stroke-width:2.6'/>
+<path d='M46.0 397.2 L56.4 390.8 L66.8 384.7 L77.2 378.7 L87.6 372.8 L98.0 367.0 L108.4 361.4 L118.8 355.8 L129.2 350.3 L139.6 345.0 L150.0 339.8 L160.4 334.8 L170.8 330.0 L181.2 325.4 L191.6 321.1 L202.0 317.0 L212.4 313.2 L222.8 309.6 L233.2 306.4 L243.6 303.4 L254.0 300.7 L264.4 298.3 L274.8 296.1 L285.2 294.2 L295.6 292.4 L306.0 290.9 L316.4 289.6 L326.8 288.4 L337.2 287.3 L347.6 286.4 L358.0 285.5 L368.4 284.8 L378.8 284.1 L389.2 283.4 L399.6 282.8 L410.0 282.2 L420.4 281.7 L430.8 281.1 L441.2 280.6 L451.6 280.0 L462.0 279.5 L472.4 279.0 L482.8 278.5 L493.2 278.0 L503.6 277.6 L514.0 277.1 L524.4 276.7 L534.8 276.2 L545.2 275.8 L555.6 275.5 L566.0 275.1 L576.4 274.8 L586.8 274.5 L597.2 274.2 L607.6 273.9 L618.0 273.7 L628.4 273.5 L638.8 273.3 L649.2 273.2 L659.6 273.0 L670.0 272.9' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' stroke-dasharray='7 5' style='--d:0.70s;--dur:1.50s;stroke:var(--n-student);stroke-width:2.4'/>
+<text x='686.0' y='276.0' class='lbl sm end a-rise' style='--d:0.95s;fill:var(--n-teacher)'>SURGE</text>
+<text x='686.0' y='298.0' class='lbl sm end a-rise' style='--d:1.00s;fill:var(--n-student)'>ours</text>
+<text x='48.0' y='410.0' class='lbl sm a-rise' style='--d:1.00s;fill:var(--n-dim)'>iteration →</text>
+<g class='a-travel' style='--d:1.20s;--dur:7.00s;--fx:0px;--tx:614px'><path d='M46.0 256.0 L46.0 404.0' fill='none' class='' stroke-linecap='round' stroke-dasharray='4 6' style='--d:0.00s;stroke:var(--n-data);stroke-width:1.6'/></g>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 2.</span> <b>Matched Gaussian implementation versus SURGE.</b> I would make this a multi-panel verification figure. Panel A shows a scatterplot of $\hat\beta$; panel B shows $\hat\lambda$; panel C shows $\hat u$, after sign alignment if necessary; panel D compares $\operatorname{vec}(\hat R)$; and panel E overlays the two ELBO traces. The identity line should be visible in the parameter panels. — <b>Drawn, not measured.</b> The pinned SURGE clone is an external oracle and is not in this repository, so no number in this figure was computed. Panel D is the one that survives a sign flip, because $U\to-U,\ \Lambda\to-\Lambda$ leaves $R$ alone.</div>
+</div>
+
+
+### A practical debugging hierarchy
+
+If the final fits disagree, I would not immediately inspect the entire optimizer.
+
+I would work from the smallest difference upward:
+
+1. confirm that the input matrices are identical;
+2. confirm that the initial parameter values are identical;
+3. run **one update only** for $\beta$;
+4. compare;
+5. run one update for $\lambda$;
+6. compare;
+7. run one update for $u$;
+8. continue through the random effects and precision updates;
+9. only then compare complete iterations.
+
+This converts
+
+> “My implementation does not match SURGE”
+
+into something much more specific, such as
+
+> “The second moment used in the $u_i$ update differs after the $\lambda_s$ update.”
+
+That is the level at which a mathematical implementation bug becomes tractable.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 388' role='img' aria-label='Nine localisation steps, the first six agreeing and the seventh flagged as the first disagreement.'>
+<text x='56.0' y='28.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>smallest difference first</text>
+<g class='a-flow' style='--d:0.60s;--dur:1.60s'><path d='M38.0 52.0 L38.0 336.0' fill='none' class='' stroke-linecap='round' style='--d:0.00s;stroke:var(--n-edge);stroke-width:1.8'/></g>
+<rect x='56.0' y='44.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.12s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='58.0' r='4.60' class='a-pop' style='--d:0.15s;fill:var(--n-kept)'/>
+<text x='72.0' y='63.0' class='lbl sm a-rise' style='--d:0.16s;fill:var(--n-dim)'>1.</text>
+<text x='98.0' y='63.0' class='lbl a-rise' style='--d:0.18s;fill:var(--n-ink)'>input matrices identical?</text>
+<text x='530.0' y='63.0' class='lbl sm a-rise' style='--d:0.22s;fill:var(--n-kept)'>✓  agrees</text>
+<rect x='56.0' y='78.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.19s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='92.0' r='4.60' class='a-pop' style='--d:0.22s;fill:var(--n-kept)'/>
+<text x='72.0' y='97.0' class='lbl sm a-rise' style='--d:0.23s;fill:var(--n-dim)'>2.</text>
+<text x='98.0' y='97.0' class='lbl a-rise' style='--d:0.25s;fill:var(--n-ink)'>initial parameter values identical?</text>
+<text x='530.0' y='97.0' class='lbl sm a-rise' style='--d:0.29s;fill:var(--n-kept)'>✓  agrees</text>
+<rect x='56.0' y='112.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.26s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='126.0' r='4.60' class='a-pop' style='--d:0.29s;fill:var(--n-kept)'/>
+<text x='72.0' y='131.0' class='lbl sm a-rise' style='--d:0.30s;fill:var(--n-dim)'>3.</text>
+<text x='98.0' y='131.0' class='lbl a-rise' style='--d:0.32s;fill:var(--n-ink)'>one update for β</text>
+<text x='530.0' y='131.0' class='lbl sm a-rise' style='--d:0.36s;fill:var(--n-kept)'>✓  agrees</text>
+<rect x='56.0' y='146.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.33s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='160.0' r='4.60' class='a-pop' style='--d:0.36s;fill:var(--n-kept)'/>
+<text x='72.0' y='165.0' class='lbl sm a-rise' style='--d:0.37s;fill:var(--n-dim)'>4.</text>
+<text x='98.0' y='165.0' class='lbl a-rise' style='--d:0.39s;fill:var(--n-ink)'>compare</text>
+<text x='530.0' y='165.0' class='lbl sm a-rise' style='--d:0.43s;fill:var(--n-kept)'>✓  agrees</text>
+<rect x='56.0' y='180.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.40s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='194.0' r='4.60' class='a-pop' style='--d:0.43s;fill:var(--n-kept)'/>
+<text x='72.0' y='199.0' class='lbl sm a-rise' style='--d:0.44s;fill:var(--n-dim)'>5.</text>
+<text x='98.0' y='199.0' class='lbl a-rise' style='--d:0.46s;fill:var(--n-ink)'>one update for λ</text>
+<text x='530.0' y='199.0' class='lbl sm a-rise' style='--d:0.50s;fill:var(--n-kept)'>✓  agrees</text>
+<rect x='56.0' y='214.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.47s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:1.6'/>
+<circle cx='38.0' cy='228.0' r='4.60' class='a-pop' style='--d:0.50s;fill:var(--n-kept)'/>
+<text x='72.0' y='233.0' class='lbl sm a-rise' style='--d:0.51s;fill:var(--n-dim)'>6.</text>
+<text x='98.0' y='233.0' class='lbl a-rise' style='--d:0.53s;fill:var(--n-ink)'>compare</text>
+<text x='530.0' y='233.0' class='lbl sm a-rise' style='--d:0.57s;fill:var(--n-kept)'>✓  agrees</text>
+<g class='a-glow' style='--d:0.94s;--dur:1.90s'><rect x='56.0' y='248.0' width='452.0' height='28.0' rx='8' class='box' style='fill:none;stroke:var(--n-loss);stroke-width:3.2'/></g>
+<rect x='56.0' y='248.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.54s;fill:var(--n-panel);stroke:var(--n-loss);stroke-width:2.2'/>
+<circle cx='38.0' cy='262.0' r='4.60' class='a-pop' style='--d:0.57s;fill:var(--n-loss)'/>
+<text x='72.0' y='267.0' class='lbl sm a-rise' style='--d:0.58s;fill:var(--n-dim)'>7.</text>
+<text x='98.0' y='267.0' class='lbl a-rise' style='--d:0.60s;fill:var(--n-ink)'>one update for u</text>
+<text x='530.0' y='267.0' class='lbl sm a-rise' style='--d:0.64s;fill:var(--n-loss)'>✗  first disagreement</text>
+<rect x='56.0' y='282.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.61s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6;opacity:0.55'/>
+<circle cx='38.0' cy='296.0' r='4.60' class='a-pop' style='--d:0.64s;fill:var(--n-dim);opacity:0.5'/>
+<text x='72.0' y='301.0' class='lbl sm a-rise' style='--d:0.65s;fill:var(--n-dim)'>8.</text>
+<text x='98.0' y='301.0' class='lbl a-rise' style='--d:0.67s;fill:var(--n-dim)'>random effects, then precisions</text>
+<text x='530.0' y='301.0' class='lbl sm a-rise' style='--d:0.71s;fill:var(--n-dim)'>not reached</text>
+<rect x='56.0' y='316.0' width='452.0' height='28.0' rx='8' class='box a-pop' style='--d:0.68s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6;opacity:0.55'/>
+<circle cx='38.0' cy='330.0' r='4.60' class='a-pop' style='--d:0.71s;fill:var(--n-dim);opacity:0.5'/>
+<text x='72.0' y='335.0' class='lbl sm a-rise' style='--d:0.72s;fill:var(--n-dim)'>9.</text>
+<text x='98.0' y='335.0' class='lbl a-rise' style='--d:0.74s;fill:var(--n-dim)'>complete iterations</text>
+<text x='530.0' y='335.0' class='lbl sm a-rise' style='--d:0.78s;fill:var(--n-dim)'>not reached</text>
+<text x='56.0' y='372.0' class='lbl sm a-rise' style='--d:0.90s;fill:var(--n-dim)'>the report is no longer "it does not match SURGE"</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 3.</span> Comparing complete fits tells you only that something is wrong. Comparing one update at a time tells you which one. The seventh row is the worked example above: <i>the second moment used in the $u_i$ update differs after the $\lambda_s$ update</i> — a sentence a person can act on. Illustrative: the failing step is drawn where a real bug of this kind would surface, not where one was found.</div>
+</div>
+
+
+Passing this check tells me something quite strong:
+
+> **The basic likelihood, Gaussian-prior updates, repeated-donor structure and variational machinery have been implemented consistently with the reference model.**
+
+It still says nothing about whether the empirical-Bayes extension is correct.
+
+That requires more local tests.
+
+---
+
+## 2. Does donor-balanced reparameterization leave $R$ unchanged?
+
+After fitting, we want each latent coordinate to have a donor-balanced mean of zero and variance of one.
+
+Let
+
+$$
+a_i=\frac{1}{D I_{d(i)}},
+$$
+
+where $I_{d(i)}$ is the number of measurements contributed by donor $d(i)$.
+
+These weights satisfy
+
+$$
+\sum_i a_i=1,
+$$
+
+and every donor receives the same total weight.
+
+For factor $k$, define
+
+$$
+c_k
+=
+\sum_i a_i\hat u_{ik}
+$$
+
+and
+
+$$
+h_k^2
+=
+\sum_i
+a_i
+(\hat u_{ik}-c_k)^2.
+$$
+
+We then transform
+
+$$
+u^\star_{ik}
+=
+\frac{\hat u_{ik}-c_k}{h_k},
+$$
+
+$$
+\lambda^\star_{sk}
+=
+h_k\hat\lambda_{sk},
+$$
+
+and
+
+$$
+\beta^\star_s
+=
+\hat\beta_s
++
+\sum_k c_k\hat\lambda_{sk}.
+$$
+
+Why do we make all three changes?
+
+Because changing $U$ alone would change the fitted effects.
+
+The transformation is designed so that
+
+$$
+\beta^\star_s
++
+\sum_k
+u^\star_{ik}\lambda^\star_{sk}
+=
+\hat\beta_s
++
+\sum_k
+\hat u_{ik}\hat\lambda_{sk}.
+$$
+
+It is useful to verify this algebra explicitly.
+
+For one factor,
+
+$$
+u^\star_{ik}\lambda^\star_{sk}
+=
+\frac{\hat u_{ik}-c_k}{h_k}
+h_k\hat\lambda_{sk}
+=
+(\hat u_{ik}-c_k)\hat\lambda_{sk}.
+$$
+
+Adding the shifted intercept gives
+
+$$
+\beta^\star_s
++
+u^\star_{ik}\lambda^\star_{sk}
+=
+\hat\beta_s+c_k\hat\lambda_{sk}
++
+\hat u_{ik}\hat\lambda_{sk}
+-
+c_k\hat\lambda_{sk},
+$$
+
+so
+
+$$
+\boxed{
+r^\star_{si}=\hat r_{si}.
+}
+$$
+
+The same argument applies factor by factor when $K>1$.
+
+### The computational test
+
+This test does not even require simulated expression data.
+
+Generate or take arbitrary fitted values
+
+$$
+\hat\beta,\hat\Lambda,\hat U.
+$$
+
+First construct
+
+$$
+R_{\mathrm{before}}
+=
+\hat\beta\mathbf 1^\mathsf T
++
+\hat\Lambda\hat U^\mathsf T.
+$$
+
+Then apply the donor-balanced transformation and construct
+
+$$
+R_{\mathrm{after}}
+=
+\beta^\star\mathbf 1^\mathsf T
++
+\Lambda^\star(U^\star)^\mathsf T.
+$$
+
+Finally calculate
+
+$$
+\Delta_R
+=
+R_{\mathrm{after}}
+-
+R_{\mathrm{before}}.
+$$
+
+The primary assertion is
+
+$$
+\boxed{
+\Delta_R\approx0.
+}
+$$
+
+I would test both
+
+$$
+\max |\Delta_R|
+$$
+
+and
+
+$$
+\frac{\|\Delta_R\|_F}
+{1+\|R_{\mathrm{before}}\|_F}.
+$$
+
+But there are two additional assertions.
+
+After transformation,
+
+$$
+\sum_i a_i u^\star_{ik}\approx0
+$$
+
+and
+
+$$
+\sum_i
+a_i(u^\star_{ik})^2
+\approx1.
+$$
+
+So one unit test simultaneously checks both the **purpose** of the transformation and its **invariance**.
+
+<div class='lab wide' id='l0-reparam-lab'>
+<div class='lab-head'><span class='name'>Lab 1 · the donor-balanced transformation</span><span class='hint'>move the factors, and watch the fitted effects refuse to move</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label>donor sizes</label>
+<div class='seg seg-l0r-sizes'><button type='button' data-value='equal' aria-pressed='true'>equal</button><button type='button' data-value='uneven' aria-pressed='false'>uneven</button><button type='button' data-value='extreme' aria-pressed='false'>very uneven</button></div>
+</div>
+<div class='ctl'>
+<label for='l0r-beta'>average effect β <span class='val' id='l0r-beta-v'></span></label>
+<input type='range' id='l0r-beta' min='-1.5' max='1.5' step='0.01' value='0.4'>
+</div>
+<div class='ctl'>
+<label for='l0r-lam'>loading λ <span class='val' id='l0r-lam-v'></span></label>
+<input type='range' id='l0r-lam' min='-1.5' max='1.5' step='0.01' value='0.9'>
+</div>
+<div class='ctl'>
+<label for='l0r-centre'>centre of u <span class='val' id='l0r-centre-v'></span></label>
+<input type='range' id='l0r-centre' min='-2.0' max='2.0' step='0.01' value='0.8'>
+</div>
+<div class='ctl'>
+<label for='l0r-spread'>spread of u <span class='val' id='l0r-spread-v'></span></label>
+<input type='range' id='l0r-spread' min='0.0' max='2.5' step='0.01' value='1.3'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>max |ΔR|</span><span class='v' id='l0r-dr'></span></div>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>Σ aᵢ u*ᵢ</span><span class='v' id='l0r-mean'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>Σ aᵢ (u*ᵢ)²</span><span class='v' id='l0r-var'></span></div>
+<div class='stat' style='--stat-hue:var(--n-data)'><span class='k'>how far u moved</span><span class='v' id='l0r-move'></span></div>
+</div>
+<div class='verdict' id='l0r-verdict'></div>
+<svg viewBox='0 0 700 300' role='img'></svg>
+<p class='cap'>Every quantity is computed from the sliders. The weights are $a_i = 1/(D\,I_{d(i)})$, so each donor carries the same total weight however many measurements it contributed. <b>Drag the spread to zero</b> and the transformation stops being defined — that is the $h_k \approx 0$ edge case, and the reason the specification drops such a factor rather than dividing by it.</p>
+</div>
+</div>
+
+
+### An important edge case
+
+If
+
+$$
+h_k\approx0,
+$$
+
+the coordinate has essentially no variation.
+
+Dividing by $h_k$ would be numerically meaningless. The specification therefore removes factors with numerically zero $h_k$.
+
+That case needs its own unit test.
+
+This check is specifically about the **posterior-mean fitted effect matrix**. It should not be interpreted as claiming that every variational posterior quantity is invariant under the transformation.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 392' role='img' aria-label='Five panels: the coordinate before and after donor balancing, the loadings absorbing the inverse, and the fitted effect matrix before, after and differenced.'>
+<text x='34.0' y='40.0' class='lbl bg a-rise' style='--d:0.05s;fill:var(--n-student)'>A</text>
+<text x='54.0' y='40.0' class='lbl a-rise' style='--d:0.08s;fill:var(--n-ink)'>the coordinate u</text>
+<path d='M94.0 84.0 L334.0 84.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.16s;--dur:0.70s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='86.0' y='89.0' class='lbl sm end a-rise' style='--d:0.20s;fill:var(--n-pruned)'>before</text>
+<circle cx='178.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.26s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='217.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.27s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.1' cy='84.0' r='4.00' class='a-pop' style='--d:0.28s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.1' cy='84.0' r='4.00' class='a-pop' style='--d:0.28s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='225.0' cy='84.0' r='4.00' class='a-pop' style='--d:0.29s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.30s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.31s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='211.2' cy='84.0' r='4.00' class='a-pop' style='--d:0.32s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.32s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.33s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.34s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='197.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.35s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.36s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='212.6' cy='84.0' r='4.00' class='a-pop' style='--d:0.36s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='206.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.37s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.38s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.39s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.1' cy='84.0' r='4.00' class='a-pop' style='--d:0.40s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='240.2' cy='84.0' r='4.00' class='a-pop' style='--d:0.40s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.41s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.0' cy='84.0' r='4.00' class='a-pop' style='--d:0.42s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.3' cy='84.0' r='4.00' class='a-pop' style='--d:0.43s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='188.3' cy='84.0' r='4.00' class='a-pop' style='--d:0.44s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='212.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.44s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='194.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.45s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.1' cy='84.0' r='4.00' class='a-pop' style='--d:0.46s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.2' cy='84.0' r='4.00' class='a-pop' style='--d:0.47s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.48s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.5' cy='84.0' r='4.00' class='a-pop' style='--d:0.48s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.9' cy='84.0' r='4.00' class='a-pop' style='--d:0.49s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='213.6' cy='84.0' r='4.00' class='a-pop' style='--d:0.50s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='215.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.51s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='185.8' cy='84.0' r='4.00' class='a-pop' style='--d:0.52s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.3' cy='84.0' r='4.00' class='a-pop' style='--d:0.52s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.1' cy='84.0' r='4.00' class='a-pop' style='--d:0.53s;fill:var(--n-pruned);opacity:0.85'/>
+<circle cx='214.4' cy='84.0' r='4.00' class='a-pop' style='--d:0.54s;fill:var(--n-pruned);opacity:0.85'/>
+<path d='M214.0 72.0 L214.0 96.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='3 4' style='--d:0.21s;--dur:0.40s;stroke:var(--n-dim);stroke-width:1.2'/>
+<path d='M94.0 138.0 L334.0 138.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.30s;--dur:0.70s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='86.0' y='143.0' class='lbl sm end a-rise' style='--d:0.34s;fill:var(--n-kept)'>after</text>
+<circle cx='102.9' cy='138.0' r='4.00' class='a-pop' style='--d:0.40s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='228.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.41s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='218.0' cy='138.0' r='4.00' class='a-pop' style='--d:0.42s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.42s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='253.4' cy='138.0' r='4.00' class='a-pop' style='--d:0.43s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.1' cy='138.0' r='4.00' class='a-pop' style='--d:0.44s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.0' cy='138.0' r='4.00' class='a-pop' style='--d:0.45s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='208.5' cy='138.0' r='4.00' class='a-pop' style='--d:0.46s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='219.0' cy='138.0' r='4.00' class='a-pop' style='--d:0.46s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.3' cy='138.0' r='4.00' class='a-pop' style='--d:0.47s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='216.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.48s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='163.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.49s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='220.4' cy='138.0' r='4.00' class='a-pop' style='--d:0.50s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='213.1' cy='138.0' r='4.00' class='a-pop' style='--d:0.50s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='194.2' cy='138.0' r='4.00' class='a-pop' style='--d:0.51s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='216.9' cy='138.0' r='4.00' class='a-pop' style='--d:0.52s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.4' cy='138.0' r='4.00' class='a-pop' style='--d:0.53s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.54s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='302.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.54s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='218.9' cy='138.0' r='4.00' class='a-pop' style='--d:0.55s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.56s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='218.5' cy='138.0' r='4.00' class='a-pop' style='--d:0.57s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='133.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.58s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='212.4' cy='138.0' r='4.00' class='a-pop' style='--d:0.58s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='154.9' cy='138.0' r='4.00' class='a-pop' style='--d:0.59s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='214.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.60s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='215.1' cy='138.0' r='4.00' class='a-pop' style='--d:0.61s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.2' cy='138.0' r='4.00' class='a-pop' style='--d:0.62s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='215.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.62s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.1' cy='138.0' r='4.00' class='a-pop' style='--d:0.63s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='216.3' cy='138.0' r='4.00' class='a-pop' style='--d:0.64s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='222.2' cy='138.0' r='4.00' class='a-pop' style='--d:0.65s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='125.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.66s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='218.5' cy='138.0' r='4.00' class='a-pop' style='--d:0.66s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='217.8' cy='138.0' r='4.00' class='a-pop' style='--d:0.67s;fill:var(--n-kept);opacity:0.85'/>
+<circle cx='218.7' cy='138.0' r='4.00' class='a-pop' style='--d:0.68s;fill:var(--n-kept);opacity:0.85'/>
+<path d='M214.0 126.0 L214.0 150.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='3 4' style='--d:0.35s;--dur:0.40s;stroke:var(--n-dim);stroke-width:1.2'/>
+<g class='a-beat' style='--d:0.90s;--dur:2.20s'><circle cx='214.0' cy='138.0' r='7.60' class='' style='--d:0.00s;fill:none;stroke:var(--n-kept);stroke-width:2.0'/></g>
+<text x='34.0' y='172.0' class='lbl sm a-rise' style='--d:0.62s;fill:var(--n-dim)'>recentred on the donor-balanced mean,</text>
+<text x='34.0' y='192.0' class='lbl sm a-rise' style='--d:0.66s;fill:var(--n-dim)'>then rescaled to unit spread</text>
+<text x='380.0' y='40.0' class='lbl bg a-rise' style='--d:0.05s;fill:var(--n-student)'>B</text>
+<text x='400.0' y='40.0' class='lbl a-rise' style='--d:0.08s;fill:var(--n-ink)'>the loading λ</text>
+<rect x='394.0' y='137.6' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.20s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='403.3' y='137.9' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.34s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='414.1' y='90.7' width='8.1' height='47.3' rx='2' class='a-grow' style='--d:0.22s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='423.4' y='123.5' width='8.1' height='14.5' rx='2' class='a-grow' style='--d:0.36s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='434.3' y='137.7' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.24s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='443.6' y='137.9' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.38s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='454.4' y='137.3' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.26s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='463.7' y='137.8' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.40s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='474.6' y='91.9' width='8.1' height='46.1' rx='2' class='a-grow' style='--d:0.28s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='483.8' y='123.8' width='8.1' height='14.2' rx='2' class='a-grow' style='--d:0.42s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='494.7' y='108.9' width='8.1' height='29.1' rx='2' class='a-grow' style='--d:0.30s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='504.0' y='129.1' width='8.1' height='8.9' rx='2' class='a-grow' style='--d:0.44s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='514.9' y='127.1' width='8.1' height='10.9' rx='2' class='a-grow' style='--d:0.32s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='524.1' y='134.6' width='8.1' height='3.4' rx='2' class='a-grow' style='--d:0.46s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='535.0' y='136.1' width='8.1' height='1.9' rx='2' class='a-grow' style='--d:0.34s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='544.3' y='137.4' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.48s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='555.1' y='138.0' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.36s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='564.4' y='138.0' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.50s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='575.3' y='134.4' width='8.1' height='3.6' rx='2' class='a-grow' style='--d:0.38s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='584.6' y='136.9' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.52s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='595.4' y='138.0' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.40s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='604.7' y='138.0' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.54s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='615.6' y='134.4' width='8.1' height='3.6' rx='2' class='a-grow' style='--d:0.42s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='624.8' y='136.9' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.56s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='635.7' y='137.1' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.44s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='645.0' y='137.7' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.58s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<rect x='655.9' y='137.7' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.46s;fill:var(--n-pruned);--org:bottom;opacity:0.9'/>
+<rect x='665.1' y='137.9' width='8.1' height='1.2' rx='2' class='a-grow' style='--d:0.60s;fill:var(--n-kept);--org:bottom;opacity:0.9'/>
+<path d='M390.0 138.0 L678.0 138.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.18s;--dur:0.70s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='394.0' y='84.0' class='lbl sm a-rise' style='--d:0.24s;fill:var(--n-pruned)'>before</text>
+<text x='458.0' y='84.0' class='lbl sm a-rise' style='--d:0.38s;fill:var(--n-kept)'>after</text>
+<text x='380.0' y='172.0' class='lbl sm a-rise' style='--d:0.62s;fill:var(--n-dim)'>scaled by exactly the factor</text>
+<text x='380.0' y='192.0' class='lbl sm a-rise' style='--d:0.66s;fill:var(--n-dim)'>that u was divided by</text>
+<text x='44.0' y='216.0' class='lbl bg a-rise' style='--d:0.05s;fill:var(--n-student)'>C</text>
+<text x='64.0' y='216.0' class='lbl a-rise' style='--d:0.08s;fill:var(--n-ink)'>R before</text>
+<rect x='44.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.50s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='57.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.51s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='70.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.52s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='83.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.54s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='96.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.55s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='109.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='122.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='135.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='148.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='161.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='174.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='187.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='200.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='213.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='44.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.51s;fill:rgb(var(--n-blue-rgb));opacity:0.59'/>
+<rect x='57.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.52s;fill:var(--n-loss);opacity:0.36'/>
+<rect x='70.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.54s;fill:var(--n-loss);opacity:0.30'/>
+<rect x='83.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.55s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='96.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:var(--n-loss);opacity:0.51'/>
+<rect x='109.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='122.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='135.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:var(--n-loss);opacity:0.24'/>
+<rect x='148.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:var(--n-loss);opacity:0.30'/>
+<rect x='161.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='174.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='187.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='200.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.31'/>
+<rect x='213.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.27'/>
+<rect x='44.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.52s;fill:rgb(var(--n-blue-rgb));opacity:0.10'/>
+<rect x='57.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.54s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='70.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.55s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='83.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='96.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='109.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='122.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='135.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='148.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='161.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='174.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='187.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.10'/>
+<rect x='200.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='213.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='44.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.54s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='57.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.55s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='70.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='83.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='96.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='109.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='122.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='135.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='148.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='161.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='174.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='187.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='200.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='213.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='44.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.55s;fill:var(--n-loss);opacity:0.95'/>
+<rect x='57.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:var(--n-loss);opacity:0.21'/>
+<rect x='70.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='83.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='96.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.13'/>
+<rect x='109.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='122.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='135.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:var(--n-loss);opacity:0.33'/>
+<rect x='148.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:var(--n-loss);opacity:0.27'/>
+<rect x='161.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='174.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='187.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.59'/>
+<rect x='200.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:var(--n-loss);opacity:0.26'/>
+<rect x='213.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:var(--n-loss);opacity:0.31'/>
+<rect x='44.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.56s;fill:var(--n-loss);opacity:0.39'/>
+<rect x='57.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:rgb(var(--n-blue-rgb));opacity:0.27'/>
+<rect x='70.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='83.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='96.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.36'/>
+<rect x='109.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='122.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='135.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.20'/>
+<rect x='148.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='161.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='174.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='187.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:var(--n-loss);opacity:0.17'/>
+<rect x='200.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='213.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.21'/>
+<rect x='44.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.57s;fill:rgb(var(--n-blue-rgb));opacity:0.32'/>
+<rect x='57.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.14'/>
+<rect x='70.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='83.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='96.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.11'/>
+<rect x='109.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='122.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='135.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.17'/>
+<rect x='148.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='161.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='174.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='187.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='200.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='213.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.17'/>
+<rect x='44.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.13'/>
+<rect x='57.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='70.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='83.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='96.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='109.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='122.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='135.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='148.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='161.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='174.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='187.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.14'/>
+<rect x='200.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='213.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='44.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='57.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='70.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='83.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='96.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='109.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='122.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='135.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='148.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='161.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='174.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='187.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='200.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='213.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<text x='44.0' y='372.0' class='lbl sm a-rise' style='--d:0.80s;fill:var(--n-dim)'>pairs × cells</text>
+<text x='274.0' y='216.0' class='lbl bg a-rise' style='--d:0.09s;fill:var(--n-student)'>D</text>
+<text x='294.0' y='216.0' class='lbl a-rise' style='--d:0.12s;fill:var(--n-ink)'>R after</text>
+<rect x='274.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.60s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='287.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='300.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='313.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='326.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.65s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='339.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='352.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='365.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='378.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='391.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='404.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='417.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='430.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='443.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.19'/>
+<rect x='274.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.59'/>
+<rect x='287.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:var(--n-loss);opacity:0.36'/>
+<rect x='300.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:var(--n-loss);opacity:0.30'/>
+<rect x='313.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.65s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='326.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.51'/>
+<rect x='339.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='352.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='365.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:var(--n-loss);opacity:0.24'/>
+<rect x='378.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-loss);opacity:0.30'/>
+<rect x='391.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='404.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:var(--n-loss);opacity:0.29'/>
+<rect x='417.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='430.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-loss);opacity:0.31'/>
+<rect x='443.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-loss);opacity:0.27'/>
+<rect x='274.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.10'/>
+<rect x='287.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='300.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.65s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='313.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='326.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='339.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='352.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='365.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='378.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='391.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='404.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='417.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.10'/>
+<rect x='430.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='443.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-loss);opacity:0.10'/>
+<rect x='274.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='287.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.65s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='300.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='313.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='326.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='339.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='352.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='365.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='378.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='391.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='404.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='417.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='430.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.30'/>
+<rect x='443.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.29'/>
+<rect x='274.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.65s;fill:var(--n-loss);opacity:0.95'/>
+<rect x='287.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.21'/>
+<rect x='300.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='313.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='326.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.13'/>
+<rect x='339.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='352.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='365.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:var(--n-loss);opacity:0.33'/>
+<rect x='378.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-loss);opacity:0.27'/>
+<rect x='391.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='404.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-loss);opacity:0.28'/>
+<rect x='417.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-loss);opacity:0.59'/>
+<rect x='430.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:var(--n-loss);opacity:0.26'/>
+<rect x='443.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-loss);opacity:0.31'/>
+<rect x='274.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.39'/>
+<rect x='287.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.27'/>
+<rect x='300.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='313.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='326.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.36'/>
+<rect x='339.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='352.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='365.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.20'/>
+<rect x='378.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='391.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='404.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.23'/>
+<rect x='417.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:var(--n-loss);opacity:0.17'/>
+<rect x='430.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='443.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.21'/>
+<rect x='274.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.32'/>
+<rect x='287.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.14'/>
+<rect x='300.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='313.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='326.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.11'/>
+<rect x='339.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='352.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='365.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.17'/>
+<rect x='378.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='391.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='404.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='417.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:rgb(var(--n-blue-rgb));opacity:0.24'/>
+<rect x='430.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='443.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:rgb(var(--n-blue-rgb));opacity:0.17'/>
+<rect x='274.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.13'/>
+<rect x='287.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='300.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='313.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='326.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='339.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='352.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='365.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='378.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='391.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='404.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='417.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.14'/>
+<rect x='430.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:rgb(var(--n-blue-rgb));opacity:0.16'/>
+<rect x='443.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:rgb(var(--n-blue-rgb));opacity:0.15'/>
+<rect x='274.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='287.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='300.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='313.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='326.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='339.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='352.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='365.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='378.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='391.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='404.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='417.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='430.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<rect x='443.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.85s;fill:rgb(var(--n-blue-rgb));opacity:0.28'/>
+<text x='274.0' y='372.0' class='lbl sm a-rise' style='--d:0.85s;fill:var(--n-dim)'>the same, exactly</text>
+<text x='504.0' y='216.0' class='lbl bg a-rise' style='--d:0.13s;fill:var(--n-student)'>E</text>
+<text x='524.0' y='216.0' class='lbl a-rise' style='--d:0.16s;fill:var(--n-ink)'>after − before</text>
+<rect x='504.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.70s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='230.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='243.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='256.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='269.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='282.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='295.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.92s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.92s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='308.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.93s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.92s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.93s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='321.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.94s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='504.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='517.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='530.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='543.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='556.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='569.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='582.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='595.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='608.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='621.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='634.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.92s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='647.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.93s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='660.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.94s;fill:var(--n-edge);opacity:0.14'/>
+<rect x='673.0' y='334.0' width='11.6' height='11.6' rx='2' class='a-pop' style='--d:0.95s;fill:var(--n-edge);opacity:0.14'/>
+<text x='504.0' y='372.0' class='lbl sm a-rise' style='--d:0.90s;fill:var(--n-kept)'>max 4.4 × 10⁻¹⁶</text>
+<g class='a-travel' style='--d:1.00s;--dur:6.00s;--fx:0px;--tx:169px'><rect x='44.0' y='228.0' width='13.0' height='117.0' rx='2' class='box' style='--d:0.00s;fill:var(--n-data);stroke:none;stroke-width:0;opacity:0.22'/></g>
+<g class='a-travel' style='--d:1.00s;--dur:6.00s;--fx:0px;--tx:169px'><rect x='274.0' y='228.0' width='13.0' height='117.0' rx='2' class='box' style='--d:0.00s;fill:var(--n-data);stroke:none;stroke-width:0;opacity:0.22'/></g>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 4.</span> <b>Reparameterization changes the factors, not the fitted effects.</b> Panel A could show $U$ before and after donor balancing. Panel B could show the corresponding inverse change in $\Lambda$. Panel C shows $R_{\mathrm{before}}$, panel D shows $R_{\mathrm{after}}$, and panel E shows $R_{\mathrm{after}}-R_{\mathrm{before}}$, which should be essentially zero everywhere. — Measured, on a real rank-2 fit at $D=25$, $I=125$, $S=30$. The transformation is not a small one — $U$ moves by <b>3.94×</b> its own norm and $\Lambda$ by <b>0.76×</b> — and $R$ moves by <b>4.4e-16</b> at its largest entry, which is floating-point noise on numbers of order one. Afterwards $\sum_i a_i u^\star_{i}= 1.4e-17$ and $\sum_i a_i (u^\star_{i})^2 = 1.0000$. Panels C–E show a 9 × 14 corner of the full 30 × 125 matrix.</div>
+</div>
+
+
+---
+
+## 3. Does unscaling return effects to the original phenotype units?
+
+The model is not fitted directly to the raw $Y$ and $X$.
+
+For pair $s$, define donor-balanced phenotype and genotype scales
+
+$$
+q_s^2
+=
+\sum_i
+a_i(Y_{is}-\bar y_s)^2
+$$
+
+and
+
+$$
+h_s^2
+=
+\frac{1}{D}
+\sum_d
+(x_{d,s}-\bar x_s)^2.
+$$
+
+The fitting matrices are
+
+$$
+\widetilde Y_{is}
+=
+\frac{Y_{is}-\bar y_s}{q_s},
+$$
+
+$$
+\widetilde X_{is}
+=
+\frac{X_{is}-\bar x_s}{h_s}.
+$$
+
+Suppose the fitted cis effect on this standardized scale is
+
+$$
+\widetilde r_{si}.
+$$
+
+The model contribution on the fitting scale is
+
+$$
+\widetilde X_{is}\widetilde r_{si}.
+$$
+
+Multiplying back by the phenotype scale $q_s$,
+
+$$
+q_s
+\widetilde X_{is}
+\widetilde r_{si}
+=
+q_s
+\frac{X_{is}-\bar x_s}{h_s}
+\widetilde r_{si}.
+$$
+
+Therefore the effect measured per unit of the original genotype is
+
+$$
+\boxed{
+r_{si}
+=
+\frac{q_s}{h_s}
+\widetilde r_{si}.
+}
+$$
+
+The same transformation applies to the posterior mean:
+
+$$
+E[r_{si}]
+=
+\frac{q_s}{h_s}
+E[\widetilde r_{si}],
+$$
+
+while the variance changes quadratically:
+
+$$
+\operatorname{Var}(r_{si})
+=
+\left(
+\frac{q_s}{h_s}
+\right)^2
+\operatorname{Var}(\widetilde r_{si}).
+$$
+
+### How I would test this
+
+I would create a tiny synthetic example where the answer is obvious.
+
+Suppose
+
+$$
+q_s=4,
+\qquad
+h_s=2,
+\qquad
+\widetilde r_{si}=0.3.
+$$
+
+Then the effect in the original phenotype units must be
+
+$$
+r_{si}
+=
+\frac{4}{2}\times0.3
+=
+0.6.
+$$
+
+But testing the formula alone is too weak.
+
+A stronger test checks the contribution to the phenotype.
+
+On the fitting scale,
+
+$$
+q_s
+\widetilde X_{is}
+\widetilde r_{si}
+$$
+
+should equal
+
+$$
+(X_{is}-\bar x_s)r_{si}.
+$$
+
+That is,
+
+$$
+\boxed{
+q_s
+\widetilde X_{is}
+\widetilde r_{si}
+=
+(X_{is}-\bar x_s)
+\frac{q_s}{h_s}
+\widetilde r_{si}.
+}
+$$
+
+I would generate many random values of $q_s,h_s,X_{is}$ and $\widetilde r_{si}$, apply both calculations independently, and require numerical agreement.
+
+Then repeat the same test for the posterior variance.
+
+<div class='lab wide' id='l0-unscale-lab'>
+<div class='lab-head'><span class='name'>Lab 2 · back to phenotype units</span><span class='hint'>the formula, and the contribution it has to reproduce</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='l0u-q'>phenotype scale q <span class='val' id='l0u-q-v'></span></label>
+<input type='range' id='l0u-q' min='0.0' max='6.0' step='0.01' value='4.0'>
+</div>
+<div class='ctl'>
+<label for='l0u-h'>genotype scale h <span class='val' id='l0u-h-v'></span></label>
+<input type='range' id='l0u-h' min='0.0' max='6.0' step='0.01' value='2.0'>
+</div>
+<div class='ctl'>
+<label for='l0u-x'>centred genotype X − x̄ <span class='val' id='l0u-x-v'></span></label>
+<input type='range' id='l0u-x' min='-2.0' max='2.0' step='0.01' value='1.0'>
+</div>
+<div class='ctl'>
+<label for='l0u-rt'>fitted effect r̃ <span class='val' id='l0u-rt-v'></span></label>
+<input type='range' id='l0u-rt' min='-1.5' max='1.5' step='0.01' value='0.3'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>r_si = (q/h) r̃</span><span class='v' id='l0u-r'></span></div>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>q_s X̃ r̃</span><span class='v' id='l0u-lhs'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>(X − x̄) r</span><span class='v' id='l0u-rhs'></span></div>
+<div class='stat' style='--stat-hue:var(--n-data)'><span class='k'>variance scaling</span><span class='v' id='l0u-var'></span></div>
+</div>
+<div class='verdict' id='l0u-verdict'></div>
+<svg viewBox='0 0 700 302' role='img'></svg>
+<p class='cap'>The two middle readouts are computed by different routes and must agree at every setting; the panel draws them as two bars that have to reach the same height. The preset is the worked example above, $q_s=4$, $h_s=2$, $\tilde r = 0.3 \Rightarrow r = 0.6$. <b>Drag either scale to zero</b> to see the pairs that must be filtered out before fitting rather than handed to the unscaling routine.</p>
+</div>
+</div>
+
+
+### Boundary cases
+
+If
+
+$$
+h_s=0,
+$$
+
+there is no genotype variation and the pair cannot identify a genetic effect.
+
+If
+
+$$
+q_s=0,
+$$
+
+the molecular phenotype has no variation.
+
+These pairs should be removed before fitting, rather than passed into the unscaling routine.
+
+A separate test should verify that this filtering happens.
+
+The reason this check matters is practical. A method can internally estimate perfectly reasonable standardized coefficients while exporting biologically meaningless effect sizes if the final scale conversion is wrong.
+
+---
+
+## 4. Does $K=1$ collapse to $K=0$ when $\lambda_s=0$?
+
+The $K=0$ model contains no cellular variation in genetic effects:
+
+$$
+\widetilde Y_{is}
+=
+c_i^\mathsf T a_s
++
+b_{d(i)s}
++
+\widetilde X_{is}\beta_s
++
+\epsilon_{is}.
+$$
+
+With $K=1$, the model becomes
+
+$$
+\widetilde Y_{is}
+=
+c_i^\mathsf T a_s
++
+b_{d(i)s}
++
+\widetilde X_{is}
+(\beta_s+u_i\lambda_s)
++
+\epsilon_{is}.
+$$
+
+Now set
+
+$$
+\lambda_s=0
+$$
+
+for every pair.
+
+Then
+
+$$
+u_i\lambda_s=0
+$$
+
+regardless of $u_i$, and the model becomes exactly
+
+$$
+\widetilde Y_{is}
+=
+c_i^\mathsf T a_s
++
+b_{d(i)s}
++
+\widetilde X_{is}\beta_s
++
+\epsilon_{is}.
+$$
+
+Therefore
+
+$$
+\boxed{
+K=1,\ \lambda_s\equiv0
+\quad\Longrightarrow\quad
+K=0.
+}
+$$
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 314' role='img' aria-label='The interaction arm vanishing when the loading is zero, and the resulting effect matrix with every column identical.'>
+<text x='30.0' y='30.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>the genotype-weighted term</text>
+<rect x='30.0' y='62.0' width='58.0' height='44.0' rx='10' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-data);stroke-width:2.0'/>
+<text x='59.0' y='90.0' class='lbl bg mid a-rise' style='--d:0.14s;fill:var(--n-data)'>x</text>
+<text x='100.0' y='90.0' class='lbl bg mid a-rise' style='--d:0.16s;fill:var(--n-dim)'>·</text>
+<path d='M126 84 C116 84, 116 62, 106 62 M126 84 C116 84, 116 128, 106 128' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.20s;--dur:0.70s;stroke:var(--n-edge);stroke-width:2.0'/>
+<rect x='130.0' y='40.0' width='92.0' height='44.0' rx='10' class='box a-pop' style='--d:0.26s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:2.0'/>
+<text x='176.0' y='68.0' class='lbl bg mid a-rise' style='--d:0.30s;fill:var(--n-kept)'>β</text>
+<rect x='130.0' y='106.0' width='92.0' height='44.0' rx='10' class='box a-pop' style='--d:0.32s;fill:var(--n-panel);stroke:var(--n-pruned);stroke-width:2.0'/>
+<g class='a-vanish' style='--d:0.95s;--dur:0.80s'><text x='176.0' y='134.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-pruned)'>u λ</text></g>
+<g class='a-fade' style='--d:1.30s;--dur:0.60s'><text x='176.0' y='134.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-loss)'>0</text></g>
+<g class='a-rise' style='--d:0.60s'><text x='238.0' y='134.0' class='lbl' style='--d:0.00s;fill:var(--n-loss)'>λ ≡ 0</text></g>
+<g class='a-vanish' style='--d:0.95s;--dur:0.80s'><rect x='130.0' y='106.0' width='92.0' height='44.0' rx='10' class='box' style='fill:none;stroke:var(--n-loss);stroke-width:2.6'/></g>
+<g class='a-breathe' style='--d:1.60s;--dur:3.40s;--lo:0.20;--hi:0.75'><circle cx='38.0' cy='184.0' r='5.00' class='' style='--d:0.00s;fill:var(--n-pruned)'/></g>
+<g class='a-rise' style='--d:1.50s'><text x='54.0' y='189.0' class='lbl sm' style='--d:0.00s;fill:var(--n-dim)'>u is now free and cannot</text></g>
+<g class='a-rise' style='--d:1.56s'><text x='54.0' y='209.0' class='lbl sm' style='--d:0.00s;fill:var(--n-dim)'>reach the likelihood at all</text></g>
+<g class='a-rise' style='--d:1.70s'><text x='30.0' y='252.0' class='lbl' style='--d:0.00s;fill:var(--n-kept)'>what is left is the K = 0 model,</text></g>
+<g class='a-rise' style='--d:1.76s'><text x='30.0' y='274.0' class='lbl' style='--d:0.00s;fill:var(--n-kept)'>exactly</text></g>
+<g class='a-wide' style='--d:1.80s;--dur:0.80s'><rect x='30.0' y='284.0' width='236.0' height='3.0' rx='2' class='box' style='--d:0.00s;fill:var(--n-kept);stroke:none;stroke-width:0;opacity:0.6'/></g>
+<text x='372.0' y='30.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>the reconstructed R</text>
+<rect x='372.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.55s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='398.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.58s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='424.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.61s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='450.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.64s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='476.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='502.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='528.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='554.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='580.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='606.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='632.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.85s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='658.0' y='48.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.88s;fill:rgb(var(--n-blue-rgb));opacity:0.18'/>
+<rect x='372.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.57s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='398.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.60s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='424.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.63s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='450.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.66s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='476.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.69s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='502.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.72s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='528.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.75s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='554.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.78s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='580.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.81s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='606.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.84s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='632.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.87s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='658.0' y='74.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.90s;fill:var(--n-loss);opacity:0.94'/>
+<rect x='372.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.59s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='398.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.62s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='424.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.65s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='450.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.68s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='476.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.71s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='502.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.74s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='528.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.77s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='554.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.80s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='580.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.83s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='606.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.86s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='632.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.89s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='658.0' y='100.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.92s;fill:rgb(var(--n-blue-rgb));opacity:0.42'/>
+<rect x='372.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.61s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='398.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.64s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='424.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.67s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='450.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.70s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='476.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.73s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='502.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.76s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='528.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.79s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='554.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.82s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='580.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.85s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='606.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.88s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='632.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.91s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='658.0' y='126.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.94s;fill:var(--n-loss);opacity:0.55'/>
+<rect x='372.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.63s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='398.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.66s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='424.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='450.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='476.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.75s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='502.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='528.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.81s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='554.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.84s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='580.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.87s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='606.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.90s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='632.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.93s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='658.0' y='152.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.96s;fill:rgb(var(--n-blue-rgb));opacity:0.73'/>
+<rect x='372.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.65s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='398.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.68s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='424.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.71s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='450.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.74s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='476.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.77s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='502.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.80s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='528.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.83s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='554.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.86s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='580.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.89s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='606.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.92s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='632.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.95s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='658.0' y='178.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.98s;fill:var(--n-loss);opacity:0.79'/>
+<rect x='372.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.67s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='398.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.70s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='424.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.73s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='450.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.76s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='476.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.79s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='502.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.82s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='528.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.85s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='554.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.88s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='580.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.91s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='606.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.94s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='632.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.97s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='658.0' y='204.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:1.00s;fill:rgb(var(--n-blue-rgb));opacity:0.75'/>
+<rect x='372.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.69s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='398.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.72s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='424.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.75s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='450.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.78s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='476.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.81s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='502.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.84s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='528.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.87s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='554.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.90s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='580.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.93s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='606.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.96s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='632.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:0.99s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<rect x='658.0' y='230.0' width='24.0' height='24.0' rx='2' class='a-pop' style='--d:1.02s;fill:rgb(var(--n-blue-rgb));opacity:0.76'/>
+<text x='372.0' y='278.0' class='lbl sm a-rise' style='--d:1.10s;fill:var(--n-kept)'>every column identical;</text>
+<text x='372.0' y='298.0' class='lbl sm a-rise' style='--d:1.14s;fill:var(--n-kept)'>spread along a row 0.0000</text>
+<text x='700.0' y='278.0' class='lbl sm end a-rise' style='--d:1.18s;fill:var(--n-dim)'>cells →</text>
+<g class='a-travel' style='--d:1.30s;--dur:5.50s;--fx:0px;--tx:286px'><rect x='372.0' y='46.0' width='26.0' height='208.0' rx='2' class='box' style='--d:0.00s;fill:var(--n-data);stroke:none;stroke-width:0;opacity:0.24'/></g>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 5.</span> Measured. With the loading held at zero by a point-mass prior, the rank-one fit reproduces the $K=0$ fit <b>bitwise</b>: $\hat\beta$, $\hat b$ and $\hat a$ differ by exactly $0.0$, not by a tolerance, and the spread of $\hat R$ along every row is exactly $0$. The right panel is a real $8\times12$ block of that fit. This is also the only path that drives (S14)'s zero-precision branch, since $\lambda=0$ leaves $u$ with no likelihood information at all.</div>
+</div>
+
+
+### This is a unit test, not a null simulation
+
+There is an important distinction here.
+
+For this Level 0 check, I would **force**
+
+$$
+\lambda_s=0
+$$
+
+and prevent the optimizer from changing it.
+
+I am not generating null data and asking whether the method estimates $\lambda_s\approx0$. That would be a Level 1 calibration question.
+
+Here the mathematical model has literally been reduced to $K=0$, so the two computational paths should give the same answer.
+
+Use exactly the same
+
+$$
+Y,X,C,d(i)
+$$
+
+and the same hyperparameters.
+
+Then compare:
+
+$$
+\hat\beta_s,
+\qquad
+\hat a_s,
+\qquad
+\hat b_{ds},
+\qquad
+\hat\phi_s,
+\qquad
+\hat\psi_s.
+$$
+
+The reconstructed effect matrix should satisfy
+
+$$
+\hat R_{si}
+=
+\hat\beta_s
+$$
+
+for every cell $i$.
+
+In other words, every column has the same value for pair $s$.
+
+I would **not** require the $u_i$ values themselves to agree with anything meaningful. Once all $\lambda_s=0$, the likelihood contains no information about $u_i$. The important statement is that $u_i$ can no longer affect $R$ or the likelihood.
+
+This check catches a surprisingly broad class of bugs: stale interaction terms, residual calculations that accidentally retain $u$, or factor contributions that are not properly removed when a loading is zero.
+
+---
+
+## 5. Does pair projection reproduce the same pair when nothing is actually new?
+
+The [previous post](/notes/2026/09/06/regulotypes-train-test/) introduced pair projection.
+
+Once $U$ has been learned, a new pair can be placed on the map by keeping $U$ fixed and estimating
+
+$$
+\beta_s,\lambda_s.
+$$
+
+For a projected gene, the model is
+
+$$
+y_{ig}
+=
+c_i^\mathsf T\alpha_g
++
+(u_i^\star)^\mathsf T\rho_g
++
+b_{d(i)g}
++
+x_{d(i)v}
+\left\{
+\beta_{vg}
++
+(u_i^\star)^\mathsf T\lambda_{vg}
+\right\}
++
+\epsilon_{ig}.
+$$
+
+The output is
+
+$$
+\hat r_{vgi}
+=
+\hat\beta_{vg}
++
+(u_i^\star)^\mathsf T\hat\lambda_{vg}.
+$$
+
+How do I know that this projection code is correct?
+
+Give it a pair whose answer is already known.
+
+### Construct a self-projection test
+
+1. Fit the reference model.
+2. Save the fitted coordinates $U^\star$.
+3. Select one reference pair $s$.
+4. Treat that pair as though it were being projected.
+5. Supply exactly the same $U^\star$.
+6. Fit its pair-specific coefficients.
+7. Compare the resulting cis-effect profile with the reference-pair calculation.
+
+The target is
+
+$$
+\boxed{
+\hat R^{\mathrm{projection}}_{s:}
+\approx
+\hat R^{\mathrm{reference}}_{s:}.
+}
+$$
+
+### Matching the design matters
+
+This test only has a clean mathematical interpretation if the two paths solve the same conditional problem.
+
+The projection equation contains an additive term
+
+$$
+(u_i^\star)^\mathsf T\rho_g
+$$
+
+to account for genotype-independent association between the fixed coordinates and expression of the projected gene.
+
+Therefore, when constructing the strict unit test, I would ensure that the reference and projection pathways contain identical additive terms and priors. If one path includes $\rho_g$ and the other does not, exact equality is no longer a valid assertion.
+
+The cleanest implementation test is therefore:
+
+> Given the same fixed $U$, same pair, same design matrix, same prior specification and same starting values, do the ordinary conditional-fit routine and projection routine return the same $\beta_s,\lambda_s$ and $R_{s:}$?
+
+That isolates the **projection software** rather than confounding it with a modeling difference.
+
+A useful diagnostic plot is simply
+
+$$
+\hat r^{\mathrm{reference}}_{si}
+\quad\text{vs.}\quad
+\hat r^{\mathrm{projection}}_{si}.
+$$
+
+Every point should lie on the identity line.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 302' role='img' aria-label='A scatter of the reference-pair fit against its own projection, and the ten per-pair relative errors on a logarithmic axis.'>
+<text x='56.0' y='32.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>reference-pair fit  vs.  projection of the same pair</text>
+<rect x='56.0' y='46.0' width='344.0' height='240.0' rx='10' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M74.0 268.0 L382.0 64.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.24s;--dur:0.90s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='171.5' cy='203.5' r='3.60' class='a-pop' style='--d:0.34s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='208.8' cy='178.7' r='3.60' class='a-pop' style='--d:0.35s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='253.3' cy='149.1' r='3.60' class='a-pop' style='--d:0.35s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.3' cy='169.7' r='3.60' class='a-pop' style='--d:0.36s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='191.0' cy='190.5' r='3.60' class='a-pop' style='--d:0.36s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='186.5' cy='193.5' r='3.60' class='a-pop' style='--d:0.37s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='184.1' cy='195.1' r='3.60' class='a-pop' style='--d:0.38s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='230.4' cy='164.4' r='3.60' class='a-pop' style='--d:0.38s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='247.3' cy='153.1' r='3.60' class='a-pop' style='--d:0.39s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='201.9' cy='183.3' r='3.60' class='a-pop' style='--d:0.39s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='190.0' cy='191.2' r='3.60' class='a-pop' style='--d:0.40s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='208.1' cy='179.1' r='3.60' class='a-pop' style='--d:0.41s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='207.1' cy='179.8' r='3.60' class='a-pop' style='--d:0.41s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='197.8' cy='186.0' r='3.60' class='a-pop' style='--d:0.42s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='213.1' cy='175.8' r='3.60' class='a-pop' style='--d:0.42s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='223.2' cy='169.1' r='3.60' class='a-pop' style='--d:0.43s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='227.2' cy='166.4' r='3.60' class='a-pop' style='--d:0.44s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='206.5' cy='180.2' r='3.60' class='a-pop' style='--d:0.44s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='182.2' cy='196.3' r='3.60' class='a-pop' style='--d:0.45s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='195.4' cy='187.6' r='3.60' class='a-pop' style='--d:0.45s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='237.2' cy='159.8' r='3.60' class='a-pop' style='--d:0.46s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='224.4' cy='168.4' r='3.60' class='a-pop' style='--d:0.47s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='214.0' cy='175.2' r='3.60' class='a-pop' style='--d:0.47s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.7' cy='169.5' r='3.60' class='a-pop' style='--d:0.48s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='189.0' cy='191.9' r='3.60' class='a-pop' style='--d:0.48s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.5' cy='170.3' r='3.60' class='a-pop' style='--d:0.49s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='218.2' cy='172.4' r='3.60' class='a-pop' style='--d:0.50s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='192.8' cy='189.3' r='3.60' class='a-pop' style='--d:0.50s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='192.1' cy='189.8' r='3.60' class='a-pop' style='--d:0.51s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='203.5' cy='182.2' r='3.60' class='a-pop' style='--d:0.51s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='212.9' cy='176.0' r='3.60' class='a-pop' style='--d:0.52s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='180.7' cy='197.4' r='3.60' class='a-pop' style='--d:0.53s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='190.4' cy='191.0' r='3.60' class='a-pop' style='--d:0.53s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='218.5' cy='172.3' r='3.60' class='a-pop' style='--d:0.54s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='200.9' cy='183.9' r='3.60' class='a-pop' style='--d:0.54s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.9' cy='170.6' r='3.60' class='a-pop' style='--d:0.55s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='213.5' cy='175.6' r='3.60' class='a-pop' style='--d:0.56s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='240.9' cy='157.4' r='3.60' class='a-pop' style='--d:0.56s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='99.7' cy='251.0' r='3.60' class='a-pop' style='--d:0.57s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='356.3' cy='81.0' r='3.60' class='a-pop' style='--d:0.57s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='261.2' cy='144.0' r='3.60' class='a-pop' style='--d:0.58s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='254.2' cy='148.7' r='3.60' class='a-pop' style='--d:0.59s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='242.3' cy='156.5' r='3.60' class='a-pop' style='--d:0.59s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='234.6' cy='161.6' r='3.60' class='a-pop' style='--d:0.60s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='158.7' cy='211.9' r='3.60' class='a-pop' style='--d:0.60s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='270.5' cy='137.8' r='3.60' class='a-pop' style='--d:0.61s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='233.3' cy='162.5' r='3.60' class='a-pop' style='--d:0.62s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='170.3' cy='204.2' r='3.60' class='a-pop' style='--d:0.62s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='228.4' cy='165.7' r='3.60' class='a-pop' style='--d:0.63s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.3' cy='170.4' r='3.60' class='a-pop' style='--d:0.63s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='195.3' cy='187.7' r='3.60' class='a-pop' style='--d:0.64s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='174.7' cy='201.3' r='3.60' class='a-pop' style='--d:0.65s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='239.0' cy='158.7' r='3.60' class='a-pop' style='--d:0.65s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='234.3' cy='161.8' r='3.60' class='a-pop' style='--d:0.66s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='226.1' cy='167.2' r='3.60' class='a-pop' style='--d:0.66s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='266.7' cy='140.4' r='3.60' class='a-pop' style='--d:0.67s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='277.8' cy='133.0' r='3.60' class='a-pop' style='--d:0.68s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='279.7' cy='131.7' r='3.60' class='a-pop' style='--d:0.68s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='189.0' cy='191.9' r='3.60' class='a-pop' style='--d:0.69s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='244.4' cy='155.1' r='3.60' class='a-pop' style='--d:0.69s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='256.1' cy='147.4' r='3.60' class='a-pop' style='--d:0.70s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='254.0' cy='148.8' r='3.60' class='a-pop' style='--d:0.71s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='247.7' cy='153.0' r='3.60' class='a-pop' style='--d:0.71s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='242.2' cy='156.6' r='3.60' class='a-pop' style='--d:0.72s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='168.5' cy='205.4' r='3.60' class='a-pop' style='--d:0.72s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='190.2' cy='191.0' r='3.60' class='a-pop' style='--d:0.73s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='296.6' cy='120.5' r='3.60' class='a-pop' style='--d:0.74s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.0' cy='171.3' r='3.60' class='a-pop' style='--d:0.74s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.8' cy='169.4' r='3.60' class='a-pop' style='--d:0.75s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='269.7' cy='138.4' r='3.60' class='a-pop' style='--d:0.75s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='315.0' cy='108.3' r='3.60' class='a-pop' style='--d:0.76s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='292.6' cy='123.2' r='3.60' class='a-pop' style='--d:0.77s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='195.2' cy='187.7' r='3.60' class='a-pop' style='--d:0.77s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='262.4' cy='143.2' r='3.60' class='a-pop' style='--d:0.78s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='117.9' cy='239.0' r='3.60' class='a-pop' style='--d:0.78s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='253.0' cy='149.4' r='3.60' class='a-pop' style='--d:0.79s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='235.4' cy='161.1' r='3.60' class='a-pop' style='--d:0.80s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='212.3' cy='176.4' r='3.60' class='a-pop' style='--d:0.80s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='217.5' cy='173.0' r='3.60' class='a-pop' style='--d:0.81s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='219.8' cy='171.4' r='3.60' class='a-pop' style='--d:0.81s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.6' cy='169.6' r='3.60' class='a-pop' style='--d:0.82s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='223.5' cy='169.0' r='3.60' class='a-pop' style='--d:0.83s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='229.8' cy='164.8' r='3.60' class='a-pop' style='--d:0.83s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='218.0' cy='172.6' r='3.60' class='a-pop' style='--d:0.84s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.1' cy='171.2' r='3.60' class='a-pop' style='--d:0.84s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='227.9' cy='166.1' r='3.60' class='a-pop' style='--d:0.85s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='223.8' cy='168.8' r='3.60' class='a-pop' style='--d:0.86s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='223.3' cy='169.1' r='3.60' class='a-pop' style='--d:0.86s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='225.5' cy='167.6' r='3.60' class='a-pop' style='--d:0.87s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='227.7' cy='166.2' r='3.60' class='a-pop' style='--d:0.87s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.6' cy='170.2' r='3.60' class='a-pop' style='--d:0.88s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.4' cy='170.4' r='3.60' class='a-pop' style='--d:0.89s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.8' cy='170.1' r='3.60' class='a-pop' style='--d:0.89s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='219.7' cy='171.5' r='3.60' class='a-pop' style='--d:0.90s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.2' cy='171.2' r='3.60' class='a-pop' style='--d:0.90s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='219.3' cy='171.8' r='3.60' class='a-pop' style='--d:0.91s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='224.3' cy='168.4' r='3.60' class='a-pop' style='--d:0.92s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.5' cy='171.0' r='3.60' class='a-pop' style='--d:0.92s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.2' cy='171.2' r='3.60' class='a-pop' style='--d:0.93s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='219.8' cy='171.4' r='3.60' class='a-pop' style='--d:0.93s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.3' cy='169.8' r='3.60' class='a-pop' style='--d:0.94s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='220.9' cy='170.7' r='3.60' class='a-pop' style='--d:0.95s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='227.1' cy='166.6' r='3.60' class='a-pop' style='--d:0.95s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='226.8' cy='166.8' r='3.60' class='a-pop' style='--d:0.96s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='218.1' cy='172.6' r='3.60' class='a-pop' style='--d:0.96s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='223.7' cy='168.8' r='3.60' class='a-pop' style='--d:0.97s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='222.9' cy='169.4' r='3.60' class='a-pop' style='--d:0.98s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='221.0' cy='170.7' r='3.60' class='a-pop' style='--d:0.98s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='216.7' cy='173.5' r='3.60' class='a-pop' style='--d:0.99s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='216.9' cy='173.3' r='3.60' class='a-pop' style='--d:0.99s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='225.9' cy='167.4' r='3.60' class='a-pop' style='--d:1.00s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='219.2' cy='171.8' r='3.60' class='a-pop' style='--d:1.01s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='231.5' cy='163.7' r='3.60' class='a-pop' style='--d:1.01s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='218.9' cy='172.1' r='3.60' class='a-pop' style='--d:1.02s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='183.9' cy='195.2' r='3.60' class='a-pop' style='--d:1.02s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='195.3' cy='187.7' r='3.60' class='a-pop' style='--d:1.03s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='158.2' cy='212.3' r='3.60' class='a-pop' style='--d:1.04s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='174.7' cy='201.3' r='3.60' class='a-pop' style='--d:1.04s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='190.9' cy='190.6' r='3.60' class='a-pop' style='--d:1.05s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='192.5' cy='189.5' r='3.60' class='a-pop' style='--d:1.05s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='184.2' cy='195.0' r='3.60' class='a-pop' style='--d:1.06s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='172.3' cy='202.9' r='3.60' class='a-pop' style='--d:1.07s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='158.0' cy='212.4' r='3.60' class='a-pop' style='--d:1.07s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='175.7' cy='200.7' r='3.60' class='a-pop' style='--d:1.08s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='189.7' cy='191.4' r='3.60' class='a-pop' style='--d:1.08s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='178.6' cy='198.7' r='3.60' class='a-pop' style='--d:1.09s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='175.9' cy='200.5' r='3.60' class='a-pop' style='--d:1.10s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='178.5' cy='198.8' r='3.60' class='a-pop' style='--d:1.10s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='178.0' cy='199.1' r='3.60' class='a-pop' style='--d:1.11s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='171.7' cy='203.3' r='3.60' class='a-pop' style='--d:1.11s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='168.4' cy='205.5' r='3.60' class='a-pop' style='--d:1.12s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='185.2' cy='194.3' r='3.60' class='a-pop' style='--d:1.13s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='200.3' cy='184.3' r='3.60' class='a-pop' style='--d:1.13s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='193.2' cy='189.1' r='3.60' class='a-pop' style='--d:1.14s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='158.1' cy='212.3' r='3.60' class='a-pop' style='--d:1.14s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='172.4' cy='202.9' r='3.60' class='a-pop' style='--d:1.15s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='179.7' cy='198.0' r='3.60' class='a-pop' style='--d:1.16s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='174.5' cy='201.4' r='3.60' class='a-pop' style='--d:1.16s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='192.7' cy='189.4' r='3.60' class='a-pop' style='--d:1.17s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='173.7' cy='202.0' r='3.60' class='a-pop' style='--d:1.17s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='166.3' cy='206.9' r='3.60' class='a-pop' style='--d:1.18s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='183.3' cy='195.6' r='3.60' class='a-pop' style='--d:1.19s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='197.1' cy='186.4' r='3.60' class='a-pop' style='--d:1.19s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='181.0' cy='197.1' r='3.60' class='a-pop' style='--d:1.20s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='176.1' cy='200.4' r='3.60' class='a-pop' style='--d:1.20s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='200.2' cy='184.4' r='3.60' class='a-pop' style='--d:1.21s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='200.4' cy='184.2' r='3.60' class='a-pop' style='--d:1.22s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='181.8' cy='196.6' r='3.60' class='a-pop' style='--d:1.22s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='179.4' cy='198.2' r='3.60' class='a-pop' style='--d:1.23s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='176.6' cy='200.1' r='3.60' class='a-pop' style='--d:1.23s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='162.5' cy='209.4' r='3.60' class='a-pop' style='--d:1.24s;fill:var(--n-teacher);opacity:0.85'/>
+<circle cx='164.1' cy='208.3' r='3.60' class='a-pop' style='--d:1.25s;fill:var(--n-teacher);opacity:0.85'/>
+<text x='388.0' y='280.0' class='lbl sm end a-rise' style='--d:0.60s;fill:var(--n-dim)'>reference  $\hat r$</text>
+<text x='66.0' y='60.0' class='lbl sm a-rise' style='--d:0.60s;fill:var(--n-dim)'>↑ projected</text>
+<text x='388.0' y='68.0' class='lbl sm end a-rise' style='--d:0.62s;fill:var(--n-dim)'>identity</text>
+<text x='438.0' y='32.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>relative error, per pair</text>
+<rect x='438.0' y='46.0' width='250.0' height='240.0' rx='10' class='box a-pop' style='--d:0.12s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M498.0 62.0 L498.0 256.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.30s;--dur:0.50s;stroke:var(--n-grid);stroke-width:1.0'/>
+<text x='498.0' y='274.0' class='lbl sm mid a-rise' style='--d:0.34s;fill:var(--n-dim)'>10⁻⁵</text>
+<path d='M553.3 62.0 L553.3 256.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.30s;--dur:0.50s;stroke:var(--n-grid);stroke-width:1.0'/>
+<text x='553.3' y='274.0' class='lbl sm mid a-rise' style='--d:0.34s;fill:var(--n-dim)'>10⁻⁴</text>
+<path d='M608.7 62.0 L608.7 256.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.30s;--dur:0.50s;stroke:var(--n-grid);stroke-width:1.0'/>
+<text x='608.7' y='274.0' class='lbl sm mid a-rise' style='--d:0.34s;fill:var(--n-dim)'>10⁻³</text>
+<path d='M664.0 62.0 L664.0 256.0' fill='none' class='a-fade' stroke-linecap='round' stroke-dasharray='3 6' style='--d:0.30s;--dur:0.50s;stroke:var(--n-grid);stroke-width:1.0'/>
+<text x='664.0' y='274.0' class='lbl sm mid a-rise' style='--d:0.34s;fill:var(--n-dim)'>10⁻²</text>
+<path d='M498.0 76.0 L628.8 76.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.40s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='628.8' cy='76.0' r='4.20' class='a-pop' style='--d:0.44s;fill:var(--n-teacher)'/>
+<text x='490.0' y='81.0' class='lbl sm end a-rise' style='--d:0.42s;fill:var(--n-dim)'>pair 1</text>
+<path d='M498.0 94.0 L594.2 94.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.45s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='594.2' cy='94.0' r='4.20' class='a-pop' style='--d:0.49s;fill:var(--n-teacher)'/>
+<text x='490.0' y='99.0' class='lbl sm end a-rise' style='--d:0.47s;fill:var(--n-dim)'>pair 2</text>
+<path d='M498.0 112.0 L603.0 112.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.50s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='603.0' cy='112.0' r='4.20' class='a-pop' style='--d:0.54s;fill:var(--n-teacher)'/>
+<text x='490.0' y='117.0' class='lbl sm end a-rise' style='--d:0.52s;fill:var(--n-dim)'>pair 3</text>
+<path d='M498.0 130.0 L604.7 130.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.55s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='604.7' cy='130.0' r='4.20' class='a-pop' style='--d:0.59s;fill:var(--n-teacher)'/>
+<text x='490.0' y='135.0' class='lbl sm end a-rise' style='--d:0.57s;fill:var(--n-dim)'>pair 4</text>
+<path d='M498.0 148.0 L587.2 148.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.60s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='587.2' cy='148.0' r='4.20' class='a-pop' style='--d:0.64s;fill:var(--n-teacher)'/>
+<text x='490.0' y='153.0' class='lbl sm end a-rise' style='--d:0.62s;fill:var(--n-dim)'>pair 5</text>
+<path d='M498.0 166.0 L623.2 166.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.65s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='623.2' cy='166.0' r='4.20' class='a-pop' style='--d:0.69s;fill:var(--n-teacher)'/>
+<text x='490.0' y='171.0' class='lbl sm end a-rise' style='--d:0.67s;fill:var(--n-dim)'>pair 6</text>
+<path d='M498.0 184.0 L547.8 184.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.70s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='547.8' cy='184.0' r='4.20' class='a-pop' style='--d:0.74s;fill:var(--n-teacher)'/>
+<text x='490.0' y='189.0' class='lbl sm end a-rise' style='--d:0.72s;fill:var(--n-dim)'>pair 7</text>
+<path d='M498.0 202.0 L610.0 202.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.75s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='610.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.79s;fill:var(--n-teacher)'/>
+<text x='490.0' y='207.0' class='lbl sm end a-rise' style='--d:0.77s;fill:var(--n-dim)'>pair 8</text>
+<path d='M498.0 220.0 L523.1 220.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.80s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='523.1' cy='220.0' r='4.20' class='a-pop' style='--d:0.84s;fill:var(--n-teacher)'/>
+<text x='490.0' y='225.0' class='lbl sm end a-rise' style='--d:0.82s;fill:var(--n-dim)'>pair 9</text>
+<path d='M498.0 238.0 L586.7 238.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.85s;--dur:0.50s;stroke:var(--n-teacher);stroke-width:2.0'/>
+<circle cx='586.7' cy='238.0' r='4.20' class='a-pop' style='--d:0.89s;fill:var(--n-teacher)'/>
+<text x='490.0' y='243.0' class='lbl sm end a-rise' style='--d:0.87s;fill:var(--n-dim)'>pair 10</text>
+<g class='a-glow' style='--d:1.10s;--dur:2.40s'><path d='M599.0 66.0 L599.0 254.0' fill='none' class='' stroke-linecap='round' style='--d:0.00s;stroke:var(--n-loss);stroke-width:2.0'/></g>
+<text x='678.0' y='62.0' class='lbl sm end a-rise' style='--d:1.15s;fill:var(--n-loss)'>median</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 6.</span> Measured, and the only check here that does not land at machine precision. Projecting a pair that is already in the fit, against the fit's own frozen coordinates, returns its cis-effect profile to a median relative error of <b>6.7e-04</b> over ten pairs and <b>2.3e-03</b> at worst. The residual is the iterative solve, not the algebra: the projection re-solves a conditional problem rather than reading the answer off. Getting it this small needs $E[(u^\star)^2] = (u^\star)^2 + \operatorname{Var}(u^\star)$ — the squared mean alone leaves a 27% error.</div>
+</div>
+
+
+---
+
+## 6. Does the cEBNM posterior update agree with direct numerical integration?
+
+This is the most important local test for the new empirical-Bayes machinery.
+
+The updates for $u_{ik}$ and $\lambda_{sk}$ are both reduced to normal-means problems.
+
+For a generic coefficient $a_j$, the pseudo-observation satisfies
+
+$$
+\hat a_j\mid a_j
+\sim
+N(a_j,s_j^2).
+$$
+
+The point-normal prior is
+
+$$
+a_j
+\sim
+(1-\pi_j)\delta_0
++
+\pi_j N(0,\omega^2).
+$$
+
+Here
+
+$$
+\pi_j
+=
+\operatorname{logit}^{-1}
+(\theta_0+q_j^\mathsf T\theta)
+$$
+
+can depend on measured features.
+
+The implementation uses closed-form posterior calculations.
+
+Conditional on the coefficient belonging to the nonzero component,
+
+$$
+m_{j1}
+=
+\frac{\omega^2}
+{\omega^2+s_j^2}
+\hat a_j
+$$
+
+and
+
+$$
+v_{j1}
+=
+\frac{\omega^2s_j^2}
+{\omega^2+s_j^2}.
+$$
+
+The posterior inclusion probability is
+
+$$
+w_j
+=
+\frac{
+\pi_j
+N(\hat a_j;0,s_j^2+\omega^2)
+}{
+(1-\pi_j)
+N(\hat a_j;0,s_j^2)
++
+\pi_j
+N(\hat a_j;0,s_j^2+\omega^2)
+}.
+$$
+
+The moments returned to the factor algorithm are
+
+$$
+E[a_j]
+=
+w_jm_{j1}
+$$
+
+and
+
+$$
+E[a_j^2]
+=
+w_j
+(v_{j1}+m_{j1}^2).
+$$
+
+These equations look simple enough that it is tempting to trust them.
+
+I would not.
+
+They sit inside every alternating update for $U$ and $\Lambda$. A small mistake here propagates through the entire model.
+
+### Build an independent numerical answer
+
+Instead of using the closed-form formulas, calculate the posterior directly from Bayes' rule.
+
+The zero component has unnormalized posterior mass
+
+$$
+Z_0
+=
+(1-\pi_j)
+N(\hat a_j;0,s_j^2).
+$$
+
+For the continuous component, define
+
+$$
+f(a)
+=
+\pi_j
+N(\hat a_j;a,s_j^2)
+N(a;0,\omega^2).
+$$
+
+Numerically integrate
+
+$$
+Z_1
+=
+\int_{-\infty}^{\infty}
+f(a)\,da,
+$$
+
+$$
+M_1
+=
+\int_{-\infty}^{\infty}
+a\,f(a)\,da,
+$$
+
+and
+
+$$
+M_2
+=
+\int_{-\infty}^{\infty}
+a^2f(a)\,da.
+$$
+
+Then the independently calculated quantities are
+
+$$
+w_j^{\mathrm{num}}
+=
+\frac{Z_1}{Z_0+Z_1},
+$$
+
+$$
+E[a_j]_{\mathrm{num}}
+=
+\frac{M_1}{Z_0+Z_1},
+$$
+
+and
+
+$$
+E[a_j^2]_{\mathrm{num}}
+=
+\frac{M_2}{Z_0+Z_1}.
+$$
+
+Now compare these with the analytic implementation.
+
+<div class='lab wide' id='l0-cebnm-lab'>
+<div class='lab-head'><span class='name'>Lab 3 · the posterior, computed two ways</span><span class='hint'>closed form on the left of each pair, numerical integration on the right</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='l0c-ahat'>observation â <span class='val' id='l0c-ahat-v'></span></label>
+<input type='range' id='l0c-ahat' min='-4.0' max='4.0' step='0.01' value='0.9'>
+</div>
+<div class='ctl'>
+<label for='l0c-s'>noise s <span class='val' id='l0c-s-v'></span></label>
+<input type='range' id='l0c-s' min='0.05' max='3.0' step='0.01' value='0.7'>
+</div>
+<div class='ctl'>
+<label for='l0c-omega'>slab width ω <span class='val' id='l0c-omega-v'></span></label>
+<input type='range' id='l0c-omega' min='0.05' max='3.0' step='0.01' value='1.5'>
+</div>
+<div class='ctl'>
+<label for='l0c-pi'>prior inclusion π <span class='val' id='l0c-pi-v'></span></label>
+<input type='range' id='l0c-pi' min='0.01' max='0.99' step='0.01' value='0.3'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>w · closed / quad</span><span class='v' id='l0c-w'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>E[a] · closed / quad</span><span class='v' id='l0c-m'></span></div>
+<div class='stat' style='--stat-hue:var(--n-data)'><span class='k'>E[a²] · closed / quad</span><span class='v' id='l0c-m2'></span></div>
+<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>largest disagreement</span><span class='v' id='l0c-gap'></span></div>
+</div>
+<div class='verdict' id='l0c-verdict'></div>
+<svg viewBox='0 0 700 300' role='img'></svg>
+<p class='cap'>The right-hand number in each pair is a Gauss–Legendre quadrature of $\int a\,f(a)\,\mathrm da$ run in the browser, sharing no algebra with (S17)–(S18). It integrates over $m_{j1} \pm 14\sqrt{v_{j1}}$ rather than a fixed window, which is what stops it losing the spike when $|\hat a_j|$ is large. At the preset it reproduces <code>scipy.integrate.quad</code>: $w = 0.263233$, $E[a] = 0.194543$, $E[a^2] = 0.249695$.</p>
+</div>
+</div>
+
+
+### Do not test only one friendly case
+
+I would create a grid covering very different posterior regimes.
+
+For example:
+
+* $\hat a_j\approx0$ and $|\hat a_j|\gg s_j$;
+* small and large $s_j$;
+* small and large $\omega$;
+* $\pi_j=0.01$;
+* $\pi_j=0.5$;
+* $\pi_j=0.99$;
+* positive and negative $\hat a_j$.
+
+This produces cases where the posterior is:
+
+* almost entirely zero;
+* uncertain between zero and nonzero;
+* almost certainly nonzero;
+* strongly shrunk;
+* weakly shrunk.
+
+For every case, compare
+
+$$
+w_j,
+\qquad
+E[a_j],
+\qquad
+E[a_j^2].
+$$
+
+I would also compare the marginal likelihood, because that is the quantity used to estimate the prior parameters.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 418' role='img' aria-label='Three posterior shapes with a point mass at zero, and three scatterplots of the analytic moments against numerically integrated ones.'>
+<text x='24.0' y='34.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>almost certainly zero</text>
+<rect x='24.0' y='44.0' width='214.0' height='158.0' rx='10' class='box a-pop' style='--d:0.08s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M38.0 176.0 L224.0 176.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.16s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M38.0 176.0 L39.6 176.0 L41.1 176.0 L42.6 176.0 L44.2 176.0 L45.8 176.0 L47.3 176.0 L48.9 176.0 L50.4 176.0 L51.9 176.0 L53.5 176.0 L55.0 176.0 L56.6 176.0 L58.2 176.0 L59.7 176.0 L61.2 176.0 L62.8 176.0 L64.4 176.0 L65.9 176.0 L67.5 176.0 L69.0 176.0 L70.6 176.0 L72.1 176.0 L73.7 176.0 L75.2 176.0 L76.8 176.0 L78.3 176.0 L79.8 176.0 L81.4 176.0 L83.0 176.0 L84.5 176.0 L86.1 175.9 L87.6 175.9 L89.2 175.9 L90.7 175.9 L92.2 175.8 L93.8 175.7 L95.3 175.6 L96.9 175.5 L98.5 175.3 L100.0 175.1 L101.6 174.8 L103.1 174.5 L104.7 174.1 L106.2 173.7 L107.8 173.1 L109.3 172.5 L110.9 171.8 L112.4 171.0 L114.0 170.1 L115.5 169.1 L117.0 168.1 L118.6 167.1 L120.2 166.0 L121.7 165.0 L123.2 163.9 L124.8 163.0 L126.3 162.1 L127.9 161.4 L129.5 160.8 L131.0 160.4 L132.6 160.1 L134.1 160.1 L135.7 160.2 L137.2 160.5 L138.8 161.0 L140.3 161.7 L141.9 162.5 L143.4 163.4 L144.9 164.4 L146.5 165.5 L148.1 166.5 L149.6 167.6 L151.2 168.6 L152.7 169.6 L154.2 170.5 L155.8 171.4 L157.4 172.1 L158.9 172.8 L160.4 173.4 L162.0 173.9 L163.6 174.3 L165.1 174.7 L166.7 175.0 L168.2 175.2 L169.8 175.4 L171.3 175.6 L172.9 175.7 L174.4 175.8 L176.0 175.8 L177.5 175.9 L179.1 175.9 L180.6 175.9 L182.2 176.0 L183.7 176.0 L185.2 176.0 L186.8 176.0 L188.4 176.0 L189.9 176.0 L191.5 176.0 L193.0 176.0 L194.6 176.0 L196.1 176.0 L197.7 176.0 L199.2 176.0 L200.8 176.0 L202.3 176.0 L203.9 176.0 L205.4 176.0 L207.0 176.0 L208.5 176.0 L210.1 176.0 L211.6 176.0 L213.2 176.0 L214.7 176.0 L216.2 176.0 L217.8 176.0 L219.4 176.0 L220.9 176.0 L222.4 176.0 L224.0 176.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.30s;--dur:1.20s;stroke:var(--n-student);stroke-width:2.4'/>
+<path d='M131.0 176.0 L131.0 89.9' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.44s;--dur:0.60s;stroke:var(--n-loss);stroke-width:4.0'/>
+<circle cx='131.0' cy='89.9' r='5.20' class='a-pop' style='--d:0.54s;fill:var(--n-loss)'/>
+<text x='140.0' y='81.9' class='lbl sm a-rise' style='--d:0.60s;fill:var(--n-loss)'>0.84</text>
+<g class='a-beat' style='--d:0.75s;--dur:2.10s'><circle cx='131.4' cy='188.0' r='4.40' class='' style='--d:0.00s;fill:var(--n-kept)'/></g>
+<text x='226.0' y='62.0' class='lbl sm end a-rise' style='--d:0.66s;fill:var(--n-data)'>â = 0.15</text>
+<text x='264.0' y='34.0' class='lbl sm a-rise' style='--d:0.10s;fill:var(--n-dim)'>genuinely uncertain</text>
+<rect x='264.0' y='44.0' width='214.0' height='158.0' rx='10' class='box a-pop' style='--d:0.13s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M278.0 176.0 L464.0 176.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.21s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M278.0 176.0 L279.6 176.0 L281.1 176.0 L282.6 176.0 L284.2 176.0 L285.8 176.0 L287.3 176.0 L288.9 176.0 L290.4 176.0 L291.9 176.0 L293.5 176.0 L295.1 176.0 L296.6 176.0 L298.1 176.0 L299.7 176.0 L301.2 176.0 L302.8 176.0 L304.4 176.0 L305.9 176.0 L307.4 176.0 L309.0 176.0 L310.6 176.0 L312.1 176.0 L313.6 176.0 L315.2 176.0 L316.8 176.0 L318.3 176.0 L319.9 176.0 L321.4 176.0 L322.9 176.0 L324.5 176.0 L326.1 176.0 L327.6 176.0 L329.1 176.0 L330.7 176.0 L332.2 176.0 L333.8 176.0 L335.4 176.0 L336.9 176.0 L338.4 176.0 L340.0 176.0 L341.6 176.0 L343.1 175.9 L344.6 175.9 L346.2 175.8 L347.8 175.8 L349.3 175.7 L350.9 175.6 L352.4 175.4 L353.9 175.2 L355.5 174.9 L357.1 174.5 L358.6 174.0 L360.1 173.4 L361.7 172.7 L363.2 171.8 L364.8 170.7 L366.4 169.5 L367.9 168.0 L369.5 166.3 L371.0 164.5 L372.6 162.4 L374.1 160.1 L375.6 157.7 L377.2 155.2 L378.8 152.6 L380.3 150.1 L381.9 147.6 L383.4 145.2 L384.9 143.0 L386.5 141.1 L388.1 139.6 L389.6 138.4 L391.1 137.7 L392.7 137.4 L394.2 137.6 L395.8 138.3 L397.4 139.4 L398.9 140.9 L400.4 142.7 L402.0 144.8 L403.6 147.2 L405.1 149.7 L406.6 152.2 L408.2 154.8 L409.8 157.3 L411.3 159.8 L412.9 162.0 L414.4 164.1 L416.0 166.1 L417.5 167.8 L419.1 169.3 L420.6 170.5 L422.1 171.6 L423.7 172.6 L425.2 173.3 L426.8 173.9 L428.4 174.4 L429.9 174.8 L431.5 175.1 L433.0 175.4 L434.6 175.5 L436.1 175.7 L437.6 175.8 L439.2 175.8 L440.8 175.9 L442.3 175.9 L443.9 175.9 L445.4 176.0 L447.0 176.0 L448.5 176.0 L450.1 176.0 L451.6 176.0 L453.1 176.0 L454.7 176.0 L456.2 176.0 L457.8 176.0 L459.4 176.0 L460.9 176.0 L462.4 176.0 L464.0 176.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.35s;--dur:1.20s;stroke:var(--n-student);stroke-width:2.4'/>
+<path d='M371.0 176.0 L371.0 112.5' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.49s;--dur:0.60s;stroke:var(--n-loss);stroke-width:4.0'/>
+<circle cx='371.0' cy='112.5' r='5.20' class='a-pop' style='--d:0.59s;fill:var(--n-loss)'/>
+<text x='380.0' y='104.5' class='lbl sm a-rise' style='--d:0.65s;fill:var(--n-loss)'>0.62</text>
+<g class='a-beat' style='--d:0.80s;--dur:2.10s'><circle cx='379.2' cy='188.0' r='4.40' class='' style='--d:0.00s;fill:var(--n-kept)'/></g>
+<text x='466.0' y='62.0' class='lbl sm end a-rise' style='--d:0.71s;fill:var(--n-data)'>â = 1.20</text>
+<text x='504.0' y='34.0' class='lbl sm a-rise' style='--d:0.15s;fill:var(--n-dim)'>almost certainly nonzero</text>
+<rect x='504.0' y='44.0' width='214.0' height='158.0' rx='10' class='box a-pop' style='--d:0.18s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M518.0 176.0 L704.0 176.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.26s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<path d='M518.0 176.0 L519.5 176.0 L521.1 176.0 L522.6 176.0 L524.2 176.0 L525.8 176.0 L527.3 176.0 L528.9 176.0 L530.4 176.0 L532.0 176.0 L533.5 176.0 L535.0 176.0 L536.6 176.0 L538.1 176.0 L539.7 176.0 L541.2 176.0 L542.8 176.0 L544.4 176.0 L545.9 176.0 L547.5 176.0 L549.0 176.0 L550.5 176.0 L552.1 176.0 L553.6 176.0 L555.2 176.0 L556.8 176.0 L558.3 176.0 L559.9 176.0 L561.4 176.0 L563.0 176.0 L564.5 176.0 L566.0 176.0 L567.6 176.0 L569.1 176.0 L570.7 176.0 L572.2 176.0 L573.8 176.0 L575.4 176.0 L576.9 176.0 L578.5 176.0 L580.0 176.0 L581.5 176.0 L583.1 176.0 L584.6 176.0 L586.2 176.0 L587.8 176.0 L589.3 176.0 L590.9 176.0 L592.4 176.0 L594.0 176.0 L595.5 176.0 L597.0 176.0 L598.6 176.0 L600.1 176.0 L601.7 176.0 L603.2 176.0 L604.8 176.0 L606.4 176.0 L607.9 176.0 L609.5 176.0 L611.0 176.0 L612.5 175.9 L614.1 175.9 L615.6 175.9 L617.2 175.8 L618.8 175.7 L620.3 175.6 L621.9 175.5 L623.4 175.2 L625.0 174.9 L626.5 174.5 L628.0 174.0 L629.6 173.3 L631.1 172.3 L632.7 171.1 L634.2 169.7 L635.8 167.8 L637.4 165.6 L638.9 162.9 L640.5 159.7 L642.0 156.0 L643.5 151.8 L645.1 146.9 L646.6 141.6 L648.2 135.8 L649.8 129.5 L651.3 122.9 L652.9 116.2 L654.4 109.3 L656.0 102.6 L657.5 96.2 L659.0 90.3 L660.6 85.1 L662.1 80.7 L663.7 77.3 L665.2 75.1 L666.8 74.0 L668.4 74.2 L669.9 75.6 L671.5 78.1 L673.0 81.8 L674.5 86.4 L676.1 91.9 L677.6 97.9 L679.2 104.4 L680.8 111.2 L682.3 118.0 L683.9 124.7 L685.4 131.2 L687.0 137.4 L688.5 143.1 L690.0 148.3 L691.6 153.0 L693.1 157.1 L694.7 160.6 L696.2 163.7 L697.8 166.2 L699.4 168.4 L700.9 170.1 L702.5 171.5 L704.0 172.6' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.40s;--dur:1.20s;stroke:var(--n-student);stroke-width:2.4'/>
+<path d='M611.0 176.0 L611.0 175.8' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.54s;--dur:0.60s;stroke:var(--n-loss);stroke-width:4.0'/>
+<circle cx='611.0' cy='175.8' r='5.20' class='a-pop' style='--d:0.64s;fill:var(--n-loss)'/>
+<text x='620.0' y='167.8' class='lbl sm a-rise' style='--d:0.70s;fill:var(--n-loss)'>0.00</text>
+<g class='a-beat' style='--d:0.85s;--dur:2.10s'><circle cx='667.3' cy='188.0' r='4.40' class='' style='--d:0.00s;fill:var(--n-kept)'/></g>
+<text x='706.0' y='62.0' class='lbl sm end a-rise' style='--d:0.76s;fill:var(--n-data)'>â = 3.10</text>
+<text x='24.0' y='240.0' class='lbl sm a-rise' style='--d:0.05s;fill:var(--n-dim)'>w  —  analytic vs. numerical</text>
+<rect x='24.0' y='250.0' width='214.0' height='150.0' rx='10' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M42.0 382.0 L220.0 268.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.24s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='198.2' cy='281.9' r='4.20' class='a-pop' style='--d:0.36s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='202.8' cy='279.0' r='4.20' class='a-pop' style='--d:0.39s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='59.9' cy='370.5' r='4.20' class='a-pop' style='--d:0.42s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='71.1' cy='363.4' r='4.20' class='a-pop' style='--d:0.45s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='177.8' cy='295.0' r='4.20' class='a-pop' style='--d:0.48s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='59.2' cy='371.0' r='4.20' class='a-pop' style='--d:0.51s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='68.2' cy='365.3' r='4.20' class='a-pop' style='--d:0.54s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='113.7' cy='336.1' r='4.20' class='a-pop' style='--d:0.57s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='59.2' cy='371.0' r='4.20' class='a-pop' style='--d:0.60s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='85.6' cy='354.1' r='4.20' class='a-pop' style='--d:0.63s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='202.8' cy='279.0' r='4.20' class='a-pop' style='--d:0.66s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='59.3' cy='370.9' r='4.20' class='a-pop' style='--d:0.69s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='202.5' cy='279.2' r='4.20' class='a-pop' style='--d:0.72s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='202.8' cy='279.0' r='4.20' class='a-pop' style='--d:0.75s;fill:var(--n-teacher);opacity:0.88'/>
+<circle cx='60.2' cy='370.3' r='4.20' class='a-pop' style='--d:0.78s;fill:var(--n-teacher);opacity:0.88'/>
+<text x='226.0' y='394.0' class='lbl sm end a-rise' style='--d:0.70s;fill:var(--n-dim)'>analytic →</text>
+<text x='34.0' y='264.0' class='lbl sm a-rise' style='--d:0.70s;fill:var(--n-dim)'>↑ quadrature</text>
+<text x='264.0' y='240.0' class='lbl sm a-rise' style='--d:0.10s;fill:var(--n-dim)'>E[a]  —  analytic vs. numerical</text>
+<rect x='264.0' y='250.0' width='214.0' height='150.0' rx='10' class='box a-pop' style='--d:0.15s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M282.0 382.0 L460.0 268.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.29s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='310.1' cy='364.0' r='4.20' class='a-pop' style='--d:0.41s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='299.2' cy='371.0' r='4.20' class='a-pop' style='--d:0.44s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='362.9' cy='330.2' r='4.20' class='a-pop' style='--d:0.47s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='361.8' cy='330.9' r='4.20' class='a-pop' style='--d:0.50s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='354.7' cy='335.5' r='4.20' class='a-pop' style='--d:0.53s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.2' cy='330.0' r='4.20' class='a-pop' style='--d:0.56s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.3' cy='329.9' r='4.20' class='a-pop' style='--d:0.59s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.3' cy='329.9' r='4.20' class='a-pop' style='--d:0.62s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.3' cy='329.9' r='4.20' class='a-pop' style='--d:0.65s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='368.5' cy='326.6' r='4.20' class='a-pop' style='--d:0.68s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='386.4' cy='315.2' r='4.20' class='a-pop' style='--d:0.71s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.4' cy='329.8' r='4.20' class='a-pop' style='--d:0.74s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='431.1' cy='286.5' r='4.20' class='a-pop' style='--d:0.77s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='442.8' cy='279.0' r='4.20' class='a-pop' style='--d:0.80s;fill:var(--n-student);opacity:0.88'/>
+<circle cx='363.8' cy='329.6' r='4.20' class='a-pop' style='--d:0.83s;fill:var(--n-student);opacity:0.88'/>
+<text x='466.0' y='394.0' class='lbl sm end a-rise' style='--d:0.75s;fill:var(--n-dim)'>analytic →</text>
+<text x='274.0' y='264.0' class='lbl sm a-rise' style='--d:0.75s;fill:var(--n-dim)'>↑ quadrature</text>
+<text x='504.0' y='240.0' class='lbl sm a-rise' style='--d:0.15s;fill:var(--n-dim)'>E[a²]  —  analytic vs. numerical</text>
+<rect x='504.0' y='250.0' width='214.0' height='150.0' rx='10' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<path d='M522.0 382.0 L700.0 268.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='6 5' style='--d:0.34s;--dur:0.80s;stroke:var(--n-dim);stroke-width:1.4'/>
+<circle cx='611.2' cy='324.8' r='4.20' class='a-pop' style='--d:0.46s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='632.7' cy='311.1' r='4.20' class='a-pop' style='--d:0.49s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.4' cy='370.9' r='4.20' class='a-pop' style='--d:0.52s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='540.4' cy='370.2' r='4.20' class='a-pop' style='--d:0.55s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='541.5' cy='369.5' r='4.20' class='a-pop' style='--d:0.58s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.3' cy='370.9' r='4.20' class='a-pop' style='--d:0.61s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.9' cy='370.5' r='4.20' class='a-pop' style='--d:0.64s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.2' cy='371.0' r='4.20' class='a-pop' style='--d:0.67s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.3' cy='370.9' r='4.20' class='a-pop' style='--d:0.70s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='543.0' cy='368.6' r='4.20' class='a-pop' style='--d:0.73s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='551.6' cy='363.0' r='4.20' class='a-pop' style='--d:0.76s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.3' cy='370.9' r='4.20' class='a-pop' style='--d:0.79s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='649.7' cy='300.2' r='4.20' class='a-pop' style='--d:0.82s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='682.8' cy='279.0' r='4.20' class='a-pop' style='--d:0.85s;fill:var(--n-data);opacity:0.88'/>
+<circle cx='539.4' cy='370.9' r='4.20' class='a-pop' style='--d:0.88s;fill:var(--n-data);opacity:0.88'/>
+<text x='706.0' y='394.0' class='lbl sm end a-rise' style='--d:0.80s;fill:var(--n-dim)'>analytic →</text>
+<text x='514.0' y='264.0' class='lbl sm a-rise' style='--d:0.80s;fill:var(--n-dim)'>↑ quadrature</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 7.</span> <b>Analytic cEBNM update versus numerical integration.</b> One panel can show the point mass at zero plus the continuous posterior density for three representative cases. Additional panels can compare analytic and numerical $w_j$, $E[a_j]$, and $E[a_j^2]$ across hundreds of randomly generated settings. All scatterplots should follow the identity line. — Measured. Top: the point-normal posterior in three regimes at $s=0.7$, $\omega=1.5$, $\pi=0.3$ — the red stem is the mass left at zero, the violet curve the continuous part, the green marker $E[a]$. Bottom: every one of the fifteen parameterizations, closed form on the horizontal axis and <code>scipy.integrate.quad</code> on the vertical. The worst disagreement over the grid is <b>1.8e-15</b>; over 2,000 random settings the median is <b>2.2e-16</b> and the worst <i>relative</i> gap is 2e-08, which is the quadrature's own tolerance rather than the implementation's.</div>
+</div>
+
+
+This is a particularly satisfying implementation check because the numerical integration does not need to know anything about the derivation used by the production code.
+
+Two completely different computational routes should arrive at the same posterior.
+
+---
+
+## 7. Does the point-normal update become the Gaussian update when $\pi=1$?
+
+There is another useful reduction inside the empirical-Bayes update.
+
+Set
+
+$$
+\pi_j=1.
+$$
+
+The point mass at zero disappears, and the prior becomes
+
+$$
+a_j\sim N(0,\omega^2).
+$$
+
+Then
+
+$$
+w_j=1,
+$$
+
+and the point-normal posterior reduces to
+
+$$
+E[a_j]
+=
+\frac{\omega^2}
+{\omega^2+s_j^2}
+\hat a_j,
+$$
+
+$$
+\operatorname{Var}(a_j)
+=
+\frac{\omega^2s_j^2}
+{\omega^2+s_j^2}.
+$$
+
+Now write the prior precision as
+
+$$
+\kappa=\frac{1}{\omega^2}
+$$
+
+and the likelihood precision as
+
+$$
+p=\frac{1}{s_j^2}.
+$$
+
+The ordinary Gaussian normal-means update is
+
+$$
+v^{-1}
+=
+\kappa+p
+$$
+
+and
+
+$$
+m
+=
+v\,p\,\hat a_j.
+$$
+
+Since
+
+$$
+v
+=
+\frac{1}
+{1/\omega^2+1/s_j^2}
+=
+\frac{\omega^2s_j^2}
+{\omega^2+s_j^2},
+$$
+
+we obtain
+
+$$
+m
+=
+\frac{\omega^2}
+{\omega^2+s_j^2}
+\hat a_j.
+$$
+
+So the two updates are exactly the same.
+
+This gives another strict identity:
+
+$$
+\boxed{
+\text{point-normal cEBNM with }\pi=1
+=
+\text{Gaussian normal-means update}.
+}
+$$
+
+### Computational test
+
+Generate many combinations of
+
+$$
+\hat a_j,\quad
+s_j,\quad
+\omega.
+$$
+
+Calculate the posterior once using the cEBNM function with
+
+$$
+\pi_j=1,
+$$
+
+and once using an independent Gaussian update.
+
+Compare the posterior mean and second moment.
+
+<div class='lab wide' id='l0-pi-one-lab'>
+<div class='lab-head'><span class='name'>Lab 4 · the spike disappearing</span><span class='hint'>push π to one and the two updates become the same arithmetic</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label for='l0p-pi'>prior inclusion π <span class='val' id='l0p-pi-v'></span></label>
+<input type='range' id='l0p-pi' min='0.1' max='1.0' step='0.01' value='1.0'>
+</div>
+<div class='ctl'>
+<label for='l0p-ahat'>observation â <span class='val' id='l0p-ahat-v'></span></label>
+<input type='range' id='l0p-ahat' min='-4.0' max='4.0' step='0.01' value='1.4'>
+</div>
+<div class='ctl'>
+<label for='l0p-s'>noise s <span class='val' id='l0p-s-v'></span></label>
+<input type='range' id='l0p-s' min='0.05' max='3.0' step='0.01' value='0.6'>
+</div>
+<div class='ctl'>
+<label for='l0p-omega'>slab width ω <span class='val' id='l0p-omega-v'></span></label>
+<input type='range' id='l0p-omega' min='0.05' max='3.0' step='0.01' value='1.2'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>point-normal · E[a] / Var</span><span class='v' id='l0p-pn'></span></div>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>Gaussian · m / v</span><span class='v' id='l0p-gauss'></span></div>
+<div class='stat' style='--stat-hue:var(--n-kept)'><span class='k'>|difference|</span><span class='v' id='l0p-gap'></span></div>
+<div class='stat' style='--stat-hue:var(--n-loss)'><span class='k'>mass left at zero</span><span class='v' id='l0p-spike'></span></div>
+</div>
+<div class='verdict' id='l0p-verdict'></div>
+<svg viewBox='0 0 700 302' role='img'></svg>
+<p class='cap'>The Gaussian column is written from $v^{-1} = \kappa + p$ and $m = v\,p\,\hat a_j$ with $\kappa = 1/\omega^2$ and $p = 1/s_j^2$, not from the point-normal formulas. At $\pi = 1$ the preset gives $E[a] = 1.12$ and $\operatorname{Var} = 0.288$ on both routes. Below one they differ, and the gap is the whole content of the spike.</p>
+</div>
+</div>
+
+
+This test is especially useful because it forms a bridge between the new code and the already checked Gaussian/SURGE path.
+
+Conceptually, the verification chain becomes
+
+$$
+\boxed{
+\text{SURGE}
+\longleftrightarrow
+\text{our Gaussian update}
+\longleftrightarrow
+\text{cEBNM at }\pi=1
+\longleftrightarrow
+\text{general point-normal cEBNM}.
+}
+$$
+
+If every adjacent pair agrees, it becomes much easier to trust the more complicated endpoint.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 206' role='img' aria-label='Four boxes joined by three two-way links, from SURGE to the general point-normal prior.'>
+<rect x='24.0' y='62.0' width='146.0' height='66.0' rx='10' class='box a-pop' style='--d:0.10s;fill:var(--n-panel);stroke:var(--n-teacher);stroke-width:2.2'/>
+<text x='97.0' y='92.0' class='lbl mid a-rise' style='--d:0.16s;fill:var(--n-teacher)'>SURGE</text>
+<text x='97.0' y='114.0' class='lbl sm mid a-rise' style='--d:0.20s;fill:var(--n-dim)'>released code</text>
+<rect x='202.0' y='62.0' width='146.0' height='66.0' rx='10' class='box a-pop' style='--d:0.20s;fill:var(--n-panel);stroke:var(--n-student);stroke-width:2.2'/>
+<text x='275.0' y='92.0' class='lbl mid a-rise' style='--d:0.26s;fill:var(--n-student)'>our Gaussian</text>
+<text x='275.0' y='114.0' class='lbl sm mid a-rise' style='--d:0.30s;fill:var(--n-dim)'>same likelihood</text>
+<rect x='380.0' y='62.0' width='146.0' height='66.0' rx='10' class='box a-pop' style='--d:0.30s;fill:var(--n-panel);stroke:var(--n-kept);stroke-width:2.2'/>
+<text x='453.0' y='92.0' class='lbl mid a-rise' style='--d:0.36s;fill:var(--n-kept)'>cEBNM at π = 1</text>
+<text x='453.0' y='114.0' class='lbl sm mid a-rise' style='--d:0.40s;fill:var(--n-dim)'>no spike left</text>
+<rect x='558.0' y='62.0' width='146.0' height='66.0' rx='10' class='box a-pop' style='--d:0.40s;fill:var(--n-panel);stroke:var(--n-data);stroke-width:2.2'/>
+<text x='631.0' y='92.0' class='lbl mid a-rise' style='--d:0.46s;fill:var(--n-data)'>point-normal</text>
+<text x='631.0' y='114.0' class='lbl sm mid a-rise' style='--d:0.50s;fill:var(--n-dim)'>the general prior</text>
+<g class='a-flow' style='--d:0.60s;--dur:1.50s'><path d='M173.0 95.0 L199.0 95.0' fill='none' class='' stroke-linecap='round' style='--d:0.00s;stroke:var(--n-dim);stroke-width:2.0'/></g>
+<path d='M198.0 95.0 l7 -5 M198.0 95.0 l7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.62s;--dur:0.40s;stroke:var(--n-dim);stroke-width:2.0'/>
+<path d='M174.0 95.0 l-7 -5 M174.0 95.0 l-7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.62s;--dur:0.40s;stroke:var(--n-dim);stroke-width:2.0'/>
+<text x='186.0' y='50.0' class='lbl sm mid a-rise' style='--d:0.70s;fill:var(--n-dim)'>matched start</text>
+<text x='186.0' y='150.0' class='lbl sm mid a-rise' style='--d:0.74s;fill:var(--n-dim)'>illustrative</text>
+<g class='a-travel' style='--d:1.00s;--dur:2.60s;--fx:0px;--tx:20px'><circle cx='176.0' cy='95.0' r='3.60' class='' style='--d:0.00s;fill:var(--n-dim)'/></g>
+<g class='a-flow' style='--d:0.70s;--dur:1.50s'><path d='M351.0 95.0 L377.0 95.0' fill='none' class='' stroke-linecap='round' style='--d:0.00s;stroke:var(--n-kept);stroke-width:2.0'/></g>
+<path d='M376.0 95.0 l7 -5 M376.0 95.0 l7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.72s;--dur:0.40s;stroke:var(--n-kept);stroke-width:2.0'/>
+<path d='M352.0 95.0 l-7 -5 M352.0 95.0 l-7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.72s;--dur:0.40s;stroke:var(--n-kept);stroke-width:2.0'/>
+<text x='364.0' y='50.0' class='lbl sm mid a-rise' style='--d:0.80s;fill:var(--n-kept)'>π → 1</text>
+<text x='364.0' y='150.0' class='lbl sm mid a-rise' style='--d:0.84s;fill:var(--n-kept)'>3.0 × 10⁻¹⁵</text>
+<g class='a-travel' style='--d:1.10s;--dur:2.60s;--fx:0px;--tx:20px'><circle cx='354.0' cy='95.0' r='3.60' class='' style='--d:0.00s;fill:var(--n-kept)'/></g>
+<g class='a-flow' style='--d:0.80s;--dur:1.50s'><path d='M529.0 95.0 L555.0 95.0' fill='none' class='' stroke-linecap='round' style='--d:0.00s;stroke:var(--n-kept);stroke-width:2.0'/></g>
+<path d='M554.0 95.0 l7 -5 M554.0 95.0 l7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.82s;--dur:0.40s;stroke:var(--n-kept);stroke-width:2.0'/>
+<path d='M530.0 95.0 l-7 -5 M530.0 95.0 l-7 5' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.82s;--dur:0.40s;stroke:var(--n-kept);stroke-width:2.0'/>
+<text x='542.0' y='50.0' class='lbl sm mid a-rise' style='--d:0.90s;fill:var(--n-kept)'>quadrature</text>
+<text x='542.0' y='150.0' class='lbl sm mid a-rise' style='--d:0.94s;fill:var(--n-kept)'>1.8 × 10⁻¹⁵</text>
+<g class='a-travel' style='--d:1.20s;--dur:2.60s;--fx:0px;--tx:20px'><circle cx='532.0' cy='95.0' r='3.60' class='' style='--d:0.00s;fill:var(--n-kept)'/></g>
+<text x='24.0' y='186.0' class='lbl sm a-rise' style='--d:1.30s;fill:var(--n-dim)'>each adjacent pair is checked on its own, so the far end is reached one link at a time</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 8.</span> Two of the three links are measured and one is not. The $\pi\to1$ link and the quadrature link are the numbers above; the matched-start link to SURGE is the one that needs the external oracle. A chain is only as good as its weakest link, which is exactly why it is worth saying out loud which link that is.</div>
+</div>
+
+
+---
+
+## Putting the checks together
+
+I find it useful to view Level 0 not as seven unrelated tests but as a chain of reductions and invariances.
+
+### End-to-end reference
+
+$$
+\boxed{
+\text{Gaussian regulotype implementation}
+\approx
+\text{released SURGE implementation}
+}
+$$
+
+This checks the basic likelihood and variational machinery.
+
+### Parameterization invariant
+
+$$
+\boxed{
+(\beta,\Lambda,U)
+\rightarrow
+(\beta^\star,\Lambda^\star,U^\star)
+\quad\text{but}\quad
+R^\star=R
+}
+$$
+
+This checks donor-balanced reparameterization.
+
+### Unit conversion invariant
+
+$$
+\boxed{
+\widetilde r_{si}
+\rightarrow
+r_{si}
+=
+\frac{q_s}{h_s}\widetilde r_{si}
+}
+$$
+
+This checks that reported effects return to the original molecular phenotype units.
+
+### Nested-model reduction
+
+$$
+\boxed{
+K=1,\lambda=0
+\rightarrow
+K=0
+}
+$$
+
+This checks that the interaction component disappears exactly when it should.
+
+### Projection self-consistency
+
+$$
+\boxed{
+\text{project an existing pair using its existing coordinates}
+\rightarrow
+\text{recover the same cis-effect profile}
+}
+$$
+
+This checks the machinery that will later be used for held-out genes.
+
+### Local posterior correctness
+
+$$
+\boxed{
+\text{analytic cEBNM posterior}
+=
+\text{numerically integrated posterior}
+}
+$$
+
+This checks the new empirical-Bayes calculation directly.
+
+### Prior-family reduction
+
+$$
+\boxed{
+\pi=1
+\rightarrow
+\text{Gaussian update}
+}
+$$
+
+This connects the empirical-Bayes implementation back to the Gaussian implementation.
+
+I would summarize the actual outputs of the Level 0 analysis in one compact table:
+
+| Check                         | Quantity that should agree                                |
+| ----------------------------- | --------------------------------------------------------- |
+| Matched SURGE fit             | posterior means, $R$, ELBO                              |
+| Donor-balanced transformation | $R_{\mathrm{before}}=R_{\mathrm{after}}$                |
+| Unscaling                     | original-scale genetic contribution and posterior moments |
+| $K=1,\lambda=0$             | $K=0$ likelihood parameters and $R$                   |
+| Self-projection               | pair-specific $\beta,\lambda$ and $R_{s:}$            |
+| cEBNM numerical integration   | $w,E[a],E[a^2]$, marginal likelihood                  |
+| $\pi=1$ reduction           | Gaussian posterior mean and variance                      |
+
+A final Level 0 figure could summarize all seven checks as small panels with identity lines or near-zero residuals. I would prefer that over reporting only “all unit tests passed,” because the plots make the numerical agreement inspectable.
+
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 402' role='img' aria-label='Seven small panels, one per check, each with its measured agreement.'>
+<rect x='24.0' y='46.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.08s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='36.0' y='70.0' class='lbl sm a-rise' style='--d:0.11s;fill:var(--n-dim)'>1</text>
+<text x='54.0' y='70.0' class='lbl sm a-rise' style='--d:0.13s;fill:var(--n-ink)'>matched SURGE</text>
+<path d='M40.0 136.0 L166.0 82.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='5 4' style='--d:0.18s;--dur:0.60s;stroke:var(--n-dim);stroke-width:1.2'/>
+<circle cx='44.5' cy='133.9' r='3.00' class='a-pop' style='--d:0.24s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='53.5' cy='130.0' r='3.00' class='a-pop' style='--d:0.26s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='62.5' cy='126.0' r='3.00' class='a-pop' style='--d:0.28s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='71.5' cy='122.0' r='3.00' class='a-pop' style='--d:0.30s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='80.5' cy='118.4' r='3.00' class='a-pop' style='--d:0.32s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='89.5' cy='114.3' r='3.00' class='a-pop' style='--d:0.34s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='98.5' cy='111.4' r='3.00' class='a-pop' style='--d:0.36s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='107.5' cy='107.1' r='3.00' class='a-pop' style='--d:0.38s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='116.5' cy='102.7' r='3.00' class='a-pop' style='--d:0.40s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='125.5' cy='99.2' r='3.00' class='a-pop' style='--d:0.42s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='134.5' cy='95.1' r='3.00' class='a-pop' style='--d:0.44s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='143.5' cy='92.1' r='3.00' class='a-pop' style='--d:0.46s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='152.5' cy='87.8' r='3.00' class='a-pop' style='--d:0.48s;fill:var(--n-dim);opacity:0.9'/>
+<circle cx='161.5' cy='84.2' r='3.00' class='a-pop' style='--d:0.50s;fill:var(--n-dim);opacity:0.9'/>
+<g class='a-beat' style='--d:0.63s;--dur:2.40s'><text x='103.0' y='164.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-dim)'>not yet run</text></g>
+<text x='103.0' y='184.0' class='lbl sm mid a-rise' style='--d:0.48s;fill:var(--n-dim)'>illustrative</text>
+<rect x='202.0' y='46.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.21s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='214.0' y='70.0' class='lbl sm a-rise' style='--d:0.24s;fill:var(--n-dim)'>2</text>
+<text x='232.0' y='70.0' class='lbl sm a-rise' style='--d:0.26s;fill:var(--n-ink)'>donor balancing</text>
+<path d='M218.0 109.0 L344.0 109.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.31s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='218.0' y='131.0' class='lbl sm a-rise' style='--d:0.35s;fill:var(--n-dim)'>0</text>
+<circle cx='223.7' cy='109.1' r='3.00' class='a-pop' style='--d:0.37s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='235.2' cy='109.2' r='3.00' class='a-pop' style='--d:0.39s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='246.6' cy='107.9' r='3.00' class='a-pop' style='--d:0.41s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='258.1' cy='108.4' r='3.00' class='a-pop' style='--d:0.43s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='269.5' cy='108.5' r='3.00' class='a-pop' style='--d:0.45s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='281.0' cy='109.9' r='3.00' class='a-pop' style='--d:0.47s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='292.5' cy='109.6' r='3.00' class='a-pop' style='--d:0.49s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='303.9' cy='108.3' r='3.00' class='a-pop' style='--d:0.51s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='315.4' cy='109.7' r='3.00' class='a-pop' style='--d:0.53s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='326.8' cy='108.2' r='3.00' class='a-pop' style='--d:0.55s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='338.3' cy='109.3' r='3.00' class='a-pop' style='--d:0.57s;fill:var(--n-kept);opacity:0.9'/>
+<g class='a-beat' style='--d:0.76s;--dur:2.40s'><text x='281.0' y='164.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-kept)'>4.4 × 10⁻¹⁶</text></g>
+<text x='281.0' y='184.0' class='lbl sm mid a-rise' style='--d:0.61s;fill:var(--n-dim)'>max |ΔR|</text>
+<rect x='380.0' y='46.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.34s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='392.0' y='70.0' class='lbl sm a-rise' style='--d:0.37s;fill:var(--n-dim)'>3</text>
+<text x='410.0' y='70.0' class='lbl sm a-rise' style='--d:0.39s;fill:var(--n-ink)'>unscaling</text>
+<path d='M396.0 109.0 L522.0 109.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.44s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='396.0' y='131.0' class='lbl sm a-rise' style='--d:0.48s;fill:var(--n-dim)'>0</text>
+<circle cx='401.7' cy='108.2' r='3.00' class='a-pop' style='--d:0.50s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='413.2' cy='107.9' r='3.00' class='a-pop' style='--d:0.52s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='424.6' cy='109.8' r='3.00' class='a-pop' style='--d:0.54s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='436.1' cy='108.4' r='3.00' class='a-pop' style='--d:0.56s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='447.5' cy='108.4' r='3.00' class='a-pop' style='--d:0.58s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='459.0' cy='110.1' r='3.00' class='a-pop' style='--d:0.60s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='470.5' cy='109.8' r='3.00' class='a-pop' style='--d:0.62s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='481.9' cy='108.5' r='3.00' class='a-pop' style='--d:0.64s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='493.4' cy='110.0' r='3.00' class='a-pop' style='--d:0.66s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='504.8' cy='109.1' r='3.00' class='a-pop' style='--d:0.68s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='516.3' cy='109.4' r='3.00' class='a-pop' style='--d:0.70s;fill:var(--n-kept);opacity:0.9'/>
+<g class='a-beat' style='--d:0.89s;--dur:2.40s'><text x='459.0' y='164.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-kept)'>4.2 × 10⁻¹⁶</text></g>
+<text x='459.0' y='184.0' class='lbl sm mid a-rise' style='--d:0.74s;fill:var(--n-dim)'>max rel., n = 5,000</text>
+<rect x='558.0' y='46.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.47s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='570.0' y='70.0' class='lbl sm a-rise' style='--d:0.50s;fill:var(--n-dim)'>4</text>
+<text x='588.0' y='70.0' class='lbl sm a-rise' style='--d:0.52s;fill:var(--n-ink)'>K = 1, λ = 0</text>
+<path d='M574.0 109.0 L700.0 109.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.57s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='574.0' y='131.0' class='lbl sm a-rise' style='--d:0.61s;fill:var(--n-dim)'>0</text>
+<circle cx='579.7' cy='108.4' r='3.00' class='a-pop' style='--d:0.63s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='591.2' cy='110.0' r='3.00' class='a-pop' style='--d:0.65s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='602.6' cy='109.4' r='3.00' class='a-pop' style='--d:0.67s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='614.1' cy='110.0' r='3.00' class='a-pop' style='--d:0.69s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='625.5' cy='109.9' r='3.00' class='a-pop' style='--d:0.71s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='637.0' cy='108.6' r='3.00' class='a-pop' style='--d:0.73s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='648.5' cy='108.7' r='3.00' class='a-pop' style='--d:0.75s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='659.9' cy='108.3' r='3.00' class='a-pop' style='--d:0.77s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='671.4' cy='108.2' r='3.00' class='a-pop' style='--d:0.79s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='682.8' cy='108.0' r='3.00' class='a-pop' style='--d:0.81s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='694.3' cy='108.6' r='3.00' class='a-pop' style='--d:0.83s;fill:var(--n-kept);opacity:0.9'/>
+<g class='a-beat' style='--d:1.02s;--dur:2.40s'><text x='637.0' y='164.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-kept)'>0.0</text></g>
+<text x='637.0' y='184.0' class='lbl sm mid a-rise' style='--d:0.87s;fill:var(--n-dim)'>bitwise, exactly</text>
+<rect x='103.0' y='222.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.60s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='115.0' y='246.0' class='lbl sm a-rise' style='--d:0.63s;fill:var(--n-dim)'>5</text>
+<text x='133.0' y='246.0' class='lbl sm a-rise' style='--d:0.65s;fill:var(--n-ink)'>self-projection</text>
+<path d='M119.0 312.0 L245.0 258.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='5 4' style='--d:0.70s;--dur:0.60s;stroke:var(--n-dim);stroke-width:1.2'/>
+<circle cx='123.5' cy='309.8' r='3.00' class='a-pop' style='--d:0.76s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='132.5' cy='307.6' r='3.00' class='a-pop' style='--d:0.78s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='141.5' cy='301.9' r='3.00' class='a-pop' style='--d:0.80s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='150.5' cy='298.9' r='3.00' class='a-pop' style='--d:0.82s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='159.5' cy='295.2' r='3.00' class='a-pop' style='--d:0.84s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='168.5' cy='289.9' r='3.00' class='a-pop' style='--d:0.86s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='177.5' cy='287.0' r='3.00' class='a-pop' style='--d:0.88s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='186.5' cy='283.6' r='3.00' class='a-pop' style='--d:0.90s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='195.5' cy='279.3' r='3.00' class='a-pop' style='--d:0.92s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='204.5' cy='274.8' r='3.00' class='a-pop' style='--d:0.94s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='213.5' cy='272.7' r='3.00' class='a-pop' style='--d:0.96s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='222.5' cy='266.4' r='3.00' class='a-pop' style='--d:0.98s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='231.5' cy='265.1' r='3.00' class='a-pop' style='--d:1.00s;fill:var(--n-teacher);opacity:0.9'/>
+<circle cx='240.5' cy='259.3' r='3.00' class='a-pop' style='--d:1.02s;fill:var(--n-teacher);opacity:0.9'/>
+<g class='a-beat' style='--d:1.15s;--dur:2.40s'><text x='182.0' y='340.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-teacher)'>6.7 × 10⁻⁴</text></g>
+<text x='182.0' y='360.0' class='lbl sm mid a-rise' style='--d:1.00s;fill:var(--n-dim)'>median of 10 pairs</text>
+<rect x='281.0' y='222.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.73s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='293.0' y='246.0' class='lbl sm a-rise' style='--d:0.76s;fill:var(--n-dim)'>6</text>
+<text x='311.0' y='246.0' class='lbl sm a-rise' style='--d:0.78s;fill:var(--n-ink)'>cEBNM vs. quad</text>
+<path d='M297.0 312.0 L423.0 258.0' fill='none' class='a-draw' stroke-linecap='round' stroke-dasharray='5 4' style='--d:0.83s;--dur:0.60s;stroke:var(--n-dim);stroke-width:1.2'/>
+<circle cx='301.5' cy='309.7' r='3.00' class='a-pop' style='--d:0.89s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='310.5' cy='306.7' r='3.00' class='a-pop' style='--d:0.91s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='319.5' cy='302.0' r='3.00' class='a-pop' style='--d:0.93s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='328.5' cy='298.6' r='3.00' class='a-pop' style='--d:0.95s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='337.5' cy='294.6' r='3.00' class='a-pop' style='--d:0.97s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='346.5' cy='291.3' r='3.00' class='a-pop' style='--d:0.99s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='355.5' cy='287.4' r='3.00' class='a-pop' style='--d:1.01s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='364.5' cy='283.4' r='3.00' class='a-pop' style='--d:1.03s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='373.5' cy='278.7' r='3.00' class='a-pop' style='--d:1.05s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='382.5' cy='275.7' r='3.00' class='a-pop' style='--d:1.07s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='391.5' cy='271.2' r='3.00' class='a-pop' style='--d:1.09s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='400.5' cy='267.2' r='3.00' class='a-pop' style='--d:1.11s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='409.5' cy='263.3' r='3.00' class='a-pop' style='--d:1.13s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='418.5' cy='260.1' r='3.00' class='a-pop' style='--d:1.15s;fill:var(--n-kept);opacity:0.9'/>
+<g class='a-beat' style='--d:1.28s;--dur:2.40s'><text x='360.0' y='340.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-kept)'>1.8 × 10⁻¹⁵</text></g>
+<text x='360.0' y='360.0' class='lbl sm mid a-rise' style='--d:1.13s;fill:var(--n-dim)'>worst of 15</text>
+<rect x='459.0' y='222.0' width='158.0' height='148.0' rx='10' class='box a-pop' style='--d:0.86s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.6'/>
+<text x='471.0' y='246.0' class='lbl sm a-rise' style='--d:0.89s;fill:var(--n-dim)'>7</text>
+<text x='489.0' y='246.0' class='lbl sm a-rise' style='--d:0.91s;fill:var(--n-ink)'>π = 1 → Gaussian</text>
+<path d='M475.0 285.0 L601.0 285.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.96s;--dur:0.60s;stroke:var(--n-edge);stroke-width:1.4'/>
+<text x='475.0' y='307.0' class='lbl sm a-rise' style='--d:1.00s;fill:var(--n-dim)'>0</text>
+<circle cx='480.7' cy='284.7' r='3.00' class='a-pop' style='--d:1.02s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='492.2' cy='285.1' r='3.00' class='a-pop' style='--d:1.04s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='503.6' cy='285.6' r='3.00' class='a-pop' style='--d:1.06s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='515.1' cy='284.1' r='3.00' class='a-pop' style='--d:1.08s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='526.5' cy='285.5' r='3.00' class='a-pop' style='--d:1.10s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='538.0' cy='285.7' r='3.00' class='a-pop' style='--d:1.12s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='549.5' cy='285.8' r='3.00' class='a-pop' style='--d:1.14s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='560.9' cy='284.0' r='3.00' class='a-pop' style='--d:1.16s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='572.4' cy='286.0' r='3.00' class='a-pop' style='--d:1.18s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='583.8' cy='284.1' r='3.00' class='a-pop' style='--d:1.20s;fill:var(--n-kept);opacity:0.9'/>
+<circle cx='595.3' cy='284.6' r='3.00' class='a-pop' style='--d:1.22s;fill:var(--n-kept);opacity:0.9'/>
+<g class='a-beat' style='--d:1.41s;--dur:2.40s'><text x='538.0' y='340.0' class='lbl bg mid' style='--d:0.00s;fill:var(--n-kept)'>3.0 × 10⁻¹⁵</text></g>
+<text x='538.0' y='360.0' class='lbl sm mid a-rise' style='--d:1.26s;fill:var(--n-dim)'>worst of 500</text>
+<text x='24.0' y='390.0' class='lbl sm a-rise' style='--d:1.30s;fill:var(--n-dim)'>six of seven land at machine precision; one is an iterative solve and one has not been run</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 9.</span> The whole of Level 0 on one page. Panels 2, 3, 4, 6 and 7 are identities that hold to floating point; panel 5 is an iterative re-solve, which is why it sits at $10^{-4}$ rather than $10^{-16}$; panel 1 is the one that needs the external oracle and is drawn, not measured. The dot clouds in the measured panels are schematic — the numbers beneath them are not.</div>
+</div>
+
+
+---
+
+## What passing Level 0 means
+
+If all of these checks pass, I can make a fairly precise statement:
+
+> **The code appears to implement the mathematical model that I wrote down.**
+
+In particular, I have evidence that:
+
+* the baseline likelihood agrees with its SURGE reference implementation;
+* the factor reparameterization does not alter $R$;
+* fitted effects are returned to the correct phenotype scale;
+* the low-rank model reduces correctly when its interaction disappears;
+* the projection machinery solves the intended conditional problem;
+* the empirical-Bayes posterior moments are numerically correct;
+* and the new prior machinery reduces back to the Gaussian case when it should.
+
+But none of these checks asks whether the estimated regulotype is scientifically meaningful.
+
+A perfectly coded algorithm can still fail to recover a weak signal.
+
+It can estimate an unstable map when there are too few donors.
+
+It can struggle when there are too few independent reference loci.
+
+And it can recover the wrong cellular geometry when the statistical problem is poorly identified.
+
+Those are different questions.
+
+Level 0 asks:
+
+> **Did I implement the mathematics correctly?**
+
+It does **not** yet ask:
+
+> **Did I recover a meaningful regulotype?**
+
+That comes next.
+
+## Sources
+
+- Strober *et al.* SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. *Genome Biol* **25**, 28 (2024). [doi:10.1186/s13059-023-03152-z](https://doi.org/10.1186/s13059-023-03152-z) — the released implementation the Gaussian reduction in §1 is checked against, and the source of the observation likelihood.
+- Denault *et al.* Covariate-moderated empirical Bayes matrix factorization. *NeurIPS* **38** (2025). [doi:10.52202/085713-1573](https://doi.org/10.52202/085713-1573) — the covariate-moderated prior whose point-normal cEBNM subproblem §6 and §7 check.
+- [Regulotypes: how the map is trained and tested](/notes/2026/09/06/regulotypes-train-test/) — the previous note, which introduces the pair projection that §5 puts a known answer through.
+- [Regulotypes: defining cells by genetic response](/notes/2026/09/04/regulotypes/) — where $R$, the reference variant–gene pairs and the low-rank model itself are defined.
