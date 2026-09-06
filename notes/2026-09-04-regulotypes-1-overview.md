@@ -40,7 +40,7 @@ keywords: regulotype, cis-regulatory effects, cell-resolved cis effects, context
 <rect x='128' y='206.0' width='576' height='34' rx='8' fill='transparent'/>
 <circle cx='148.0' cy='223.0' r='4.0' class='a-beat' style='--d:0.77s;--dur:2.00s;fill:var(--n-kept)'/>
 <text x='164.0' y='228.0' class='lbl a-rise' style='--d:0.77s;fill:var(--n-kept)'>What this could contribute</text>
-<text x='704.0' y='228.0' class='lbl sm end a-rise' style='--d:0.87s;fill:var(--n-dim)'>claims, each with a decisive analysis</text>
+<text x='704.0' y='228.0' class='lbl sm end a-rise' style='--d:0.87s;fill:var(--n-dim)'>five added values, and what would show them</text>
 </a>
 </svg>
 </div>
@@ -732,100 +732,152 @@ The closest method is SURGE. The novelty is therefore not a new genotype-by-late
 
 ## What this could contribute
 
-The project will matter if it does more than produce another embedding or another list of context-dependent eQTLs. The central contribution should be a validated cellular representation that changes how inherited regulatory effects are localized and interpreted in the blood–brain barrier.
+> If expression already tells us what a cell is, what scientifically useful information does organizing cells by genetic regulation add?
 
-### 1. A new estimand: cellular identity defined by cis-effect profiles
+We do not need regulotypes to rediscover cell types that marker genes already distinguish, and I would not defend them on that ground. But a marker identifying a cell does not establish that genetic variants have the same effects in every cell carrying that marker. The question is whether organizing cells by their patterns of genetic effects reveals information that expression-based identities miss, and whether that information improves genetic prediction and disease interpretation. Five things could follow from it, none of them yet established.
 
-Our key conceptual step is to make $R$, rather than an individual factor or interaction test, the object of inference. A regulotype is one column of $R$; a locus-specific response map is one row.
+### 1. Whether expression boundaries are regulatory boundaries
 
-**Analysis required.** Simulate genotype-independent expression structure and genetic-response structure with varying degrees of alignment. Test null calibration when all $\lambda_{vg}=0$, recovery of $r_{vgi}$, regulotype distances and uncertainty. Then benchmark against average-effect QTL models, fixed-label effects, supplied expression coordinates and the Gaussian-prior SURGE implementation.
+An expression subtype is defined by differences in expression, not by differences in genetic effect, so the two need not coincide. Two expression subtypes can share a cis-effect pattern; a single expression subtype can contain substantially different ones. Two endothelial subclusters might differ sharply in stress-response expression and still agree in their estimated cis effects, while cells inside one capillary endothelial label might not agree at all.
 
-**Contribution if supported.** The work would establish cell-resolved cis-effect profiles as a statistically estimable cellular phenotype. This is more fundamental than finding additional interaction eQTLs: it defines the object that later BBB and disease analyses use.
+Regulotypes would then say both where to split an existing label and where an existing distinction is unnecessary for a particular regulatory question. That is a stronger claim than producing a finer clustering, because it tests whether the current classification is the right one for studying genetic regulation in the first place. What would settle it is showing that the regulotype organization explains reproducible genetic-effect differences beyond existing labels and expression-state representations; simply recovering known subtypes would be reassuring without being sufficient.
 
-### 2. Evidence that a regulotype transfers across genes and donors
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 372' role='img' aria-label='The same cells grouped twice: by expression label on the left, by cis-effect pattern on the right, where two labels merge and one label splits.'>
+<text x='178.0' y='44.0' class='lbl mid a-pop' style='--d:0.05s;fill:var(--n-teacher)'>expression labels</text>
+<text x='528.0' y='44.0' class='lbl mid a-pop' style='--d:0.10s;fill:var(--n-student)'>cis-effect patterns</text>
+<circle cx='119.1' cy='177.0' r='4.4' class='a-pop' style='--d:0.22s;fill:var(--n-teacher)'/>
+<circle cx='133.1' cy='131.3' r='4.4' class='a-pop' style='--d:0.24s;fill:var(--n-teacher)'/>
+<circle cx='88.9' cy='175.4' r='4.4' class='a-pop' style='--d:0.26s;fill:var(--n-teacher)'/>
+<circle cx='61.5' cy='171.8' r='4.4' class='a-pop' style='--d:0.27s;fill:var(--n-teacher)'/>
+<circle cx='135.1' cy='147.8' r='4.4' class='a-pop' style='--d:0.29s;fill:var(--n-teacher)'/>
+<circle cx='89.2' cy='134.9' r='4.4' class='a-pop' style='--d:0.31s;fill:var(--n-teacher)'/>
+<circle cx='84.7' cy='146.3' r='4.4' class='a-pop' style='--d:0.33s;fill:var(--n-teacher)'/>
+<circle cx='107.9' cy='153.6' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-teacher)'/>
+<circle cx='153.6' cy='169.9' r='4.4' class='a-pop' style='--d:0.36s;fill:var(--n-teacher)'/>
+<circle cx='118.9' cy='183.2' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-teacher)'/>
+<circle cx='81.0' cy='126.9' r='4.4' class='a-pop' style='--d:0.40s;fill:var(--n-teacher)'/>
+<circle cx='118.0' cy='119.0' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-teacher)'/>
+<circle cx='64.3' cy='151.0' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-teacher)'/>
+<circle cx='104.4' cy='178.4' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-teacher)'/>
+<circle cx='232.4' cy='183.1' r='4.4' class='a-pop' style='--d:0.30s;fill:var(--n-data)'/>
+<circle cx='231.6' cy='169.6' r='4.4' class='a-pop' style='--d:0.32s;fill:var(--n-data)'/>
+<circle cx='282.9' cy='142.6' r='4.4' class='a-pop' style='--d:0.34s;fill:var(--n-data)'/>
+<circle cx='242.7' cy='141.3' r='4.4' class='a-pop' style='--d:0.35s;fill:var(--n-data)'/>
+<circle cx='211.9' cy='148.6' r='4.4' class='a-pop' style='--d:0.37s;fill:var(--n-data)'/>
+<circle cx='224.4' cy='133.5' r='4.4' class='a-pop' style='--d:0.39s;fill:var(--n-data)'/>
+<circle cx='219.2' cy='129.2' r='4.4' class='a-pop' style='--d:0.41s;fill:var(--n-data)'/>
+<circle cx='277.7' cy='144.8' r='4.4' class='a-pop' style='--d:0.43s;fill:var(--n-data)'/>
+<circle cx='225.8' cy='156.2' r='4.4' class='a-pop' style='--d:0.44s;fill:var(--n-data)'/>
+<circle cx='258.2' cy='160.0' r='4.4' class='a-pop' style='--d:0.46s;fill:var(--n-data)'/>
+<circle cx='286.8' cy='126.2' r='4.4' class='a-pop' style='--d:0.48s;fill:var(--n-data)'/>
+<circle cx='236.5' cy='135.4' r='4.4' class='a-pop' style='--d:0.50s;fill:var(--n-data)'/>
+<circle cx='203.6' cy='128.3' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-data)'/>
+<circle cx='238.7' cy='142.7' r='4.4' class='a-pop' style='--d:0.53s;fill:var(--n-data)'/>
+<circle cx='211.9' cy='263.5' r='4.4' class='a-pop' style='--d:0.38s;fill:var(--n-pruned)'/>
+<circle cx='187.1' cy='296.9' r='4.4' class='a-pop' style='--d:0.40s;fill:var(--n-pruned)'/>
+<circle cx='197.6' cy='306.2' r='4.4' class='a-pop' style='--d:0.42s;fill:var(--n-pruned)'/>
+<circle cx='211.0' cy='306.4' r='4.4' class='a-pop' style='--d:0.43s;fill:var(--n-pruned)'/>
+<circle cx='133.5' cy='273.7' r='4.4' class='a-pop' style='--d:0.45s;fill:var(--n-pruned)'/>
+<circle cx='176.1' cy='248.4' r='4.4' class='a-pop' style='--d:0.47s;fill:var(--n-pruned)'/>
+<circle cx='131.5' cy='300.5' r='4.4' class='a-pop' style='--d:0.49s;fill:var(--n-pruned)'/>
+<circle cx='222.4' cy='297.4' r='4.4' class='a-pop' style='--d:0.51s;fill:var(--n-pruned)'/>
+<circle cx='160.4' cy='292.0' r='4.4' class='a-pop' style='--d:0.52s;fill:var(--n-pruned)'/>
+<circle cx='158.8' cy='294.4' r='4.4' class='a-pop' style='--d:0.54s;fill:var(--n-pruned)'/>
+<circle cx='157.0' cy='297.2' r='4.4' class='a-pop' style='--d:0.56s;fill:var(--n-pruned)'/>
+<circle cx='222.9' cy='311.1' r='4.4' class='a-pop' style='--d:0.58s;fill:var(--n-pruned)'/>
+<circle cx='213.1' cy='306.1' r='4.4' class='a-pop' style='--d:0.60s;fill:var(--n-pruned)'/>
+<circle cx='196.9' cy='281.7' r='4.4' class='a-pop' style='--d:0.61s;fill:var(--n-pruned)'/>
+<rect x='45.0' y='100.0' width='125.0' height='100.0' rx='16' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:0.85s;--dur:0.80s;--len:450;stroke:var(--n-teacher);stroke-width:2'/>
+<rect x='186.0' y='100.0' width='125.0' height='100.0' rx='16' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:0.92s;--dur:0.80s;--len:450;stroke:var(--n-data);stroke-width:2'/>
+<rect x='115.0' y='228.0' width='125.0' height='100.0' rx='16' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:0.99s;--dur:0.80s;--len:450;stroke:var(--n-pruned);stroke-width:2'/>
+<text x='107.0' y='92.0' class='lbl sm mid a-rise' style='--d:1.05s;fill:var(--n-teacher)'>label A</text>
+<text x='248.0' y='92.0' class='lbl sm mid a-rise' style='--d:1.10s;fill:var(--n-data)'>label B</text>
+<text x='177.0' y='348.0' class='lbl sm mid a-rise' style='--d:1.15s;fill:var(--n-pruned)'>label C</text>
+<path d='M317 164 L385 164' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.30s;--dur:0.50s;--len:70;stroke:var(--n-dim);stroke-width:1.6'/>
+<polygon points='391,164 385,167.3 385,160.7' class='a-pop' style='--d:1.72s;fill:var(--n-dim)'/>
+<text x='351.0' y='150.0' class='lbl sm mid a-rise' style='--d:1.35s;fill:var(--n-dim)'>same cells</text>
+<circle cx='469.1' cy='177.0' r='4.4' class='a-pop' style='--d:1.85s;fill:var(--n-kept)'/>
+<circle cx='483.1' cy='131.3' r='4.4' class='a-pop' style='--d:1.87s;fill:var(--n-kept)'/>
+<circle cx='438.9' cy='175.4' r='4.4' class='a-pop' style='--d:1.89s;fill:var(--n-kept)'/>
+<circle cx='411.5' cy='171.8' r='4.4' class='a-pop' style='--d:1.90s;fill:var(--n-kept)'/>
+<circle cx='485.1' cy='147.8' r='4.4' class='a-pop' style='--d:1.92s;fill:var(--n-kept)'/>
+<circle cx='439.2' cy='134.9' r='4.4' class='a-pop' style='--d:1.94s;fill:var(--n-kept)'/>
+<circle cx='434.7' cy='146.3' r='4.4' class='a-pop' style='--d:1.96s;fill:var(--n-kept)'/>
+<circle cx='457.9' cy='153.6' r='4.4' class='a-pop' style='--d:1.98s;fill:var(--n-kept)'/>
+<circle cx='503.6' cy='169.9' r='4.4' class='a-pop' style='--d:1.99s;fill:var(--n-kept)'/>
+<circle cx='468.9' cy='183.2' r='4.4' class='a-pop' style='--d:2.01s;fill:var(--n-kept)'/>
+<circle cx='431.0' cy='126.9' r='4.4' class='a-pop' style='--d:2.03s;fill:var(--n-kept)'/>
+<circle cx='468.0' cy='119.0' r='4.4' class='a-pop' style='--d:2.05s;fill:var(--n-kept)'/>
+<circle cx='414.3' cy='151.0' r='4.4' class='a-pop' style='--d:2.07s;fill:var(--n-kept)'/>
+<circle cx='454.4' cy='178.4' r='4.4' class='a-pop' style='--d:2.08s;fill:var(--n-kept)'/>
+<circle cx='582.4' cy='183.1' r='4.4' class='a-pop' style='--d:1.90s;fill:var(--n-kept)'/>
+<circle cx='581.6' cy='169.6' r='4.4' class='a-pop' style='--d:1.92s;fill:var(--n-kept)'/>
+<circle cx='632.9' cy='142.6' r='4.4' class='a-pop' style='--d:1.94s;fill:var(--n-kept)'/>
+<circle cx='592.7' cy='141.3' r='4.4' class='a-pop' style='--d:1.95s;fill:var(--n-kept)'/>
+<circle cx='561.9' cy='148.6' r='4.4' class='a-pop' style='--d:1.97s;fill:var(--n-kept)'/>
+<circle cx='574.4' cy='133.5' r='4.4' class='a-pop' style='--d:1.99s;fill:var(--n-kept)'/>
+<circle cx='569.2' cy='129.2' r='4.4' class='a-pop' style='--d:2.01s;fill:var(--n-kept)'/>
+<circle cx='627.7' cy='144.8' r='4.4' class='a-pop' style='--d:2.03s;fill:var(--n-kept)'/>
+<circle cx='575.8' cy='156.2' r='4.4' class='a-pop' style='--d:2.04s;fill:var(--n-kept)'/>
+<circle cx='608.2' cy='160.0' r='4.4' class='a-pop' style='--d:2.06s;fill:var(--n-kept)'/>
+<circle cx='636.8' cy='126.2' r='4.4' class='a-pop' style='--d:2.08s;fill:var(--n-kept)'/>
+<circle cx='586.5' cy='135.4' r='4.4' class='a-pop' style='--d:2.10s;fill:var(--n-kept)'/>
+<circle cx='553.6' cy='128.3' r='4.4' class='a-pop' style='--d:2.12s;fill:var(--n-kept)'/>
+<circle cx='588.7' cy='142.7' r='4.4' class='a-pop' style='--d:2.13s;fill:var(--n-kept)'/>
+<circle cx='561.9' cy='263.5' r='4.4' class='a-pop' style='--d:2.35s;fill:var(--n-student)'/>
+<circle cx='537.1' cy='296.9' r='4.4' class='a-pop' style='--d:2.37s;fill:var(--n-student)'/>
+<circle cx='547.6' cy='306.2' r='4.4' class='a-pop' style='--d:2.39s;fill:var(--n-student)'/>
+<circle cx='561.0' cy='306.4' r='4.4' class='a-pop' style='--d:2.40s;fill:var(--n-student)'/>
+<circle cx='483.5' cy='273.7' r='4.4' class='a-pop' style='--d:2.42s;fill:var(--n-loss)'/>
+<circle cx='517.1' cy='248.4' r='4.4' class='a-pop' style='--d:2.44s;fill:var(--n-loss)'/>
+<circle cx='481.5' cy='300.5' r='4.4' class='a-pop' style='--d:2.46s;fill:var(--n-loss)'/>
+<circle cx='572.4' cy='297.4' r='4.4' class='a-pop' style='--d:2.48s;fill:var(--n-student)'/>
+<circle cx='510.4' cy='292.0' r='4.4' class='a-pop' style='--d:2.49s;fill:var(--n-loss)'/>
+<circle cx='508.8' cy='294.4' r='4.4' class='a-pop' style='--d:2.51s;fill:var(--n-loss)'/>
+<circle cx='507.0' cy='297.2' r='4.4' class='a-pop' style='--d:2.53s;fill:var(--n-loss)'/>
+<circle cx='572.9' cy='311.1' r='4.4' class='a-pop' style='--d:2.55s;fill:var(--n-student)'/>
+<circle cx='563.1' cy='306.1' r='4.4' class='a-pop' style='--d:2.57s;fill:var(--n-student)'/>
+<circle cx='546.9' cy='281.7' r='4.4' class='a-pop' style='--d:2.58s;fill:var(--n-student)'/>
+<rect x='395.0' y='100.0' width='266.0' height='100.0' rx='16' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:2.55s;--dur:1.00s;--len:732;stroke:var(--n-kept);stroke-width:2.2'/>
+<text x='528.0' y='92.0' class='lbl sm mid a-rise' style='--d:2.80s;fill:var(--n-kept)'>one pattern, two labels</text>
+<rect x='465.0' y='228.0' width='59.0' height='100.0' rx='14' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:3.05s;--dur:0.80s;--len:318;stroke:var(--n-loss);stroke-width:2.2'/>
+<rect x='531.0' y='228.0' width='59.0' height='100.0' rx='14' class='a-draw' fill='none' stroke-dasharray='7 5' style='--d:3.12s;--dur:0.80s;--len:318;stroke:var(--n-student);stroke-width:2.2'/>
+<text x='528.0' y='348.0' class='lbl sm mid a-rise' style='--d:3.30s;fill:var(--n-dim)'>two patterns, one label</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 6.</span> The same cells, grouped twice. On the left they carry three expression labels. On the right they are grouped by estimated cis-effect pattern: labels A and B fall together, and label C divides. Neither move is available from the expression labels alone, and either one changes which cells should be pooled to estimate a genetic effect. Illustrative, not a fitted example.</div>
+</div>
 
-A factorization can always summarize its training data. It becomes a cellular representation only if the learned coordinates predict effects that were not used to estimate them.
+### 2. Susceptibility to genetic variation that average expression does not reveal
 
-**Analysis required.** Use nested partitions exactly as specified in our design. Training regions in training donors estimate $U$. Test-region pairs in training donors estimate new $\beta_{vg}$ and $\lambda_{vg}$ with $U$ fixed. Training genes locate cells from held-out donors on the map. Expression of the held-out test genes is used only to evaluate the predicted genetic component $x_{d(i)v}r_{vgi}$.
+Expression level and genetic effect are different quantities. Writing the conditional mean of a gene's expression in a cellular context $c$ as
 
-Compare predictive density and squared error under identical partitions with $K=0$, fixed-label models, supplied expression coordinates and SURGE. Keep all cells from one donor in the same fold and give each donor equal total weight.
+$$
+E[y_{ig}\mid x,c]=m(c)+x\,\beta(c),
+$$
 
-**Contribution if supported.** The same cellular response structure modifies multiple independent cis effects and recurs across people. This is the decisive evidence that “regulotype” names a transferable property rather than a training-set visualization.
+with $x$ the centred effect-allele dosage, separates a baseline term $m(c)$ from the genotype-expression association $\beta(c)$. Two contexts can agree on $m(c)$ and differ in $\beta(c)$: they look alike in that gene's expression while differing in how strongly inherited variation moves it.
 
-### 3. An all-cell response map that is not predetermined by lineage
+What that buys is a way to say where genetic variation matters, rather than only where a gene is expressed, and exclusive markers do not answer that question for the other genes expressed within a lineage. What would settle it is context-dependent effects predicting genotype-associated expression differences in held-out donors better than models built from expression states alone, remembering throughout that these effects are estimated across donors and not measured independently in any single cell.
 
-The agreed analysis starts from all cells without identity labels. This is not the same as ignoring expression. Genotype-independent expression variation is adjusted in $m_{ig}$; what is withheld is the assumption that endothelial, perivascular, glial or immune labels must define separate genetic-effect spaces.
+### 3. Estimation that pools information by regulatory similarity
 
-**Analysis required.** Fit the response map first. Only afterward overlay canonical labels, expression neighborhoods, endothelial zonation, mural specialization, inflammatory programs and other vascular annotations. Identify expression-near/regulotype-far and expression-far/regulotype-near cells using genes and donors excluded from the corresponding fit. Ask whether regulotype proximity predicts held-out cis effects beyond expression distance and labels.
+Broad cell-type pooling averages heterogeneous effects away, while subdividing repeatedly leaves groups too small to estimate anything in. Sharing information across cells and variant-gene pairs with related effect patterns is a way through that trade-off: a rare endothelial state may carry too little evidence to estimate every eQTL on its own, but if several variant-gene pairs vary together across it, a shared low-dimensional model can estimate them jointly.
 
-If one regulotype region spans several canonical lineages, require it to reproduce across donor folds and independent reference sets. Interpret it with TF activity, chromatin, spatial or experimental evidence withheld from fitting. Control explicitly for donor composition, RNA quality, target-gene detection and generic stress programs.
+The contribution would be better estimation without a separately powered eQTL analysis for every subtype, bearing in mind that more cells are not more donors and that sharing across pairs which do not in fact share structure introduces bias. What would settle it is better held-out prediction or effect recovery, with calibrated uncertainty, against broad-label, subtype-specific and continuous expression-interaction models; not merely more significant findings.
 
-**Contribution if supported.** The project would reveal response programs that cross conventional cell identities and show where expression taxonomy is insufficient for genetic interpretation. The result would not be “new cell types,” but a complementary organization of cells by the regulatory consequences of inherited variation.
+### 4. Coordinated patterns of genetic regulation across loci
 
-### 4. Feature-informed estimation of sparse response programs
+Separate context-dependent eQTL analyses say where individual genetic effects vary. A joint regulotype model asks something further: whether multiple loci vary together across the same cellular contexts. If several independent variant-gene pairs consistently strengthen or weaken along one axis, that identifies a shared regulatory pattern rather than a collection of unrelated interactions, which is a relationship among genetic effects that neither cell labels nor one-locus-at-a-time analysis would expose. It is the direct consequence of organizing the effect matrix jointly.
 
-The number of independent genotypes is the number of donors, not the number of cells. Our covariate-moderated empirical-Bayes extension addresses this constraint by allowing cell features $z_i$ to inform the prior for $u_{ik}$ and pair annotations $h_{vg}$ to inform the prior for $\lambda_{vgk}$.
+What would settle it is the shared pattern replicating, and surviving the removal of its strongest loci. Calling it an inflammatory programme would take independent biological evidence; a latent factor or a pathway-enrichment result does not by itself establish a common mechanism.
 
-**Analysis required.** Compare feature-moderated point-normal priors with Gaussian, intercept-only and feature-permuted priors inside the same donor and region partitions. Evaluate held-out prediction, calibration, stability of $R$ and recovery of sparse effects—not only whether the resulting factors are easy to name. Separate the gain from cell features from the gain due to variant–gene annotations.
+### 5. Disease follow-up specific enough to test
 
-Annotations reserved for biological evaluation must not enter the prior. Expression-derived features must be calculated without held-out test-gene expression.
+"This AD-associated locus is relevant to endothelial cells" still leaves a large experimental search space. A reproducible state-dependent effect narrows it to a particular gene in a particular cellular condition, and, where the data support it, to testing a candidate allele's effect on that gene under inflammatory stimulation against baseline rather than testing an undifferentiated endothelial population. The added value is a more precise experimental hypothesis: which allele, which gene, under which condition.
 
-**Contribution if supported.** The method would show how measured cellular and cis-regulatory information can stabilize a response map without using those annotations to define the map. It would also identify which cells and which pairs participate in a recurrent response program.
-
-### 5. A BBB regulotype atlas that localizes Alzheimer's disease cis effects
-
-The reference map is learned before AD genetics is introduced. Candidate AD pairs are then projected using leave-one-region-out coordinates, with the disease-increasing allele used only to orient the final profile.
-
-**Analysis required.** For each candidate variant–gene pair, estimate $\beta_{vg}$ and $\lambda_{vg}$ with the relevant region excluded from coordinate estimation. Retain fine-mapping, colocalization and replication evidence; keep uncertainty when one variant has several candidate target genes; and keep molecular QTL effects on the molecular phenotype scale rather than treating them as disease-risk effects.
-
-Next, compare the cell-resolved profiles of independent AD loci. Test whether they converge more strongly than matched non-AD pairs after accounting for average cis-effect magnitude, target-gene expression, allele frequency, LD complexity and local information. Require any convergence to survive removal of individual major loci, including APOE.
-
-**Contribution if supported.** The atlas would connect risk loci to candidate genes and precise vascular conditions. Convergence would be especially important: different loci and genes could act through a shared BBB condition, providing a state-level mechanism for polygenic risk rather than another list of locus-specific annotations.
-
-### 6. Separation of genetic susceptibility from disease remodeling
-
-Our design distinguishes three questions that are often conflated:
-
-1. where an allele is predicted to alter its target gene;
-2. which cellular conditions become more or less abundant in disease; and
-3. how expression changes within the same condition during disease.
-
-**Analysis required.** Use $R$ to describe genetic susceptibility along the map. Separately summarize each donor's occupancy of the map and molecular remodeling within its regions. Test these donor-level quantities against AD status, quantitative neuropathology and APOE while adjusting for study design. Do not treat cells as independent disease samples and do not infer that an allele created an AD-enriched region.
-
-**Contribution if supported.** The analysis could distinguish a vulnerable condition that exists before disease from a condition that expands or changes after pathology develops. This difference directly changes the biological interpretation: inherited susceptibility, disease response and cellular composition are not interchangeable.
-
-### 7. Spatial localization without using spatial information to create the result
-
-Xenium provides the opportunity to locate predicted regulotypes in intact tissue, but the projection must first be shown to work in RNA data where the full regulotype estimate is available.
-
-**Analysis required.** Train a panel-restricted expression model in the single-cell RNA reference and evaluate it in held-out donors. Measure error in predicted $R$, preservation of regulotype distances and nearest-neighbor stability. Exclude spatial coordinates, vessel geometry, neighboring-cell composition and pathology from the projection model. Only after validation should the model be applied to Xenium cells.
-
-In tissue, test where projected regulotype-like conditions occur along vessel segments and relative to perivascular, glial and immune neighbors and local pathology. Use donor and tissue section—not individual cells—as the independent units for spatial association.
-
-**Contribution if supported.** The work would connect a genetically learned response condition to a physical vascular niche. This makes the atlas experimentally useful while keeping spatial evidence independent of map construction.
-
-### 8. Actionable hypotheses and a careful route to foundation models
-
-The immediate experimental output is a prioritized variant–state–gene hypothesis: the candidate allele, target gene, cellular condition, predicted direction of the molecular effect and the evidence supporting the assignment. Perturbation, permeability or rescue experiments would be follow-up tests, not results to claim before they exist.
-
-Once the regulotype map has passed genetic validation, an expression-only model could be trained to predict its coordinates in new datasets. The appropriate claim would be that genetically defined response contexts have been distilled into an expression-based representation and that this representation recovers context-dependent genetic effects in independent genotyped data.
-
-In an ungenotyped atlas, the output is a predicted regulotype-like context—not a demonstrated eQTL.
-
-**Contribution if supported.** This creates a principled bridge from population-scale single-cell genetics to larger expression and spatial atlases, while preserving a clear boundary between predicting a cellular context and proving a genetic effect.
-
-### The paper-level contribution
-
-The strongest Nature Genetics story is one connected chain:
-
-1. define $R$ and estimate it with calibrated uncertainty;
-2. show transfer across independent genes and donors;
-3. demonstrate that the response map contains information beyond expression labels;
-4. project independent AD loci and identify shared BBB conditions;
-5. distinguish genetic susceptibility from disease-associated occupancy and remodeling; and
-6. locate the implicated conditions in tissue and nominate precise experiments.
-
-If the work stops after factor fitting, it is an extension of latent-context QTL methodology. If $R$ generalizes, it becomes a new cellular estimand. If AD loci converge on reproducible, spatially supported BBB conditions, it becomes the disease-genetics contribution envisioned in our project plan.
+This one rests on credible links to the disease association, because a state-dependent eQTL does not on its own show that the state mediates AD risk. What would settle it is independent genetic support and replication, followed ideally by an experiment confirming the predicted context dependence.
 
 ## Sources
 
