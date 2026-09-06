@@ -1,7 +1,7 @@
 ---
-title: 'Regulotypes: how the map is trained and tested'
+title: 'Regulotypes Note 2 Train & Test: how the map is trained and tested'
 subtitle: A regulotype map is estimated from a set of donors and cis variant–gene pairs. To test whether it represents reusable genetic-response structure, we need to know how to place a new cis effect and a new cell onto the same map.
-date: 2026-09-06
+date: 2026-09-05
 tags: regulotype
 keywords: regulotype, train-test design, held-out prediction, transfer across genes, transfer across donors, nested evaluation, cis-regulatory effects, cell-resolved cis effects, latent factor model, blood-brain barrier
 ---
@@ -51,7 +51,7 @@ keywords: regulotype, train-test design, held-out prediction, transfer across ge
 </svg>
 </div>
 
-In the [previous note](/notes/2026/09/04/regulotypes/), I defined the regulotype of a cell as its cis-effect profile across a reference set of variant–gene pairs.
+In the [previous note](/notes/2026/09/04/regulotypes-1-overview/), I defined the regulotype of a cell as its cis-effect profile across a reference set of variant–gene pairs.
 
 | symbol | meaning |
 | --- | --- |

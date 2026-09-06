@@ -1,5 +1,5 @@
 ---
-title: 'Regulotypes: does the same map come back?'
+title: 'Regulotypes Note 5 Validation: does the same map come back?'
 subtitle: In real data there is no true R to compare against. What can be checked is whether the same organization of cells reappears when the loci, the donors, or the dataset used to estimate the map are changed.
 date: 2026-09-06
 tags: regulotype
@@ -57,13 +57,13 @@ keywords: regulotype, reproducibility, donor bootstrap, regulotype distances, ne
 </svg>
 </div>
 
-The [previous note](/notes/2026/09/06/regulotypes-simulation/) asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.
+The [previous note](/notes/2026/09/06/regulotypes-4-simulation/) asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.
 
 In real data there is no $R^{\mathrm{true}}$. A useful substitute is reproducibility: if the cellular organization reflects recurrent cis-regulatory biology, it should not depend on one lucky set of loci or donors.
 
 Simulation lets us compare $\hat R$ with a known truth. Real data removes that reference.
 
-This is not a fourth level of evidence stacked on the [three](/notes/2026/09/06/regulotypes-checking-the-implementation/) the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the [train-test design](/notes/2026/09/06/regulotypes-train-test/) already needs.
+This is not a fourth level of evidence stacked on the [three](/notes/2026/09/05/regulotypes-3-validation/) the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the [train-test design](/notes/2026/09/05/regulotypes-2-train-test/) already needs.
 
 | symbol | meaning |
 | --- | --- |
@@ -1245,7 +1245,7 @@ Reproducibility makes the classification credible. It still does not prove that 
 - Strober *et al.* SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. *Genome Biol* **25**, 28 (2024). [doi:10.1186/s13059-023-03152-z](https://doi.org/10.1186/s13059-023-03152-z)
 - Denault *et al.* Covariate-moderated empirical Bayes matrix factorization. *NeurIPS* **38** (2025). [doi:10.52202/085713-1573](https://doi.org/10.52202/085713-1573)
 - Cuomo *et al.* CellRegMap: a statistical framework for mapping context-specific regulatory variants using scRNA-seq. *Mol Syst Biol* **18**, e10663 (2022). [doi:10.15252/msb.202110663](https://doi.org/10.15252/msb.202110663)
-- [Regulotypes: when do we recover the right map?](/notes/2026/09/06/regulotypes-simulation/) — the previous note, and the ground-truth comparison this one has to do without.
-- [Regulotypes: how the map is trained and tested](/notes/2026/09/06/regulotypes-train-test/) — where projecting a cell into an existing fit is defined, which is what the donor bootstrap reuses.
-- [Regulotypes: checking the implementation before checking the biology](/notes/2026/09/06/regulotypes-checking-the-implementation/) — the Level 0 evidence everything here assumes.
-- [Regulotypes: defining cells by genetic response](/notes/2026/09/04/regulotypes/) — where $R$, the reference variant–gene pairs and the low-rank model are defined.
+- [Regulotypes Note 4 Validation: when do we recover the right map?](/notes/2026/09/06/regulotypes-4-simulation/) — the previous note, and the ground-truth comparison this one has to do without.
+- [Regulotypes Note 2 Train & Test: how the map is trained and tested](/notes/2026/09/05/regulotypes-2-train-test/) — where projecting a cell into an existing fit is defined, which is what the donor bootstrap reuses.
+- [Regulotypes Note 3 Validation: checking the implementation before checking the biology](/notes/2026/09/05/regulotypes-3-validation/) — the Level 0 evidence everything here assumes.
+- [Regulotypes Note 1 Overview: defining cells by genetic response](/notes/2026/09/04/regulotypes-1-overview/) — where $R$, the reference variant–gene pairs and the low-rank model are defined.

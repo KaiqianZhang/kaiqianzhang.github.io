@@ -1,11 +1,90 @@
----
-title: 'Regulotypes: when do we recover the right map?'
-subtitle: Simulation is the only setting where the true cell-resolved cis-effect matrix is known. It lets us ask not whether the code is correct, but whether the estimated map is.
-date: 2026-09-06
-tags: regulotype
-keywords: regulotype, simulation study, null calibration, effect recovery, regulotype distances, nearest-neighbour recovery, estimability, rotation invariance, covariate-moderated priors, cell-resolved cis effects
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Regulotypes Note 4 Validation: when do we recover the right map? | Kaiqian Zhang</title>
+    <meta charset='UTF-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
+    <meta name='description' content='Simulation is the only setting where the true cell-resolved cis-effect matrix is known. It lets us ask not whether the code is correct, but whether the estimated map is.'>
+    <meta name='keywords' content='natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization'>
+    <meta name='author' content='Kaiqian Zhang'>
+
+    <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
+    <link href='/css/blog.css?v=374b2ece' rel='stylesheet'/>
+    <link href='/css/pygments.css?v=0bba0ab0' rel='stylesheet'/>
+
+    <script>
+    /* Runs before anything is painted: a reader who chose the dark page must
+       not be shown the white one first. Nothing here consults
+       prefers-color-scheme -- the site is light until somebody asks. */
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+    </script>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+    </script>
+    <script id='MathJax-script' async
+            src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+    </script>
+    <link href='/css/widgets.css?v=6f6366f4' rel='stylesheet'/>
+    <link href='/css/notes.css?v=6d6326f1' rel='stylesheet'/>
+    <script defer src='/js/widgets.js?v=882fce9f'></script>
+    <script defer src='/js/notes.js?v=1da50ef9'></script>
+</head>
+<body class='notes-site notes-note'>
+    <button class='theme-toggle' type='button' aria-pressed='false'
+            aria-label='Switch to dark mode' title='Switch to dark mode'>
+        <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
+            <circle cx='12' cy='12' r='4.6'/>
+            <path d='M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7'/>
+        </svg>
+        <svg class='icon moon' viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z'/>
+        </svg>
+    </button>
+    <div class='nav'>
+    <ul class='wrap'>
+        <li><a href='/'>Home</a></li>
+        <li><a href='/blog/'>Blog</a></li>
+        <li><a href='/notes/'>Research Notes</a></li>
+    </ul>
+</div>
+    <div class='wrap content'>
+        <div class='front-matter'>
+            <h1>Regulotypes Note 4 Validation: when do we recover the right map?</h1>
+            <h4>Simulation is the only setting where the true cell-resolved cis-effect matrix is known. It lets us ask not whether the code is correct, but whether the estimated map is.</h4>
+<div class='keywords'><span class='kw-label'>Keywords:</span><span class='kw-list'><span class='kw'>regulotype</span><span class='kw'>simulation study</span><span class='kw'>null calibration</span><span class='kw'>effect recovery</span><span class='kw'>regulotype distances</span><span class='kw'>nearest-neighbour recovery</span><span class='kw'>estimability</span><span class='kw'>rotation invariance</span><span class='kw'>covariate-moderated priors</span><span class='kw'>cell-resolved cis effects</span></span></div>
+            <div class='bylines'>
+                <div class='byline'>
+                    <h3>Published</h3>
+                    <p>06 September 2026</p>
+                </div>
+                <div class='byline'>
+                    <h3>Read time</h3>
+                    <p>20 min read</p>
+                </div>
+                <div class='byline'>
+                    <h3>Tags</h3>
+                    <p><a href='/notes/tags/regulotype/'>Regulotype</a></p>
+                </div>
+            </div>
+            <div class='clear'></div>
+        </div>
+        <div class='article'>
 <div class='nfig wide roadmap'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 412' role='img' aria-label='The eight sections of this note.'>
@@ -62,24 +141,17 @@ keywords: regulotype, simulation study, null calibration, effect recovery, regul
 </a>
 </svg>
 </div>
-
-Simulation gives us something real data never will: the true cell-resolved cis-effect matrix. This makes it the cleanest place to ask whether an estimated regulotype map is actually correct.
-
-The implementation checks in the [previous note](/notes/2026/09/06/regulotypes-checking-the-implementation/) ask whether the code performs the mathematics we intended. That is necessary, but a perfectly implemented method can still estimate the wrong object when the data are noisy or weakly informative.
-
-That note called those checks **Level 0**, and named two levels above them: simulation recovery, where ground truth exists by construction, and held-out generalization, where it does not. This note is **Level 1**, and the gap between the two is worth stating plainly, because they fail in different ways and are repaired by different things.
-
-* A **Level 0** failure is a bug. Something in the program is not the estimator we wrote down, and the repair is in the code.
-* A **Level 1** failure need not be a bug at all. The estimator can be exactly right and still land far from the truth because the data do not contain enough information to locate it. The repair is then more donors, more reference pairs, a stronger signal &#8212; or a narrower claim.
-
-The two are easy to confuse in one direction in particular: a Level 0 defect can produce attractive simulation results, and a correct implementation can produce disappointing ones. Only Level 0 evidence separates them, which is why it comes first.
-
-Level 2 &#8212; everything in the [train and test note](/notes/2026/09/06/regulotypes-train-test/), projecting a new cis pair onto the map, locating a cell from a held-out donor, predicting in the corner where both are new &#8212; is *indirect*, because $R^{\mathrm{true}}$ is never observed in real data. Held-out prediction can say that the map is useful. It cannot say that the map is right.
-
-Simulation lets us move to the next question.
-
-For reference pair $s$ and cell $i$,
-
+<p>Simulation gives us something real data never will: the true cell-resolved cis-effect matrix. This makes it the cleanest place to ask whether an estimated regulotype map is actually correct.</p>
+<p>The implementation checks in the <a href='/notes/2026/09/05/regulotypes-3-validation/'>previous note</a> ask whether the code performs the mathematics we intended. That is necessary, but a perfectly implemented method can still estimate the wrong object when the data are noisy or weakly informative.</p>
+<p>That note called those checks <strong>Level 0</strong>, and named two levels above them: simulation recovery, where ground truth exists by construction, and held-out generalization, where it does not. This note is <strong>Level 1</strong>, and the gap between the two is worth stating plainly, because they fail in different ways and are repaired by different things.</p>
+<ul>
+  <li>A <strong>Level 0</strong> failure is a bug. Something in the program is not the estimator we wrote down, and the repair is in the code.</li>
+  <li>A <strong>Level 1</strong> failure need not be a bug at all. The estimator can be exactly right and still land far from the truth because the data do not contain enough information to locate it. The repair is then more donors, more reference pairs, a stronger signal &#8212; or a narrower claim.</li>
+</ul>
+<p>The two are easy to confuse in one direction in particular: a Level 0 defect can produce attractive simulation results, and a correct implementation can produce disappointing ones. Only Level 0 evidence separates them, which is why it comes first.</p>
+<p>Level 2 &#8212; everything in the <a href='/notes/2026/09/05/regulotypes-2-train-test/'>train and test note</a>, projecting a new cis pair onto the map, locating a cell from a held-out donor, predicting in the corner where both are new &#8212; is <em>indirect</em>, because $R^{\mathrm{true}}$ is never observed in real data. Held-out prediction can say that the map is useful. It cannot say that the map is right.</p>
+<p>Simulation lets us move to the next question.</p>
+<p>For reference pair $s$ and cell $i$,</p>
 $$
 r_{si}^{\mathrm{true}}
 =
@@ -88,9 +160,7 @@ r_{si}^{\mathrm{true}}
 (u_i^{\mathrm{true}})^{\mathsf T}
 \lambda_s^{\mathrm{true}},
 $$
-
-so the generator gives us
-
+<p>so the generator gives us</p>
 $$
 R^{\mathrm{true}}
 =
@@ -99,71 +169,54 @@ R^{\mathrm{true}}
 \Lambda^{\mathrm{true}}
 (U^{\mathrm{true}})^{\mathsf T}.
 $$
-
-After fitting the model, we get $\hat R$. The central simulation question is therefore simple:
-
+<p>After fitting the model, we get $\hat R$. The central simulation question is therefore simple:</p>
 $$
 \boxed{\hat R \stackrel{?}{\approx} R^{\mathrm{true}}.}
 $$
-
-The interesting part is deciding what &#8220;approximately&#8221; should mean.
-
-| symbol | meaning |
-| --- | --- |
-| $R^{\mathrm{true}}$, $\hat R$ | the $S\times I$ cell-resolved effect matrix, as generated and as estimated |
-| $\beta^{\mathrm{true}}$, $\Lambda^{\mathrm{true}}$, $U^{\mathrm{true}}$ | the generating average effects, loadings and cellular coordinates |
-| $K$ | the true rank; $K=0$ is the null |
-| $w_i$ | the genotype-independent expression state of cell $i$ |
-| $\xi^{(u)}_{ik}$, $\xi^{(\lambda)}_{sk}$ | whether cell $i$ and pair $s$ participate in factor $k$ |
-| $d_R(i,i')$ | the regulotype distance between two cells under a matrix $R$ |
-
-One caveat sits underneath all of it. A simulation drawn from the model's own assumptions can only establish that the estimator is self-consistent; it says nothing about what happens when those assumptions are wrong. So the regimes below should not all be well-specified ones. Heavier-tailed noise than the model assumes, a truth that is dense where the prior expects sparsity, cellular structure that enters expression without entering the cis effects &#8212; each of these belongs in the same harness, run with the same metrics, precisely because the model does not cover them.
-
-## Start with the null
-
-The first simulation should contain no cellular heterogeneity in cis effects.
-
-Set
-
+<p>The interesting part is deciding what &#8220;approximately&#8221; should mean.</p>
+<table>
+<thead><tr><th>symbol</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td>$R^{\mathrm{true}}$, $\hat R$</td><td>the $S\times I$ cell-resolved effect matrix, as generated and as estimated</td></tr>
+<tr><td>$\beta^{\mathrm{true}}$, $\Lambda^{\mathrm{true}}$, $U^{\mathrm{true}}$</td><td>the generating average effects, loadings and cellular coordinates</td></tr>
+<tr><td>$K$</td><td>the true rank; $K=0$ is the null</td></tr>
+<tr><td>$w_i$</td><td>the genotype-independent expression state of cell $i$</td></tr>
+<tr><td>$\xi^{(u)}_{ik}$, $\xi^{(\lambda)}_{sk}$</td><td>whether cell $i$ and pair $s$ participate in factor $k$</td></tr>
+<tr><td>$d_R(i,i')$</td><td>the regulotype distance between two cells under a matrix $R$</td></tr>
+</tbody>
+</table>
+<p>One caveat sits underneath all of it. A simulation drawn from the model's own assumptions can only establish that the estimator is self-consistent; it says nothing about what happens when those assumptions are wrong. So the regimes below should not all be well-specified ones. Heavier-tailed noise than the model assumes, a truth that is dense where the prior expects sparsity, cellular structure that enters expression without entering the cis effects &#8212; each of these belongs in the same harness, run with the same metrics, precisely because the model does not cover them.</p>
+<h2 id='start-with-the-null'>Start with the null</h2>
+<p>The first simulation should contain no cellular heterogeneity in cis effects.</p>
+<p>Set</p>
 $$
 \lambda_{sk}^{\mathrm{true}}=0
 $$
-
-for every pair $s$ and factor $k$. Then
-
+<p>for every pair $s$ and factor $k$. Then</p>
 $$
 r_{si}^{\mathrm{true}}=\beta_s^{\mathrm{true}}
 $$
-
-for every cell. The rows of $R^{\mathrm{true}}$ may have different average effects, but within a row every cell has the same effect.
-
-This is a deliberately generous null. The data still contain everything except the thing being tested: donors still differ genetically, genes still differ in average effect, cells still differ in expression, and the residual and donor variances are still there to be soaked up. Only the interaction is absent. If a cellular map appears anyway, it did not come from the phenomenon we are claiming to measure.
-
-A flexible latent model should not turn this into a structured cellular map.
-
-I would inspect three quantities:
-
-* the estimated cell-specific deviations
-  $$
+<p>for every cell. The rows of $R^{\mathrm{true}}$ may have different average effects, but within a row every cell has the same effect.</p>
+<p>This is a deliberately generous null. The data still contain everything except the thing being tested: donors still differ genetically, genes still differ in average effect, cells still differ in expression, and the residual and donor variances are still there to be soaked up. Only the interaction is absent. If a cellular map appears anyway, it did not come from the phenomenon we are claiming to measure.</p>
+<p>A flexible latent model should not turn this into a structured cellular map.</p>
+<p>I would inspect three quantities:</p>
+<ul>
+  <li>the estimated cell-specific deviations $$
   \hat r_{si}-\hat\beta_s;
-  $$
-* the fitted regulotype distances
-  $$
+  $$</li>
+  <li>the fitted regulotype distances $$
   d_{\hat R}(i,i');
-  $$
-* the improvement of $K>0$ over the matched $K=0$ model.
-
-The three are not redundant. The first can be small on average while a handful of pairs carry large spurious deviations. The second is what any downstream clustering or reclassification would actually see. The third is the only one that asks whether the extra factor *bought* anything, and it should be judged out of sample: an added factor almost always improves in-sample fit, so an in-sample comparison is not a null test at all.
-
-Under the null, all three should remain small. This is a calibration question, not a power question: when there is no response-defined cellular structure, the method should not manufacture one.
-
-Two things make this harder than it sounds, and both are unsettled rather than solved.
-
-* **Whatever decides to keep a factor is the null test.** Sequential factor addition stops on a rule, and any such rule carries a constant &#8212; a threshold on the gain in the objective, a held-out criterion, or both. Under the null that constant is the only thing standing between noise and a published map, so it has to be chosen before the null is run, not tuned until the null looks clean.
-* **Over-selecting rank and retaining a false factor are different failures.** A run can choose too many factors while none of them is spurious in the sense that matters, and a run can retain a single factor that is entirely noise. They need not respond the same way to a threshold, or to sample size. Reporting them as one number hides which one is happening.
-
-For that reason the null has to be run at more than one $(D,S)$, and the retention rate reported as a function of dimension. A false-positive rate that is acceptable at one size and does not fall as the data grow is a different, and worse, finding than a rate that simply starts too high.
-
+  $$</li>
+  <li>the improvement of $K>0$ over the matched $K=0$ model.</li>
+</ul>
+<p>The three are not redundant. The first can be small on average while a handful of pairs carry large spurious deviations. The second is what any downstream clustering or reclassification would actually see. The third is the only one that asks whether the extra factor <em>bought</em> anything, and it should be judged out of sample: an added factor almost always improves in-sample fit, so an in-sample comparison is not a null test at all.</p>
+<p>Under the null, all three should remain small. This is a calibration question, not a power question: when there is no response-defined cellular structure, the method should not manufacture one.</p>
+<p>Two things make this harder than it sounds, and both are unsettled rather than solved.</p>
+<ul>
+  <li><strong>Whatever decides to keep a factor is the null test.</strong> Sequential factor addition stops on a rule, and any such rule carries a constant &#8212; a threshold on the gain in the objective, a held-out criterion, or both. Under the null that constant is the only thing standing between noise and a published map, so it has to be chosen before the null is run, not tuned until the null looks clean.</li>
+  <li><strong>Over-selecting rank and retaining a false factor are different failures.</strong> A run can choose too many factors while none of them is spurious in the sense that matters, and a run can retain a single factor that is entirely noise. They need not respond the same way to a threshold, or to sample size. Reporting them as one number hides which one is happening.</li>
+</ul>
+<p>For that reason the null has to be run at more than one $(D,S)$, and the retention rate reported as a function of dimension. A false-positive rate that is acceptable at one size and does not fall as the data grow is a different, and worse, finding than a rate that simply starts too high.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 348' role='img' aria-label='Two histograms, each comparing a null simulation against a low-rank signal simulation of the same size.'>
@@ -229,25 +282,17 @@ For that reason the null has to be run at more than one $(D,S)$, and the retenti
 </svg>
 <div class='caption'><span class='caption-label'>Figure 1.</span> Under the null every cell in a row carries the same effect, so both quantities should pile up against zero &#8212; the sage distribution &#8212; while the same experiment run with a genuine rank&#8209;two signal spreads out. The failure to look for is a sage distribution that has drifted rightwards: cellular structure the model has invented rather than found. Schematic shapes, drawn to show what is being compared; they are not measured distributions.</div>
 </div>
-
-## Recover the cell-resolved effects
-
-Under a signal simulation, the most direct target is the matrix itself.
-
-For every pair-cell combination, compare
-
+<h2 id='recover-the-cell-resolved-effects'>Recover the cell-resolved effects</h2>
+<p>Under a signal simulation, the most direct target is the matrix itself.</p>
+<p>For every pair-cell combination, compare</p>
 $$
 \hat r_{si}
 $$
-
-with
-
+<p>with</p>
 $$
 r_{si}^{\mathrm{true}}.
 $$
-
-A simple global error is
-
+<p>A simple global error is</p>
 $$
 \sqrt{
 \frac{1}{SI}
@@ -255,11 +300,8 @@ $$
 (\hat r_{si}-r_{si}^{\mathrm{true}})^2
 }.
 $$
-
-Because genes can have different phenotype scales, I would also report the standardized error used by the regulotype distance, or an NRMSE that makes simulation settings comparable. Without normalisation, an error of a given size means something different in a gene with a large dynamic range than in a quiet one, and a grid of simulation settings cannot be read down a column.
-
-There is a trap in this metric that is worth naming, because it points the wrong way rather than merely being imprecise. The matrix has two parts,
-
+<p>Because genes can have different phenotype scales, I would also report the standardized error used by the regulotype distance, or an NRMSE that makes simulation settings comparable. Without normalisation, an error of a given size means something different in a gene with a large dynamic range than in a quiet one, and a grid of simulation settings cannot be read down a column.</p>
+<p>There is a trap in this metric that is worth naming, because it points the wrong way rather than merely being imprecise. The matrix has two parts,</p>
 $$
 R
 =
@@ -267,35 +309,23 @@ R
 +
 \underbrace{\Lambda U^{\mathsf T}}_{\text{contextual}},
 $$
-
-and in most realistic settings the first dominates the second in magnitude. Every comparator recovers the first, including the $K=0$ average-effect model that has no cellular map at all. So an error computed over the whole of $R$ is largely an error in $\beta$, and a fit that recovers *nothing* contextual can score better than one that recovers a real fraction of it, simply by estimating the average effects a little more stably.
-
-The remedy is cheap: report the error in
-
+<p>and in most realistic settings the first dominates the second in magnitude. Every comparator recovers the first, including the $K=0$ average-effect model that has no cellular map at all. So an error computed over the whole of $R$ is largely an error in $\beta$, and a fit that recovers <em>nothing</em> contextual can score better than one that recovers a real fraction of it, simply by estimating the average effects a little more stably.</p>
+<p>The remedy is cheap: report the error in</p>
 $$
 R-\beta\mathbf 1^{\mathsf T}
 $$
-
-beside the error in $R$, always, and treat any disagreement in their ordering as the finding rather than as noise. The contextual part is the entire claim of the method; it should be scored on its own.
-
-A scatterplot of
-
+<p>beside the error in $R$, always, and treat any disagreement in their ordering as the finding rather than as noise. The contextual part is the entire claim of the method; it should be scored on its own.</p>
+<p>A scatterplot of</p>
 $$
 r_{si}^{\mathrm{true}}
 \quad\text{versus}\quad
 \hat r_{si}
 $$
-
-is useful, but it should not be the only result. A large matrix can have good global correlation while still placing some cells in the wrong neighborhoods.
-
-This leads to the more important map-level check.
-
-## Recover the geometry of the cells
-
-The regulotype of cell $i$ is the column $R_{:i}$. If the goal is to organize cells by genetic response, then the relationships between columns matter directly.
-
-For two cells $i$ and $i'$, our default distance is
-
+<p>is useful, but it should not be the only result. A large matrix can have good global correlation while still placing some cells in the wrong neighborhoods.</p>
+<p>This leads to the more important map-level check.</p>
+<h2 id='recover-the-geometry-of-the-cells'>Recover the geometry of the cells</h2>
+<p>The regulotype of cell $i$ is the column $R_{:i}$. If the goal is to organize cells by genetic response, then the relationships between columns matter directly.</p>
+<p>For two cells $i$ and $i'$, our default distance is</p>
 $$
 d_R(i,i')
 =
@@ -307,37 +337,26 @@ E[r_{si}]-E[r_{si'}]
 }{s_g}
 \right)^2,
 $$
-
-where $s_g$ is the scale of the molecular phenotype for gene $g$.
-
-Note what this is not. It is not Euclidean distance between raw columns of $R$: each pair is divided by a per-gene scale before the difference is squared, and the sum is averaged over pairs rather than accumulated, so reference sets of different sizes remain comparable. It is also a quantity on posterior means, so a cell whose coordinate is poorly determined does not automatically appear far from everything.
-
-What $s_g$ binds to is a live question rather than a detail. If it is a fixed property of the gene, distances computed in two different training partitions are on the same scale and can be compared directly. If it is fitted inside each partition, they are not, and a stability analysis that compares maps across partitions is then partly measuring the scaling rather than the map. That is a decision to make explicitly before any distance is computed, not one to discover afterwards.
-
-In simulation we can compute both
-
+<p>where $s_g$ is the scale of the molecular phenotype for gene $g$.</p>
+<p>Note what this is not. It is not Euclidean distance between raw columns of $R$: each pair is divided by a per-gene scale before the difference is squared, and the sum is averaged over pairs rather than accumulated, so reference sets of different sizes remain comparable. It is also a quantity on posterior means, so a cell whose coordinate is poorly determined does not automatically appear far from everything.</p>
+<p>What $s_g$ binds to is a live question rather than a detail. If it is a fixed property of the gene, distances computed in two different training partitions are on the same scale and can be compared directly. If it is fitted inside each partition, they are not, and a stability analysis that compares maps across partitions is then partly measuring the scaling rather than the map. That is a decision to make explicitly before any distance is computed, not one to discover afterwards.</p>
+<p>In simulation we can compute both</p>
 $$
 d_{R^{\mathrm{true}}}(i,i')
 $$
-
-and
-
+<p>and</p>
 $$
 d_{\hat R}(i,i').
 $$
-
-I would compare them in three ways:
-
-* correlation between true and estimated pairwise distances;
-* error in the distance matrix;
-* preservation of local neighborhoods, for example the fraction of true nearest regulotype neighbors recovered by $\hat R$.
-
-They tighten in that order. A rank correlation over all pairs is dominated by the easy comparisons &#8212; cells at opposite ends of the map &#8212; and stays high even when the fine structure is wrong. An error in the distance matrix is stricter but still global. Neighbourhood recovery is local and unforgiving, and it is the only one of the three that degrades when a small number of cells are badly misplaced.
-
-Distances have one more property that the raw factors do not: they are invariant to how the factorisation happens to be oriented. That is what makes them a legitimate target, and it is the subject of the next section.
-
-The third metric is especially intuitive if the eventual use of $R$ is cellular reclassification. It asks whether cells that truly have similar genetic responses remain neighbors after estimation.
-
+<p>I would compare them in three ways:</p>
+<ul>
+  <li>correlation between true and estimated pairwise distances;</li>
+  <li>error in the distance matrix;</li>
+  <li>preservation of local neighborhoods, for example the fraction of true nearest regulotype neighbors recovered by $\hat R$.</li>
+</ul>
+<p>They tighten in that order. A rank correlation over all pairs is dominated by the easy comparisons &#8212; cells at opposite ends of the map &#8212; and stays high even when the fine structure is wrong. An error in the distance matrix is stricter but still global. Neighbourhood recovery is local and unforgiving, and it is the only one of the three that degrades when a small number of cells are badly misplaced.</p>
+<p>Distances have one more property that the raw factors do not: they are invariant to how the factorisation happens to be oriented. That is what makes them a legitimate target, and it is the subject of the next section.</p>
+<p>The third metric is especially intuitive if the eventual use of $R$ is cellular reclassification. It asks whether cells that truly have similar genetic responses remain neighbors after estimation.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 530' role='img' aria-label='Two scatterplots comparing estimated with true effects and distances, and two small maps of the same cells placed by true and by estimated distances.'>
@@ -460,93 +479,64 @@ The third metric is especially intuitive if the eventual use of $R$ is cellular 
 </svg>
 <div class='caption'><span class='caption-label'>Figure 2.</span> Panel A compares the estimated cell&#8209;resolved effect with the truth entry by entry; panel B does the same for distances between cells, which is a different question about the same fit. Panel C is the one that decides whether the map is usable: the teal cells stay together under both geometries, and the rose cell does not &#8212; a neighbourhood failure that either scatterplot can absorb without looking wrong. Illustrative points, not a fitted example.</div>
 </div>
-
-## Do not make U the primary target
-
-The generator also gives us $U^{\mathrm{true}}$ and $\Lambda^{\mathrm{true}}$, so it is tempting to compare them directly with $\hat U$ and $\hat\Lambda$.
-
-This is useful for debugging, but it is not the main scientific recovery metric.
-
-The factorization is not unique. Rotations, sign changes and rescalings can change $U$ and $\Lambda$ while preserving
-
+<h2 id='do-not-make-u-the-primary-target'>Do not make U the primary target</h2>
+<p>The generator also gives us $U^{\mathrm{true}}$ and $\Lambda^{\mathrm{true}}$, so it is tempting to compare them directly with $\hat U$ and $\hat\Lambda$.</p>
+<p>This is useful for debugging, but it is not the main scientific recovery metric.</p>
+<p>The factorization is not unique. Rotations, sign changes and rescalings can change $U$ and $\Lambda$ while preserving</p>
 $$
 R=\beta\mathbf 1^{\mathsf T}+\Lambda U^{\mathsf T}.
 $$
-
-Concretely, for any invertible $K\times K$ matrix $A$,
-
+<p>Concretely, for any invertible $K\times K$ matrix $A$,</p>
 $$
 \Lambda U^{\mathsf T}
 =
 (\Lambda A)(UA^{-\mathsf T})^{\mathsf T},
 $$
-
-so $(\Lambda A, UA^{-\mathsf T})$ is exactly as good a fit as $(\Lambda, U)$ and no data can prefer between them. An error computed factor by factor is therefore not even well defined until a matching rule is imposed &#8212; and the matching rule then does part of the scoring. A generous rule can hide a genuine failure by rotating into it; a strict one can report a failure where the fit is perfect.
-
-The simulation code can match generating and estimated factors by their rank-one cis-effect components when we want to inspect factor-level recovery. But the invariant targets remain $R$, regulotype distances and later predictions.
-
-The same argument is why a factor gets a biological name only when something withheld from the fit lines up with it. Rotation invariance is not a technicality about the optimiser; it is a statement that individual factors carry no meaning the data can defend.
-
-## When should recovery become possible?
-
-A useful simulation does more than show one successful example. It tells us where the method works and where it should not be trusted.
-
-The generator lets us vary:
-
-* donor number $D$;
-* number of reference pairs $S$;
-* true rank $K$;
-* magnitude of cellular effect variation;
-* factor sparsity;
-* donor variance and residual variance;
-* informativeness of cell and pair features.
-
-I would treat $D$ and $S$ as the main axes first. Cells provide measurements at different cellular conditions, but the independent genetic samples are donors. Increasing $S$ supplies more independent cis regions from which the shared cellular structure can be learned.
-
-The two axes buy different things, which is why neither substitutes for the other:
-
-* **Donors** buy independent draws of genotype. Every donor contributes many cells, but those cells share one genome, so they do not multiply the genetic information &#8212; they refine where a donor's cells sit on the map. This is also why every split, every resample and every uncertainty calculation keeps a donor's measurements together.
-* **Reference pairs** buy independent views of the same cellular coordinate. Each pair has its own $\beta_s$ and $\lambda_s$, but $u_i$ is shared, so $S$ is what makes the shared structure estimable at all. A one-pair study has no regulotype in any useful sense.
-* **Cells** buy resolution. More metacells per donor make the coordinates finer, not the genetics stronger.
-
-A compact experiment is therefore a grid over
-
+<p>so $(\Lambda A, UA^{-\mathsf T})$ is exactly as good a fit as $(\Lambda, U)$ and no data can prefer between them. An error computed factor by factor is therefore not even well defined until a matching rule is imposed &#8212; and the matching rule then does part of the scoring. A generous rule can hide a genuine failure by rotating into it; a strict one can report a failure where the fit is perfect.</p>
+<p>The simulation code can match generating and estimated factors by their rank-one cis-effect components when we want to inspect factor-level recovery. But the invariant targets remain $R$, regulotype distances and later predictions.</p>
+<p>The same argument is why a factor gets a biological name only when something withheld from the fit lines up with it. Rotation invariance is not a technicality about the optimiser; it is a statement that individual factors carry no meaning the data can defend.</p>
+<h2 id='when-should-recovery-become-possible'>When should recovery become possible?</h2>
+<p>A useful simulation does more than show one successful example. It tells us where the method works and where it should not be trusted.</p>
+<p>The generator lets us vary:</p>
+<ul>
+  <li>donor number $D$;</li>
+  <li>number of reference pairs $S$;</li>
+  <li>true rank $K$;</li>
+  <li>magnitude of cellular effect variation;</li>
+  <li>factor sparsity;</li>
+  <li>donor variance and residual variance;</li>
+  <li>informativeness of cell and pair features.</li>
+</ul>
+<p>I would treat $D$ and $S$ as the main axes first. Cells provide measurements at different cellular conditions, but the independent genetic samples are donors. Increasing $S$ supplies more independent cis regions from which the shared cellular structure can be learned.</p>
+<p>The two axes buy different things, which is why neither substitutes for the other:</p>
+<ul>
+  <li><strong>Donors</strong> buy independent draws of genotype. Every donor contributes many cells, but those cells share one genome, so they do not multiply the genetic information &#8212; they refine where a donor's cells sit on the map. This is also why every split, every resample and every uncertainty calculation keeps a donor's measurements together.</li>
+  <li><strong>Reference pairs</strong> buy independent views of the same cellular coordinate. Each pair has its own $\beta_s$ and $\lambda_s$, but $u_i$ is shared, so $S$ is what makes the shared structure estimable at all. A one-pair study has no regulotype in any useful sense.</li>
+  <li><strong>Cells</strong> buy resolution. More metacells per donor make the coordinates finer, not the genetics stronger.</li>
+</ul>
+<p>A compact experiment is therefore a grid over</p>
 $$
 (D,S)
 $$
-
-and a heatmap of distance recovery or $R$-error.
-
-Then repeat a smaller set of configurations while varying effect size and sparsity.
-
-Two design points make this grid honest rather than decorative. It should be specified &#8212; axes, level sets, seeds, metrics &#8212; before it is run, so that the reported surface is a measurement rather than a search. And a single design point that fails to converge should not be allowed to take a whole grid with it: the failures are themselves part of the surface, and a harness that aborts on them silently reports the easy region.
-
-This answers a practical question that the fitted map alone cannot:
-
-How much genetic information do we need before the cellular reclassification becomes reliable?
-
-## Does expression have to agree with the regulotype?
-
-The simulator separately generates a genotype-independent expression state $w_i$ and a genetic-response coordinate $u_i$. Their relationship can be controlled.
-
-This gives two useful regimes.
-
-When $w_i$ and $u_i$ are strongly aligned, expression-defined and regulotype-defined cellular structure should largely agree.
-
-When they are weakly related or independent, an expression representation should become a poor proxy for genetic-response structure, while the regulotype model should still recover $R^{\mathrm{true}}$ if enough genetic information is available.
-
-The comparator in both regimes is the model handed supplied expression coordinates &#8212; expression principal components or a similar low-dimensional summary, in the style of the [context-kernel methods surveyed in the first note](/notes/2026/09/04/regulotypes/). Under strong alignment that comparator has been given the answer, and it should win or tie; a method that could not be beaten in the regime where the competing representation is correct would be telling us something is wrong with the harness, not with the competitor.
-
-Three things have to be controlled for the axis to mean anything.
-
-* **The correlation must be imposed on the realised coordinate.** If it is imposed on a latent variable that is afterwards thresholded to induce sparsity, the correlation that survives into $u_i$ is attenuated, and the strongly-aligned end of the axis is never actually reached. The arm that is supposed to be hardest for the method silently becomes an easy one.
-* **Rank has to be held fixed, and stated.** A scalar expression state cannot reach more than one factor, so at higher $K$ the supplied-coordinate comparator is capped by construction rather than by any property of the data. Running the alignment axis at $K=1$ is the only setting in which the comparison is unconditionally fair.
-* **Alignment is a property of the truth, not of the fit.** It should be reported as the realised correlation in each simulated dataset, not as the nominal value requested from the generator.
-
-This is one of the most important conceptual simulations. The goal is not to show that expression is uninformative. It is to show that expression similarity and genetic-response similarity are different estimands, and to identify when the distinction matters.
-
-A claim demonstrated in one direction only is weaker than it looks. The result worth reporting is a crossing: the method ahead where the two structures differ, and behind where they coincide.
-
+<p>and a heatmap of distance recovery or $R$-error.</p>
+<p>Then repeat a smaller set of configurations while varying effect size and sparsity.</p>
+<p>Two design points make this grid honest rather than decorative. It should be specified &#8212; axes, level sets, seeds, metrics &#8212; before it is run, so that the reported surface is a measurement rather than a search. And a single design point that fails to converge should not be allowed to take a whole grid with it: the failures are themselves part of the surface, and a harness that aborts on them silently reports the easy region.</p>
+<p>This answers a practical question that the fitted map alone cannot:</p>
+<p>How much genetic information do we need before the cellular reclassification becomes reliable?</p>
+<h2 id='does-expression-have-to-agree-with-the-regulotype'>Does expression have to agree with the regulotype?</h2>
+<p>The simulator separately generates a genotype-independent expression state $w_i$ and a genetic-response coordinate $u_i$. Their relationship can be controlled.</p>
+<p>This gives two useful regimes.</p>
+<p>When $w_i$ and $u_i$ are strongly aligned, expression-defined and regulotype-defined cellular structure should largely agree.</p>
+<p>When they are weakly related or independent, an expression representation should become a poor proxy for genetic-response structure, while the regulotype model should still recover $R^{\mathrm{true}}$ if enough genetic information is available.</p>
+<p>The comparator in both regimes is the model handed supplied expression coordinates &#8212; expression principal components or a similar low-dimensional summary, in the style of the <a href='/notes/2026/09/04/regulotypes-1-overview/'>context-kernel methods surveyed in the first note</a>. Under strong alignment that comparator has been given the answer, and it should win or tie; a method that could not be beaten in the regime where the competing representation is correct would be telling us something is wrong with the harness, not with the competitor.</p>
+<p>Three things have to be controlled for the axis to mean anything.</p>
+<ul>
+  <li><strong>The correlation must be imposed on the realised coordinate.</strong> If it is imposed on a latent variable that is afterwards thresholded to induce sparsity, the correlation that survives into $u_i$ is attenuated, and the strongly-aligned end of the axis is never actually reached. The arm that is supposed to be hardest for the method silently becomes an easy one.</li>
+  <li><strong>Rank has to be held fixed, and stated.</strong> A scalar expression state cannot reach more than one factor, so at higher $K$ the supplied-coordinate comparator is capped by construction rather than by any property of the data. Running the alignment axis at $K=1$ is the only setting in which the comparison is unconditionally fair.</li>
+  <li><strong>Alignment is a property of the truth, not of the fit.</strong> It should be reported as the realised correlation in each simulated dataset, not as the nominal value requested from the generator.</li>
+</ul>
+<p>This is one of the most important conceptual simulations. The goal is not to show that expression is uninformative. It is to show that expression similarity and genetic-response similarity are different estimands, and to identify when the distinction matters.</p>
+<p>A claim demonstrated in one direction only is weaker than it looks. The result worth reporting is a crossing: the method ahead where the two structures differ, and behind where they coincide.</p>
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
 <svg viewBox='0 0 720 516' role='img' aria-label='Cells shaded by expression state and by response coordinate under two regimes, with schematic recovery bars beneath each.'>
@@ -682,65 +672,160 @@ A claim demonstrated in one direction only is weaker than it looks. The result w
 </svg>
 <div class='caption'><span class='caption-label'>Figure 3.</span> The same cells appear four times. On the left the expression state and the response coordinate vary together, so the two shadings agree and a model handed expression coordinates has everything it needs. On the right they are independent: the shadings disagree, and only the model that learns its coordinates from recurrent genetic effects should still recover the truth. The correlation has to be imposed on the realised coordinate rather than on a latent variable that is later thresholded, or the aligned arm is never actually reached. Illustrative, not measured.</div>
 </div>
-
-## What do the empirical-Bayes features contribute?
-
-For sparse simulations, the generator also knows the true participation variables
-
+<h2 id='what-do-the-empirical-bayes-features-contribute'>What do the empirical-Bayes features contribute?</h2>
+<p>For sparse simulations, the generator also knows the true participation variables</p>
 $$
 \xi^{(u)}_{ik}
 \quad\text{and}\quad
 \xi^{(\lambda)}_{sk}.
 $$
-
-This lets us test the part of the method that is new beyond the Gaussian-prior fit.
-
-Use three feature settings:
-
-* **informative**: features predict factor participation;
-* **uninformative**: features are unrelated to participation;
-* **permuted**: the marginal feature distribution is preserved but its relationship to participation is destroyed.
-
-The last two are not the same test, and running only one of them leaves a gap. Uninformative features ask whether the prior is harmless when there is nothing to learn. Permuted features hold the feature distribution fixed &#8212; the same means, variances and correlations, the same number of columns, the same conditioning of the design &#8212; and destroy only the link to participation. A gain that survives permutation is not a gain from information; it is a gain from the extra flexibility of having any features at all.
-
-Then compare the feature-moderated prior with an intercept-only prior and the Gaussian-prior baseline.
-
-The informative prior should improve recovery when the simulated annotations truly carry information. The uninformative and permuted priors should not create a similar gain.
-
-For sparse factors, I would additionally evaluate recovery of the participation indicators using posterior inclusion probabilities.
-
-Both halves of this deserve a warning about what a negative result would mean. The mixing probability is a logistic function of the features, so its coefficients are estimated from the cells and pairs available &#8212; and there is a size below which an informative arm and a permuted arm are simply not distinguishable, however informative the features are. A null result at small $S$ or small $I$ is a statement about estimability, not about the prior, and it should be reported as an estimability boundary with the sample size attached. The interesting question is where that boundary sits relative to the studies we intend to run.
-
-This is not only a prediction benchmark. It checks whether the prior learns the relationship it was designed to learn.
-
-## Summary
-
-Simulation gives a direct definition of a correct regulotype map.
-
-I would call the simulation evidence convincing if the method:
-
-* does not invent cellular effect heterogeneity under the null;
-* accurately recovers the cell-resolved effects in $R$;
-* preserves the true regulotype distances and local neighborhoods;
-* improves as donor number, reference-pair number and signal strength increase;
-* still recovers genetic-response structure when it differs from ordinary expression structure;
-* and uses informative features without benefiting similarly from uninformative or permuted features.
-
-Two conditions sit alongside those six, and are easy to lose. Each claim is reported on the contextual part of the matrix as well as on the whole of it, and each is preregistered &#8212; metric, direction and grid fixed before the runs &#8212; because a simulation harness that can be adjusted after seeing its output is a search, not a test.
-
-These analyses answer:
-
+<p>This lets us test the part of the method that is new beyond the Gaussian-prior fit.</p>
+<p>Use three feature settings:</p>
+<ul>
+  <li><strong>informative</strong>: features predict factor participation;</li>
+  <li><strong>uninformative</strong>: features are unrelated to participation;</li>
+  <li><strong>permuted</strong>: the marginal feature distribution is preserved but its relationship to participation is destroyed.</li>
+</ul>
+<p>The last two are not the same test, and running only one of them leaves a gap. Uninformative features ask whether the prior is harmless when there is nothing to learn. Permuted features hold the feature distribution fixed &#8212; the same means, variances and correlations, the same number of columns, the same conditioning of the design &#8212; and destroy only the link to participation. A gain that survives permutation is not a gain from information; it is a gain from the extra flexibility of having any features at all.</p>
+<p>Then compare the feature-moderated prior with an intercept-only prior and the Gaussian-prior baseline.</p>
+<p>The informative prior should improve recovery when the simulated annotations truly carry information. The uninformative and permuted priors should not create a similar gain.</p>
+<p>For sparse factors, I would additionally evaluate recovery of the participation indicators using posterior inclusion probabilities.</p>
+<p>Both halves of this deserve a warning about what a negative result would mean. The mixing probability is a logistic function of the features, so its coefficients are estimated from the cells and pairs available &#8212; and there is a size below which an informative arm and a permuted arm are simply not distinguishable, however informative the features are. A null result at small $S$ or small $I$ is a statement about estimability, not about the prior, and it should be reported as an estimability boundary with the sample size attached. The interesting question is where that boundary sits relative to the studies we intend to run.</p>
+<p>This is not only a prediction benchmark. It checks whether the prior learns the relationship it was designed to learn.</p>
+<h2 id='summary'>Summary</h2>
+<p>Simulation gives a direct definition of a correct regulotype map.</p>
+<p>I would call the simulation evidence convincing if the method:</p>
+<ul>
+  <li>does not invent cellular effect heterogeneity under the null;</li>
+  <li>accurately recovers the cell-resolved effects in $R$;</li>
+  <li>preserves the true regulotype distances and local neighborhoods;</li>
+  <li>improves as donor number, reference-pair number and signal strength increase;</li>
+  <li>still recovers genetic-response structure when it differs from ordinary expression structure;</li>
+  <li>and uses informative features without benefiting similarly from uninformative or permuted features.</li>
+</ul>
+<p>Two conditions sit alongside those six, and are easy to lose. Each claim is reported on the contextual part of the matrix as well as on the whole of it, and each is preregistered &#8212; metric, direction and grid fixed before the runs &#8212; because a simulation harness that can be adjusted after seeing its output is a search, not a test.</p>
+<p>These analyses answer:</p>
 $$
 \boxed{\text{When the truth is known, did we recover the right cellular map?}}
 $$
+<p>They still do not tell us whether a map estimated from one dataset is stable when the data used to construct it change. That is the next question.</p>
+<h2 id='sources'>Sources</h2>
+<ul>
+  <li>Strober <em>et al.</em> SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. <em>Genome Biol</em> <strong>25</strong>, 28 (2024). <a href='https://doi.org/10.1186/s13059-023-03152-z'>doi:10.1186/s13059-023-03152-z</a></li>
+  <li>Denault <em>et al.</em> Covariate-moderated empirical Bayes matrix factorization. <em>NeurIPS</em> <strong>38</strong> (2025). <a href='https://doi.org/10.52202/085713-1573'>doi:10.52202/085713-1573</a></li>
+  <li>Cuomo <em>et al.</em> CellRegMap: a statistical framework for mapping context-specific regulatory variants using scRNA-seq. <em>Mol Syst Biol</em> <strong>18</strong>, e10663 (2022). <a href='https://doi.org/10.15252/msb.202110663'>doi:10.15252/msb.202110663</a> — the supplied-expression-coordinate comparator the alignment axis is run against.</li>
+  <li><a href='/notes/2026/09/05/regulotypes-3-validation/'>Regulotypes Note 3 Validation: checking the implementation before checking the biology</a> — the previous note, and the Level 0 evidence this one assumes.</li>
+  <li><a href='/notes/2026/09/05/regulotypes-2-train-test/'>Regulotypes Note 2 Train & Test: how the map is trained and tested</a> — the nested design whose held-out prediction is Level 2.</li>
+  <li><a href='/notes/2026/09/04/regulotypes-1-overview/'>Regulotypes Note 1 Overview: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model are defined.</li>
+</ul>
 
-They still do not tell us whether a map estimated from one dataset is stable when the data used to construct it change. That is the next question.
+        </div>
+        <div class='applause'>
+            <button class='applause-btn' type='button' aria-pressed='false'
+                    aria-label='Like this post'
+                    title='Kept in your browser. Nothing is sent anywhere.'>
+                <span class='hearts' aria-hidden='true'><svg class='h h1' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h2' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h3' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg></span>
+                <span class='applause-label'>like</span>
+                <span class='applause-count' hidden></span>
+            </button>
+        </div>
+        <div id='more'>
+            <a href='/notes/'>&larr; All research notes</a>
+        </div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.applause-btn');
+      if (!btn) return;
+      var label = btn.querySelector('.applause-label');
+      var counter = btn.querySelector('.applause-count');
+      var api = 'https://blog-likes.kaiqianzhang.workers.dev';
+      var slug = 'regulotypes-4-simulation';
+      var key = 'liked:' + location.pathname;
+      var count = null;
 
-## Sources
+      function show() {
+        if (count === null) return;
+        counter.hidden = false;
+        counter.textContent = count;
+      }
+      function paint(on, animate) {
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? 'liked' : 'like';
+        if (on && animate) {
+          btn.classList.remove('is-popping');
+          void btn.offsetWidth;
+          btn.classList.add('is-popping');
+        }
+      }
+      function liked() {
+        try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+      }
 
-- Strober *et al.* SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. *Genome Biol* **25**, 28 (2024). [doi:10.1186/s13059-023-03152-z](https://doi.org/10.1186/s13059-023-03152-z)
-- Denault *et al.* Covariate-moderated empirical Bayes matrix factorization. *NeurIPS* **38** (2025). [doi:10.52202/085713-1573](https://doi.org/10.52202/085713-1573)
-- Cuomo *et al.* CellRegMap: a statistical framework for mapping context-specific regulatory variants using scRNA-seq. *Mol Syst Biol* **18**, e10663 (2022). [doi:10.15252/msb.202110663](https://doi.org/10.15252/msb.202110663) — the supplied-expression-coordinate comparator the alignment axis is run against.
-- [Regulotypes: checking the implementation before checking the biology](/notes/2026/09/06/regulotypes-checking-the-implementation/) — the previous note, and the Level 0 evidence this one assumes.
-- [Regulotypes: how the map is trained and tested](/notes/2026/09/06/regulotypes-train-test/) — the nested design whose held-out prediction is Level 2.
-- [Regulotypes: defining cells by genetic response](/notes/2026/09/04/regulotypes/) — where $R$, the reference variant–gene pairs and the low-rank model are defined.
+      paint(liked(), false);
+
+      if (api) {
+        fetch(api + '/' + slug, {cache: 'no-store'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      }
+
+      btn.addEventListener('click', function () {
+        var on = !btn.classList.contains('is-on');
+        try {
+          on ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+        } catch (e) {}
+        paint(on, true);
+        if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
+        if (!api) return;
+        /* text/plain, not application/json, and deliberately so: a JSON
+           content type is not CORS-safelisted, so the browser sends an
+           OPTIONS preflight first and the POST only happens if that
+           succeeds. Everything here is a same-shaped JSON body either way --
+           the Worker parses it with request.json() regardless of the header
+           -- and this way there is no preflight to fail, and one fewer round
+           trip per click. */
+        fetch(api + '/' + slug, {
+          method: 'POST',
+          headers: {'Content-Type': 'text/plain;charset=UTF-8'},
+          body: JSON.stringify({delta: on ? 1 : -1})
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      });
+    })();
+    </script>
+
+    <div class='credit'>
+        <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      function paint() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var say = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        btn.setAttribute('aria-label', say);
+        btn.setAttribute('title', say);
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') !== 'dark';
+        if (dark) { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    })();
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Regulotypes: checking the implementation before checking the biology | Kaiqian Zhang</title>
+    <title>Regulotypes Note 3 Validation: checking the implementation before checking the biology | Kaiqian Zhang</title>
     <meta charset='UTF-8'>
     <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
@@ -65,13 +65,13 @@
 </div>
     <div class='wrap content'>
         <div class='front-matter'>
-            <h1>Regulotypes: checking the implementation before checking the biology</h1>
+            <h1>Regulotypes Note 3 Validation: checking the implementation before checking the biology</h1>
             <h4>Before asking whether a method finds the right answer, ask whether the program performs the mathematical operation you intended. Seven reductions and invariances that need no ground truth.</h4>
 <div class='keywords'><span class='kw-label'>Keywords:</span><span class='kw-list'><span class='kw'>implementation correctness</span><span class='kw'>unit tests</span><span class='kw'>SURGE</span><span class='kw'>variational inference</span><span class='kw'>ELBO</span><span class='kw'>covariate-moderated empirical Bayes</span><span class='kw'>point-normal prior</span><span class='kw'>cEBNM</span><span class='kw'>donor-balanced reparameterization</span><span class='kw'>numerical integration</span></span></div>
             <div class='bylines'>
                 <div class='byline'>
                     <h3>Published</h3>
-                    <p>06 September 2026</p>
+                    <p>05 September 2026</p>
                 </div>
                 <div class='byline'>
                     <h3>Read time</h3>
@@ -1705,7 +1705,7 @@ $$
 <p>This check catches a surprisingly broad class of bugs: stale interaction terms, residual calculations that accidentally retain $u$, or factor contributions that are not properly removed when a loading is zero.</p>
 <hr>
 <h2 id='5-does-pair-projection-reproduce-the-same-pair-when-nothing-is-actually-new'>5. Does pair projection reproduce the same pair when nothing is actually new?</h2>
-<p>The <a href='/notes/2026/09/06/regulotypes-train-test/'>previous post</a> introduced pair projection.</p>
+<p>The <a href='/notes/2026/09/05/regulotypes-2-train-test/'>previous post</a> introduced pair projection.</p>
 <p>Once $U$ has been learned, a new pair can be placed on the map by keeping $U$ fixed and estimating</p>
 $$
 \beta_s,\lambda_s.
@@ -2697,8 +2697,8 @@ $$
 <ul>
   <li>Strober <em>et al.</em> SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. <em>Genome Biol</em> <strong>25</strong>, 28 (2024). <a href='https://doi.org/10.1186/s13059-023-03152-z'>doi:10.1186/s13059-023-03152-z</a> — the released implementation the Gaussian reduction in §1 is checked against, and the source of the observation likelihood.</li>
   <li>Denault <em>et al.</em> Covariate-moderated empirical Bayes matrix factorization. <em>NeurIPS</em> <strong>38</strong> (2025). <a href='https://doi.org/10.52202/085713-1573'>doi:10.52202/085713-1573</a> — the covariate-moderated prior whose point-normal cEBNM subproblem §6 and §7 check.</li>
-  <li><a href='/notes/2026/09/06/regulotypes-train-test/'>Regulotypes: how the map is trained and tested</a> — the previous note, which introduces the pair projection that §5 puts a known answer through.</li>
-  <li><a href='/notes/2026/09/04/regulotypes/'>Regulotypes: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model itself are defined.</li>
+  <li><a href='/notes/2026/09/05/regulotypes-2-train-test/'>Regulotypes Note 2 Train & Test: how the map is trained and tested</a> — the previous note, which introduces the pair projection that §5 puts a known answer through.</li>
+  <li><a href='/notes/2026/09/04/regulotypes-1-overview/'>Regulotypes Note 1 Overview: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model itself are defined.</li>
 </ul>
 
         </div>
@@ -2722,7 +2722,7 @@ $$
       var label = btn.querySelector('.applause-label');
       var counter = btn.querySelector('.applause-count');
       var api = 'https://blog-likes.kaiqianzhang.workers.dev';
-      var slug = 'regulotypes-checking-the-implementation';
+      var slug = 'regulotypes-3-validation';
       var key = 'liked:' + location.pathname;
       var count = null;
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Regulotypes: does the same map come back? | Kaiqian Zhang</title>
+    <title>Regulotypes Note 5 Validation: does the same map come back? | Kaiqian Zhang</title>
     <meta charset='UTF-8'>
     <meta content='width=device-width, initial-scale=1' name='viewport'/>
 
@@ -65,7 +65,7 @@
 </div>
     <div class='wrap content'>
         <div class='front-matter'>
-            <h1>Regulotypes: does the same map come back?</h1>
+            <h1>Regulotypes Note 5 Validation: does the same map come back?</h1>
             <h4>In real data there is no true R to compare against. What can be checked is whether the same organization of cells reappears when the loci, the donors, or the dataset used to estimate the map are changed.</h4>
 <div class='keywords'><span class='kw-label'>Keywords:</span><span class='kw-list'><span class='kw'>regulotype</span><span class='kw'>reproducibility</span><span class='kw'>donor bootstrap</span><span class='kw'>regulotype distances</span><span class='kw'>nearest-neighbour stability</span><span class='kw'>assignment probability</span><span class='kw'>cross-dataset replication</span><span class='kw'>cis-regulatory effects</span><span class='kw'>blood-brain barrier</span></span></div>
             <div class='bylines'>
@@ -135,10 +135,10 @@
 </a>
 </svg>
 </div>
-<p>The <a href='/notes/2026/09/06/regulotypes-simulation/'>previous note</a> asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.</p>
+<p>The <a href='/notes/2026/09/06/regulotypes-4-simulation/'>previous note</a> asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.</p>
 <p>In real data there is no $R^{\mathrm{true}}$. A useful substitute is reproducibility: if the cellular organization reflects recurrent cis-regulatory biology, it should not depend on one lucky set of loci or donors.</p>
 <p>Simulation lets us compare $\hat R$ with a known truth. Real data removes that reference.</p>
-<p>This is not a fourth level of evidence stacked on the <a href='/notes/2026/09/06/regulotypes-checking-the-implementation/'>three</a> the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the <a href='/notes/2026/09/06/regulotypes-train-test/'>train-test design</a> already needs.</p>
+<p>This is not a fourth level of evidence stacked on the <a href='/notes/2026/09/05/regulotypes-3-validation/'>three</a> the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the <a href='/notes/2026/09/05/regulotypes-2-train-test/'>train-test design</a> already needs.</p>
 <table>
 <thead><tr><th>symbol</th><th>meaning</th></tr></thead>
 <tbody>
@@ -1269,10 +1269,10 @@ $$
   <li>Strober <em>et al.</em> SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. <em>Genome Biol</em> <strong>25</strong>, 28 (2024). <a href='https://doi.org/10.1186/s13059-023-03152-z'>doi:10.1186/s13059-023-03152-z</a></li>
   <li>Denault <em>et al.</em> Covariate-moderated empirical Bayes matrix factorization. <em>NeurIPS</em> <strong>38</strong> (2025). <a href='https://doi.org/10.52202/085713-1573'>doi:10.52202/085713-1573</a></li>
   <li>Cuomo <em>et al.</em> CellRegMap: a statistical framework for mapping context-specific regulatory variants using scRNA-seq. <em>Mol Syst Biol</em> <strong>18</strong>, e10663 (2022). <a href='https://doi.org/10.15252/msb.202110663'>doi:10.15252/msb.202110663</a></li>
-  <li><a href='/notes/2026/09/06/regulotypes-simulation/'>Regulotypes: when do we recover the right map?</a> — the previous note, and the ground-truth comparison this one has to do without.</li>
-  <li><a href='/notes/2026/09/06/regulotypes-train-test/'>Regulotypes: how the map is trained and tested</a> — where projecting a cell into an existing fit is defined, which is what the donor bootstrap reuses.</li>
-  <li><a href='/notes/2026/09/06/regulotypes-checking-the-implementation/'>Regulotypes: checking the implementation before checking the biology</a> — the Level 0 evidence everything here assumes.</li>
-  <li><a href='/notes/2026/09/04/regulotypes/'>Regulotypes: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model are defined.</li>
+  <li><a href='/notes/2026/09/06/regulotypes-4-simulation/'>Regulotypes Note 4 Validation: when do we recover the right map?</a> — the previous note, and the ground-truth comparison this one has to do without.</li>
+  <li><a href='/notes/2026/09/05/regulotypes-2-train-test/'>Regulotypes Note 2 Train & Test: how the map is trained and tested</a> — where projecting a cell into an existing fit is defined, which is what the donor bootstrap reuses.</li>
+  <li><a href='/notes/2026/09/05/regulotypes-3-validation/'>Regulotypes Note 3 Validation: checking the implementation before checking the biology</a> — the Level 0 evidence everything here assumes.</li>
+  <li><a href='/notes/2026/09/04/regulotypes-1-overview/'>Regulotypes Note 1 Overview: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model are defined.</li>
 </ul>
 
         </div>
@@ -1296,7 +1296,7 @@ $$
       var label = btn.querySelector('.applause-label');
       var counter = btn.querySelector('.applause-count');
       var api = 'https://blog-likes.kaiqianzhang.workers.dev';
-      var slug = 'regulotypes-reproducibility';
+      var slug = 'regulotypes-5-reproducibility';
       var key = 'liked:' + location.pathname;
       var count = null;
 

@@ -1,7 +1,7 @@
 ---
-title: 'Regulotypes: checking the implementation before checking the biology'
+title: 'Regulotypes Note 3 Validation: checking the implementation before checking the biology'
 subtitle: Before asking whether a method finds the right answer, ask whether the program performs the mathematical operation you intended. Seven reductions and invariances that need no ground truth.
-date: 2026-09-06
+date: 2026-09-05
 tags: regulotype
 keywords: implementation correctness, unit tests, SURGE, variational inference, ELBO, covariate-moderated empirical Bayes, point-normal prior, cEBNM, donor-balanced reparameterization, numerical integration
 ---
@@ -1851,7 +1851,7 @@ This check catches a surprisingly broad class of bugs: stale interaction terms, 
 
 ## 5. Does pair projection reproduce the same pair when nothing is actually new?
 
-The [previous post](/notes/2026/09/06/regulotypes-train-test/) introduced pair projection.
+The [previous post](/notes/2026/09/05/regulotypes-2-train-test/) introduced pair projection.
 
 Once $U$ has been learned, a new pair can be placed on the map by keeping $U$ fixed and estimating
 
@@ -2996,5 +2996,5 @@ That comes next.
 
 - Strober *et al.* SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. *Genome Biol* **25**, 28 (2024). [doi:10.1186/s13059-023-03152-z](https://doi.org/10.1186/s13059-023-03152-z) — the released implementation the Gaussian reduction in §1 is checked against, and the source of the observation likelihood.
 - Denault *et al.* Covariate-moderated empirical Bayes matrix factorization. *NeurIPS* **38** (2025). [doi:10.52202/085713-1573](https://doi.org/10.52202/085713-1573) — the covariate-moderated prior whose point-normal cEBNM subproblem §6 and §7 check.
-- [Regulotypes: how the map is trained and tested](/notes/2026/09/06/regulotypes-train-test/) — the previous note, which introduces the pair projection that §5 puts a known answer through.
-- [Regulotypes: defining cells by genetic response](/notes/2026/09/04/regulotypes/) — where $R$, the reference variant–gene pairs and the low-rank model itself are defined.
+- [Regulotypes Note 2 Train & Test: how the map is trained and tested](/notes/2026/09/05/regulotypes-2-train-test/) — the previous note, which introduces the pair projection that §5 puts a known answer through.
+- [Regulotypes Note 1 Overview: defining cells by genetic response](/notes/2026/09/04/regulotypes-1-overview/) — where $R$, the reference variant–gene pairs and the low-rank model itself are defined.
