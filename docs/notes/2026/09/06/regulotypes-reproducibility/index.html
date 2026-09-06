@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Regulotypes: does the same map come back? | Kaiqian Zhang</title>
+    <meta charset='UTF-8'>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+
+    <meta name='description' content='In real data there is no true R to compare against. What can be checked is whether the same organization of cells reappears when the loci, the donors, or the dataset used to estimate the map are changed.'>
+    <meta name='keywords' content='natural language processing, nlp, transformers, attention, deep learning, machine learning, tokenization'>
+    <meta name='author' content='Kaiqian Zhang'>
+
+    <link rel='alternate' type='application/rss+xml' title='Kaiqian Zhang' href='/feed.xml'>
+    <link href='/css/blog.css?v=374b2ece' rel='stylesheet'/>
+    <link href='/css/pygments.css?v=0bba0ab0' rel='stylesheet'/>
+
+    <script>
+    /* Runs before anything is painted: a reader who chose the dark page must
+       not be shown the white one first. Nothing here consults
+       prefers-color-scheme -- the site is light until somebody asks. */
+    (function () {
+      try {
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) {}
+    })();
+    </script>
+    <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+    </script>
+    <script id='MathJax-script' async
+            src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+    </script>
+    <link href='/css/widgets.css?v=6f6366f4' rel='stylesheet'/>
+    <link href='/css/notes.css?v=6d6326f1' rel='stylesheet'/>
+    <script defer src='/js/widgets.js?v=882fce9f'></script>
+    <script defer src='/js/notes.js?v=1da50ef9'></script>
+</head>
+<body class='notes-site notes-note'>
+    <button class='theme-toggle' type='button' aria-pressed='false'
+            aria-label='Switch to dark mode' title='Switch to dark mode'>
+        <svg class='icon sun' viewBox='0 0 24 24' aria-hidden='true'>
+            <circle cx='12' cy='12' r='4.6'/>
+            <path d='M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7'/>
+        </svg>
+        <svg class='icon moon' viewBox='0 0 24 24' aria-hidden='true'>
+            <path d='M20.5 14.3A8.6 8.6 0 0 1 9.7 3.5a8.6 8.6 0 1 0 10.8 10.8z'/>
+        </svg>
+    </button>
+    <div class='nav'>
+    <ul class='wrap'>
+        <li><a href='/'>Home</a></li>
+        <li><a href='/blog/'>Blog</a></li>
+        <li><a href='/notes/'>Research Notes</a></li>
+    </ul>
+</div>
+    <div class='wrap content'>
+        <div class='front-matter'>
+            <h1>Regulotypes: does the same map come back?</h1>
+            <h4>In real data there is no true R to compare against. What can be checked is whether the same organization of cells reappears when the loci, the donors, or the dataset used to estimate the map are changed.</h4>
+<div class='keywords'><span class='kw-label'>Keywords:</span><span class='kw-list'><span class='kw'>regulotype</span><span class='kw'>reproducibility</span><span class='kw'>donor bootstrap</span><span class='kw'>regulotype distances</span><span class='kw'>nearest-neighbour stability</span><span class='kw'>assignment probability</span><span class='kw'>cross-dataset replication</span><span class='kw'>cis-regulatory effects</span><span class='kw'>blood-brain barrier</span></span></div>
+            <div class='bylines'>
+                <div class='byline'>
+                    <h3>Published</h3>
+                    <p>06 September 2026</p>
+                </div>
+                <div class='byline'>
+                    <h3>Read time</h3>
+                    <p>11 min read</p>
+                </div>
+                <div class='byline'>
+                    <h3>Tags</h3>
+                    <p><a href='/notes/tags/regulotype/'>Regulotype</a></p>
+                </div>
+            </div>
+            <div class='clear'></div>
+        </div>
+        <div class='article'>
+<div class='nfig wide roadmap'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 360' role='img' aria-label='The seven sections of this note.'>
+<text x='14.0' y='173.0' class='lbl bg a-pop' style='--d:0.00s;fill:var(--n-student)'>Does it</text>
+<text x='14.0' y='195.0' class='lbl bg a-pop' style='--d:0.08s;fill:var(--n-student)'>recur?</text>
+<path d='M138 47.0 C134.7 47.0, 134.7 179.0, 116 179.0 C134.7 179.0, 134.7 311.0, 138 311.0' fill='none' class='a-draw' stroke-linecap='round' stroke-linejoin='round' style='--d:0.22s;--dur:0.90s;stroke:var(--n-student);stroke-width:2.4'/>
+<a href='#what-has-to-be-stable' class='rm-row'>
+<rect x='128' y='30.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='47.0' r='4.0' class='a-beat' style='--d:0.45s;--dur:2.00s;fill:var(--n-data)'/>
+<text x='164.0' y='52.0' class='lbl a-rise' style='--d:0.45s;fill:var(--n-data)'>What has to be stable</text>
+<text x='704.0' y='52.0' class='lbl sm end a-rise' style='--d:0.55s;fill:var(--n-dim)'>the object, and the distance on it</text>
+</a>
+<a href='#change-the-reference-cis-regions' class='rm-row'>
+<rect x='128' y='74.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='91.0' r='4.0' class='a-beat' style='--d:0.53s;--dur:2.00s;fill:var(--n-student)'/>
+<text x='164.0' y='96.0' class='lbl a-rise' style='--d:0.53s;fill:var(--n-student)'>Change the reference cis regions</text>
+<text x='704.0' y='96.0' class='lbl sm end a-rise' style='--d:0.63s;fill:var(--n-dim)'>same cells, disjoint loci</text>
+</a>
+<a href='#resample-donors-not-cells' class='rm-row'>
+<rect x='128' y='118.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='135.0' r='4.0' class='a-beat' style='--d:0.61s;--dur:2.00s;fill:var(--n-teacher)'/>
+<text x='164.0' y='140.0' class='lbl a-rise' style='--d:0.61s;fill:var(--n-teacher)'>Resample donors, not cells</text>
+<text x='704.0' y='140.0' class='lbl sm end a-rise' style='--d:0.71s;fill:var(--n-dim)'>the independent unit is a person</text>
+</a>
+<a href='#if-we-draw-groups-report-assignment-uncertainty' class='rm-row'>
+<rect x='128' y='162.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='179.0' r='4.0' class='a-beat' style='--d:0.69s;--dur:2.00s;fill:var(--n-pruned)'/>
+<text x='164.0' y='184.0' class='lbl a-rise' style='--d:0.69s;fill:var(--n-pruned)'>If we draw groups</text>
+<text x='704.0' y='184.0' class='lbl sm end a-rise' style='--d:0.79s;fill:var(--n-dim)'>report assignment uncertainty</text>
+</a>
+<a href='#repeat-the-test-across-compatible-datasets' class='rm-row'>
+<rect x='128' y='206.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='223.0' r='4.0' class='a-beat' style='--d:0.77s;--dur:2.00s;fill:var(--n-kept)'/>
+<text x='164.0' y='228.0' class='lbl a-rise' style='--d:0.77s;fill:var(--n-kept)'>Repeat across datasets</text>
+<text x='704.0' y='228.0' class='lbl sm end a-rise' style='--d:0.87s;fill:var(--n-dim)'>the strongest rung, and the latest</text>
+</a>
+<a href='#what-should-count-as-reproducible' class='rm-row'>
+<rect x='128' y='250.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='267.0' r='4.0' class='a-beat' style='--d:0.85s;--dur:2.00s;fill:var(--n-loss)'/>
+<text x='164.0' y='272.0' class='lbl a-rise' style='--d:0.85s;fill:var(--n-loss)'>What should count as reproducible?</text>
+<text x='704.0' y='272.0' class='lbl sm end a-rise' style='--d:0.95s;fill:var(--n-dim)'>five resolutions, no single threshold</text>
+</a>
+<a href='#summary' class='rm-row'>
+<rect x='128' y='294.0' width='576' height='34.0' rx='8' fill='transparent'/>
+<circle cx='148.0' cy='311.0' r='4.0' class='a-beat' style='--d:0.93s;--dur:2.00s;fill:var(--n-data)'/>
+<text x='164.0' y='316.0' class='lbl a-rise' style='--d:0.93s;fill:var(--n-data)'>Summary</text>
+<text x='704.0' y='316.0' class='lbl sm end a-rise' style='--d:1.03s;fill:var(--n-dim)'>does the same organization come back?</text>
+</a>
+</svg>
+</div>
+<p>The <a href='/notes/2026/09/06/regulotypes-simulation/'>previous note</a> asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.</p>
+<p>In real data there is no $R^{\mathrm{true}}$. A useful substitute is reproducibility: if the cellular organization reflects recurrent cis-regulatory biology, it should not depend on one lucky set of loci or donors.</p>
+<p>Simulation lets us compare $\hat R$ with a known truth. Real data removes that reference.</p>
+<p>This is not a fourth level of evidence stacked on the <a href='/notes/2026/09/06/regulotypes-checking-the-implementation/'>three</a> the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the <a href='/notes/2026/09/06/regulotypes-train-test/'>train-test design</a> already needs.</p>
+<table>
+<thead><tr><th>symbol</th><th>meaning</th></tr></thead>
+<tbody>
+<tr><td>$s=(v,g)$</td><td>a reference pair: variant $v$ and the gene $g$ nominated for it</td></tr>
+<tr><td>$i$</td><td>a cell, in practice a within-donor metacell</td></tr>
+<tr><td>$r_{si}$</td><td>the cis effect of pair $s$ in cell $i$, per effect allele</td></tr>
+<tr><td>$R$</td><td>the $S\times I$ matrix collecting every $r_{si}$; $R=\beta\mathbf 1^\mathsf T+\Lambda U^\mathsf T$</td></tr>
+<tr><td>$S^{(A)},S^{(B)}$</td><td>two disjoint sets of reference cis regions</td></tr>
+<tr><td>$d_R(i,i')$</td><td>the regulotype distance between two cells</td></tr>
+<tr><td>$B$</td><td>the number of bootstrap fits</td></tr>
+</tbody>
+</table>
+<h2 id='what-has-to-be-stable'>What has to be stable</h2>
+<p>This changes the validation question. Instead of asking</p>
+$$
+\hat R \stackrel{?}{\approx} R^{\mathrm{true}},
+$$
+<p>we ask whether the same relationships among cells reappear when the information used to estimate the map changes.</p>
+<p>The object to stabilize is still not an arbitrary orientation of $U$. It is the fitted cell-resolved effects and the geometry of the columns of $R$.</p>
+<p>Almost everything below compares two distance matrices, so the distance is worth writing down before it is used. It is not the Euclidean distance between two columns of $R$. Two cells are compared over their whole cis-effect profiles, each pair's contribution divided by the scale of the molecular phenotype for that gene, and the whole thing averaged over pairs:</p>
+$$
+d_R(i,i')^2
+=
+\frac{1}{S}
+\sum_{s=1}^{S}
+\left(
+\frac{r_{si}-r_{si'}}{s_g}
+\right)^{\!2}.
+$$
+<p>The subscript on $s_g$ is the gene $g$ of pair $s$, not a second pair index. Two features of this definition carry weight in this note.</p>
+<ul>
+  <li><strong>The average over pairs</strong> is what lets two reference sets of different size be compared at all. Without it, a set with twice as many pairs would return distances on a different scale, and none of the comparisons below would mean anything.</li>
+  <li><strong>The per-gene scale $s_g$</strong> decides what one unit of regulotype distance is, and it is not yet bound to a specific quantity. The choice interacts directly with everything that follows: if $s_g$ were estimated separately inside each training partition, $S^{(A)}$ and $S^{(B)}$ would be divided by different constants and their distance matrices would sit on different scales. A stability analysis run that way would be measuring the scaling and reporting it as biology. Until the binding is settled, the implementation refuses to compute Eq (12) rather than defaulting to a guess.</li>
+</ul>
+<h2 id='change-the-reference-cis-regions'>Change the reference cis regions</h2>
+<p>The cleanest reproducibility experiment keeps the cells fixed and changes the loci that define the map.</p>
+<p>Split approximately independent reference regions into two sets,</p>
+$$
+S^{(A)}
+\qquad\text{and}\qquad
+S^{(B)}.
+$$
+<p>Fit a regulotype map from $S^{(A)}$, and separately fit another map from $S^{(B)}$.</p>
+<p>The two matrices have different rows, so their entries cannot be compared directly. But they describe the same cells.</p>
+<p>For each fit, calculate its regulotype distance matrix,</p>
+$$
+d_{R^{(A)}}(i,i')
+\qquad\text{and}\qquad
+d_{R^{(B)}}(i,i').
+$$
+<p>Then compare the two geometries.</p>
+<p>I would report:</p>
+<ul>
+  <li>correlation between the two distance matrices;</li>
+  <li>preservation of nearest regulotype neighbors;</li>
+  <li>stability of any low-dimensional visualization constructed from those distances.</li>
+</ul>
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 566' role='img' aria-label='Two regulotype maps fitted from disjoint sets of reference cis regions over the same cells, and the agreement between their distance matrices.'>
+<text x='307.0' y='30.0' class='lbl sm mid a-fade' style='--d:0.05s;fill:var(--n-data)'>the same 26 cells,  i  &#8594;</text>
+<rect x='190.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.15s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='199.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.17s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='208.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.19s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.10)'/>
+<rect x='217.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.21s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.40)'/>
+<rect x='226.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.23s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.65)'/>
+<rect x='235.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.25s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.26)'/>
+<rect x='244.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.27s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='253.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.29s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='262.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.31s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<rect x='271.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.33s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='280.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.35s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='289.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.37s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='298.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.39s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.42)'/>
+<rect x='307.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.41s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.53)'/>
+<rect x='316.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.43s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.45)'/>
+<rect x='325.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.45s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='334.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.47s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.72)'/>
+<rect x='343.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.49s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.38)'/>
+<rect x='352.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.51s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.48)'/>
+<rect x='361.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.53s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='370.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.55s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.45)'/>
+<rect x='379.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.57s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.29)'/>
+<rect x='388.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.59s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='397.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.13)'/>
+<rect x='406.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='415.0' y='52.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='190.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.16s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.69)'/>
+<rect x='199.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.18s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='208.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.20s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.47)'/>
+<rect x='217.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.22s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.90)'/>
+<rect x='226.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.24s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.69)'/>
+<rect x='235.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.26s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.57)'/>
+<rect x='244.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.28s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.69)'/>
+<rect x='253.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.30s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.39)'/>
+<rect x='262.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.32s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='271.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.34s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='280.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.36s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.31)'/>
+<rect x='289.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.38s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='298.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.40s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='307.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.42s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<rect x='316.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.44s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.29)'/>
+<rect x='325.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.46s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.38)'/>
+<rect x='334.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.48s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.70)'/>
+<rect x='343.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.50s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='352.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.52s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='361.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.54s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.12)'/>
+<rect x='370.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.56s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='379.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.58s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.40)'/>
+<rect x='388.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.60s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='397.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='406.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.11)'/>
+<rect x='415.0' y='61.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='190.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.16s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='199.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.18s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.22)'/>
+<rect x='208.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.20s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='217.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.22s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.27)'/>
+<rect x='226.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.24s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='235.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.26s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='244.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.28s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='253.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.30s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='262.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.32s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.13)'/>
+<rect x='271.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.34s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.46)'/>
+<rect x='280.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.36s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.47)'/>
+<rect x='289.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.38s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.54)'/>
+<rect x='298.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.40s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='307.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.42s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='316.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.44s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='325.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.46s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.47)'/>
+<rect x='334.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.48s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='343.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.50s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.26)'/>
+<rect x='352.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.52s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='361.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.54s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='370.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.56s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='379.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.58s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='388.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.60s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='397.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='406.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.33)'/>
+<rect x='415.0' y='70.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='190.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.17s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.12)'/>
+<rect x='199.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.19s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='208.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.21s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='217.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.23s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.36)'/>
+<rect x='226.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.25s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='235.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.27s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='244.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.29s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.17)'/>
+<rect x='253.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.31s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='262.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.33s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.27)'/>
+<rect x='271.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.35s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='280.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.37s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<rect x='289.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.39s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.50)'/>
+<rect x='298.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.41s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='307.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.43s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='316.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.45s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.25)'/>
+<rect x='325.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.47s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.48)'/>
+<rect x='334.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.49s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='343.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.51s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='352.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.53s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.70)'/>
+<rect x='361.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.55s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.50)'/>
+<rect x='370.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.57s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.50)'/>
+<rect x='379.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.59s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='388.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.54)'/>
+<rect x='397.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='406.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.10)'/>
+<rect x='415.0' y='79.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='190.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.17s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='199.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.19s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='208.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.21s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.33)'/>
+<rect x='217.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.23s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.25)'/>
+<rect x='226.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.25s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.12)'/>
+<rect x='235.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.27s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='244.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.29s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.52)'/>
+<rect x='253.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.31s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='262.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.33s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='271.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.35s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='280.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.37s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.25)'/>
+<rect x='289.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.39s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='298.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.41s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.17)'/>
+<rect x='307.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.43s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='316.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.45s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.24)'/>
+<rect x='325.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.47s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<rect x='334.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.49s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.67)'/>
+<rect x='343.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.51s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='352.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.53s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.33)'/>
+<rect x='361.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.55s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<rect x='370.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.57s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.59)'/>
+<rect x='379.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.59s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.53)'/>
+<rect x='388.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='397.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='406.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.39)'/>
+<rect x='415.0' y='88.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.51)'/>
+<rect x='190.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.18s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.21)'/>
+<rect x='199.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.20s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='208.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.22s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='217.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.24s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='226.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.26s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.57)'/>
+<rect x='235.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.28s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.12)'/>
+<rect x='244.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.30s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='253.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.32s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='262.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.34s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.10)'/>
+<rect x='271.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.36s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.25)'/>
+<rect x='280.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.38s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.22)'/>
+<rect x='289.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.40s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='298.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.42s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.25)'/>
+<rect x='307.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.44s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<rect x='316.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.46s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='325.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.48s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.26)'/>
+<rect x='334.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.50s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.22)'/>
+<rect x='343.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.52s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.38)'/>
+<rect x='352.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.54s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='361.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.56s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='370.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.58s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.13)'/>
+<rect x='379.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.60s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.35)'/>
+<rect x='388.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='397.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.12)'/>
+<rect x='406.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.24)'/>
+<rect x='415.0' y='97.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.11)'/>
+<rect x='190.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.19s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='199.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.21s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.39)'/>
+<rect x='208.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.23s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='217.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.25s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='226.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.27s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='235.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.29s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.43)'/>
+<rect x='244.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.31s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.13)'/>
+<rect x='253.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.33s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='262.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.35s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='271.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.37s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.38)'/>
+<rect x='280.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.39s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.27)'/>
+<rect x='289.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.41s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='298.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.43s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.32)'/>
+<rect x='307.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.45s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.17)'/>
+<rect x='316.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.47s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='325.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.49s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.21)'/>
+<rect x='334.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.51s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.60)'/>
+<rect x='343.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.53s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='352.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.55s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.44)'/>
+<rect x='361.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.57s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.42)'/>
+<rect x='370.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.59s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.24)'/>
+<rect x='379.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.25)'/>
+<rect x='388.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.43)'/>
+<rect x='397.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='406.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.47)'/>
+<rect x='415.0' y='106.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.69s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='190.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.19s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.54)'/>
+<rect x='199.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.21s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='208.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.23s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='217.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.25s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.38)'/>
+<rect x='226.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.27s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.14)'/>
+<rect x='235.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.29s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.59)'/>
+<rect x='244.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.31s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.41)'/>
+<rect x='253.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.33s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='262.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.35s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.72)'/>
+<rect x='271.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.37s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.19)'/>
+<rect x='280.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.39s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.39)'/>
+<rect x='289.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.41s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.33)'/>
+<rect x='298.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.43s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='307.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.45s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.40)'/>
+<rect x='316.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.47s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.26)'/>
+<rect x='325.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.49s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='334.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.51s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.37)'/>
+<rect x='343.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.53s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='352.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.55s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='361.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.57s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.32)'/>
+<rect x='370.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.59s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='379.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='388.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.60)'/>
+<rect x='397.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<rect x='406.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.28)'/>
+<rect x='415.0' y='115.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.69s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.45)'/>
+<rect x='187.0' y='49.0' width='238.8' height='76.8' rx='4' class=' a-draw' style='--d:0.77s;--dur:0.80s;fill:none;stroke:var(--n-student);stroke-width:2.4'/>
+<text x='182.0' y='92.0' class='lbl end a-rise' style='--d:0.87s;fill:var(--n-student)'>set A</text>
+<rect x='190.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.60s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='199.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='208.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.56)'/>
+<rect x='217.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.38)'/>
+<rect x='226.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='235.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.70s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.46)'/>
+<rect x='244.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.72s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.54)'/>
+<rect x='253.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.74s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.80)'/>
+<rect x='262.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.76s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.75)'/>
+<rect x='271.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.78s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.21)'/>
+<rect x='280.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.80s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.79)'/>
+<rect x='289.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.82s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.75)'/>
+<rect x='298.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.84s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.45)'/>
+<rect x='307.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.86s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.58)'/>
+<rect x='316.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.88s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.43)'/>
+<rect x='325.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.90s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='334.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.92s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='343.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.94s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='352.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.96s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.55)'/>
+<rect x='361.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.98s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.57)'/>
+<rect x='370.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.00s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.76)'/>
+<rect x='379.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.02s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.66)'/>
+<rect x='388.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.04s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='397.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.06s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.70)'/>
+<rect x='406.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.08s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.57)'/>
+<rect x='415.0' y='150.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.10s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.88)'/>
+<rect x='190.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.24)'/>
+<rect x='199.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.41)'/>
+<rect x='208.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='217.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='226.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.69s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.15)'/>
+<rect x='235.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.71s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.31)'/>
+<rect x='244.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.73s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='253.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.75s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='262.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.77s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='271.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.79s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.42)'/>
+<rect x='280.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.81s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='289.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.83s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='298.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.85s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.15)'/>
+<rect x='307.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.87s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='316.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.89s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.22)'/>
+<rect x='325.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.91s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.39)'/>
+<rect x='334.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.93s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.51)'/>
+<rect x='343.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.95s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.54)'/>
+<rect x='352.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.97s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.44)'/>
+<rect x='361.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.99s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='370.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.01s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.23)'/>
+<rect x='379.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.03s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.45)'/>
+<rect x='388.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.05s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.48)'/>
+<rect x='397.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.07s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.31)'/>
+<rect x='406.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.09s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.54)'/>
+<rect x='415.0' y='159.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.11s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='190.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.61s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<rect x='199.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.45)'/>
+<rect x='208.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.38)'/>
+<rect x='217.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.21)'/>
+<rect x='226.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.69s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='235.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.71s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.42)'/>
+<rect x='244.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.73s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.48)'/>
+<rect x='253.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.75s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.70)'/>
+<rect x='262.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.77s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.43)'/>
+<rect x='271.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.79s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='280.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.81s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='289.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.83s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='298.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.85s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<rect x='307.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.87s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.49)'/>
+<rect x='316.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.89s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.46)'/>
+<rect x='325.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.91s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.46)'/>
+<rect x='334.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.93s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='343.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.95s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='352.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.97s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<rect x='361.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.99s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.74)'/>
+<rect x='370.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.01s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.63)'/>
+<rect x='379.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.03s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.39)'/>
+<rect x='388.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.05s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.56)'/>
+<rect x='397.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.07s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.44)'/>
+<rect x='406.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.09s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.37)'/>
+<rect x='415.0' y='168.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.11s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='190.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.31)'/>
+<rect x='199.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.42)'/>
+<rect x='208.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='217.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.21)'/>
+<rect x='226.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.70s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.10)'/>
+<rect x='235.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.72s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.12)'/>
+<rect x='244.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.74s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='253.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.76s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='262.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.78s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.43)'/>
+<rect x='271.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.80s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.30)'/>
+<rect x='280.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.82s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.34)'/>
+<rect x='289.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.84s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.15)'/>
+<rect x='298.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.86s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.32)'/>
+<rect x='307.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.88s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='316.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.90s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.18)'/>
+<rect x='325.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.92s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<rect x='334.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.94s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.51)'/>
+<rect x='343.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.96s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='352.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.98s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='361.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.00s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.40)'/>
+<rect x='370.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.02s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.25)'/>
+<rect x='379.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.04s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.16)'/>
+<rect x='388.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.06s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.50)'/>
+<rect x='397.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.08s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='406.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.10s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.30)'/>
+<rect x='415.0' y='177.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.12s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.21)'/>
+<rect x='190.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.62s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='199.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.48)'/>
+<rect x='208.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.61)'/>
+<rect x='217.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='226.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.70s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.63)'/>
+<rect x='235.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.72s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.59)'/>
+<rect x='244.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.74s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.89)'/>
+<rect x='253.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.76s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.58)'/>
+<rect x='262.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.78s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.51)'/>
+<rect x='271.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.80s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.67)'/>
+<rect x='280.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.82s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.90)'/>
+<rect x='289.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.84s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.47)'/>
+<rect x='298.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.86s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.77)'/>
+<rect x='307.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.88s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<rect x='316.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.90s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<rect x='325.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.92s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.43)'/>
+<rect x='334.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.94s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.24)'/>
+<rect x='343.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.96s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.24)'/>
+<rect x='352.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.98s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='361.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.00s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.14)'/>
+<rect x='370.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.02s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='379.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.04s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.24)'/>
+<rect x='388.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.06s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.67)'/>
+<rect x='397.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.08s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.63)'/>
+<rect x='406.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.10s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.79)'/>
+<rect x='415.0' y='186.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.12s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.56)'/>
+<rect x='190.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.63s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='199.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.65s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.39)'/>
+<rect x='208.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.67s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='217.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.69s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.14)'/>
+<rect x='226.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.71s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='235.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.73s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.15)'/>
+<rect x='244.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.75s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.17)'/>
+<rect x='253.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.77s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<rect x='262.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.79s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.17)'/>
+<rect x='271.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.81s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.37)'/>
+<rect x='280.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.83s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='289.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.85s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.28)'/>
+<rect x='298.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.87s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.18)'/>
+<rect x='307.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.89s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.22)'/>
+<rect x='316.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.91s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.37)'/>
+<rect x='325.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.93s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.25)'/>
+<rect x='334.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.95s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.12)'/>
+<rect x='343.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.97s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.12)'/>
+<rect x='352.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.99s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.36)'/>
+<rect x='361.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.01s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='370.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.03s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.26)'/>
+<rect x='379.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.05s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='388.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.07s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.38)'/>
+<rect x='397.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.09s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.57)'/>
+<rect x='406.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.11s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.51)'/>
+<rect x='415.0' y='195.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.13s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.47)'/>
+<rect x='190.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='199.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.22)'/>
+<rect x='208.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.30)'/>
+<rect x='217.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.70s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.11)'/>
+<rect x='226.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.72s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.25)'/>
+<rect x='235.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.74s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<rect x='244.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.76s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.58)'/>
+<rect x='253.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.78s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.13)'/>
+<rect x='262.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.80s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.59)'/>
+<rect x='271.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.82s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.60)'/>
+<rect x='280.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.84s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.62)'/>
+<rect x='289.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.86s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.60)'/>
+<rect x='298.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.88s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.29)'/>
+<rect x='307.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.90s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.38)'/>
+<rect x='316.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.92s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.58)'/>
+<rect x='325.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.94s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.33)'/>
+<rect x='334.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.96s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.58)'/>
+<rect x='343.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.98s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<rect x='352.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.00s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.21)'/>
+<rect x='361.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.02s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.38)'/>
+<rect x='370.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.04s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.24)'/>
+<rect x='379.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.06s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.33)'/>
+<rect x='388.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.08s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.13)'/>
+<rect x='397.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.10s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.28)'/>
+<rect x='406.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.12s;--dur:0.40s;fill:rgba(var(--n-red-rgb), 0.19)'/>
+<rect x='415.0' y='204.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.14s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='190.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.64s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.41)'/>
+<rect x='199.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.66s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.16)'/>
+<rect x='208.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.68s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.11)'/>
+<rect x='217.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.70s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.43)'/>
+<rect x='226.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.72s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.40)'/>
+<rect x='235.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.74s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<rect x='244.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.76s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.21)'/>
+<rect x='253.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.78s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.13)'/>
+<rect x='262.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.80s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.39)'/>
+<rect x='271.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.82s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.43)'/>
+<rect x='280.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.84s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.47)'/>
+<rect x='289.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.86s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.42)'/>
+<rect x='298.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.88s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<rect x='307.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.90s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.62)'/>
+<rect x='316.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.92s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.58)'/>
+<rect x='325.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.94s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.69)'/>
+<rect x='334.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.96s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='343.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:0.98s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.23)'/>
+<rect x='352.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.00s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.40)'/>
+<rect x='361.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.02s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.53)'/>
+<rect x='370.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.04s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.37)'/>
+<rect x='379.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.06s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.35)'/>
+<rect x='388.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.08s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.25)'/>
+<rect x='397.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.10s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<rect x='406.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.12s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.51)'/>
+<rect x='415.0' y='213.0' width='7.9' height='7.9' rx='1.6' class=' a-pop' style='--d:1.14s;--dur:0.40s;fill:rgba(var(--n-blue-rgb), 0.32)'/>
+<rect x='187.0' y='147.0' width='238.8' height='76.8' rx='4' class=' a-draw' style='--d:1.22s;--dur:0.80s;fill:none;stroke:var(--n-teacher);stroke-width:2.4'/>
+<text x='182.0' y='190.0' class='lbl end a-rise' style='--d:1.32s;fill:var(--n-teacher)'>set B</text>
+<text x='182.0' y='108.0' class='lbl sm end a-fade' style='--d:0.90s;fill:var(--n-dim)'>cis regions</text>
+<text x='182.0' y='206.0' class='lbl sm end a-fade' style='--d:1.00s;fill:var(--n-dim)'>disjoint from A</text>
+<rect x='466.0' y='44.0' width='224.0' height='84.0' rx='6' class=' a-fade' style='--d:0.95s;--dur:0.50s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.2'/>
+<circle cx='554.0' cy='58.8' r='3.40' class='a-pop' style='--d:1.15s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 1.00)'/>
+<circle cx='559.8' cy='53.5' r='3.40' class='a-pop' style='--d:1.16s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.97)'/>
+<circle cx='549.5' cy='63.0' r='3.40' class='a-pop' style='--d:1.17s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.90)'/>
+<circle cx='548.0' cy='62.9' r='3.40' class='a-pop' style='--d:1.19s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.83)'/>
+<circle cx='548.5' cy='75.4' r='3.40' class='a-pop' style='--d:1.20s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.76)'/>
+<circle cx='547.9' cy='81.3' r='3.40' class='a-pop' style='--d:1.21s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.69)'/>
+<circle cx='544.8' cy='82.4' r='3.40' class='a-pop' style='--d:1.22s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.62)'/>
+<circle cx='552.5' cy='88.1' r='3.40' class='a-pop' style='--d:1.23s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.55)'/>
+<circle cx='553.7' cy='92.3' r='3.40' class='a-pop' style='--d:1.25s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.48)'/>
+<circle cx='554.0' cy='94.9' r='3.40' class='a-pop' style='--d:1.26s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.41)'/>
+<circle cx='565.7' cy='102.1' r='3.40' class='a-pop' style='--d:1.27s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<circle cx='559.8' cy='113.1' r='3.40' class='a-pop' style='--d:1.28s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.27)'/>
+<circle cx='569.1' cy='110.8' r='3.40' class='a-pop' style='--d:1.29s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<circle cx='577.8' cy='108.0' r='3.40' class='a-pop' style='--d:1.31s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<circle cx='578.1' cy='115.5' r='3.40' class='a-pop' style='--d:1.32s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<circle cx='585.8' cy='110.7' r='3.40' class='a-pop' style='--d:1.33s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.34)'/>
+<circle cx='594.5' cy='104.9' r='3.40' class='a-pop' style='--d:1.34s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<circle cx='599.2' cy='99.1' r='3.40' class='a-pop' style='--d:1.35s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.48)'/>
+<circle cx='603.0' cy='100.2' r='3.40' class='a-pop' style='--d:1.37s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.55)'/>
+<circle cx='606.4' cy='88.6' r='3.40' class='a-pop' style='--d:1.38s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.62)'/>
+<circle cx='611.4' cy='84.4' r='3.40' class='a-pop' style='--d:1.39s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.69)'/>
+<circle cx='609.5' cy='81.0' r='3.40' class='a-pop' style='--d:1.40s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.76)'/>
+<circle cx='614.1' cy='75.4' r='3.40' class='a-pop' style='--d:1.41s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.83)'/>
+<circle cx='612.9' cy='73.5' r='3.40' class='a-pop' style='--d:1.43s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.90)'/>
+<circle cx='615.2' cy='55.3' r='3.40' class='a-pop' style='--d:1.44s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.97)'/>
+<circle cx='612.7' cy='61.1' r='3.40' class='a-pop' style='--d:1.45s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 1.00)'/>
+<text x='690.0' y='37.0' class='lbl sm end a-fade' style='--d:1.25s;fill:var(--n-dim)'>map from set A</text>
+<rect x='466.0' y='142.0' width='224.0' height='84.0' rx='6' class=' a-fade' style='--d:1.35s;--dur:0.50s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.2'/>
+<circle cx='571.0' cy='146.0' r='3.40' class='a-pop' style='--d:1.55s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 1.00)'/>
+<circle cx='568.9' cy='152.6' r='3.40' class='a-pop' style='--d:1.56s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.97)'/>
+<circle cx='557.5' cy='157.9' r='3.40' class='a-pop' style='--d:1.57s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.90)'/>
+<circle cx='562.3' cy='161.3' r='3.40' class='a-pop' style='--d:1.59s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.83)'/>
+<circle cx='556.6' cy='168.2' r='3.40' class='a-pop' style='--d:1.60s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.76)'/>
+<circle cx='554.9' cy='169.9' r='3.40' class='a-pop' style='--d:1.61s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.69)'/>
+<circle cx='550.8' cy='179.1' r='3.40' class='a-pop' style='--d:1.62s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.62)'/>
+<circle cx='551.4' cy='183.8' r='3.40' class='a-pop' style='--d:1.63s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.55)'/>
+<circle cx='553.0' cy='191.3' r='3.40' class='a-pop' style='--d:1.65s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.48)'/>
+<circle cx='554.4' cy='192.9' r='3.40' class='a-pop' style='--d:1.66s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.41)'/>
+<circle cx='554.1' cy='202.5' r='3.40' class='a-pop' style='--d:1.67s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.34)'/>
+<circle cx='559.1' cy='206.1' r='3.40' class='a-pop' style='--d:1.68s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.27)'/>
+<circle cx='566.6' cy='203.0' r='3.40' class='a-pop' style='--d:1.69s;--dur:0.36s;fill:rgba(var(--n-blue-rgb), 0.20)'/>
+<circle cx='570.1' cy='200.1' r='3.40' class='a-pop' style='--d:1.71s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.20)'/>
+<circle cx='574.7' cy='208.0' r='3.40' class='a-pop' style='--d:1.72s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.27)'/>
+<circle cx='576.7' cy='204.1' r='3.40' class='a-pop' style='--d:1.73s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.34)'/>
+<circle cx='587.7' cy='199.2' r='3.40' class='a-pop' style='--d:1.74s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.41)'/>
+<circle cx='590.3' cy='200.9' r='3.40' class='a-pop' style='--d:1.75s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.48)'/>
+<circle cx='598.3' cy='203.2' r='3.40' class='a-pop' style='--d:1.77s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.55)'/>
+<circle cx='600.3' cy='190.4' r='3.40' class='a-pop' style='--d:1.78s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.62)'/>
+<circle cx='610.0' cy='194.4' r='3.40' class='a-pop' style='--d:1.79s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.69)'/>
+<circle cx='607.8' cy='186.2' r='3.40' class='a-pop' style='--d:1.80s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.76)'/>
+<circle cx='612.0' cy='178.3' r='3.40' class='a-pop' style='--d:1.81s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.83)'/>
+<circle cx='616.8' cy='173.5' r='3.40' class='a-pop' style='--d:1.83s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.90)'/>
+<circle cx='611.1' cy='170.3' r='3.40' class='a-pop' style='--d:1.84s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 0.97)'/>
+<circle cx='611.4' cy='160.7' r='3.40' class='a-pop' style='--d:1.85s;--dur:0.36s;fill:rgba(var(--n-red-rgb), 1.00)'/>
+<text x='690.0' y='135.0' class='lbl sm end a-fade' style='--d:1.65s;fill:var(--n-dim)'>map from set B</text>
+<path d='M432.0 88.0 L452.0 88.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.90s;--dur:0.45s;--len:20;stroke:var(--n-student);stroke-width:1.6'/>
+<polygon points='458.0,88.0 452.0,91.3 452.0,84.7' class='a-pop' style='--d:1.28s;fill:var(--n-student)'/>
+<path d='M432.0 186.0 L452.0 186.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.30s;--dur:0.45s;--len:20;stroke:var(--n-teacher);stroke-width:1.6'/>
+<polygon points='458.0,186.0 452.0,189.3 452.0,182.7' class='a-pop' style='--d:1.68s;fill:var(--n-teacher)'/>
+<text x='578.0' y='250.0' class='lbl sm mid a-fade' style='--d:1.85s;fill:var(--n-dim)'>a visual summary, not the evidence</text>
+<text x='395.0' y='284.0' class='lbl bg mid a-pop' style='--d:2.00s;fill:var(--n-ink)'>the panel that carries the claim</text>
+<rect x='236.0' y='300.0' width='318.0' height='232.0' rx='6' class=' a-fade' style='--d:2.05s;--dur:0.50s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.2'/>
+<path d='M315.5 306.0 L315.5 526.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:220;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M242.0 358.0 L548.0 358.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:306;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M395.0 306.0 L395.0 526.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:220;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M242.0 416.0 L548.0 416.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:306;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M474.5 306.0 L474.5 526.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:220;stroke:var(--n-grid);stroke-width:1.0'/>
+<path d='M242.0 474.0 L548.0 474.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:2.10s;--dur:0.40s;--len:306;stroke:var(--n-grid);stroke-width:1.0'/>
+<circle cx='281.5' cy='506.7' r='2.50' class='a-pop' style='--d:2.20s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='281.4' cy='496.0' r='2.50' class='a-pop' style='--d:2.20s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='259.7' cy='492.6' r='2.50' class='a-pop' style='--d:2.20s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='278.3' cy='472.8' r='2.50' class='a-pop' style='--d:2.20s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='280.1' cy='476.3' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='293.7' cy='446.0' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='297.6' cy='439.5' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='309.0' cy='418.6' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='338.6' cy='410.1' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='350.5' cy='373.8' r='2.50' class='a-pop' style='--d:2.21s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='383.2' cy='359.4' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='395.7' cy='383.1' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='400.9' cy='399.2' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='424.3' cy='363.7' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='417.8' cy='376.8' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='439.6' cy='391.9' r='2.50' class='a-pop' style='--d:2.22s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='414.9' cy='380.7' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='452.1' cy='357.9' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='420.7' cy='405.8' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='444.5' cy='364.4' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='417.1' cy='393.7' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='438.0' cy='396.8' r='2.50' class='a-pop' style='--d:2.23s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='420.0' cy='399.4' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='437.2' cy='420.1' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='426.2' cy='440.7' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='281.0' cy='507.1' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.1' cy='499.4' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='289.0' cy='483.3' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='297.5' cy='489.2' r='2.50' class='a-pop' style='--d:2.24s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='312.7' cy='466.3' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='320.1' cy='463.2' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='326.0' cy='437.7' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='340.6' cy='437.4' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='375.5' cy='410.9' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='413.4' cy='396.2' r='2.50' class='a-pop' style='--d:2.25s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='405.2' cy='411.1' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='406.4' cy='424.3' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='440.0' cy='392.3' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='440.5' cy='402.8' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='434.7' cy='417.0' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='414.7' cy='403.4' r='2.50' class='a-pop' style='--d:2.26s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='429.6' cy='378.5' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='409.7' cy='416.8' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='425.4' cy='375.5' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='411.3' cy='410.5' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='432.9' cy='411.3' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='403.9' cy='411.1' r='2.50' class='a-pop' style='--d:2.27s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='399.6' cy='428.9' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='394.0' cy='439.5' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='271.0' cy='493.6' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='284.6' cy='501.4' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='283.7' cy='499.5' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='285.7' cy='478.9' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='306.4' cy='486.9' r='2.50' class='a-pop' style='--d:2.28s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='311.3' cy='467.3' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='317.7' cy='449.6' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='340.6' cy='431.8' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='375.6' cy='410.1' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='388.8' cy='429.3' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='391.9' cy='436.8' r='2.50' class='a-pop' style='--d:2.29s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='420.1' cy='402.4' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='412.3' cy='417.9' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='458.1' cy='411.5' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='436.5' cy='397.6' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='445.4' cy='369.5' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='425.2' cy='394.2' r='2.50' class='a-pop' style='--d:2.30s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='471.0' cy='347.2' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='447.9' cy='379.9' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='475.6' cy='376.8' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='442.3' cy='364.0' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='457.4' cy='391.9' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='460.8' cy='400.1' r='2.50' class='a-pop' style='--d:2.31s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='262.3' cy='498.5' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='273.5' cy='508.8' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='279.9' cy='487.8' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='285.0' cy='477.3' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='293.2' cy='472.0' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='322.9' cy='463.4' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='345.0' cy='438.6' r='2.50' class='a-pop' style='--d:2.32s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='363.8' cy='428.1' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='377.2' cy='441.0' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='389.8' cy='448.4' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='413.1' cy='418.6' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='421.5' cy='430.2' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='447.3' cy='423.6' r='2.50' class='a-pop' style='--d:2.33s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='423.9' cy='418.3' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='451.4' cy='391.2' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='442.9' cy='421.7' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='446.3' cy='372.4' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='441.2' cy='403.3' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='466.7' cy='400.4' r='2.50' class='a-pop' style='--d:2.34s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='441.3' cy='387.8' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='475.1' cy='416.3' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='454.4' cy='421.3' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='257.4' cy='505.9' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.3' cy='497.2' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='274.2' cy='491.5' r='2.50' class='a-pop' style='--d:2.35s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='287.6' cy='492.2' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='282.7' cy='473.2' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='309.2' cy='458.0' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='324.1' cy='440.9' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='326.7' cy='461.6' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='355.7' cy='459.7' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='362.0' cy='433.7' r='2.50' class='a-pop' style='--d:2.36s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='371.2' cy='438.0' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='406.9' cy='429.3' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='395.8' cy='423.4' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='417.7' cy='389.4' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='424.2' cy='406.8' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='436.3' cy='368.7' r='2.50' class='a-pop' style='--d:2.37s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='431.4' cy='399.6' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='461.7' cy='384.3' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='445.6' cy='367.6' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='480.6' cy='392.0' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='455.9' cy='392.3' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='252.1' cy='505.6' r='2.50' class='a-pop' style='--d:2.38s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='254.2' cy='498.8' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='254.1' cy='495.9' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='268.3' cy='491.3' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='290.5' cy='471.0' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='302.0' cy='452.2' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='300.1' cy='463.2' r='2.50' class='a-pop' style='--d:2.39s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='345.4' cy='473.8' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='344.2' cy='436.5' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='357.7' cy='445.8' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='374.0' cy='436.5' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='380.4' cy='427.0' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='399.6' cy='393.8' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='422.1' cy='421.5' r='2.50' class='a-pop' style='--d:2.40s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='430.8' cy='370.2' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='420.6' cy='394.5' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='457.2' cy='385.0' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='451.3' cy='360.4' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='477.4' cy='395.2' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='464.6' cy='388.0' r='2.50' class='a-pop' style='--d:2.41s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='264.8' cy='492.6' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.6' cy='499.9' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.2' cy='493.1' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='299.3' cy='479.1' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='301.8' cy='469.3' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='320.4' cy='478.4' r='2.50' class='a-pop' style='--d:2.42s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='349.7' cy='476.9' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='346.0' cy='447.7' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='368.6' cy='452.3' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='400.7' cy='443.3' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='389.9' cy='426.2' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='431.5' cy='395.3' r='2.50' class='a-pop' style='--d:2.43s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='438.8' cy='411.1' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='457.4' cy='358.7' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='440.7' cy='385.3' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='491.3' cy='360.6' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='473.8' cy='337.0' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='504.4' cy='363.0' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='482.0' cy='349.8' r='2.50' class='a-pop' style='--d:2.44s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='260.5' cy='509.9' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='257.6' cy='494.6' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='282.1' cy='501.1' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='285.5' cy='484.6' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='279.6' cy='485.4' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='316.1' cy='493.0' r='2.50' class='a-pop' style='--d:2.45s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='314.9' cy='462.8' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='336.7' cy='465.1' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='358.5' cy='448.0' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='355.8' cy='440.2' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='379.8' cy='408.9' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='400.0' cy='414.0' r='2.50' class='a-pop' style='--d:2.46s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='413.8' cy='374.2' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='405.1' cy='381.8' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='439.4' cy='368.3' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='434.8' cy='342.6' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='481.6' cy='364.4' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='443.2' cy='354.7' r='2.50' class='a-pop' style='--d:2.47s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='261.8' cy='501.3' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.7' cy='504.3' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='277.4' cy='491.4' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='274.5' cy='498.9' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='301.3' cy='503.2' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='310.1' cy='483.5' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='324.0' cy='483.9' r='2.50' class='a-pop' style='--d:2.48s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='343.2' cy='459.5' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='356.6' cy='458.5' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='362.5' cy='422.7' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='386.1' cy='426.6' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='408.3' cy='387.7' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='397.9' cy='395.3' r='2.50' class='a-pop' style='--d:2.49s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='442.2' cy='371.6' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='436.8' cy='337.1' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='486.3' cy='373.0' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='459.7' cy='346.9' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='268.6' cy='495.4' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='278.5' cy='496.1' r='2.50' class='a-pop' style='--d:2.50s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='271.8' cy='492.6' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='321.4' cy='493.9' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='313.1' cy='478.9' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='323.2' cy='480.6' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='348.7' cy='460.9' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='356.5' cy='456.6' r='2.50' class='a-pop' style='--d:2.51s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='370.4' cy='427.2' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='393.6' cy='423.8' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='425.4' cy='383.4' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='400.2' cy='394.7' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='433.0' cy='360.8' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='442.5' cy='344.3' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='496.9' cy='361.6' r='2.50' class='a-pop' style='--d:2.52s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='468.6' cy='349.2' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='268.3' cy='504.1' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='271.3' cy='503.2' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='273.8' cy='502.5' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='269.8' cy='487.0' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='270.6' cy='487.1' r='2.50' class='a-pop' style='--d:2.53s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='312.6' cy='467.0' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='309.3' cy='458.9' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='330.1' cy='434.1' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='354.5' cy='420.6' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='372.6' cy='384.7' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='362.5' cy='387.3' r='2.50' class='a-pop' style='--d:2.54s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='402.6' cy='364.4' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='392.8' cy='327.3' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='455.7' cy='349.6' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='444.8' cy='314.0' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='263.2' cy='499.6' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='275.9' cy='499.4' r='2.50' class='a-pop' style='--d:2.55s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='267.1' cy='496.3' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='279.5' cy='481.0' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='320.8' cy='472.1' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='331.4' cy='466.1' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='334.7' cy='448.3' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='372.3' cy='422.7' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='403.8' cy='392.7' r='2.50' class='a-pop' style='--d:2.56s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='411.2' cy='395.3' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='460.3' cy='369.9' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='444.1' cy='340.4' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='540.0' cy='358.4' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='509.3' cy='326.6' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.7' cy='511.2' r='2.50' class='a-pop' style='--d:2.57s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='250.2' cy='504.0' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='274.5' cy='506.6' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='286.5' cy='495.7' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='302.9' cy='488.3' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='313.1' cy='472.5' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='345.7' cy='463.0' r='2.50' class='a-pop' style='--d:2.58s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='367.2' cy='433.7' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='368.7' cy='431.7' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='408.7' cy='410.7' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='404.4' cy='380.5' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='481.8' cy='392.8' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='442.1' cy='369.0' r='2.50' class='a-pop' style='--d:2.59s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='260.7' cy='505.4' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='275.5' cy='509.8' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='304.0' cy='500.5' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='294.7' cy='499.8' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.0' cy='477.3' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='317.6' cy='476.7' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='335.5' cy='451.2' r='2.50' class='a-pop' style='--d:2.60s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='343.3' cy='450.9' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='398.6' cy='429.0' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='362.1' cy='401.6' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='446.9' cy='415.3' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='435.2' cy='391.5' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='253.7' cy='512.8' r='2.50' class='a-pop' style='--d:2.61s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='289.6' cy='501.7' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='282.7' cy='500.7' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.4' cy='483.6' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='318.7' cy='469.4' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='356.5' cy='452.0' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='350.3' cy='455.8' r='2.50' class='a-pop' style='--d:2.62s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='395.3' cy='416.9' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='381.6' cy='395.3' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='478.4' cy='404.5' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='432.6' cy='376.8' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='283.4' cy='501.9' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='260.8' cy='499.1' r='2.50' class='a-pop' style='--d:2.63s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='275.6' cy='490.8' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='287.7' cy='484.9' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='328.7' cy='457.5' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='333.4' cy='457.6' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='356.3' cy='432.9' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='347.2' cy='413.1' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='426.4' cy='419.0' r='2.50' class='a-pop' style='--d:2.64s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='405.6' cy='393.9' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='264.5' cy='504.6' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='283.3' cy='507.8' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='304.0' cy='500.2' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='301.7' cy='489.6' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='311.1' cy='489.5' r='2.50' class='a-pop' style='--d:2.65s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='338.8' cy='469.2' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='326.9' cy='455.8' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='390.8' cy='457.2' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='366.8' cy='435.2' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='250.0' cy='507.4' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='265.5' cy='502.4' r='2.50' class='a-pop' style='--d:2.66s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.2' cy='489.5' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='275.1' cy='499.9' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='297.3' cy='471.5' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.7' cy='457.1' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='358.1' cy='459.0' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='333.8' cy='435.5' r='2.50' class='a-pop' style='--d:2.67s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='260.6' cy='505.5' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='274.1' cy='498.3' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='277.2' cy='492.2' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='300.9' cy='472.2' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='294.6' cy='467.6' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='359.3' cy='460.4' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='332.5' cy='437.8' r='2.50' class='a-pop' style='--d:2.68s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='276.8' cy='508.4' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='272.8' cy='504.7' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='294.0' cy='499.8' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='271.4' cy='485.5' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='316.6' cy='490.1' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='299.3' cy='472.8' r='2.50' class='a-pop' style='--d:2.69s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='254.4' cy='506.3' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='277.0' cy='493.2' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='265.8' cy='486.2' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='303.5' cy='483.7' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='292.1' cy='470.4' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='261.8' cy='504.6' r='2.50' class='a-pop' style='--d:2.70s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='264.1' cy='502.5' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='287.3' cy='502.3' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.8' cy='486.9' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='274.1' cy='507.8' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.2' cy='518.0' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='295.1' cy='500.3' r='2.50' class='a-pop' style='--d:2.71s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='277.0' cy='508.7' r='2.50' class='a-pop' style='--d:2.72s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='278.5' cy='506.1' r='2.50' class='a-pop' style='--d:2.72s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<circle cx='261.7' cy='514.7' r='2.50' class='a-pop' style='--d:2.72s;--dur:0.30s;fill:rgba(var(--n-violet-rgb), 0.42)'/>
+<text x='395.0' y='554.0' class='lbl sm mid a-fade' style='--d:2.95s;fill:var(--n-student)'>regulotype distance from set A</text>
+<g transform='rotate(-90 220.0 416.0)'><text x='220.0' y='416.0' class='lbl sm mid a-fade' style='--d:2.95s;fill:var(--n-teacher)'>regulotype distance from set B</text></g>
+<text x='566.0' y='318.0' class='lbl sm a-fade' style='--d:3.05s;fill:var(--n-dim)'>all 325 cell pairs</text>
+<text x='566.0' y='348.0' class='lbl sm a-fade' style='--d:3.15s;fill:var(--n-dim)'>Spearman</text>
+<text x='566.0' y='370.0' class='lbl bg a-pop' style='--d:3.20s;fill:var(--n-kept)'>0.92</text>
+<text x='566.0' y='390.0' class='lbl sm a-fade' style='--d:3.25s;fill:var(--n-dim)'>shared 5 nearest</text>
+<text x='566.0' y='412.0' class='lbl bg a-pop' style='--d:3.30s;fill:var(--n-kept)'>77%</text>
+<text x='566.0' y='432.0' class='lbl sm a-fade' style='--d:3.35s;fill:var(--n-dim)'>pairs per set</text>
+<text x='566.0' y='454.0' class='lbl bg a-pop' style='--d:3.40s;fill:var(--n-dim)'>60</text>
+<text x='566.0' y='474.0' class='lbl sm a-fade' style='--d:3.45s;fill:var(--n-dim)'>respond to  u</text>
+<text x='566.0' y='496.0' class='lbl bg a-pop' style='--d:3.50s;fill:var(--n-dim)'>60%</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 1.</span> Independent reference sets. The same $26$ cells are fitted twice, from two disjoint sets of reference cis regions. The two matrices share no rows, so their entries cannot be compared; the two embeddings are a visual summary and their orientation is arbitrary. What is compared is the geometry: every pair of cells gives one point in the lower panel, its distance under set A against its distance under set B. Synthetic data from a rank-two toy generator, not a fitted example — the same generator drives Lab 1, where the dials are live.</div>
+</div>
+<p>This is a strong test of the core idea. If many independent cis loci reveal a recurrent cellular response structure, then changing the particular loci used to estimate it should not completely reorganize the cells.</p>
+<p>It is also a test that can fail in two quite different ways, and the difference matters. The two locus sets can disagree because there is no shared response structure to find — no pair's effect actually varies with $u_i$, so each set is fitting its own noise. Or they can agree about the broad arrangement of cells while disagreeing about which cells are nearest neighbours, which is what happens when a real structure is estimated too coarsely. The first says the claim is wrong; the second says the claim is right but the resolution has been overstated. The lab below separates them.</p>
+<div class='lab wide' id='rg-repro-lab'>
+<div class='lab-head'><span class='name'>Lab 1 &#183; split the loci</span><span class='hint'>fit the same cells twice and see how much of the geometry survives</span></div>
+<div class='lab-body'>
+<div class='controls'>
+<div class='ctl'>
+<label>what changes between the two fits</label>
+<div class='seg seg-split'>
+<button type='button' data-value='disjoint' aria-pressed='true'>disjoint loci</button>
+<button type='button' data-value='same' aria-pressed='false'>nothing (the ceiling)</button>
+</div>
+</div>
+<div class='ctl'>
+<label for='rg-pairs'>reference pairs per set <span class='val' id='rg-pairs-v'></span></label>
+<input type='range' id='rg-pairs' min='4' max='300' step='2' value='60'>
+</div>
+<div class='ctl'>
+<label for='rg-resp'>pairs that respond <span class='val' id='rg-resp-v'></span></label>
+<input type='range' id='rg-resp' min='0' max='100' step='5' value='60'>
+</div>
+<div class='ctl'>
+<label for='rg-noise'>estimation noise per pair <span class='val' id='rg-noise-v'></span></label>
+<input type='range' id='rg-noise' min='0' max='200' step='5' value='60'>
+</div>
+</div>
+<div class='readout'>
+<div class='stat' style='--stat-hue:var(--n-teacher)'><span class='k'>distance agreement</span><span class='v' id='rg-stat-rho'></span></div>
+<div class='stat' style='--stat-hue:var(--n-student)'><span class='k'>shared 5 nearest neighbours</span><span class='v' id='rg-stat-nn'></span></div>
+<div class='stat' style='--stat-hue:var(--n-clay)'><span class='k'>responding pairs per set</span><span class='v' id='rg-stat-resp'></span></div>
+</div>
+<div class='verdict' id='rg-repro-verdict'></div>
+<svg viewBox='0 0 700 292' role='img'></svg>
+<p class='cap'>Left: one point per pair of cells &#8212; its Eq&#160;(12) distance under set A against its distance under set B. Right: for each cell, how many of its five nearest regulotype neighbours are the same under both fits. Synthetic, from a rank-two toy generator with a fixed seed, so a dial moved back and forth returns the same picture. Two anchors are exact: switch the fits to <b>nothing (the ceiling)</b> and agreement is exactly 1.000 with 100% shared neighbours, because both fits are then the same fit; set <b>responding pairs</b> and <b>noise</b> both to zero and every distance is exactly zero, so there is no geometry to compare and the readout says so.</p>
+</div>
+</div>
+<h2 id='resample-donors-not-cells'>Resample donors, not cells</h2>
+<p>Donors are the independent genetic units. A bootstrap that samples individual cells would therefore give a misleading impression of precision.</p>
+<p>Instead, resample donors and keep all measurements from a selected donor together.</p>
+<p>For bootstrap replicate $b$, fit</p>
+$$
+\hat R^{(b)}.
+$$
+<p>The practical complication is that different bootstrap samples contain different cells. I would avoid comparing arbitrary factor coordinates across fits. Two alternatives are cleaner.</p>
+<p><strong>First</strong>, for cells that can be evaluated under multiple fits, compare selected cell-resolved cis-effect profiles and regulotype distances directly.</p>
+<p><strong>Second</strong>, use each bootstrap fit as a reference and project a fixed evaluation set of cells into it. Then every bootstrap produces a regulotype representation for the same evaluation cells, making distance and neighborhood stability directly comparable.</p>
+<p>The second is the one that generalizes, because it reuses machinery the train-test design already needs: locating a cell that was not in the fit is exactly the new-column operation from the previous note.</p>
+<p>Across bootstrap fits, summarize:</p>
+<ul>
+  <li>uncertainty in selected $r_{si}$;</li>
+  <li>uncertainty in $d_R(i,i')$;</li>
+  <li>stability of nearest neighbors;</li>
+  <li>stability of any discrete summaries of the continuous map.</li>
+</ul>
+<p>The project already treats donor bootstrap fits as a source of uncertainty for $R$ and regulotype distances. This analysis turns that idea into a map-level reproducibility result.</p>
+<h2 id='if-we-draw-groups-report-assignment-uncertainty'>If we draw groups, report assignment uncertainty</h2>
+<p>A continuous map may eventually be summarized into a few regions for visualization or downstream analysis.</p>
+<p>If we do this, the group label should inherit uncertainty from the map.</p>
+<p>For each bootstrap or alternative-reference fit, recluster or reassign cells using the same prespecified rule. For cell $i$, report an assignment probability such as</p>
+$$
+\hat\pi_{ic}
+=
+\frac{1}{B}
+\sum_{b=1}^{B}
+\mathbf 1
+\{\text{cell }i\text{ is assigned to region }c\text{ in fit }b\}.
+$$
+<p>A cell with assignment probability $0.98$ is qualitatively different from one that switches regions in half the fits.</p>
+<p>This also prevents the discrete summary from becoming more certain than the continuous object that generated it.</p>
+<h2 id='repeat-the-test-across-compatible-datasets'>Repeat the test across compatible datasets</h2>
+<p>The strongest reproducibility result would come from an independent dataset with compatible genotype and molecular measurements.</p>
+<p>The datasets do not need to contain the same individual cells. The goal is to ask whether the same response organization appears.</p>
+<p>A practical design is:</p>
+<ol>
+  <li>learn the regulotype reference in dataset A;</li>
+  <li>locate cells from dataset B using the projection mechanism;</li>
+  <li>examine whether pair profiles, neighborhoods and known response continua reproduce;</li>
+  <li>reverse the roles of A and B when sample size permits.</li>
+</ol>
+<p>The exact cross-dataset comparison will depend on which genes, variants and cellular compartments overlap. I would therefore treat this as a later reproducibility analysis rather than the first one.</p>
+<p>The essential rule is the same: the biological interpretation should not rest on a structure that disappears as soon as the reference loci or donors change.</p>
+<div class='nfig wide'>
+<button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
+<svg viewBox='0 0 720 412' role='img' aria-label='Three levels of reproducibility test, left to right, each compared on the same three quantities.'>
+<text x='360.0' y='32.0' class='lbl bg mid a-pop' style='--d:0.02s;fill:var(--n-ink)'>each rung changes more, and asks more</text>
+<path d='M24.0 62.0 L690.0 62.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:0.14s;--dur:0.90s;--len:666;stroke:var(--n-grid);stroke-width:6'/>
+<polygon points='696.0,62.0 690.0,65.3 690.0,58.7' class='a-pop' style='--d:0.91s;fill:var(--n-grid)'/>
+<text x='360.0' y='54.0' class='lbl sm mid a-fade' style='--d:0.60s;fill:var(--n-dim)'>stronger evidence  &#8594;</text>
+<rect x='20.0' y='96.0' width='222.0' height='226.0' rx='8' class=' a-fade' style='--d:0.55s;--dur:0.55s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.4'/>
+<rect x='20.0' y='96.0' width='222.0' height='4.0' rx='2' class=' a-wide' style='--d:0.60s;--dur:0.50s;fill:var(--n-student)'/>
+<rect x='32.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:0.63s;--dur:0.30s;fill:var(--n-student);stroke:var(--n-student);stroke-width:1.0'/>
+<rect x='41.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:0.66s;--dur:0.30s;fill:none;stroke:var(--n-student);stroke-width:1.0'/>
+<rect x='50.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:0.69s;--dur:0.30s;fill:none;stroke:var(--n-student);stroke-width:1.0'/>
+<text x='131.0' y='134.0' class='lbl mid a-rise' style='--d:0.65s;fill:var(--n-student)'>alternative cis regions</text>
+<text x='131.0' y='150.0' class='lbl sm mid a-fade' style='--d:0.71s;fill:var(--n-dim)'>same donors,</text>
+<text x='131.0' y='165.0' class='lbl sm mid a-fade' style='--d:0.75s;fill:var(--n-dim)'>disjoint loci</text>
+<text x='34.0' y='184.0' class='lbl sm a-fade' style='--d:0.79s;fill:var(--n-dim)'>one donor set</text>
+<circle cx='40.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.83s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='55.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.85s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='70.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.87s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='85.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.89s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='100.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.91s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='115.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.93s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='130.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.95s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='145.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.97s;--dur:0.30s;fill:var(--n-data)'/>
+<circle cx='160.0' cy='202.0' r='4.20' class='a-pop' style='--d:0.99s;--dur:0.30s;fill:var(--n-data)'/>
+<rect x='40.0' y='220.0' width='108.0' height='16.0' rx='3' class=' a-wide' style='--d:0.97s;--dur:0.55s;fill:var(--n-student)'/>
+<text x='156.0' y='232.0' class='lbl sm a-fade' style='--d:1.05s;fill:var(--n-student)'>set A</text>
+<rect x='40.0' y='246.0' width='108.0' height='16.0' rx='3' class=' a-wide' style='--d:1.07s;--dur:0.55s;fill:var(--n-teacher)'/>
+<text x='156.0' y='258.0' class='lbl sm a-fade' style='--d:1.15s;fill:var(--n-teacher)'>set B</text>
+<text x='131.0' y='310.0' class='lbl sm mid a-fade' style='--d:1.35s;fill:var(--n-dim)'>do this first</text>
+<rect x='24.0' y='338.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.43s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='34.0' y='353.0' class='lbl sm a-fade' style='--d:1.49s;fill:var(--n-student)'>r<tspan baseline-shift="sub" font-size="9">si</tspan></text>
+<text x='60.0' y='353.0' class='lbl sm a-fade' style='--d:1.51s;fill:var(--n-dim)'>cell-resolved effects</text>
+<rect x='24.0' y='364.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.51s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='34.0' y='379.0' class='lbl sm a-fade' style='--d:1.57s;fill:var(--n-student)'>d<tspan baseline-shift="sub" font-size="9">R</tspan></text>
+<text x='60.0' y='379.0' class='lbl sm a-fade' style='--d:1.59s;fill:var(--n-dim)'>regulotype distances</text>
+<rect x='24.0' y='390.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.59s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='34.0' y='405.0' class='lbl sm a-fade' style='--d:1.65s;fill:var(--n-student)'>NN</text>
+<text x='60.0' y='405.0' class='lbl sm a-fade' style='--d:1.67s;fill:var(--n-dim)'>neighbourhood stability</text>
+<rect x='254.0' y='96.0' width='222.0' height='226.0' rx='8' class=' a-fade' style='--d:0.90s;--dur:0.55s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.4'/>
+<rect x='254.0' y='96.0' width='222.0' height='4.0' rx='2' class=' a-wide' style='--d:0.95s;--dur:0.50s;fill:var(--n-teacher)'/>
+<rect x='266.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:0.98s;--dur:0.30s;fill:var(--n-teacher);stroke:var(--n-teacher);stroke-width:1.0'/>
+<rect x='275.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:1.01s;--dur:0.30s;fill:var(--n-teacher);stroke:var(--n-teacher);stroke-width:1.0'/>
+<rect x='284.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:1.04s;--dur:0.30s;fill:none;stroke:var(--n-teacher);stroke-width:1.0'/>
+<text x='365.0' y='134.0' class='lbl mid a-rise' style='--d:1.00s;fill:var(--n-teacher)'>donor bootstrap</text>
+<text x='365.0' y='150.0' class='lbl sm mid a-fade' style='--d:1.06s;fill:var(--n-dim)'>resampled donors,</text>
+<text x='365.0' y='165.0' class='lbl sm mid a-fade' style='--d:1.10s;fill:var(--n-dim)'>fixed evaluation cells</text>
+<text x='268.0' y='184.0' class='lbl sm a-fade' style='--d:1.14s;fill:var(--n-dim)'>B resampled donor sets</text>
+<circle cx='278.0' cy='198.0' r='4.20' class='a-pop' style='--d:1.18s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='293.0' cy='198.0' r='4.20' class='a-pop' style='--d:1.20s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='308.0' cy='198.0' r='4.20' class='a-pop' style='--d:1.21s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='323.0' cy='198.0' r='4.20' class='a-pop' style='--d:1.23s;--dur:0.28s;fill:var(--n-teacher)'/>
+<path d='M342.0 198.0 L366.0 198.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.32s;--dur:0.35s;--len:24;stroke:var(--n-edge);stroke-width:1.2'/>
+<polygon points='372.0,198.0 366.0,201.3 366.0,194.7' class='a-pop' style='--d:1.62s;fill:var(--n-edge)'/>
+<rect x='376.0' y='192.0' width='30.0' height='12.0' rx='2' class=' a-draw' style='--d:1.38s;--dur:0.45s;fill:none;stroke:var(--n-teacher);stroke-width:1.4'/>
+<circle cx='278.0' cy='215.0' r='4.20' class='a-pop' style='--d:1.22s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='293.0' cy='215.0' r='4.20' class='a-pop' style='--d:1.24s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='308.0' cy='215.0' r='4.20' class='a-pop' style='--d:1.25s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='323.0' cy='215.0' r='4.20' class='a-pop' style='--d:1.27s;--dur:0.28s;fill:var(--n-teacher)'/>
+<path d='M342.0 215.0 L366.0 215.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.36s;--dur:0.35s;--len:24;stroke:var(--n-edge);stroke-width:1.2'/>
+<polygon points='372.0,215.0 366.0,218.3 366.0,211.7' class='a-pop' style='--d:1.66s;fill:var(--n-edge)'/>
+<rect x='376.0' y='209.0' width='30.0' height='12.0' rx='2' class=' a-draw' style='--d:1.42s;--dur:0.45s;fill:none;stroke:var(--n-teacher);stroke-width:1.4'/>
+<circle cx='278.0' cy='232.0' r='4.20' class='a-pop' style='--d:1.26s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='293.0' cy='232.0' r='4.20' class='a-pop' style='--d:1.28s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='308.0' cy='232.0' r='4.20' class='a-pop' style='--d:1.29s;--dur:0.28s;fill:var(--n-teacher)'/>
+<circle cx='323.0' cy='232.0' r='4.20' class='a-pop' style='--d:1.31s;--dur:0.28s;fill:var(--n-teacher)'/>
+<path d='M342.0 232.0 L366.0 232.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.40s;--dur:0.35s;--len:24;stroke:var(--n-edge);stroke-width:1.2'/>
+<polygon points='372.0,232.0 366.0,235.3 366.0,228.7' class='a-pop' style='--d:1.70s;fill:var(--n-edge)'/>
+<rect x='376.0' y='226.0' width='30.0' height='12.0' rx='2' class=' a-draw' style='--d:1.46s;--dur:0.45s;fill:none;stroke:var(--n-teacher);stroke-width:1.4'/>
+<text x='268.0' y='262.0' class='lbl sm a-fade' style='--d:1.56s;fill:var(--n-data)'>one fixed set of cells</text>
+<rect x='272.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.60s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='285.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.61s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='298.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.63s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='311.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.65s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='324.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.66s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='337.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.68s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='350.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.69s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='363.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.71s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='376.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.72s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='389.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.74s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='402.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.75s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='415.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.77s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='428.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.78s;--dur:0.28s;fill:var(--n-data)'/>
+<rect x='441.0' y='270.0' width='10.0' height='10.0' rx='2' class=' a-pop' style='--d:1.80s;--dur:0.28s;fill:var(--n-data)'/>
+<text x='365.0' y='310.0' class='lbl sm mid a-fade' style='--d:1.70s;fill:var(--n-dim)'>then this</text>
+<rect x='258.0' y='338.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.78s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='268.0' y='353.0' class='lbl sm a-fade' style='--d:1.84s;fill:var(--n-teacher)'>r<tspan baseline-shift="sub" font-size="9">si</tspan></text>
+<text x='294.0' y='353.0' class='lbl sm a-fade' style='--d:1.86s;fill:var(--n-dim)'>cell-resolved effects</text>
+<rect x='258.0' y='364.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.86s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='268.0' y='379.0' class='lbl sm a-fade' style='--d:1.92s;fill:var(--n-teacher)'>d<tspan baseline-shift="sub" font-size="9">R</tspan></text>
+<text x='294.0' y='379.0' class='lbl sm a-fade' style='--d:1.94s;fill:var(--n-dim)'>regulotype distances</text>
+<rect x='258.0' y='390.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:1.94s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='268.0' y='405.0' class='lbl sm a-fade' style='--d:2.00s;fill:var(--n-teacher)'>NN</text>
+<text x='294.0' y='405.0' class='lbl sm a-fade' style='--d:2.02s;fill:var(--n-dim)'>neighbourhood stability</text>
+<rect x='488.0' y='96.0' width='222.0' height='226.0' rx='8' class=' a-fade' style='--d:1.25s;--dur:0.55s;fill:var(--n-panel);stroke:var(--n-edge);stroke-width:1.4'/>
+<rect x='488.0' y='96.0' width='222.0' height='4.0' rx='2' class=' a-wide' style='--d:1.30s;--dur:0.50s;fill:var(--n-pruned)'/>
+<rect x='500.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:1.33s;--dur:0.30s;fill:var(--n-pruned);stroke:var(--n-pruned);stroke-width:1.0'/>
+<rect x='509.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:1.36s;--dur:0.30s;fill:var(--n-pruned);stroke:var(--n-pruned);stroke-width:1.0'/>
+<rect x='518.0' y='110.0' width='6.0' height='6.0' rx='1.5' class=' a-pop' style='--d:1.39s;--dur:0.30s;fill:var(--n-pruned);stroke:var(--n-pruned);stroke-width:1.0'/>
+<text x='599.0' y='134.0' class='lbl mid a-rise' style='--d:1.35s;fill:var(--n-pruned)'>an independent dataset</text>
+<text x='599.0' y='150.0' class='lbl sm mid a-fade' style='--d:1.41s;fill:var(--n-dim)'>compatible genotypes</text>
+<text x='599.0' y='165.0' class='lbl sm mid a-fade' style='--d:1.45s;fill:var(--n-dim)'>and molecular data</text>
+<rect x='502.0' y='186.0' width='88.0' height='30.0' rx='4' class=' a-draw' style='--d:1.49s;--dur:0.55s;fill:none;stroke:var(--n-pruned);stroke-width:1.6'/>
+<text x='546.0' y='205.0' class='lbl sm mid a-fade' style='--d:1.57s;fill:var(--n-pruned)'>dataset A</text>
+<rect x='502.0' y='232.0' width='88.0' height='30.0' rx='4' class=' a-draw' style='--d:1.59s;--dur:0.55s;fill:none;stroke:var(--n-data);stroke-width:1.6'/>
+<text x='546.0' y='251.0' class='lbl sm mid a-fade' style='--d:1.67s;fill:var(--n-data)'>dataset B</text>
+<rect x='634.0' y='202.0' width='56.0' height='46.0' rx='5' class=' a-draw' style='--d:1.71s;--dur:0.60s;fill:none;stroke:var(--n-pruned);stroke-width:1.8'/>
+<text x='662.0' y='229.0' class='lbl sm mid a-fade' style='--d:1.81s;fill:var(--n-pruned)'>map</text>
+<path d='M592.0 201.0 L624.0 214.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.77s;--dur:0.40s;--len:35;stroke:var(--n-pruned);stroke-width:1.5'/>
+<polygon points='630.0,214.0 624.0,217.3 624.0,210.7' class='a-pop' style='--d:2.11s;fill:var(--n-pruned)'/>
+<path d='M592.0 247.0 L624.0 236.0' fill='none' class='a-draw' stroke-linecap='round' style='--d:1.85s;--dur:0.40s;--len:34;stroke:var(--n-data);stroke-width:1.5'/>
+<polygon points='630.0,236.0 624.0,239.3 624.0,232.7' class='a-pop' style='--d:2.19s;fill:var(--n-data)'/>
+<text x='598.0' y='272.0' class='lbl sm mid a-fade' style='--d:1.95s;fill:var(--n-dim)'>project B into A&#39;s map</text>
+<text x='599.0' y='310.0' class='lbl sm mid a-fade' style='--d:2.05s;fill:var(--n-dim)'>later, not first</text>
+<rect x='492.0' y='338.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:2.13s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='502.0' y='353.0' class='lbl sm a-fade' style='--d:2.19s;fill:var(--n-pruned)'>r<tspan baseline-shift="sub" font-size="9">si</tspan></text>
+<text x='528.0' y='353.0' class='lbl sm a-fade' style='--d:2.21s;fill:var(--n-dim)'>cell-resolved effects</text>
+<rect x='492.0' y='364.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:2.21s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='502.0' y='379.0' class='lbl sm a-fade' style='--d:2.27s;fill:var(--n-pruned)'>d<tspan baseline-shift="sub" font-size="9">R</tspan></text>
+<text x='528.0' y='379.0' class='lbl sm a-fade' style='--d:2.29s;fill:var(--n-dim)'>regulotype distances</text>
+<rect x='492.0' y='390.0' width='214.0' height='21.0' rx='5' class=' a-fade' style='--d:2.29s;--dur:0.45s;fill:rgba(var(--n-violet-rgb), 0.06);stroke:var(--n-edge);stroke-width:1.0'/>
+<text x='502.0' y='405.0' class='lbl sm a-fade' style='--d:2.35s;fill:var(--n-pruned)'>NN</text>
+<text x='528.0' y='405.0' class='lbl sm a-fade' style='--d:2.37s;fill:var(--n-dim)'>neighbourhood stability</text>
+</svg>
+<div class='caption'><span class='caption-label'>Figure 2.</span> A reproducibility ladder. Left to right, each rung changes more of the information the map was built from: the reference cis regions, then the donors, then the dataset. The three strips beneath every rung are the quantities compared, and they do not change as you climb — cell-resolved effects $r_{si}$, regulotype distances $d_R(i,i')$, and the stability of a cell&#8217;s nearest regulotype neighbours.</div>
+</div>
+<h2 id='what-should-count-as-reproducible'>What should count as reproducible?</h2>
+<p>There is no single magic threshold.</p>
+<p>I would look for agreement at several resolutions:</p>
+<ul>
+  <li><strong>effect level</strong>: selected $r_{si}$ profiles remain similar;</li>
+  <li><strong>geometry level</strong>: pairwise distances remain similar;</li>
+  <li><strong>local level</strong>: cells retain similar regulotype neighbors;</li>
+  <li><strong>summary level</strong>: discrete regions, if used, have high assignment stability;</li>
+  <li><strong>biological level</strong>: later annotations of stable map regions recur across fits.</li>
+</ul>
+<p>The first three are statistical reproducibility. The last one starts to connect the map to biology.</p>
+<p>They also fail in that order. A map can be stable in its broad geometry and unstable in its neighborhoods, and in that case the honest report is the distance correlation with the neighborhood result beside it — not a picture of clusters.</p>
+<h2 id='summary'>Summary</h2>
+<p>Without a true $R$, validation has to rely on structures that survive changes in the data used to estimate them.</p>
+<p>For the regulotype map, I would ask whether:</p>
+<ul>
+  <li>independent reference cis-region sets produce similar cell geometry;</li>
+  <li>donor-level bootstrap fits give narrow uncertainty for important effects and distances;</li>
+  <li>local neighborhoods remain stable;</li>
+  <li>discrete summaries have high assignment probabilities rather than brittle labels;</li>
+  <li>and compatible external datasets recover the same broad response organization.</li>
+</ul>
+<p>These analyses answer:</p>
+$$
+\boxed{\text{If I rebuild the map, does the same cellular organization come back?}}
+$$
+<p>Reproducibility makes the classification credible. It still does not prove that the classification is useful. For that, the map has to improve a task that matters outside the fitting data.</p>
+<h2 id='sources'>Sources</h2>
+<ul>
+  <li>Strober <em>et al.</em> SURGE: uncovering context-specific genetic-regulation of gene expression from single-cell RNA sequencing using latent-factor models. <em>Genome Biol</em> <strong>25</strong>, 28 (2024). <a href='https://doi.org/10.1186/s13059-023-03152-z'>doi:10.1186/s13059-023-03152-z</a></li>
+  <li>Denault <em>et al.</em> Covariate-moderated empirical Bayes matrix factorization. <em>NeurIPS</em> <strong>38</strong> (2025). <a href='https://doi.org/10.52202/085713-1573'>doi:10.52202/085713-1573</a></li>
+  <li>Cuomo <em>et al.</em> CellRegMap: a statistical framework for mapping context-specific regulatory variants using scRNA-seq. <em>Mol Syst Biol</em> <strong>18</strong>, e10663 (2022). <a href='https://doi.org/10.15252/msb.202110663'>doi:10.15252/msb.202110663</a></li>
+  <li><a href='/notes/2026/09/06/regulotypes-simulation/'>Regulotypes: when do we recover the right map?</a> — the previous note, and the ground-truth comparison this one has to do without.</li>
+  <li><a href='/notes/2026/09/06/regulotypes-train-test/'>Regulotypes: how the map is trained and tested</a> — where projecting a cell into an existing fit is defined, which is what the donor bootstrap reuses.</li>
+  <li><a href='/notes/2026/09/06/regulotypes-checking-the-implementation/'>Regulotypes: checking the implementation before checking the biology</a> — the Level 0 evidence everything here assumes.</li>
+  <li><a href='/notes/2026/09/04/regulotypes/'>Regulotypes: defining cells by genetic response</a> — where $R$, the reference variant–gene pairs and the low-rank model are defined.</li>
+</ul>
+
+        </div>
+        <div class='applause'>
+            <button class='applause-btn' type='button' aria-pressed='false'
+                    aria-label='Like this post'
+                    title='Kept in your browser. Nothing is sent anywhere.'>
+                <span class='hearts' aria-hidden='true'><svg class='h h1' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h2' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg><svg class='h h3' viewBox='0 0 24 24'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg></span>
+                <span class='applause-label'>like</span>
+                <span class='applause-count' hidden></span>
+            </button>
+        </div>
+        <div id='more'>
+            <a href='/notes/'>&larr; All research notes</a>
+        </div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.applause-btn');
+      if (!btn) return;
+      var label = btn.querySelector('.applause-label');
+      var counter = btn.querySelector('.applause-count');
+      var api = 'https://blog-likes.kaiqianzhang.workers.dev';
+      var slug = 'regulotypes-reproducibility';
+      var key = 'liked:' + location.pathname;
+      var count = null;
+
+      function show() {
+        if (count === null) return;
+        counter.hidden = false;
+        counter.textContent = count;
+      }
+      function paint(on, animate) {
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        label.textContent = on ? 'liked' : 'like';
+        if (on && animate) {
+          btn.classList.remove('is-popping');
+          void btn.offsetWidth;
+          btn.classList.add('is-popping');
+        }
+      }
+      function liked() {
+        try { return localStorage.getItem(key) === '1'; } catch (e) { return false; }
+      }
+
+      paint(liked(), false);
+
+      if (api) {
+        fetch(api + '/' + slug, {cache: 'no-store'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      }
+
+      btn.addEventListener('click', function () {
+        var on = !btn.classList.contains('is-on');
+        try {
+          on ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+        } catch (e) {}
+        paint(on, true);
+        if (count !== null) { count = Math.max(0, count + (on ? 1 : -1)); show(); }
+        if (!api) return;
+        /* text/plain, not application/json, and deliberately so: a JSON
+           content type is not CORS-safelisted, so the browser sends an
+           OPTIONS preflight first and the POST only happens if that
+           succeeds. Everything here is a same-shaped JSON body either way --
+           the Worker parses it with request.json() regardless of the header
+           -- and this way there is no preflight to fail, and one fewer round
+           trip per click. */
+        fetch(api + '/' + slug, {
+          method: 'POST',
+          headers: {'Content-Type': 'text/plain;charset=UTF-8'},
+          body: JSON.stringify({delta: on ? 1 : -1})
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (typeof d.count === 'number') { count = d.count; show(); }
+          })
+          .catch(function () {});
+      });
+    })();
+    </script>
+
+    <div class='credit'>
+        <div class='wrap'>Acknowledgement: Website template adopted from <a href='https://gregorygundersen.com/blog/' target='_blank'>Gregory Gundersen</a>.</div>
+    </div>
+    <script>
+    (function () {
+      var btn = document.querySelector('.theme-toggle');
+      if (!btn) return;
+      var root = document.documentElement;
+      function paint() {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+        var say = dark ? 'Switch to light mode' : 'Switch to dark mode';
+        btn.setAttribute('aria-label', say);
+        btn.setAttribute('title', say);
+      }
+      paint();
+      btn.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') !== 'dark';
+        if (dark) { root.setAttribute('data-theme', 'dark'); }
+        else { root.removeAttribute('data-theme'); }
+        try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch (e) {}
+        paint();
+      });
+    })();
+    </script>
+</body>
+</html>
