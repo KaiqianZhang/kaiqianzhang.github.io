@@ -103,7 +103,7 @@ $$
 After fitting the model, we get $\hat R$. The central simulation question is therefore simple:
 
 $$
-\boxed{\hat R \stackrel{?}{\approx} R^{\mathrm{true}}.}
+\hat R \stackrel{?}{\approx} R^{\mathrm{true}}.
 $$
 
 The interesting part is deciding what &#8220;approximately&#8221; should mean.
@@ -139,9 +139,7 @@ for every cell. The rows of $R^{\mathrm{true}}$ may have different average effec
 
 This is a deliberately generous null. The data still contain everything except the thing being tested: donors still differ genetically, genes still differ in average effect, cells still differ in expression, and the residual and donor variances are still there to be soaked up. Only the interaction is absent. If a cellular map appears anyway, it did not come from the phenomenon we are claiming to measure.
 
-A flexible latent model should not turn this into a structured cellular map.
-
-I would inspect three quantities:
+A flexible latent model should not turn any of that into a structured cellular map, so I would inspect three quantities:
 
 * the estimated cell-specific deviations
   $$
@@ -326,7 +324,7 @@ $$
 d_{\hat R}(i,i').
 $$
 
-I would compare them in three ways:
+Three comparisons are worth making, and they are not interchangeable:
 
 * correlation between true and estimated pairwise distances;
 * error in the distance matrix;
@@ -463,9 +461,7 @@ The third metric is especially intuitive if the eventual use of $R$ is cellular 
 
 ## Do not make U the primary target
 
-The generator also gives us $U^{\mathrm{true}}$ and $\Lambda^{\mathrm{true}}$, so it is tempting to compare them directly with $\hat U$ and $\hat\Lambda$.
-
-This is useful for debugging, but it is not the main scientific recovery metric.
+The generator also gives us $U^{\mathrm{true}}$ and $\Lambda^{\mathrm{true}}$, so it is tempting to compare them directly with $\hat U$ and $\hat\Lambda$. That comparison is useful for debugging and it is not the main scientific recovery metric.
 
 The factorization is not unique. Rotations, sign changes and rescalings can change $U$ and $\Lambda$ while preserving
 
@@ -491,17 +487,7 @@ The same argument is why a factor gets a biological name only when something wit
 
 A useful simulation does more than show one successful example. It tells us where the method works and where it should not be trusted.
 
-The generator lets us vary:
-
-* donor number $D$;
-* number of reference pairs $S$;
-* true rank $K$;
-* magnitude of cellular effect variation;
-* factor sparsity;
-* donor variance and residual variance;
-* informativeness of cell and pair features.
-
-I would treat $D$ and $S$ as the main axes first. Cells provide measurements at different cellular conditions, but the independent genetic samples are donors. Increasing $S$ supplies more independent cis regions from which the shared cellular structure can be learned.
+The generator can vary donor number $D$, the number of reference pairs $S$, the true rank $K$, the magnitude of cellular effect variation, factor sparsity, the donor and residual variances, and how informative the cell and pair features are. I would treat $D$ and $S$ as the main axes first. Cells provide measurements at different cellular conditions, but the independent genetic samples are donors. Increasing $S$ supplies more independent cis regions from which the shared cellular structure can be learned.
 
 The two axes buy different things, which is why neither substitutes for the other:
 
@@ -543,7 +529,7 @@ Three things have to be controlled for the axis to mean anything.
 * **Rank has to be held fixed, and stated.** A scalar expression state cannot reach more than one factor, so at higher $K$ the supplied-coordinate comparator is capped by construction rather than by any property of the data. Running the alignment axis at $K=1$ is the only setting in which the comparison is unconditionally fair.
 * **Alignment is a property of the truth, not of the fit.** It should be reported as the realised correlation in each simulated dataset, not as the nominal value requested from the generator.
 
-This is one of the most important conceptual simulations. The goal is not to show that expression is uninformative. It is to show that expression similarity and genetic-response similarity are different estimands, and to identify when the distinction matters.
+Everything the project claims rests on this comparison. The goal is not to show that expression is uninformative — it plainly is not — but to show that expression similarity and genetic-response similarity are different estimands, and to identify when the distinction matters.
 
 A claim demonstrated in one direction only is weaker than it looks. The result worth reporting is a crossing: the method ahead where the two structures differ, and behind where they coincide.
 
@@ -695,7 +681,7 @@ $$
 
 This lets us test the part of the method that is new beyond the Gaussian-prior fit.
 
-Use three feature settings:
+The test needs three feature settings run side by side:
 
 * **informative**: features predict factor participation;
 * **uninformative**: features are unrelated to participation;
@@ -715,26 +701,11 @@ This is not only a prediction benchmark. It checks whether the prior learns the 
 
 ## Summary
 
-Simulation gives a direct definition of a correct regulotype map.
-
-I would call the simulation evidence convincing if the method:
-
-* does not invent cellular effect heterogeneity under the null;
-* accurately recovers the cell-resolved effects in $R$;
-* preserves the true regulotype distances and local neighborhoods;
-* improves as donor number, reference-pair number and signal strength increase;
-* still recovers genetic-response structure when it differs from ordinary expression structure;
-* and uses informative features without benefiting similarly from uninformative or permuted features.
+Simulation gives a direct definition of a correct regulotype map, which is the one thing real data can never supply. I would call the evidence convincing if the method invents no cellular effect heterogeneity under the null, recovers the cell-resolved effects in $R$, preserves the true regulotype distances and local neighbourhoods, improves as donors, reference pairs and signal strength increase, still finds genetic-response structure when that structure differs from ordinary expression structure, and gains from informative features without gaining as much from uninformative or permuted ones.
 
 Two conditions sit alongside those six, and are easy to lose. Each claim is reported on the contextual part of the matrix as well as on the whole of it, and each is preregistered &#8212; metric, direction and grid fixed before the runs &#8212; because a simulation harness that can be adjusted after seeing its output is a search, not a test.
 
-These analyses answer:
-
-$$
-\boxed{\text{When the truth is known, did we recover the right cellular map?}}
-$$
-
-They still do not tell us whether a map estimated from one dataset is stable when the data used to construct it change. That is the next question.
+Between them these analyses answer one question: **when the truth is known, did we recover the right cellular map?** They still do not tell us whether a map estimated from one dataset is stable when the data used to construct it change. That is the next question.
 
 ## Sources
 

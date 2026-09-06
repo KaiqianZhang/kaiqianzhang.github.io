@@ -59,9 +59,7 @@ keywords: regulotype, reproducibility, donor bootstrap, regulotype distances, ne
 
 The [previous note](/notes/2026/09/06/regulotypes-4-simulation/) asked whether the estimated map lands on the true one, in the only setting where the true one exists. Every statement there was a comparison against a matrix I had generated myself.
 
-In real data there is no $R^{\mathrm{true}}$. A useful substitute is reproducibility: if the cellular organization reflects recurrent cis-regulatory biology, it should not depend on one lucky set of loci or donors.
-
-Simulation lets us compare $\hat R$ with a known truth. Real data removes that reference.
+In real data there is no $R^{\mathrm{true}}$, and nothing replaces it. A useful substitute is reproducibility: if the cellular organization reflects recurrent cis-regulatory biology, it should not depend on one lucky set of loci or donors.
 
 This is not a fourth level of evidence stacked on the [three](/notes/2026/09/05/regulotypes-3-validation/) the series has been using. It is what replaces Level 1 once the truth is gone — an internal check that asks the map to agree with itself under changes that should not have mattered, and it uses the same extension machinery the [train-test design](/notes/2026/09/05/regulotypes-2-train-test/) already needs.
 
@@ -106,9 +104,7 @@ The subscript on $s_g$ is the gene $g$ of pair $s$, not a second pair index. Two
 
 ## Change the reference cis regions
 
-The cleanest reproducibility experiment keeps the cells fixed and changes the loci that define the map.
-
-Split approximately independent reference regions into two sets,
+The cleanest reproducibility experiment keeps the cells fixed and changes the loci that define the map. Split approximately independent reference regions into two sets,
 
 $$
 S^{(A)}
@@ -116,11 +112,7 @@ S^{(A)}
 S^{(B)}.
 $$
 
-Fit a regulotype map from $S^{(A)}$, and separately fit another map from $S^{(B)}$.
-
-The two matrices have different rows, so their entries cannot be compared directly. But they describe the same cells.
-
-For each fit, calculate its regulotype distance matrix,
+then fit one regulotype map from $S^{(A)}$ and, separately, another from $S^{(B)}$. The two matrices have different rows, so their entries cannot be compared directly — but they describe the same cells, and the geometry over those cells is comparable even when the rows are not. So for each fit calculate its regulotype distance matrix,
 
 $$
 d_{R^{(A)}}(i,i')
@@ -128,13 +120,7 @@ d_{R^{(A)}}(i,i')
 d_{R^{(B)}}(i,i').
 $$
 
-Then compare the two geometries.
-
-I would report:
-
-* correlation between the two distance matrices;
-* preservation of nearest regulotype neighbors;
-* stability of any low-dimensional visualization constructed from those distances.
+and compare the two: the correlation between the distance matrices, how many nearest regulotype neighbours survive, and whether any low-dimensional visualization built from those distances survives with them.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -1012,11 +998,7 @@ It is also a test that can fail in two quite different ways, and the difference 
 
 ## Resample donors, not cells
 
-Donors are the independent genetic units. A bootstrap that samples individual cells would therefore give a misleading impression of precision.
-
-Instead, resample donors and keep all measurements from a selected donor together.
-
-For bootstrap replicate $b$, fit
+Donors are the independent genetic units, so a bootstrap that samples individual cells would give a misleading impression of precision — it would report the precision of a study with far more independent genomes than we have. Resample donors instead, keeping all measurements from a selected donor together, and for bootstrap replicate $b$ fit
 
 $$
 \hat R^{(b)}.
@@ -1041,11 +1023,7 @@ The project already treats donor bootstrap fits as a source of uncertainty for $
 
 ## If we draw groups, report assignment uncertainty
 
-A continuous map may eventually be summarized into a few regions for visualization or downstream analysis.
-
-If we do this, the group label should inherit uncertainty from the map.
-
-For each bootstrap or alternative-reference fit, recluster or reassign cells using the same prespecified rule. For cell $i$, report an assignment probability such as
+A continuous map may eventually be summarized into a few regions for visualization or downstream analysis, and if we do that the group label should inherit its uncertainty from the map rather than shedding it. For each bootstrap or alternative-reference fit, recluster or reassign cells using the same prespecified rule. For cell $i$, report an assignment probability such as
 
 $$
 \hat\pi_{ic}
@@ -1056,17 +1034,11 @@ $$
 \{\text{cell }i\text{ is assigned to region }c\text{ in fit }b\}.
 $$
 
-A cell with assignment probability $0.98$ is qualitatively different from one that switches regions in half the fits.
-
-This also prevents the discrete summary from becoming more certain than the continuous object that generated it.
+A cell with assignment probability $0.98$ is qualitatively different from one that switches regions in half the fits, and reporting both stops the discrete summary from becoming more certain than the continuous object it came from.
 
 ## Repeat the test across compatible datasets
 
-The strongest reproducibility result would come from an independent dataset with compatible genotype and molecular measurements.
-
-The datasets do not need to contain the same individual cells. The goal is to ask whether the same response organization appears.
-
-A practical design is:
+The strongest reproducibility result would come from an independent dataset with compatible genotype and molecular measurements. The datasets do not need to contain the same individual cells — the question is whether the same response organization appears, not whether the same cells do. A practical design is:
 
 1. learn the regulotype reference in dataset A;
 2. locate cells from dataset B using the projection mechanism;
@@ -1075,7 +1047,7 @@ A practical design is:
 
 The exact cross-dataset comparison will depend on which genes, variants and cellular compartments overlap. I would therefore treat this as a later reproducibility analysis rather than the first one.
 
-The essential rule is the same: the biological interpretation should not rest on a structure that disappears as soon as the reference loci or donors change.
+The rule is the same: the biological interpretation should not rest on a structure that disappears as soon as the reference loci or donors change.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -1206,9 +1178,7 @@ The essential rule is the same: the biological interpretation should not rest on
 
 ## What should count as reproducible?
 
-There is no single magic threshold.
-
-I would look for agreement at several resolutions:
+There is no single threshold worth defending, and a map can be reproducible at one resolution and not at another, so I would look for agreement at several:
 
 * **effect level**: selected $r_{si}$ profiles remain similar;
 * **geometry level**: pairwise distances remain similar;
@@ -1222,21 +1192,7 @@ They also fail in that order. A map can be stable in its broad geometry and unst
 
 ## Summary
 
-Without a true $R$, validation has to rely on structures that survive changes in the data used to estimate them.
-
-For the regulotype map, I would ask whether:
-
-* independent reference cis-region sets produce similar cell geometry;
-* donor-level bootstrap fits give narrow uncertainty for important effects and distances;
-* local neighborhoods remain stable;
-* discrete summaries have high assignment probabilities rather than brittle labels;
-* and compatible external datasets recover the same broad response organization.
-
-These analyses answer:
-
-$$
-\boxed{\text{If I rebuild the map, does the same cellular organization come back?}}
-$$
+Without a true $R$, validation has to rely on whatever survives changes in the data used to estimate it. For the regulotype map that means independent reference cis-region sets producing similar cell geometry, donor-level bootstraps giving narrow uncertainty for the effects and distances that matter, local neighbourhoods holding, discrete summaries carrying high assignment probabilities instead of brittle labels, and — eventually — a compatible external dataset recovering the same broad organization. Between them they answer one question: **if I rebuild the map, does the same cellular organization come back?**
 
 Reproducibility makes the classification credible. It still does not prove that the classification is useful. For that, the map has to improve a task that matters outside the fitting data.
 
