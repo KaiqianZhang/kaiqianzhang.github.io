@@ -69,21 +69,16 @@ In the [previous note](/notes/2026/09/04/regulotypes-1-overview/), I defined the
 For pair $s=(v,g)$ and cell $i$, the cell-resolved cis effect is
 
 $$
-r_{si}=\beta_s+u_i^{\mathsf T}\lambda_s.
+r_{si}=\beta_s+u_i^{\mathsf T}\lambda_s ,
 $$
 
-Collecting these effects gives
+and collecting these effects over the whole reference set gives an $S\times I$ matrix
 
 $$
-R=\beta\mathbf 1^\mathsf T+\Lambda U^\mathsf T.
+R=\beta\mathbf 1^\mathsf T+\Lambda U^\mathsf T .
 $$
 
-The two dimensions of $R$ have different meanings:
-
-* a **row** $R_{s:}$ describes one variant–gene pair across cells;
-* a **column** $R_{:i}$ describes one cell across variant–gene pairs.
-
-This matrix view also gives a simple way to think about training and testing. A new variant–gene pair should add a **row** to $R$; a cell from a new donor should add a **column**. Once both operations are defined, we can ask what happens when the row and column are both new.
+Its two dimensions mean different things. A row $R_{s:}$ is one variant–gene pair traced across cells, while a column $R_{:i}$ is one cell described across variant–gene pairs. That asymmetry is also what makes the matrix a convenient way to think about training and testing: a variant–gene pair the model has never seen should arrive as a new row, a cell from a donor the model has never seen should arrive as a new column, and the case worth testing is what happens where a new row and a new column cross.
 
 ## Learning the reference map
 
@@ -101,40 +96,22 @@ x_{d(i)v}
 \beta_s+u_i^\mathsf T\lambda_s
 \right)
 +
-\epsilon_{ig}.
+\epsilon_{ig},
 $$
 
-Here $x_{d(i)v}$ is the allele dosage of donor $d(i)$. The term in parentheses is therefore the effect of one additional effect allele in the cellular condition represented by $i$:
+where $x_{d(i)v}$ is the allele dosage of donor $d(i)$. The term in parentheses is the effect of one additional effect allele in the cellular condition represented by $i$, which is $r_{si}$ again. Everything the model shares between pairs it shares through $u_i$: one cellular coordinate serves many approximately independent cis regions, while each pair keeps its own average effect $\beta_s$ and its own loading $\lambda_s$.
+
+Fitting this on a set of **training donors** and **coordinate-training genes** yields $\hat\beta$, $\hat\Lambda$ and $\hat U_{\text{train}}$, and hence **the reference regulotype map**
 
 $$
-r_{si}=\beta_s+u_i^\mathsf T\lambda_s.
-$$
-
-The important sharing occurs through $u_i$. The same cellular coordinate is used for many approximately independent cis pairs, while each pair gets its own average effect $\beta_s$ and loading $\lambda_s$.
-
-Using a set of **training donors** and **coordinate-training genes**, we estimate
-
-$$
-\hat\beta,\qquad
-\hat\Lambda,\qquad
-\hat U_{\text{train}},
-$$
-
-and therefore
-
-$$
-\boxed{
 \hat R_{\text{train}}
 =
 \hat\beta\mathbf 1^\mathsf T
 +
-\hat\Lambda\hat U_{\text{train}}^\mathsf T.
-}
+\hat\Lambda\hat U_{\text{train}}^\mathsf T .
 $$
 
-This is the reference regulotype map.
-
-Although the model is written in terms of $U$ and $\Lambda$, their orientation is not unique: rotations and rescalings can change the factors without changing $R$. This is why the stable objects for later evaluation are the cell-resolved effects in $R$, distances between its columns, and predictions made from them.
+Note that $U$ and $\Lambda$ are not identified individually: rotating and rescaling them changes the factors without changing their product. Everything used later — the cell-resolved effects in $R$, distances between its columns, and predictions made from them — is invariant to that ambiguity, which is why none of it is read off an individual factor.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -346,23 +323,7 @@ Although the model is written in terms of $U$ and $\Lambda$, their orientation i
 
 ## Projecting a new cis pair
 
-Suppose a variant–gene pair $s^\ast$ was not used to estimate the reference coordinates.
-
-The cellular coordinates
-
-$$
-\hat U_{\text{train}}
-$$
-
-are now kept fixed. We fit the new pair and estimate
-
-$$
-\hat\beta_{s^\ast},
-\qquad
-\hat\lambda_{s^\ast}.
-$$
-
-Its predicted effect in cell $i$ is
+Now take a variant–gene pair $s^\ast$ that played no part in estimating the reference coordinates. We hold $\hat U_{\text{train}}$ fixed and fit only the pair-side parameters $\hat\beta_{s^\ast}$ and $\hat\lambda_{s^\ast}$, so that the pair's predicted effect in cell $i$ is
 
 $$
 \hat r_{s^\ast i}
@@ -372,152 +333,44 @@ $$
 \hat u_i^\mathsf T\hat\lambda_{s^\ast}.
 $$
 
-Across all training cells,
-
-$$
-\hat R_{s^\ast:}
-=
-\left(
-\hat r_{s^\ast1},
-\ldots,
-\hat r_{s^\ast I}
-\right).
-$$
-
-The result is a new row of $R$.
-
-$$
-\boxed{
-\text{new pair}
-\rightarrow
-(\hat\beta_{s^\ast},\hat\lambda_{s^\ast})
-\rightarrow
-\text{new row}.
-}
-$$
-
-The logic is useful: the new pair did not help determine the cellular coordinate system. We are instead asking whether its genetic effect can be described over a map learned from other cis regions.
-
-This is transfer across genes.
+Evaluating it at every training cell fills in $\hat R_{s^\ast:}=(\hat r_{s^\ast 1},\ldots,\hat r_{s^\ast I})$, so **the new pair enters the matrix as a row** (Fig. 1). What makes this worth doing is that the pair contributed nothing to the coordinate system it is now being described in. The question is whether a cis effect from one region can be written as a function of a map learned from other regions, which is transfer across genes.
 
 ## Locating cells from a new donor
 
-The reverse operation starts with a new donor.
-
-These cells were absent when $U_{\text{train}}$ was estimated, so they have no coordinates yet. Consequently, they also have no columns in $R$.
-
-The quantities learned from the training donors remain fixed, including the pair-side parameters and fitted prior functions. For a new cell $j$, we infer
+The reverse operation runs the other way. Cells from a donor that was absent when $\hat U_{\text{train}}$ was estimated have no coordinates, and therefore no column in $R$. Everything learned from the training donors stays fixed, the pair-side parameters and the fitted prior functions included, and for a new cell $j$ we infer only its coordinate $\hat u_j^{\text{test}}$, from the **coordinate-training genes** measured in that donor, their corresponding genotypes, and whatever covariates and cellular features the model is permitted to see. Expression of the genes reserved for final testing plays no part in it. Once the coordinate is in hand, **the cell's whole cis-effect profile follows from it**:
 
 $$
-\hat u_j^{\text{test}}
-$$
-
-using the **coordinate-training genes** measured in that donor, their corresponding genotypes, and the covariates and cellular features permitted by the model.
-
-Expression of the genes reserved for final testing is not used here.
-
-Once the coordinate has been inferred,
-
-$$
-\boxed{
 \hat R_{:j}^{\text{test}}
 =
 \hat\beta+
 \hat\Lambda\hat u_j^{\text{test}}.
-}
 $$
 
-The result is a new column of $R$:
-
-$$
-\boxed{
-\text{new cell}
-\rightarrow
-\hat u_j^{\text{test}}
-\rightarrow
-\text{new column}.
-}
-$$
-
-This step is the bridge I find most important to keep straight. A held-out cell is not matched to an existing regulotype. Instead, the training genes locate the cell on the learned response coordinates; those coordinates then imply its cis-effect profile.
-
-This is transfer across donors.
+This is the step I find easiest to get wrong, so it is worth stating plainly: a held-out cell is never matched against an existing regulotype. The coordinate-training genes place it on the learned response coordinates, and those coordinates then imply its profile. That is transfer across donors.
 
 ## Putting the two projections together
 
-Genes and donors are held out separately.
-
-Let the donors be divided into
-
-$$
-D_{\mathrm{train}}
-\quad\text{and}\quad
-D_{\mathrm{test}},
-$$
-
-and approximately independent cis regions into
-
-$$
-S_{\mathrm{coordinate}}
-\quad\text{and}\quad
-S_{\mathrm{test}}.
-$$
-
-This produces a useful $2\times2$ design:
+Genes and donors are held out separately. Donors divide into $D_{\mathrm{train}}$ and $D_{\mathrm{test}}$, approximately independent cis regions divide into $S_{\mathrm{coordinate}}$ and $S_{\mathrm{test}}$, and crossing the two splits gives a $2\times2$ design.
 
 |                     | Coordinate-training genes | Test genes          |
 | ------------------- | ------------------------- | ------------------- |
 | **Training donors** | Learn the map             | Project new rows    |
 | **Test donors**     | Infer new columns         | Evaluate prediction |
 
-The four blocks should be read in order.
+Only the top-left block estimates anything global: training donors measured at coordinate-training genes give $\hat U_{\mathrm{train}}$, $\hat\Lambda_{\mathrm{coordinate}}$ and $\hat\beta_{\mathrm{coordinate}}$. Each of the other three is that same fit with part of it frozen. Moving right along the top row holds $U_{\mathrm{train}}$ fixed and estimates $\hat\beta_{\mathrm{test}}$ and $\hat\lambda_{\mathrm{test}}$, which says how a held-out cis pair varies over the learned map. Moving down the left column freezes the pair-side structure instead and infers $\hat U_{\mathrm{test}}$, which says where cells from a held-out donor lie on that same map.
 
-**Training donors × coordinate-training genes.**
-Estimate the reference cellular coordinates and cis-effect structure:
-
-$$
-\hat U_{\mathrm{train}},
-\qquad
-\hat\Lambda_{\mathrm{coordinate}},
-\qquad
-\hat\beta_{\mathrm{coordinate}}.
-$$
-
-**Training donors × test genes.**
-Keep $U_{\mathrm{train}}$ fixed and estimate
+The bottom-right block fits nothing at all, and no test-gene expression enters it. It multiplies the pair-side parameters arriving from the top-right by the cell coordinate arriving from the bottom-left,
 
 $$
-\hat\beta_{\mathrm{test}},
-\qquad
-\hat\lambda_{\mathrm{test}}.
-$$
-
-This tells us how a held-out cis pair varies over the learned map.
-
-**Test donors × coordinate-training genes.**
-Keep the learned global structure fixed and infer
-
-$$
-\hat U_{\mathrm{test}}.
-$$
-
-This tells us where cells from a held-out donor lie on the same map.
-
-**Test donors × test genes.**
-Nothing new is fitted using the test-gene expression in this block. Instead, we combine the test-pair parameters from the top-right with the test-cell coordinate from the bottom-left:
-
-$$
-\boxed{
 \hat r_{s^\ast i}
 =
 \hat\beta_{s^\ast}
 +
 (\hat u_i^{\mathrm{test}})^\mathsf T
-\hat\lambda_{s^\ast}.
-}
+\hat\lambda_{s^\ast},
 $$
 
-This predicts the cis effect of a held-out pair in a held-out donor.
+giving **a predicted cis effect for a pair the model never fitted, in a donor the model never saw** (Fig. 2).
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -579,69 +432,17 @@ This predicts the cis effect of a held-out pair in a held-out donor.
 
 ## What is actually predicted?
 
-The quantity
+The quantity $\hat r_{si}$ is an estimated cis effect **per effect allele**, not the realized genetic contribution to expression. Turning one into the other takes the genotype: the held-out donor carries dosage $x_{d(i)v}$ at $v$, so **the predicted genotype-dependent component of expression is**
 
 $$
-\hat r_{si}
-$$
-
-is an estimated **cis effect per effect allele**. It is not the realized genetic contribution to expression.
-
-For test pair $s=(v,g)$, the held-out donor carries genotype
-
-$$
-x_{d(i)v}.
-$$
-
-The predicted genotype-dependent component is therefore
-
-$$
-\boxed{
 \hat h^{\mathrm{gen}}_{ig}
 =
-x_{d(i)v}E[\hat r_{si}].
-}
+x_{d(i)v}\,E[\hat r_{si}],
 $$
 
-The expression of the test gene is then used to evaluate this prediction.
+and it is this quantity, rather than $\hat r_{si}$ itself, that the measured expression of the test gene is compared against (Fig. 3).
 
-The complete flow is
-
-$$
-\text{training donors + training genes}
-\longrightarrow
-\text{reference map},
-$$
-
-$$
-\text{training donors + test gene}
-\longrightarrow
-\text{new row},
-$$
-
-$$
-\text{test donor + training genes}
-\longrightarrow
-\text{new column},
-$$
-
-and finally
-
-$$
-\boxed{
-\text{test donor + test gene}
-\longrightarrow
-\text{held-out genetic prediction}.
-}
-$$
-
-The separation between the last two steps is important. Training genes are allowed to answer
-
-> Where does this new cell lie on the regulotype map?
-
-The test gene is reserved for the different question
-
-> Given that position, can we predict how this allele acts in the cell?
+The division of labour between the last two steps is the part worth guarding. Coordinate-training genes are allowed to say where a new cell lies on the regulotype map; the test gene is held back for the different question of whether, given that position, the allele's effect there can be predicted. Letting test-gene expression contribute to the coordinate would merge the two questions into one, and the evaluation would stop measuring anything.
 
 <div class='nfig wide'>
 <button class='replay' type='button'><svg viewBox='0 0 24 24' aria-hidden='true'><path d='M20.5 12a8.5 8.5 0 1 1-2.5-6'/><path d='M20.5 3.5v5h-5'/></svg>replay</button>
@@ -722,26 +523,16 @@ The test gene is reserved for the different question
 
 ## Summary
 
-The simplest way for me to remember the training and testing mechanism is to think about extending $R$.
+The mechanism is easiest to hold onto as a set of operations on $R$.
 
-* Training donors and coordinate-training genes estimate the reference $R$.
-* A new variant–gene pair is projected with $U$ fixed and becomes a **new row**.
-* A cell from a new donor is located using coordinate-training genes and becomes a **new column**.
-* The new row and new column meet in the test-donor × test-gene block.
-* Their intersection gives a predicted cell-resolved cis effect,
-  $$
-  \hat r_{si}.
-  $$
-* Combining this effect with the held-out donor's genotype gives the predicted genetic component,
-  $$
-  \hat h^{\mathrm{gen}}_{ig}.
-  $$
-* Test-gene expression is kept out of the preceding steps and used to evaluate the prediction.
+* Training donors measured at coordinate-training genes estimate the reference $R$, and nothing in that block is held out.
+* A variant–gene pair the map was not built from is projected with $U$ fixed and arrives as a **new row**; a cell from a donor the map was not built from is located from coordinate-training genes and arrives as a **new column**.
+* Where that row and that column cross, in test donors at test genes, nothing is fitted. The two meet as $\hat r_{si}$, and multiplying by the held-out donor's genotype gives $\hat h^{\mathrm{gen}}_{ig}$.
+* Test-gene expression enters only at the last step, as the thing the prediction is scored against.
 
-Or, visually,
+Or, laid out as the design itself,
 
 $$
-\boxed{
 \begin{array}{r|cc}
 \rule{0pt}{3ex}
 &
@@ -764,10 +555,9 @@ $$
 \text{evaluate}
 \\[0.5ex]
 \end{array}
-}
 $$
 
-This gives the scaffold for everything that comes next. Before asking whether the estimated regulotype map is biologically interesting, the first task is to make sure that the mathematics and implementation producing each part of this diagram are correct.
+This is the scaffold for everything that comes next. Before asking whether the estimated regulotype map is biologically interesting, the first task is to make sure that the mathematics and the implementation producing each part of it are correct.
 
 ## Sources
 
